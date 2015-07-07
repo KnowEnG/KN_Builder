@@ -1,5 +1,6 @@
 from source_utils import *
-from urllib2 import urlopen
+from urllib.request import urlopen
+from time import strptime, mktime
 import re
 
 class Stringdb(SrcClass):
@@ -22,10 +23,12 @@ class Stringdb(SrcClass):
             response = urlopen(self.url_base)
             the_page = response.readlines()
             for line in the_page:
-                match = re.search('This is version ([^ ]*) of STRING', line)
+                l = line.decode()
+                match = re.search('This is version ([^ ]*) of STRING', l)
                 if match is not None:
                     response.close()
-                    self.version[alias] = match.group(1)
+                    for a in self.aliases:
+                        self.version[a] = match.group(1)
         return self.version[alias]
 
     def get_source_version_date(self):
@@ -42,10 +45,13 @@ class Stringdb(SrcClass):
         return super(Stringdb, self).get_remote_file_size(url)
 
     def get_remote_file_modified(self, alias):
-        """Returns the file modified time of source:alias as a string.
-            Updates the url and calls the super method."""
+        """Returns the file modified time of source:alias as seconds since
+        last epoch. Updates the url and calls the super method."""
         url = self.get_remote_url(alias)
-        return super(Stringdb, self).get_remote_file_modified(url)
+        t_str = super(Stringdb, self).get_remote_file_modified(url)
+        t_format = "%a, %d %b %Y %H:%M:%S %Z"
+        return mktime(strptime(t_str, t_format))
+        
         
     def get_remote_url(self, alias):
         """Returns the remote url to be used for source:alias in a fetch"""

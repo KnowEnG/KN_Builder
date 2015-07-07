@@ -1,6 +1,6 @@
-from urllib2 import urlopen
+from urllib.request import urlopen
 from os import path
-from time import strptime
+from time import strptime, mktime
 
 class SrcClass(object):
     'super class for sources'
@@ -79,19 +79,16 @@ def compare_versions(srcObj):
         version_dict[alias]['local_file_exists'] = \
             local_dict[alias]['local_file_exists']
         
-        try:
-            l_size = local_dict[alias]['local_size']
-            r_size = version_dict[alias]['remote_size']
-            l_date = strptime(local_dict['local_date'])
-            r_date = strptime(version_dict['remote_date'])
-        except:
-            version_dict[alias]['fetch_needed'] = True
-            continue
-            
-        
         if not local_dict[alias]['local_file_exists']:
             version_dict[alias]['fetch_needed'] = True
-        elif lsize != rsize:
+            continue
+        
+        l_size = int(local_dict[alias]['local_size'])
+        r_size = int(version_dict[alias]['remote_size'])
+        l_date = float(local_dict[alias]['local_date'])
+        r_date = float(version_dict[alias]['remote_date'])
+        
+        if l_size != r_size:
             version_dict[alias]['fetch_needed'] = True
         elif l_date < r_date:
             version_dict[alias]['fetch_needed'] = True
@@ -107,4 +104,4 @@ def check_local_file_exists(local_file_name):
     Returns True if file exists at locations specified by local_file_name, 
     False otherwise.
     """
-    path.isfile(local_file_name)
+    return path.isfile(local_file_name)
