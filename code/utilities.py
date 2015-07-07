@@ -4,7 +4,7 @@ import urllib.request
 import os
 import json
 
-d_dir = '../raw_downloads/'
+DIR = '../raw_downloads/'
 
 class SrcClass(object):
     """super class for sources"""
@@ -28,7 +28,7 @@ class SrcClass(object):
         source:alias which includes the local file name and a boolean that is
         True if the file exists. If the file does exist, the dictionary also
         contains the local file size and modified date"""
-        f_dir = d_dir + self.name + '/'
+        f_dir = DIR + self.name + '/'
         file = f_dir + self.name + '.' + alias + '.txt'
         local_dict = dict()
         local_dict['local_file_name'] = file
@@ -57,9 +57,9 @@ class SrcClass(object):
         return self.url_base
 
 
-def compare_versions(srcObj):
+def compare_versions(src_obj):
     """
-    compare_versions(srcObj) -> dict
+    compare_versions(src_obj) -> dict
 
     Returns dictionary of results of checking operations for each alias of
     the source including source, alias, alias_info, remote_url, remote_date,
@@ -68,16 +68,16 @@ def compare_versions(srcObj):
     """
     version_dict = dict()
     local_dict = dict()
-    for alias in srcObj.aliases:
-        local_dict[alias] = srcObj.get_local_file_info(alias)
+    for alias in src_obj.aliases:
+        local_dict[alias] = src_obj.get_local_file_info(alias)
         version_dict[alias] = dict()
-        version_dict[alias]['alias_info'] = srcObj.aliases[alias]
-        version_dict[alias]['remote_url'] = srcObj.get_remote_url(alias)
+        version_dict[alias]['alias_info'] = src_obj.aliases[alias]
+        version_dict[alias]['remote_url'] = src_obj.get_remote_url(alias)
         version_dict[alias]['remote_date'] = \
-            srcObj.get_remote_file_modified(alias)
+            src_obj.get_remote_file_modified(alias)
         version_dict[alias]['remote_version'] = \
-            srcObj.get_source_version(alias)
-        version_dict[alias]['remote_size'] = srcObj.get_remote_file_size(alias)
+            src_obj.get_source_version(alias)
+        version_dict[alias]['remote_size'] = src_obj.get_remote_file_size(alias)
         version_dict[alias]['local_file_name'] = \
             local_dict[alias]['local_file_name']
         version_dict[alias]['local_file_exists'] = \
@@ -99,8 +99,8 @@ def compare_versions(srcObj):
         else:
             version_dict[alias]['fetch_needed'] = False
 
-    f_dir = d_dir + srcObj.name + '/'
-    with open(f_dir + srcObj.name + '_check.json', 'w') as outfile:
+    f_dir = DIR + src_obj.name + '/'
+    with open(f_dir + src_obj.name + '_check.json', 'w') as outfile:
         json.dump(version_dict, outfile, indent=4, sort_keys=True)
     print(json.dumps(version_dict, indent=4, sort_keys=True))
     return version_dict
