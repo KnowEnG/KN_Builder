@@ -16,11 +16,8 @@ class SrcClass(object):
 
     def get_source_version(self, alias):
         """Returns the source version information.
+            and updates the self.version dict
             By default, returns the empty string."""
-        return ''
-
-    def get_source_version_date(self, alias):
-        """Returns the release date of the source:alias version"""
         return ''
 
     def get_local_file_info(self, alias):
@@ -100,6 +97,7 @@ def compare_versions(src_obj):
             version_dict[alias]['fetch_needed'] = False
 
     f_dir = DIR + src_obj.name + '/'
+    os.makedirs(f_dir, exist_ok=True)
     with open(f_dir + src_obj.name + '_check.json', 'w') as outfile:
         json.dump(version_dict, outfile, indent=4, sort_keys=True)
     print(json.dumps(version_dict, indent=4, sort_keys=True))
