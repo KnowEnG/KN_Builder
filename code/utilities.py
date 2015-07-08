@@ -18,7 +18,10 @@ class SrcClass(object):
         """Returns the source version information.
             and updates the self.version dict
             By default, returns the empty string."""
-        return ''
+        if alias not in self.version:
+            for alias_name in self.aliases:
+                self.version[alias_name] = ''
+        return self.version[alias]
 
     def get_local_file_info(self, alias):
         """Returns a dictionary contianing the local file information for
