@@ -35,9 +35,6 @@ class Stringdb(SrcClass):
                         self.version[alias_name] = match.group(1)
         return self.version[alias]
 
-    def get_source_version_date(self, alias):
-        return super(Stringdb, self).get_source_version(alias)
-
     def get_local_file_info(self, alias):
         """Returns the local file version information as defined in SrcClass"""
         return super(Stringdb, self).get_local_file_info(alias)
