@@ -1,14 +1,14 @@
 {
     "schedule": "R\/2015-06-23T20:30:00Z\/P3M",
-     "scheduleTimeZone": "CST",
-      "name": "src_check_SRC",
-       "container": {
-             "type": "DOCKER",
-               "image": "python:3",
-                 "volumes": [{"containerPath": "/raw_downloads/", "hostPath":"/mnt/storage/post3/apps/P1_source_check/raw_downloads/", "mode":"RW"},
-                             {"containerPath": "/code/", "hostPath":"/mnt/storage/post3/apps/P1_source_check/code/", "mode":"R"}]
-                      },
-        "cpus": "2.0",
-         "mem": "2500",
-          "command": "sh -c 'cd /code/; python SRC.py;'"
+    "scheduleTimeZone": "CST",
+    "name": "src_check_NUM_SRC",
+    "container": {
+        "type": "DOCKER",
+        "image": "IMG",
+        "volumes": [{"containerPath": "/raw_downloads/", "hostPath":"BASE/raw_downloads/", "mode":"RW"},
+                    {"containerPath": "/code/", "hostPath":"BASE/code/", "mode":"R"}]
+    },
+    "cpus": "2.0",
+    "mem": "2500",
+    "command": "sh -c 'cd /code/; /usr/bin/time -v python3 SRC.py;'"
 }
