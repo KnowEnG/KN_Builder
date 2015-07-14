@@ -50,18 +50,18 @@ class SrcClass(object):
             url_base (str): The base url of the remote source, which may need
                 additional processing to provide an actual download link (see
                 get_remote_url). Must be provided by the extending class.
-            version (dict): The release version of each alias in the source.
-                Default empty dictionary if not provided by the extending
-                class.
             aliases (dict): A dictionary with subsets of the source which will
                 be included in the KN  as the keys (e.g. different species,
                 data types, or interaction types), and a short string with 
                 information about the alias as the value.
+            version (dict): The release version of each alias in the source.
+                Default empty dictionary if not provided by the extending
+                class.
         """
         self.name = src_name
         self.url_base = base_url
-        self.version = version
         self.aliases = aliases
+        self.version = version
 
 
     def get_source_version(self, alias):
@@ -171,7 +171,8 @@ def compare_versions(src_obj):
     source.
     
     This returns a nested dictionary describing the version information of each
-    alias in the source. For each alias the following keys are defined:
+    alias in the source. The version information is also printed. For each
+    alias the following keys are defined:
         'alias_info' (str): A short string with information about the alias.
         'remote_url' (str): See get_remote_url.
         'remote_date' (float): See get_remote_file_modified.
