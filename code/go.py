@@ -1,14 +1,32 @@
-"""Executable containing all of the functions needed to check if go
-has updated. Checks the source and outputs the updated dictionary to file."""
+"""Extension of utilities.py to provide functions required to check the
+version information of go and determine if it needs to be updated.
+
+Classes:
+    Go: extends the SrcClass class and provides the static variables and
+        go specific functions required to perform a check on go.
+
+Functions:
+    main: runs compare_versions (see utilities.py) on a Go object
+"""
 from utilities import SrcClass, compare_versions
 import urllib.request
 import re
 import time
 
 class Go(SrcClass):
-    """Class providing the check functions for the source go"""
-    def __init__(self):
-        """Constructor for the Go class"""
+    """Extends SrcClass to provide go specific check functions.
+
+    This Go class provides source-specific functions that check the go version
+    information and determine if it differs from the current version in the
+    Knowledge Network (KN).
+
+    Attributes:
+        see utilities.SrcClass
+    """    def __init__(self):
+        """Init a Stringdb with the staticly defined parameters.
+        
+        This calls the SrcClass constructor (see utilities.SrcClass)
+        """
         name = 'go'
         url_base = 'http://geneontology.org//gene-associations/'
         aliases = {
@@ -23,27 +41,60 @@ class Go(SrcClass):
         super(Go, self).__init__(name, url_base, aliases)
 
     def get_source_version(self, alias):
-        """Returns the source version information.
-            and updates the self.version dict
-            By default, returns the empty string."""
+        """Return the release version of the remote go:alias.
+
+        This returns the release version of the remote source for a specific
+        alias. This value will be 'unknown' for every alias. This value is
+        stored in the self.version dictionary object.
+
+        Args:
+            alias (str): An alias defined in self.aliases.
+
+        Returns:
+            str: The remote version of the source.
+        """
         return super(Go, self).get_source_version(alias)
 
     def get_local_file_info(self, alias):
-        """Returns a dictionary contianing the local file information for
-        source:alias which includes the local file name and a boolean that is
-        True if the file exists. If the file does exist, the dictionary also
-        contains the local file size and modified date"""
+         """Return a dictionary with the local file information for the alias.
+
+         (See utilities.get_local_file_info)
+
+        Args:
+            alias (str): An alias defined in self.aliases.
+
+        Returns:
+            dict: The local file information for a given source alias.
+        """
         return super(Go, self).get_local_file_info(alias)
 
     def get_remote_file_size(self, alias):
-        """Returns the file size of source:alias as a string.
-            Updates the url and calls the super method."""
+        """Return the remote file size.
+
+        This builds a url for the given alias (see get_remote_url) and then
+        calls the SrcClass function (see utilities.get_remote_file_size).
+
+        Args:
+            alias (str): An alias defined in self.aliases.
+
+        Returns:
+            int: The remote file size in bytes.
+        """
         url = self.get_remote_url(alias)
         return super(Go, self).get_remote_file_size(url)
 
     def get_remote_file_modified(self, alias):
-        """Returns the file modified time of source:alias as seconds since
-        last epoch."""
+        """Return the remote file date modified.
+
+        This returns the date modified of the remote file for the given alias.
+
+        Args:
+            alias (str): An alias defined in self.aliases.
+
+        Returns:
+            float: time of last modification time of remote file in seconds
+                since the epoch
+        """
         url_download_page = ('http://geneontology.org/gene-associations/'
                              'go_annotation_metadata.all.js')
         response = urllib.request.urlopen(url_download_page)
@@ -67,8 +118,18 @@ class Go(SrcClass):
         return ret_str
 
     def get_remote_url(self, alias):
-        """Returns the remote url to be used for source:alias in a fetch"""
-        url = self.url_base + 'gene_association.' + alias + '.gz'
+        """Return the remote url needed to fetch the file corresponding to the
+        alias.
+
+        This returns the url needed to fetch the file corresponding to the
+        alias. The url is constructed using the base_url and alias information.
+
+        Args:
+            alias (str): An alias defined in self.aliases.
+
+        Returns:
+            str: The url needed to fetch the file corresponding to the alias.
+        """        url = self.url_base + 'gene_association.' + alias + '.gz'
         # format for ontology information
         if alias == 'obo':
             url = 'http://purl.obolibrary.org/obo/go.obo'
@@ -76,4 +137,14 @@ class Go(SrcClass):
 
 
 if __name__ == "__main__":
+    """Runs compare_versions (see utilities.compare_versions) on a Go object.
+
+    This runs the compare_versions function on a Go object to find the version
+    information of the source and determine if a fetch is needed. The version
+    information is also printed.
+
+    Returns:
+        dict: A nested dictionary describing the version information for each
+            alias described in Go.
+    """
     compare_versions(Go())
