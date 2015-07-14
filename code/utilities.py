@@ -38,7 +38,7 @@ class SrcClass(object):
             about the alias as the value.
     """
     
-    def __init__(self, src_name, base_url, aliases, version = dict()):
+    def __init__(self, src_name, base_url, aliases, version=dict()):
         """Init a SrcClass object with the provided parameters.
         
         Constructs a SrcClass object with the provided parameters, which should
@@ -62,7 +62,6 @@ class SrcClass(object):
         self.url_base = base_url
         self.aliases = aliases
         self.version = version
-
 
     def get_source_version(self, alias):
         """Return the release version of the remote source:alias.
