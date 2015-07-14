@@ -1,5 +1,19 @@
-"""Provides all of the utility files needed to check if a source has updated.
-Also contains the parent source class: SrcClass"""
+"""Utiliites for checking if a source needs to be updated in the Knowledge
+Network (KN).
+
+Classes:
+    SrcClass: Extends the object class and serves as the base class for each
+        supported source in the KN.
+
+Functions:
+    compare_versions(SrcClass) -> dict: takes a SrcClass object and returns a
+        dictionary containing the most recent file version information and if
+        a fetch is required
+        
+Variables:
+    DIR: the relative location of the raw_downloads directory
+"""
+
 import urllib.request
 import os
 import json
@@ -7,27 +21,90 @@ import json
 DIR = '../raw_downloads/'
 
 class SrcClass(object):
-    """super class for sources"""
-    def __init__(self, src_name, base_url, aliases):
+    """Base class to be extended by each supported source in KnowEnG.
+    
+    This SrcClass provides default functions that should be extended
+    or overridden by any source which is added to the Knowledge Network (KN).
+    
+    Attributes:
+        name (str): The name of the remote source to be included in the KN.
+        url_base (str): The base url of the remote source, which may need 
+            additional processing to provide an actual download link (see
+            get_remote_url).
+        version (dict): The release version of each alias in the source.
+        aliases (dict): A dictionary with subsets of the source which will be 
+            included in the KN  as the keys (e.g. different species, data 
+            types, or interaction types), and a short string with information 
+            about the alias as the value.
+    """
+    
+    def __init__(self, src_name, base_url, aliases, version = dict()):
+        """Init a SrcClass object with the provided parameters.
+        
+        Constructs a SrcClass object with the provided parameters, which should
+        be provided by any class extending SrcClass.
+        
+        Args:
+            src_name (str): The name of the remote source to be included in
+                the KN. Must be provided by the extending class.
+            url_base (str): The base url of the remote source, which may need
+                additional processing to provide an actual download link (see
+                get_remote_url). Must be provided by the extending class.
+            version (dict): The release version of each alias in the source.
+                Default empty dictionary if not provided by the extending
+                class.
+            aliases (dict): A dictionary with subsets of the source which will
+                be included in the KN  as the keys (e.g. different species,
+                data types, or interaction types), and a short string with 
+                information about the alias as the value.
+        """
         self.name = src_name
         self.url_base = base_url
-        self.version = dict()
+        self.version = version
         self.aliases = aliases
 
+
     def get_source_version(self, alias):
-        """Returns the source version information.
-            and updates the self.version dict
-            By default, returns the empty string."""
+        """Return the release version of the remote source:alias.
+        
+        This returns the release version of the remote source for a specific
+        alias. This value will be the same for every alias unless the
+        the alias can have a different release version than the source
+        (this will be source dependent). This value is stored in the 
+        self.version dictionary object. If the value does not already,
+        all aliases versions are initialized to 'unknown'.
+        
+        Args:
+            alias (str): An alias defined in self.aliases.
+        
+        Returns:
+            str: The remote version of the source.
+        """
         if alias not in self.version:
             for alias_name in self.aliases:
-                self.version[alias_name] = ''
+                self.version[alias_name] = 'unknown'
         return self.version[alias]
 
     def get_local_file_info(self, alias):
-        """Returns a dictionary contianing the local file information for
-        source:alias which includes the local file name and a boolean that is
-        True if the file exists. If the file does exist, the dictionary also
-        contains the local file size and modified date"""
+        """Return a dictionary with the local file information for the alias.
+        
+        This returns the local file information for a given source alias, which
+        will always contain the following keys: 
+            'local_file_name' (str): the path to where the local file
+            'local_file_exists' (bool): boolean if file exists at path
+                indicated by 'local_file_name'
+        and will also conatin the following if 'local_file_exists' is True:
+            'local_size' (int): size of local file in bytes
+            'local_date' (float): time of last modification time of local file
+                in seconds since the epoch
+        
+        Args:
+            alias (str): An alias defined in self.aliases.
+        
+        Returns:
+            dict: The local file information for a given source alias.
+        """            
+
         f_dir = DIR + self.name + '/'
         file = f_dir + self.name + '.' + alias + '.txt'
         local_dict = dict()
@@ -40,31 +117,79 @@ class SrcClass(object):
         return local_dict
 
     def get_remote_file_size(self, remote_url):
-        """Returns the remote file size as described in the headers of
-        remote_url"""
+        """Return the remote file size.
+        
+        This returns the remote file size as specificied by the
+        'content-length' page header.
+        
+        Args:
+            remote_url (str): The url of the remote file to get the size of.
+        
+        Returns:
+            int: The remote file size in bytes.
+        """
         response = urllib.request.urlopen(remote_url)
-        return response.headers['content-length']
+        return float(response.headers['content-length'])
 
     def get_remote_file_modified(self, remote_url):
-        """Returns the remote file modified date as described in the headers of
-        remote url"""
+        """Return the remote file date modified.
+        
+        This returns the remote file date modifed as specificied by the
+        'last-modified' page header.
+        
+        Args:
+            remote_url (str): The url of the remote file to get the date
+                modified of.
+        
+        Returns:
+            float: time of last modification time of remote file in seconds
+                since the epoch
+        """
         response = urllib.request.urlopen(remote_url)
-        return response.headers['last-modified']
+        time_str = response.headers['last-modified']
+        time_format = "%a, %d %b %Y %H:%M:%S %Z"
+        return time.mktime(time.strptime(time_str, time_format))
 
     def get_remote_url(self, alias):
-        """Returns the url for fetching a file. By default this is the base
-        url"""
+        """Return the remote url needed to fetch the file corresponding to the
+        alias.
+        
+        This returns the url needed to fetch the file corresponding to the
+        alias. By default this returns self.base_url.
+        
+        Args:
+            alias (str): An alias defined in self.aliases.
+        
+        Returns:
+            str: The url needed to fetch the file corresponding to the alias.
+        """
         return self.url_base
 
 
 def compare_versions(src_obj):
-    """
-    compare_versions(src_obj) -> dict
-
-    Returns dictionary of results of checking operations for each alias of
-    the source including source, alias, alias_info, remote_url, remote_date,
-    remote_version, remote_size, local_file_name, local_file_exists, and
-    fetch_needed.
+    """Return a dictionary with the version information for each alias in the
+    source.
+    
+    This returns a nested dictionary describing the version information of each
+    alias in the source. For each alias the following keys are defined:
+        'alias_info' (str): A short string with information about the alias.
+        'remote_url' (str): See get_remote_url.
+        'remote_date' (float): See get_remote_file_modified.
+        'remote_version' (str): See get_source_version.
+        'local_file_name' (str): See get_local_file_info.
+        'local_file_exists' (bool): See get_local_file_info.
+        'fetch_needed' (bool): True if file needs to be downloaded from remote
+            source. A fetch will be needed if the local file does not exist,
+            or if the local and remote files have different date modified or 
+            file sizes.
+    
+    Args:
+        src_obj (SrcClass): A SrcClass object for which the comparison should
+            be performed.
+    
+    Returns:
+        dict: A nested dictionary describing the version information for each
+            alias described in src_obj.
     """
     version_dict = dict()
     local_dict = dict()
