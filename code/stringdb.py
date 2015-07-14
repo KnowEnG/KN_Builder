@@ -129,13 +129,13 @@ class Stringdb(SrcClass):
         url += version + '.txt.gz'
         return url
 
-
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a Stringdb
     object
     
     This runs the compare_versions function on a Stringdb object to find the
-    version information of the source and determine if a fetch is needed.
+    version information of the source and determine if a fetch is needed. The
+    version information is also printed.
     
     Returns:
         dict: A nested dictionary describing the version information for each
