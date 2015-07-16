@@ -16,6 +16,7 @@ Variables:
 
 import urllib.request
 import os
+import time
 import json
 
 DIR = '../raw_downloads/'
