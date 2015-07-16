@@ -22,7 +22,8 @@ class Go(SrcClass):
 
     Attributes:
         see utilities.SrcClass
-    """    def __init__(self):
+    """
+    def __init__(self):
         """Init a Stringdb with the staticly defined parameters.
         
         This calls the SrcClass constructor (see utilities.SrcClass)
@@ -56,9 +57,9 @@ class Go(SrcClass):
         return super(Go, self).get_source_version(alias)
 
     def get_local_file_info(self, alias):
-         """Return a dictionary with the local file information for the alias.
+        """Return a dictionary with the local file information for the alias.
 
-         (See utilities.get_local_file_info)
+        (See utilities.get_local_file_info)
 
         Args:
             alias (str): An alias defined in self.aliases.
@@ -129,7 +130,8 @@ class Go(SrcClass):
 
         Returns:
             str: The url needed to fetch the file corresponding to the alias.
-        """        url = self.url_base + 'gene_association.' + alias + '.gz'
+        """        
+        url = self.url_base + 'gene_association.' + alias + '.gz'
         # format for ontology information
         if alias == 'obo':
             url = 'http://purl.obolibrary.org/obo/go.obo'
