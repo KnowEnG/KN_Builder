@@ -121,7 +121,7 @@ class SrcClass(object):
 
         This returns the remote file size as specificied by the
         'content-length' page header. If the remote file size is unknown, this
-        value should be -1.0.
+        value should be -1.
 
         Args:
             remote_url (str): The url of the remote file to get the size of.
@@ -129,11 +129,11 @@ class SrcClass(object):
         Returns:
             int: The remote file size in bytes.
         """
-        response = urllib.request.urlopen(remote_url)
         try:
-            return float(response.headers['content-length'])
+            response = urllib.request.urlopen(remote_url)
+            return int(response.headers['content-length'])
         except:
-            return float(-1)
+            return -1
 
     def get_remote_file_modified(self, remote_url):
         """Return the remote file date modified.
@@ -149,10 +149,13 @@ class SrcClass(object):
             float: time of last modification time of remote file in seconds
                 since the epoch
         """
-        response = urllib.request.urlopen(remote_url)
-        time_str = response.headers['last-modified']
-        time_format = "%a, %d %b %Y %H:%M:%S %Z"
-        return time.mktime(time.strptime(time_str, time_format))
+        try:
+            response = urllib.request.urlopen(remote_url)
+            time_str = response.headers['last-modified']
+            time_format = "%a, %d %b %Y %H:%M:%S %Z"
+            return time.mktime(time.strptime(time_str, time_format))
+        except:
+            return 'unknown'
 
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the
@@ -222,9 +225,11 @@ def compare_versions(src_obj):
         l_date = local_dict[alias]['local_date']
         r_date = version_dict[alias]['remote_date']
 
-        if r_size > 0 and l_size != r_size:
+        if r_size != -1 and l_size != r_size:
             version_dict[alias]['fetch_needed'] = True
-        elif l_date < r_date:
+        elif r_date != 'unknown' and l_date < r_date:
+            version_dict[alias]['fetch_needed'] = True
+        elif r_size == -1 and r_date == 'unknown':
             version_dict[alias]['fetch_needed'] = True
         else:
             version_dict[alias]['fetch_needed'] = False

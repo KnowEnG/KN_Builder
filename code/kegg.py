@@ -102,7 +102,7 @@ class Kegg(SrcClass):
         Returns:
             int: The remote file size in bytes.
         """
-        return float(-1)
+        return -1
 
     def get_remote_file_modified(self, alias):
         """Return the remote file date modified.
