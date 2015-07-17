@@ -59,7 +59,7 @@ class Go(SrcClass):
     def get_local_file_info(self, alias):
         """Return a dictionary with the local file information for the alias.
 
-        (See utilities.get_local_file_info)
+        (See utilities.SrcClass.get_local_file_info)
 
         Args:
             alias (str): An alias defined in self.aliases.
@@ -73,7 +73,8 @@ class Go(SrcClass):
         """Return the remote file size.
 
         This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see utilities.get_remote_file_size).
+        calls the SrcClass function (see
+        utilities.SrcClass.get_remote_file_size).
 
         Args:
             alias (str): An alias defined in self.aliases.
