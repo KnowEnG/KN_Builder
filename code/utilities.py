@@ -120,7 +120,8 @@ class SrcClass(object):
         """Return the remote file size.
 
         This returns the remote file size as specificied by the
-        'content-length' page header.
+        'content-length' page header. If the remote file size is unknown, this
+        value should be -1.0.
 
         Args:
             remote_url (str): The url of the remote file to get the size of.
@@ -129,7 +130,10 @@ class SrcClass(object):
             int: The remote file size in bytes.
         """
         response = urllib.request.urlopen(remote_url)
-        return float(response.headers['content-length'])
+        try:
+            return float(response.headers['content-length'])
+        except:
+            return float(-1)
 
     def get_remote_file_modified(self, remote_url):
         """Return the remote file date modified.
@@ -213,12 +217,12 @@ def compare_versions(src_obj):
             version_dict[alias]['fetch_needed'] = True
             continue
 
-        l_size = int(local_dict[alias]['local_size'])
-        r_size = int(version_dict[alias]['remote_size'])
-        l_date = float(local_dict[alias]['local_date'])
-        r_date = float(version_dict[alias]['remote_date'])
+        l_size = local_dict[alias]['local_size']
+        r_size = version_dict[alias]['remote_size']
+        l_date = local_dict[alias]['local_date']
+        r_date = version_dict[alias]['remote_date']
 
-        if l_size != r_size:
+        if r_size > 0 and l_size != r_size:
             version_dict[alias]['fetch_needed'] = True
         elif l_date < r_date:
             version_dict[alias]['fetch_needed'] = True

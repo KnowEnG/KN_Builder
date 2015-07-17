@@ -11,7 +11,6 @@ Functions:
 from utilities import SrcClass, compare_versions
 import urllib.request
 import re
-import time
 
 class Stringdb(SrcClass):
     """Extends SrcClass to provide stringdb specific check functions.
@@ -60,8 +59,10 @@ class Stringdb(SrcClass):
                 match = re.search('This is version ([^ ]*) of STRING', d_line)
                 if match is not None:
                     response.close()
-                    for alias_name in self.aliases:
-                        self.version[alias_name] = match.group(1)
+                    self.version[alias] = match.group(1)
+                    break
+            for alias_name in self.aliases:
+                self.version[alias_name] = match.group(1)
             return self.version[alias]
         else:
             return version
