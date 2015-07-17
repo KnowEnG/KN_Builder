@@ -10,6 +10,7 @@ Functions:
 """
 from utilities import SrcClass, compare_versions
 import urllib.request
+import re
 
 class Dip(SrcClass):
     """Extends SrcClass to provide dip specific check functions.
