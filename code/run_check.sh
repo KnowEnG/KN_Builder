@@ -8,7 +8,7 @@ rm -r /shared/jobs/
 mkdir -p /shared/jobs/
 
 # print out command for new container for each source specific *.py
-BASE="\/mnt\/users\/blatti\/apps\/P1_source_check\/"   # change users to storage for cluster
+BASE="\/workspace\/apps\/P1_source_check\/"   # change users to storage for cluster
 CMD="sh -c 'cd /code/; /usr/bin/time -v python3 SRC.py;'" 
 IMG="cblatti3\/python3:0.1"
 ctr=1

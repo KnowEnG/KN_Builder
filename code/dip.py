@@ -79,7 +79,7 @@ class Dip(SrcClass):
     def get_local_file_info(self, alias):
         """Return a dictionary with the local file information for the alias.
 
-        (See utilities.get_local_file_info)
+        (See utilities.SrcClass.get_local_file_info)
 
         Args:
             alias (str): An alias defined in self.aliases.
@@ -93,7 +93,8 @@ class Dip(SrcClass):
         """Return the remote file size.
 
         This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see utilities.get_remote_file_size).
+        calls the SrcClass function (see
+        utilities.SrcClass.get_remote_file_size).
 
         Args:
             alias (str): An alias defined in self.aliases.
@@ -108,7 +109,8 @@ class Dip(SrcClass):
         """Return the remote file date modified.
 
         This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see utilities.get_remote_file_modified).
+        calls the SrcClass function (see
+        utilities.SrcClass.get_remote_file_modified).
 
         Args:
             alias (str): An alias defined in self.aliases.
@@ -125,8 +127,8 @@ class Dip(SrcClass):
         alias.
         
         This returns the url needed to fetch the file corresponding to the
-        alias. The url is constructed using the base_url, alias, and source
-        version information.
+        alias. The url is constructed using the base_url, source version
+        information, and year source was last updated.
 
         Args:
             alias (str): An alias defined in self.aliases.
