@@ -10,8 +10,6 @@ Functions:
 """
 from utilities import SrcClass, compare_versions
 import urllib.request
-import re
-import time
 
 class Biogrid(SrcClass):
     """Extends SrcClass to provide biogrid specific check functions.

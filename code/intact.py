@@ -9,10 +9,8 @@ Functions:
     main: runs compare_versions (see utilities.py) on a Intact object
 """
 from utilities import SrcClass, compare_versions
-import urllib.request
-import ftplib
-import re
 import time
+import ftplib
 
 class Intact(SrcClass):
     """Extends SrcClass to provide intact specific check functions.
@@ -48,13 +46,6 @@ class Intact(SrcClass):
             str: The remote version of the source.
         """
         return super(Intact, self).get_source_version(alias)
-        #if version == 'unknown':
-        #    self.version[alias] = self.get_remote_file_modified(alias)
-        #    for alias_name in self.aliases:
-        #        self.version[alias_name] = self.version[alias]
-        #    return self.version[alias]
-        #else:
-        #    return version
 
     def get_local_file_info(self, alias):
         """Return a dictionary with the local file information for the alias.
