@@ -49,11 +49,11 @@ class Dip(SrcClass):
         version = super(Dip, self).get_source_version(alias)
         if version == 'unknown':
             #get the year to provide a more accurate base_url
-            if (self.year == ''):
+            if self.year == '':
                 response = urllib.request.urlopen(self.url_base)
                 for line in response:
                     d_line = line.decode()
-                    year_match = re.search('href="(\d{4}/)"', d_line)
+                    year_match = re.search(r'href="(\d{4}/)"', d_line)
                     if year_match is not None:
                         if year_match.group(1) > self.year:
                             self.year = year_match.group(1)
@@ -64,7 +64,7 @@ class Dip(SrcClass):
             the_page = response.readlines()
             for line in the_page:
                 d_line = line.decode()
-                match = re.search('href="(dip\d{8}).txt"', d_line)
+                match = re.search(r'href="(dip\d{8}).txt"', d_line)
                 if match is not None:
                     if match.group(1) > self.version[alias]:
                         self.version[alias] = match.group(1)
@@ -85,7 +85,7 @@ class Dip(SrcClass):
 
         Returns:
             dict: The local file information for a given source alias.
-        """            
+        """
         return super(Dip, self).get_local_file_info(alias)
 
     def get_remote_file_size(self, alias):
@@ -124,7 +124,7 @@ class Dip(SrcClass):
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the
         alias.
-        
+
         This returns the url needed to fetch the file corresponding to the
         alias. The url is constructed using the base_url, source version
         information, and year source was last updated.

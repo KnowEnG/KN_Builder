@@ -25,7 +25,7 @@ class Go(SrcClass):
     """
     def __init__(self):
         """Init a Stringdb with the staticly defined parameters.
-        
+
         This calls the SrcClass constructor (see utilities.SrcClass)
         """
         name = 'go'
@@ -131,7 +131,7 @@ class Go(SrcClass):
 
         Returns:
             str: The url needed to fetch the file corresponding to the alias.
-        """        
+        """
         url = self.url_base + 'gene_association.' + alias + '.gz'
         # format for ontology information
         if alias == 'obo':

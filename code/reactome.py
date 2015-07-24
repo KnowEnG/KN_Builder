@@ -55,7 +55,7 @@ class Reactome(SrcClass):
             the_page = response.readlines()
             for line in the_page:
                 d_line = line.decode()
-                match = re.search('Version (\d+)', d_line)
+                match = re.search(r'Version (\d+)', d_line)
                 if match is not None:
                     response.close()
                     self.version[alias] = match.group(1)
@@ -76,7 +76,7 @@ class Reactome(SrcClass):
 
         Returns:
             dict: The local file information for a given source alias.
-        """            
+        """
         return super(Reactome, self).get_local_file_info(alias)
 
     def get_remote_file_size(self, alias):
@@ -115,7 +115,7 @@ class Reactome(SrcClass):
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the
         alias.
-        
+
         This returns the url needed to fetch the file corresponding to the
         alias. The url is constructed using the base_url and alias.
 
