@@ -58,7 +58,10 @@ class Msigdb(SrcClass):
             response = urllib.request.urlopen(url)
             the_page = response.readlines()
             for line in the_page:
-                d_line = line.decode()
+                try:
+                    d_line = line.decode()
+                except:
+                    continue
                 match = re.search('MSigDB database v([^ ]*)', d_line)
                 if match is not None:
                     response.close()
@@ -117,7 +120,10 @@ class Msigdb(SrcClass):
             response = urllib.request.urlopen(url)
             the_page = response.readlines()
             for line in the_page:
-                d_line = line.decode()
+                try:
+                    d_line = line.decode()
+                except:
+                    continue
                 match = re.search('updated ([^<]*)', d_line)
                 if match is not None:
                     time_str = match.group(1)
