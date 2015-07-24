@@ -120,10 +120,7 @@ class Msigdb(SrcClass):
             response = urllib.request.urlopen(url)
             the_page = response.readlines()
             for line in the_page:
-                try:
-                    d_line = line.decode()
-                except:
-                    continue
+                d_line = line.decode('ascii', errors='ignore')
                 match = re.search('updated ([^<]*)', d_line)
                 if match is not None:
                     time_str = match.group(1)
