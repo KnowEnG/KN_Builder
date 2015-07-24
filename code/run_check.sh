@@ -12,7 +12,7 @@ BASE="\/workspace\/apps\/P1_source_check\/"   # change users to storage for clus
 CMD="sh -c 'cd /code/; /usr/bin/time -v python3 SRC.py;'" 
 IMG="cblatti3\/python3:0.1"
 ctr=1
-CURL="curl -L -H 'Content-Type: application/json' -X POST -d /shared/jobs/NUM_SRC.json 192.17.58.180:4400/scheduler/iso8601"
+CURL="curl -L -H 'Content-Type: application/json' -X POST -d /shared/jobs/NUM_SRC.json http://mmaster01.cse.illinois.edu:4400/scheduler/iso8601"
 
 for i in `ls /shared/code/*.py | sed -e 's/.py//g' | sed -e 's/\/shared\/code\///g' | sort`; do  
 	echo "$i"
