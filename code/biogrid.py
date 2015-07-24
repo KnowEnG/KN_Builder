@@ -68,7 +68,7 @@ class Biogrid(SrcClass):
 
         Returns:
             dict: The local file information for a given source alias.
-        """            
+        """
         return super(Biogrid, self).get_local_file_info(alias)
 
     def get_remote_file_size(self, alias):

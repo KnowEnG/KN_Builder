@@ -66,7 +66,7 @@ class Kegg(SrcClass):
             the_page = response.readlines()
             for line in the_page:
                 d_line = line.decode()
-                match = re.search('Release (\S+), ([^<\n]*)', d_line)
+                match = re.search(r'Release (\S+), ([^<\n]*)', d_line)
                 if match is not None:
                     self.version[alias] = match.group(1)
                     response.close()
@@ -87,7 +87,7 @@ class Kegg(SrcClass):
 
         Returns:
             dict: The local file information for a given source alias.
-        """            
+        """
         return super(Kegg, self).get_local_file_info(alias)
 
     def get_remote_file_size(self, alias):
@@ -123,20 +123,20 @@ class Kegg(SrcClass):
             the_page = response.readlines()
             for line in the_page:
                 d_line = line.decode()
-                match = re.search('Release (\S+), ([^<\n]*)', d_line)
+                match = re.search(r'Release (\S+), ([^<\n]*)', d_line)
                 if match is not None:
                     time_str = match.group(2)
                     response.close()
                     break
             time_format = "%b %y"
-            date_modified = time.mktime(time.strptime(time_str,time_format))
+            date_modified = time.mktime(time.strptime(time_str, time_format))
             self.date_modified = date_modified
         return self.date_modified
 
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the
         alias.
-        
+
         This returns the url needed to fetch the file corresponding to the
         alias. The url is constructed using the alias and url_base.
 

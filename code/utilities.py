@@ -29,16 +29,16 @@ class SrcClass(object):
 
     Attributes:
         name (str): The name of the remote source to be included in the KN.
-        url_base (str): The base url of the remote source, which may need 
+        url_base (str): The base url of the remote source, which may need
             additional processing to provide an actual download link (see
             get_remote_url).
         version (dict): The release version of each alias in the source.
-        aliases (dict): A dictionary with subsets of the source which will be 
-            included in the KN  as the keys (e.g. different species, data 
-            types, or interaction types), and a short string with information 
+        aliases (dict): A dictionary with subsets of the source which will be
+            included in the KN  as the keys (e.g. different species, data
+            types, or interaction types), and a short string with information
             about the alias as the value.
     """
-    
+
     def __init__(self, src_name, base_url, aliases, version=dict()):
         """Init a SrcClass object with the provided parameters.
 
@@ -53,7 +53,7 @@ class SrcClass(object):
                 get_remote_url). Must be provided by the extending class.
             aliases (dict): A dictionary with subsets of the source which will
                 be included in the KN  as the keys (e.g. different species,
-                data types, or interaction types), and a short string with 
+                data types, or interaction types), and a short string with
                 information about the alias as the value.
             version (dict): The release version of each alias in the source.
                 Default empty dictionary if not provided by the extending
@@ -70,7 +70,7 @@ class SrcClass(object):
         This returns the release version of the remote source for a specific
         alias. This value will be the same for every alias unless the
         the alias can have a different release version than the source
-        (this will be source dependent). This value is stored in the 
+        (this will be source dependent). This value is stored in the
         self.version dictionary object. If the value does not already,
         all aliases versions are initialized to 'unknown'.
 
@@ -89,7 +89,7 @@ class SrcClass(object):
         """Return a dictionary with the local file information for the alias.
 
         This returns the local file information for a given source alias, which
-        will always contain the following keys: 
+        will always contain the following keys:
             'local_file_name' (str): the path to where the local file
             'local_file_exists' (bool): boolean if file exists at path
                 indicated by 'local_file_name'
@@ -103,7 +103,7 @@ class SrcClass(object):
 
         Returns:
             dict: The local file information for a given source alias.
-        """            
+        """
 
         f_dir = DIR + self.name + '/'
         file = f_dir + self.name + '.' + alias + '.txt'
@@ -188,7 +188,7 @@ def compare_versions(src_obj):
         'local_file_exists' (bool): See get_local_file_info.
         'fetch_needed' (bool): True if file needs to be downloaded from remote
             source. A fetch will be needed if the local file does not exist,
-            or if the local and remote files have different date modified or 
+            or if the local and remote files have different date modified or
             file sizes.
 
     Args:

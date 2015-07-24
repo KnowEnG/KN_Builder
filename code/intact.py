@@ -57,7 +57,7 @@ class Intact(SrcClass):
 
         Returns:
             dict: The local file information for a given source alias.
-        """            
+        """
         return super(Intact, self).get_local_file_info(alias)
 
     def get_remote_file_size(self, alias):
@@ -104,7 +104,7 @@ class Intact(SrcClass):
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the
         alias.
-        
+
         This returns the url needed to fetch the file corresponding to the
         alias. The url is constructed using the base_url, alias, and source
         version information.

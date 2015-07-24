@@ -58,10 +58,7 @@ class Msigdb(SrcClass):
             response = urllib.request.urlopen(url)
             the_page = response.readlines()
             for line in the_page:
-                try:
-                    d_line = line.decode()
-                except:
-                    continue
+                d_line = line.decode()
                 match = re.search('MSigDB database v([^ ]*)', d_line)
                 if match is not None:
                     response.close()
@@ -83,7 +80,7 @@ class Msigdb(SrcClass):
 
         Returns:
             dict: The local file information for a given source alias.
-        """            
+        """
         return super(Msigdb, self).get_local_file_info(alias)
 
     def get_remote_file_size(self, alias):
@@ -120,24 +117,21 @@ class Msigdb(SrcClass):
             response = urllib.request.urlopen(url)
             the_page = response.readlines()
             for line in the_page:
-                try:
-                    d_line = line.decode()
-                except:
-                    continue
+                d_line = line.decode()
                 match = re.search('updated ([^<]*)', d_line)
                 if match is not None:
                     time_str = match.group(1)
                     response.close()
                     break
             time_format = "%B %Y"
-            date_modified = time.mktime(time.strptime(time_str,time_format))
+            date_modified = time.mktime(time.strptime(time_str, time_format))
             self.date_modified = date_modified
         return self.date_modified
 
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the
         alias.
-        
+
         This returns the url needed to fetch the file corresponding to the
         alias. The url is constructed using the base_url, alias, and source
         version information.
