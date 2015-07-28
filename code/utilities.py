@@ -19,7 +19,7 @@ import os
 import time
 import json
 
-DIR = '../raw_downloads/'
+DIR = os.path.join('..', 'raw_downloads')
 
 class SrcClass(object):
     """Base class to be extended by each supported source in KnowEnG.
@@ -32,14 +32,17 @@ class SrcClass(object):
         url_base (str): The base url of the remote source, which may need
             additional processing to provide an actual download link (see
             get_remote_url).
-        version (dict): The release version of each alias in the source.
         aliases (dict): A dictionary with subsets of the source which will be
             included in the KN  as the keys (e.g. different species, data
             types, or interaction types), and a short string with information
             about the alias as the value.
+        remote_file (str): The name of the file to extract if the remote source
+            is a directory
+        version (dict): The release version of each alias in the source.
     """
 
-    def __init__(self, src_name, base_url, aliases, version=dict()):
+    def __init__(self, src_name, base_url, aliases,\
+                    remote_file='', version=dict()):
         """Init a SrcClass object with the provided parameters.
 
         Constructs a SrcClass object with the provided parameters, which should
@@ -62,6 +65,7 @@ class SrcClass(object):
         self.name = src_name
         self.url_base = base_url
         self.aliases = aliases
+        self.remote_file = remote_file
         self.version = version
 
     def get_source_version(self, alias):
@@ -105,8 +109,8 @@ class SrcClass(object):
             dict: The local file information for a given source alias.
         """
 
-        f_dir = DIR + self.name + '/'
-        file = f_dir + self.name + '.' + alias + '.txt'
+        f_dir = os.path.join(DIR, self.name)
+        file = os.path.join(f_dir, self.name + '.' + alias + '.txt')
         local_dict = dict()
         local_dict['local_file_name'] = file
         local_dict['local_file_exists'] = os.path.isfile(file)
@@ -175,15 +179,20 @@ class SrcClass(object):
 
 def compare_versions(src_obj):
     """Return a dictionary with the version information for each alias in the
-    source.
+    source and write a dictionary for each alias to file.
 
     This returns a nested dictionary describing the version information of each
     alias in the source. The version information is also printed. For each
     alias the following keys are defined:
+        'source' (str): The source name
+        'alias' (str): The alias name
         'alias_info' (str): A short string with information about the alias.
         'remote_url' (str): See get_remote_url.
         'remote_date' (float): See get_remote_file_modified.
         'remote_version' (str): See get_source_version.
+        'remote_file' (str): File to extract if remote file location is a
+            directory.
+        'remote_size' (int): See get_remote_file_size.
         'local_file_name' (str): See get_local_file_info.
         'local_file_exists' (bool): See get_local_file_info.
         'fetch_needed' (bool): True if file needs to be downloaded from remote
@@ -204,8 +213,11 @@ def compare_versions(src_obj):
     for alias in src_obj.aliases:
         local_dict[alias] = src_obj.get_local_file_info(alias)
         version_dict[alias] = dict()
+        version_dict[alias]['source'] = src_obj.name
+        version_dict[alias]['alias'] = alias
         version_dict[alias]['alias_info'] = src_obj.aliases[alias]
         version_dict[alias]['remote_url'] = src_obj.get_remote_url(alias)
+        version_dict[alias]['remote_file'] = src_obj.remote_file
         version_dict[alias]['remote_date'] = \
             src_obj.get_remote_file_modified(alias)
         version_dict[alias]['remote_version'] = \
@@ -234,10 +246,10 @@ def compare_versions(src_obj):
         else:
             version_dict[alias]['fetch_needed'] = False
 
-    f_dir = DIR + src_obj.name
+    f_dir = os.path.join(DIR, src_obj.name)
     os.makedirs(f_dir, exist_ok=True)
     for alias in src_obj.aliases:
-        f_name = os.path.join(f_dir, src_obj.name + '_' + alias + '_check.json')
+        f_name = os.path.join(f_dir, src_obj.name + '.' + alias + '.check.json')
         with open(f_name, 'w') as outfile:
             json.dump(version_dict[alias], outfile, indent=4, sort_keys=True)
     print(json.dumps(version_dict, indent=4, sort_keys=True))
