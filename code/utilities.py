@@ -234,9 +234,11 @@ def compare_versions(src_obj):
         else:
             version_dict[alias]['fetch_needed'] = False
 
-    f_dir = DIR + src_obj.name + '/'
+    f_dir = DIR + src_obj.name
     os.makedirs(f_dir, exist_ok=True)
-    with open(f_dir + src_obj.name + '_check.json', 'w') as outfile:
-        json.dump(version_dict, outfile, indent=4, sort_keys=True)
+    for alias in src_obj.aliases:
+        f_name = os.path.join(f_dir, src_obj.name + '_' + alias + '_check.json')
+        with open(f_name, 'w') as outfile:
+            json.dump(version_dict[alias], outfile, indent=4, sort_keys=True)
     print(json.dumps(version_dict, indent=4, sort_keys=True))
     return version_dict
