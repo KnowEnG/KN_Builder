@@ -30,8 +30,9 @@ class Intact(SrcClass):
         name = 'intact'
         url_base = 'ftp.ebi.ac.uk'
         aliases = {"PPI": "PPI"}
-        remote_file = 'intact.txt'
-        super(Intact, self).__init__(name, url_base, aliases, remote_file)
+        comment_strs = ['#']
+        super(Intact, self).__init__(name, url_base, aliases)
+        self.remote_file = 'intact.txt'
 
     def get_source_version(self, alias):
         """Return the release version of the remote intact:alias.
@@ -118,7 +119,7 @@ class Intact(SrcClass):
         """
         url = self.url_base + '/pub/databases/intact/current/psimitab/'
         url += 'intact.zip'
-        return url
+        return 'ftp://' + url
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a intact

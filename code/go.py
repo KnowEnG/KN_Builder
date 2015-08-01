@@ -29,7 +29,7 @@ class Go(SrcClass):
         This calls the SrcClass constructor (see utilities.SrcClass)
         """
         name = 'go'
-        url_base = 'http://geneontology.org//gene-associations/'
+        url_base = 'http://geneontology.org/gene-associations/'
         aliases = {
             "fb": "Drosophila melanogaster",
             "goa_human": "Homo sapiens",
