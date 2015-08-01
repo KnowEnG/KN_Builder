@@ -41,8 +41,7 @@ class SrcClass(object):
         version (dict): The release version of each alias in the source.
     """
 
-    def __init__(self, src_name, base_url, aliases,\
-                    remote_file='', version=dict()):
+    def __init__(self, src_name, base_url, aliases):
         """Init a SrcClass object with the provided parameters.
 
         Constructs a SrcClass object with the provided parameters, which should
@@ -65,8 +64,8 @@ class SrcClass(object):
         self.name = src_name
         self.url_base = base_url
         self.aliases = aliases
-        self.remote_file = remote_file
-        self.version = version
+        self.remote_file = ''
+        self.version = dict()
 
     def get_source_version(self, alias):
         """Return the release version of the remote source:alias.
@@ -110,7 +109,9 @@ class SrcClass(object):
         """
 
         f_dir = os.path.join(DIR, self.name)
-        file = os.path.join(f_dir, self.name + '.' + alias + '.txt')
+        url = self.get_remote_url(alias)
+        filename = os.path.basename(url)
+        file = os.path.join(f_dir, filename)
         local_dict = dict()
         local_dict['local_file_name'] = file
         local_dict['local_file_exists'] = os.path.isfile(file)

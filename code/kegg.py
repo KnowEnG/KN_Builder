@@ -151,7 +151,7 @@ class Kegg(SrcClass):
         elif alias == 'pathway':
             url = self.url_base + 'list/pathway'
         else:
-            url = self.url_base + 'link/' + alias + '/pathway/'
+            url = self.url_base + 'link/' + alias + '/pathway'
         return url
 
 if __name__ == "__main__":
