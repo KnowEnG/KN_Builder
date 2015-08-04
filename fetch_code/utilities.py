@@ -10,8 +10,9 @@ Functions:
         path to the file.
 
 Variables:
-    CHUNK_SZ: the default size (number of lines) to for file chunks
-    DIR: the relative location of the raw_downloads directory
+    CHUNK_SZ: the max size (number of lines) for file chunks
+    DIR: the relative path to raw_download/source/alias/ from location of
+        script execution
 """
 
 import urllib.request
@@ -52,7 +53,7 @@ def download(version_dict):
     url = version_dict['remote_url']
     if url[-1] == '/':
         url = url[:-1]
-    filename = os.path.join(DIR, os.path.basename(url))
+    filename = os.path.join(DIR, version_dict['local_file_name'])
     with urllib.request.urlopen(url) as response:
         with open(filename, 'wb') as outfile:
             shutil.copyfileobj(response, outfile)
@@ -87,7 +88,7 @@ def download(version_dict):
                 print("Remote file is a directory but version_dict"
                       "['remote_file'] was not found")
                 exit()
-    #move the downloaded file to source.version.txt
+    #move the downloaded file to source.alias.txt
     outfile = version_dict['source'] + '.' + version_dict['alias'] + '.txt'
     outfile = os.path.join(DIR, outfile)
     shutil.copy2(os.path.join(DIR, filename), outfile)
