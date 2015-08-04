@@ -11,7 +11,8 @@ Functions:
         a fetch is required
 
 Variables:
-    DIR: the relative location of the raw_downloads directory
+    DIR: relative path to the raw_download folder from location of script
+        execution
 """
 
 import urllib.request
@@ -93,7 +94,7 @@ class SrcClass(object):
 
         This returns the local file information for a given source alias, which
         will always contain the following keys:
-            'local_file_name' (str): the path to where the local file
+            'local_file_name' (str): name of the file locally
             'local_file_exists' (bool): boolean if file exists at path
                 indicated by 'local_file_name'
         and will also conatin the following if 'local_file_exists' is True:
@@ -109,11 +110,12 @@ class SrcClass(object):
         """
 
         f_dir = os.path.join(DIR, self.name)
+        f_dir = os.path.join(f_dir, alias)
         url = self.get_remote_url(alias)
         filename = os.path.basename(url)
         file = os.path.join(f_dir, filename)
         local_dict = dict()
-        local_dict['local_file_name'] = file
+        local_dict['local_file_name'] = filename
         local_dict['local_file_exists'] = os.path.isfile(file)
         if not local_dict['local_file_exists']:
             return local_dict
@@ -250,7 +252,9 @@ def compare_versions(src_obj):
     f_dir = os.path.join(DIR, src_obj.name)
     os.makedirs(f_dir, exist_ok=True)
     for alias in src_obj.aliases:
-        f_name = os.path.join(f_dir, src_obj.name + '.' + alias + '.check.json')
+        a_dir = os.path.join(f_dir, alias)
+        os.makedirs(a_dir, exist_ok=True)
+        f_name = os.path.join(a_dir, 'file_metadata.json')
         with open(f_name, 'w') as outfile:
             json.dump(version_dict[alias], outfile, indent=4, sort_keys=True)
     print(json.dumps(version_dict, indent=4, sort_keys=True))
