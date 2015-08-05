@@ -1,0 +1,13 @@
+{
+    "schedule": "R1\/\/P3M",
+    "name": "alias_fetch_TMPSRC_TMPNUM_TMPALIAS",
+    "container": {
+        "type": "DOCKER",
+        "image": "IMG",
+        "volumes": [{"containerPath": "/data/", "hostPath":"CLOUDBASE/ALIAS_DIR/", "mode":"RW"},
+                    {"containerPath": "/code/", "hostPath":"CLOUDBASE/CODE_DIR/", "mode":"RW"}]
+    },
+    "cpus": "0.5",
+    "mem": "512",
+    "command": "TMPCMD"
+}
