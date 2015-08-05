@@ -97,11 +97,13 @@ class Go(SrcClass):
             float: time of last modification time of remote file in seconds
                 since the epoch
         """
+        if alias == 'obo':
+            return float(0)
         url_download_page = ('http://geneontology.org/gene-associations/'
                              'go_annotation_metadata.all.js')
         response = urllib.request.urlopen(url_download_page)
         cur_id = ''
-        ret_str = ''
+        ret_str = float(0)
         t_format = "%m/%d/%Y"
         for line in response:
             d_line = line.decode()
