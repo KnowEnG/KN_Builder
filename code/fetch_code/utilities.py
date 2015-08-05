@@ -45,9 +45,12 @@ def download(version_dict):
     Returns:
         str: The relative path to the newly downloaded file.
     """
+    
+    ret_file = version_dict['source'] + '.' + version_dict['alias'] + '.txt'
+    ret_file = os.path.join(DIR, ret_file)
     #check if remote file must be downloaded
     if not version_dict['fetch_needed'] and version_dict['local_file_exists']:
-        return os.path.relpath(version_dict['local_file_name'])
+        return os.path.relpath(ret_file)
 
     #download remote file
     url = version_dict['remote_url']
@@ -89,10 +92,8 @@ def download(version_dict):
                       "['remote_file'] was not found")
                 exit()
     #move the downloaded file to source.alias.txt
-    outfile = version_dict['source'] + '.' + version_dict['alias'] + '.txt'
-    outfile = os.path.join(DIR, outfile)
-    shutil.copy2(os.path.join(DIR, filename), outfile)
-    return os.path.relpath(outfile)
+    shutil.copy2(os.path.join(DIR, filename), ret_file)
+    return os.path.relpath(ret_file)
 
 def chunk(filename, total_lines):
     """Splits the provided file into equal chunks with
