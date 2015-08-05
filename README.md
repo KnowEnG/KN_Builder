@@ -18,3 +18,17 @@ python SRC.py
 # fetch for alias named ALIAS of source SRC
 cd /workspace/apps/P1_source_check/raw_downloads/SRC/ALIAS
 python /workspace/apps/P1_source_check/fetch_code/utilities.py file_metadata.json
+
+
+# running pipeline on the cloud 
+./code/run_check.sh CLOUD PIPELINE
+
+# running pipeline outside containers
+./code/run_check.sh LOCAL PIPELINE
+
+# running only check outside containers
+./code/run_check.sh LOCAL STEP
+
+# running only check in local containers
+./code/run_check.sh CONTAIN STEP
+
