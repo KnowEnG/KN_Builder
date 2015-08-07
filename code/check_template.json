@@ -1,6 +1,6 @@
 {
     "schedule": "R1\/\/P3M",
-    "name": "src_check_TMPNUM_TMPSRC",
+    "name": "TMPJOB",
     "container": {
         "type": "DOCKER",
         "image": "IMG",

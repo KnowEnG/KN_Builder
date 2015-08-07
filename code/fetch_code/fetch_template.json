@@ -1,6 +1,6 @@
 {
     "schedule": "R1\/\/P3M",
-    "name": "alias_fetch_TMPSRC_TMPNUM_TMPALIAS",
+    "name": "TMPJOB",
     "container": {
         "type": "DOCKER",
         "image": "IMG",

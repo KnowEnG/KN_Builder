@@ -22,7 +22,8 @@ python /workspace/apps/P1_source_check/fetch_code/utilities.py file_metadata.jso
 
 # running pipeline on the cloud 
 ./code/run_check.sh CLOUD PIPELINE
-
+# when complete, be a good citizen and remove jobs from the cloud
+for i in `ls code/chron_jobs/*json | sed "s#code/chron_jobs/##g" | sed "s/.json//g"` ; do CMD="curl -L -X DELETE mmaster02.cse.illinois.edu:4400/scheduler/job/$i"; echo "$CMD"; eval $CMD; done                
 # running pipeline outside containers
 ./code/run_check.sh LOCAL PIPELINE
 
