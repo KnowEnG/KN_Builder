@@ -49,7 +49,7 @@ for i in `ls $LOCAL_BASE/code/*.py | sed -e 's/.py//g' | sed "s#$LOCAL_BASE/code
 		cat $LOCAL_BASE/code/check_template.json | sed "s#IMG#$IMG#g" | sed "s#TMPCMD#$CMD#g" | sed "s#TMPBASE#/#g" | sed "s#CLOUDBASE#$CLOUD_BASE#g" | sed -e "s/TMPJOB/$JOBNAME/g" > $LOCAL_BASE/code/chron_jobs/$JOBNAME.json;
 		CLOUD_CMD=$(echo $CURL | sed -e "s/TMPJOB/$JOBNAME/g")
 		echo $CLOUD_CMD
-		#eval $CLOUD_CMD
+		eval $CLOUD_CMD
 	fi
 
 	ctr=$(($ctr + 1))
