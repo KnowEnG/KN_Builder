@@ -7,7 +7,7 @@ RUN_TYPE=$4 # LOCAL, CONTAIN, CLOUD
 
 SRC_DIR="$DATA_DIR/$SRC"
 
-CLOUD_BASE="/mnt/storage/blatti/apps/P1_source_check/"   # toplevel directory on cloud
+CLOUD_BASE="/mnt/storage/post3/apps/P1_source_check/"   # toplevel directory on cloud
 
 CMD1="sh -c 'cd ALIASDIR/; /usr/bin/time -v python3 CODEDIR/fetch_code/utilities.py file_metadata.json;'" # command for current step of pipeline
 CMD2="sh -c 'cd ALIASDIR/; /usr/bin/time -v python3 CODEDIR/fetch_code/utilities.py file_metadata.json;'" # command for current and next step of pipeline

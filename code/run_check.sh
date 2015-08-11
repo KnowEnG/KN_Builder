@@ -1,8 +1,8 @@
 #!/bin/bash
 
-LOCAL_BASE="/mnt/users/blatti/apps/P1_source_check/"   # toplevel local directory inside runner of this script
+LOCAL_BASE="/workspace/apps/P1_source_check/"   # toplevel local directory inside runner of this script
 #LOCAL_BASE="/shared/"   # when called by container like check_master
-CLOUD_BASE="/mnt/storage/blatti/apps/P1_source_check/"   # toplevel directory on cloud
+CLOUD_BASE="/mnt/storage/post3/apps/P1_source_check/"   # toplevel directory on cloud
 
 RUN_TYPE=$1 # LOCAL, CONTAIN, CLOUD
 CMD_TYPE=$2  # STEP or PIPELINE
@@ -46,7 +46,7 @@ for i in `ls $LOCAL_BASE/code/*.py | sed -e 's/.py//g' | sed "s#$LOCAL_BASE/code
 	if [ "$RUN_TYPE" == "CLOUD" ]; then
     	JOBNAME=$(echo "src_check_$ctr.$i" | sed "s#\.#_#g")
 		mkdir -p $LOCAL_BASE/code/chron_jobs/
-		cat $LOCAL_BASE/code/check_template.json | sed "s#IMG#$IMG#g" | sed "s#TMPCMD#$CMD#g" | sed "s#TMPBASE#/#g" | sed "s#CLOUDBASE#$CLOUD_BASE#g" | sed -e "s/TMPJOB/$JOBNAME/g" > $LOCAL_BASE/code/chron_jobs/$JOBNAME.json;
+		cat $LOCAL_BASE/code/check_template.json | sed "s#IMG#$IMG#g" | sed "s#TMPCMD#$CMD#g" | sed "s#TMPBASE#/#g" | sed "s#CLOUDBASE#$CLOUD_BASE#g" | sed -e "s/TMPJOB/$JOBNAME/g" | sed -e "s/TMPSRC/$i/g" > $LOCAL_BASE/code/chron_jobs/$JOBNAME.json;
 		CLOUD_CMD=$(echo $CURL | sed -e "s/TMPJOB/$JOBNAME/g")
 		echo $CLOUD_CMD
 		eval $CLOUD_CMD
