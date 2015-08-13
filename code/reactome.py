@@ -160,7 +160,11 @@ class Reactome(SrcClass):
         Returns:
             bool: Whether or not the alias is used for mapping.
         """
-        return super(Reactome, self).is_map(alias)
+        maps = {"Ensembl2Reactome_All_Levels": True,
+                   "ReactomePathways": True,
+                   "homo_sapiens.interactions": False,
+                   "ReactomePathwaysRelation": True}
+        return maps[alias]
 
     def get_dependencies(self, alias):
         """Return a list of other aliases that the provided alias depends on.
@@ -175,7 +179,11 @@ class Reactome(SrcClass):
             list: The other aliases defined in self.aliases that the provided
             alias depends on.
         """
-        return super(Reactome, self).get_dependencies(alias)
+        dependencies = {"Ensembl2Reactome_All_Levels": ['ReactomePathways'],
+                   "ReactomePathways": list(),
+                   "homo_sapiens.interactions": list(),
+                   "ReactomePathwaysRelation": ['ReactomePathways']}
+        return dependencies[alias]
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a Reactome
