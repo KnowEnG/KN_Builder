@@ -6,6 +6,7 @@ Classes:
         supported source in the KN.
 
 Functions:
+    get_SrcClass: returns a SrcClass object
     compare_versions(SrcClass) -> dict: takes a SrcClass object and returns a
         dictionary containing the most recent file version information and if
         a fetch is required
@@ -21,6 +22,19 @@ import time
 import json
 
 DIR = os.path.join('..', 'raw_downloads')
+
+def get_SrcClass():
+    """Returns an object of the source class.
+
+    This returns an object of the source class to allow access to its functions
+    if the module is imported.
+    
+    Args:
+    
+    Returns:
+        class: a source class object
+    """
+    return SrcClass()
 
 class SrcClass(object):
     """Base class to be extended by each supported source in KnowEnG.
@@ -179,6 +193,47 @@ class SrcClass(object):
         """
         return self.url_base
 
+    def is_map(self, alias):
+        """Return a boolean representing if the provided alias is used for
+        source specific mapping of nodes or edges.
+        
+        This returns a boolean representing if the alias corresponds to a file
+        used for mapping. By default this returns True if the alias ends in
+        '_map' and False otherwise.
+
+        Args:
+            alias(str): An alias defined in self.aliases.
+
+        Returns:
+            bool: Whether or not the alias is used for mapping.
+        """
+        if alias[-4:] == '_map':
+            return True
+        else:
+            return False
+
+    def get_dependencies(self, alias):
+        """Return a list of other aliases that the provided alias depends on.
+
+        This returns a list of other aliases that must be processed before
+        full processing of the provided alias can be completed. By default,
+        returns a list of all aliases which are considered mapping files (see
+        is_map)
+
+        Args:
+            alias(str): An alias defined in self.aliases.
+
+        Returns:
+            list: The other aliases defined in self.aliases that the provided
+            alias depends on.
+        """
+        depends = list()
+        for alias_name in self.aliases:
+            if alias_name == alias:
+                continue
+            elif self.is_map(alias_name):
+                depends.append(alias_name)
+        return depends
 
 def compare_versions(src_obj):
     """Return a dictionary with the version information for each alias in the
@@ -190,6 +245,8 @@ def compare_versions(src_obj):
         'source' (str): The source name
         'alias' (str): The alias name
         'alias_info' (str): A short string with information about the alias.
+        'is_map' (bool): See is_map.
+        'dependencies' (lists): See get_dependencies.
         'remote_url' (str): See get_remote_url.
         'remote_date' (float): See get_remote_file_modified.
         'remote_version' (str): See get_source_version.
@@ -219,6 +276,8 @@ def compare_versions(src_obj):
         version_dict[alias]['source'] = src_obj.name
         version_dict[alias]['alias'] = alias
         version_dict[alias]['alias_info'] = src_obj.aliases[alias]
+        version_dict[alias]['is_map'] = src_obj.is_map(alias)
+        version_dict[alias]['dependencies'] = src_obj.get_dependencies(alias)
         version_dict[alias]['remote_url'] = src_obj.get_remote_url(alias)
         version_dict[alias]['remote_file'] = src_obj.remote_file
         version_dict[alias]['remote_date'] = \
