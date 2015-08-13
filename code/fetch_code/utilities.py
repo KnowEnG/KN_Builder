@@ -122,11 +122,20 @@ def chunk(filename, total_lines):
     chunk_file = os.path.join(chunk_dir, source_alias + '.')
 
     #divide file into chunks
+    line_count = 0
     with open(filename, 'rb') as infile:
         for i in range(1, num_chunks + 1):
             with open(chunk_file + str(i) + ext, 'wb') as out:
-                for _ in range(0, num_lines):
-                    out.write(infile.readline())
+                for j in range(0, num_lines):
+                    line = infile.readline()
+                    hasher = hashlib.md5()
+                    hasher.update(line)
+                    md5 = hasher.hexdigest()
+                    line_count += 1
+                    src = os.path.splitext(filename)[0]
+                    outline = '\t'.join((md5, src, str(line_count), ''))
+                    out.write(outline.encode())
+                    out.write(line)
                 if i == num_chunks:
                     for line in infile:
                         out.write(line)
@@ -188,7 +197,10 @@ def main(version_json):
         version_dict = json.load(infile)
     newfile = download(version_dict)
     md5hash, line_count = get_md5_hash(newfile)
-    num_chunks = chunk(newfile, line_count)
+    if version_dict['is_map']:
+        num_chunks = 0
+    else:
+        num_chunks = chunk(newfile, line_count)
 
     #update version_dict
     version_dict['checksum'] = md5hash
