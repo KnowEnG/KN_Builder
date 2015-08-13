@@ -24,8 +24,8 @@ docker run --name check_master -it -v /mnt/users/blatti/apps/P1_source_check/:/s
 /shared/code/run_check.sh LOCAL STEP
 
 # running only fetch while inside container
-for i in `ls /shared/raw_downloads/`; do /shared/code/fetch_code/run_fetch.sh $i /shared/raw_downloads/ /shared/code/ LOCAL; done
-
+for i in `ls raw_downloads/`; do code/fetch_code/run_fetch.sh $i raw_downloads/ code/ LOCAL; done
+for i in `ls raw_downloads/`; do code/fetch_code/run_fetch.sh $i raw_downloads/ code/ CLOUD; done
 
 #### running on KnowEnG cloud
 
