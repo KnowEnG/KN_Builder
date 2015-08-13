@@ -6,12 +6,26 @@ Classes:
         go specific functions required to perform a check on go.
 
 Functions:
+    get_SrcClass: returns a Go object
     main: runs compare_versions (see utilities.py) on a Go object
 """
 from utilities import SrcClass, compare_versions
 import urllib.request
 import re
 import time
+
+def get_SrcClass():
+    """Returns an object of the source class.
+
+    This returns an object of the source class to allow access to its functions
+    if the module is imported.
+    
+    Args:
+    
+    Returns:
+        class: a source class object
+    """
+    return Go()
 
 class Go(SrcClass):
     """Extends SrcClass to provide go specific check functions.
@@ -34,7 +48,7 @@ class Go(SrcClass):
             "fb": "Drosophila melanogaster",
             "goa_human": "Homo sapiens",
             "mgi": "Mus musculus",
-            "obo": "ontology",
+            "obo_map": "ontology",
             "sgd": "Saccharomyces cerevisiae",
             "tair": "Arabidopsis thaliana",
             "wb": "Caenorhabditis elegans"
@@ -97,7 +111,7 @@ class Go(SrcClass):
             float: time of last modification time of remote file in seconds
                 since the epoch
         """
-        if alias == 'obo':
+        if alias == 'obo_map':
             return float(0)
         url_download_page = ('http://geneontology.org/gene-associations/'
                              'go_annotation_metadata.all.js')
@@ -136,9 +150,41 @@ class Go(SrcClass):
         """
         url = self.url_base + 'gene_association.' + alias + '.gz'
         # format for ontology information
-        if alias == 'obo':
+        if alias == 'obo_map':
             url = 'http://purl.obolibrary.org/obo/go.obo'
         return url
+
+    def is_map(self, alias):
+        """Return a boolean representing if the provided alias is used for
+        source specific mapping of nodes or edges.
+        
+        This returns a boolean representing if the alias corresponds to a file
+        used for mapping. By default this returns True if the alias ends in
+        '_map' and False otherwise.
+
+        Args:
+            alias(str): An alias defined in self.aliases.
+
+        Returns:
+            bool: Whether or not the alias is used for mapping.
+        """
+        return super(Go, self).is_map(alias)
+
+    def get_dependencies(self, alias):
+        """Return a list of other aliases that the provided alias depends on.
+
+        This returns a list of other aliases that must be processed before
+        full processing of the provided alias can be completed.
+
+        Args:
+            alias(str): An alias defined in self.aliases.
+
+        Returns:
+            list: The other aliases defined in self.aliases that the provided
+            alias depends on.
+        """
+        
+        return super(Go, self).get_dependencies(alias)
 
 
 if __name__ == "__main__":

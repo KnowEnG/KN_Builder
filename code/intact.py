@@ -6,11 +6,25 @@ Classes:
         intact specific functions required to perform a check on intact.
 
 Functions:
+    get_SrcClass: returns an Intact object
     main: runs compare_versions (see utilities.py) on a Intact object
 """
 from utilities import SrcClass, compare_versions
 import time
 import ftplib
+
+def get_SrcClass():
+    """Returns an object of the source class.
+
+    This returns an object of the source class to allow access to its functions
+    if the module is imported.
+    
+    Args:
+    
+    Returns:
+        class: a source class object
+    """
+    return Intact()
 
 class Intact(SrcClass):
     """Extends SrcClass to provide intact specific check functions.
@@ -120,6 +134,38 @@ class Intact(SrcClass):
         url = self.url_base + '/pub/databases/intact/current/psimitab/'
         url += 'intact.zip'
         return 'ftp://' + url
+
+    def is_map(self, alias):
+        """Return a boolean representing if the provided alias is used for
+        source specific mapping of nodes or edges.
+        
+        This returns a boolean representing if the alias corresponds to a file
+        used for mapping. By default this returns True if the alias ends in
+        '_map' and False otherwise.
+
+        Args:
+            alias(str): An alias defined in self.aliases.
+
+        Returns:
+            bool: Whether or not the alias is used for mapping.
+        """
+        return super(Intact, self).is_map(alias)
+
+    def get_dependencies(self, alias):
+        """Return a list of other aliases that the provided alias depends on.
+
+        This returns a list of other aliases that must be processed before
+        full processing of the provided alias can be completed.
+
+        Args:
+            alias(str): An alias defined in self.aliases.
+
+        Returns:
+            list: The other aliases defined in self.aliases that the provided
+            alias depends on.
+        """
+        
+        return super(Intact, self).get_dependencies(alias)
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a intact
