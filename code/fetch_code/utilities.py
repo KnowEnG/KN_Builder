@@ -199,6 +199,12 @@ def main(version_json):
     md5hash, line_count = get_md5_hash(newfile)
     if version_dict['is_map']:
         num_chunks = 0
+        src_module = __import__(version_dict['source'])
+        SrcClass = src_module.get_SrcClass()
+        map_dict = SrcClass.create_mapping_dict(newfile)
+        map_file = os.path.splitext(newfile)[0] + '.json'
+        with open(map_file, 'w') as outfile:
+            json.dump(map_dict, outfile, indent=4, sort_keys=True)
     else:
         num_chunks = chunk(newfile, line_count)
 
