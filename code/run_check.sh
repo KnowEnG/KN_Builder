@@ -8,7 +8,7 @@ RUN_TYPE=$1 # LOCAL, CONTAIN, CLOUD
 CMD_TYPE=$2  # STEP or PIPELINE
 
 CMD1="sh -c 'cd TMPBASEcode/; /usr/bin/time -v python3 TMPSRC.py;'" # command for current step of pipeline
-CMD2="sh -c 'cd TMPBASEcode/; /usr/bin/time -v python3 TMPSRC.py; TMPBASEcode/fetch_code/run_fetch.sh TMPSRC TMPBASEraw_downloads/ TMPBASEcode/ $RUN_TYPE'" # command for current and next step of pipeline
+CMD2="sh -c 'cd TMPBASEcode/; /usr/bin/time -v python3 TMPSRC.py; TMPBASEcode/run_fetch.sh TMPSRC TMPBASEraw_downloads/ TMPBASEcode/ $RUN_TYPE'" # command for current and next step of pipeline
 
 IMG="cblatti3/python3:0.1" 
 ctr=1

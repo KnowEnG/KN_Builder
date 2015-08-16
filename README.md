@@ -11,7 +11,7 @@ python SRC.py
 
 # fetch for alias named ALIAS of source SRC
 cd /workspace/apps/P1_source_check/raw_downloads/SRC/ALIAS
-python /workspace/apps/P1_source_check/fetch_code/utilities.py file_metadata.json
+python /workspace/apps/P1_source_check/fetch_utilities.py file_metadata.json
 
 
 #### running inside container with requirements
@@ -24,8 +24,8 @@ docker run --name check_master -it -v /mnt/users/blatti/apps/P1_source_check/:/s
 /shared/code/run_check.sh LOCAL STEP
 
 # running only fetch while inside container
-for i in `ls raw_downloads/`; do code/fetch_code/run_fetch.sh $i raw_downloads/ code/ LOCAL; done
-for i in `ls raw_downloads/`; do code/fetch_code/run_fetch.sh $i raw_downloads/ code/ CLOUD; done
+for i in `ls raw_downloads/`; do code/run_fetch.sh $i raw_downloads/ code/ LOCAL; done
+for i in `ls raw_downloads/`; do code/run_fetch.sh $i raw_downloads/ code/ CLOUD; done
 
 #### running on KnowEnG cloud
 
