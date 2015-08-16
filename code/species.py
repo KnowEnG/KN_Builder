@@ -9,7 +9,7 @@ Functions:
     get_SrcClass: returns an Species object
     main: runs compare_versions (see utilities.py) on a Species object
 """
-from utilities import SrcClass, compare_versions
+from check_utilities import SrcClass, compare_versions
 import time
 import ftplib
 import csv

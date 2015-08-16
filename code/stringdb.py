@@ -9,7 +9,7 @@ Functions:
     get_SrcClass: returns a Stringdb object
     main: runs compare_versions (see utilities.py) on a Stringdb object
 """
-from utilities import SrcClass, compare_versions
+from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
 

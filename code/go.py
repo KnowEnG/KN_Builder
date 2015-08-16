@@ -9,7 +9,7 @@ Functions:
     get_SrcClass: returns a Go object
     main: runs compare_versions (see utilities.py) on a Go object
 """
-from utilities import SrcClass, compare_versions
+from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
 import time
@@ -200,7 +200,20 @@ class Go(SrcClass):
         Returns:
             dict: A dictionary for use in mapping nodes or edge types.
         """
-        return super(Go, self).create_mapping_dict(filename)
+        term_map = dict()
+        is_term = False
+        with open(filename) as infile:
+            for line in infile:
+                if line.startswith('[Term]'):
+                    line = infile.readline()
+                    if not line.startswith('id: '):
+                        continue
+                    key = line[4:].strip()
+                    line = infile.readline()
+                    if not line.startswith('name: '):
+                        continue
+                    term_map[key] = line[6:].strip()
+        return term_map
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a Go object.
