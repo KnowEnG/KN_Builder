@@ -191,9 +191,26 @@ class Msigdb(SrcClass):
 
         Returns:
             list: The other aliases defined in self.aliases that the provided
-            alias depends on.
+                alias depends on.
         """
         return super(Msigdb, self).get_dependencies(alias)
+
+    def create_mapping_dict(self, filename):
+        """Return a mapping dictionary for the provided file.
+
+        This returns a dictionary for use in mapping nodes or edge types from
+        the file specified by filetype. By default it opens the file specified
+        by filename creates a dictionary using the first column as the key and
+        the second column as the value.
+
+        Args:
+            filename(str): The name of the file containing the information
+                needed to produce the maping dictionary.
+
+        Returns:
+            dict: A dictionary for use in mapping nodes or edge types.
+        """
+        return super(Msigdb, self).create_mapping_dict(filename)
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a Msigdb
