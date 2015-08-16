@@ -127,6 +127,54 @@ class Blast(SrcClass):
         url = self.url_base + alias + '.out'
         return url
 
+    def is_map(self, alias):
+        """Return a boolean representing if the provided alias is used for
+        source specific mapping of nodes or edges.
+        
+        This returns a boolean representing if the alias corresponds to a file
+        used for mapping. By default this returns True if the alias ends in
+        '_map' and False otherwise.
+
+        Args:
+            alias(str): An alias defined in self.aliases.
+
+        Returns:
+            bool: Whether or not the alias is used for mapping.
+        """
+        return super(Blast, self).is_map(alias)
+
+    def get_dependencies(self, alias):
+        """Return a list of other aliases that the provided alias depends on.
+
+        This returns a list of other aliases that must be processed before
+        full processing of the provided alias can be completed.
+
+        Args:
+            alias(str): An alias defined in self.aliases.
+
+        Returns:
+            list: The other aliases defined in self.aliases that the provided
+                alias depends on.
+        """
+        return super(Blast, self).get_dependencies(alias)
+
+    def create_mapping_dict(self, filename):
+        """Return a mapping dictionary for the provided file.
+
+        This returns a dictionary for use in mapping nodes or edge types from
+        the file specified by filetype. By default it opens the file specified
+        by filename creates a dictionary using the first column as the key and
+        the second column as the value.
+
+        Args:
+            filename(str): The name of the file containing the information
+                needed to produce the maping dictionary.
+
+        Returns:
+            dict: A dictionary for use in mapping nodes or edge types.
+        """
+        return super(Blast, self).create_mapping_dict(filename)
+
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a blast
     object

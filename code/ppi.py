@@ -175,9 +175,89 @@ class Ppi(SrcClass):
 
         Returns:
             list: The other aliases defined in self.aliases that the provided
-            alias depends on.
+                alias depends on.
         """
         return super(Ppi, self).get_dependencies(alias)
+
+    def create_mapping_dict(self, filename):
+        """Return a mapping dictionary for the provided file.
+
+        This returns a dictionary for use in interaction types to PPI edgetypes
+        from the file specified by filetype. This involves reading through the
+        interaction files and collapsing the interaction tree to only represent
+        the desired keys.
+
+        Args:
+            filename(str): The name of the file containing the information
+                needed to produce the maping dictionary.
+
+        Returns:
+            dict: A dictionary for use in mapping edge types.
+        """
+        term_map = dict()
+        term_is_bait = list()
+        ID = ''
+        parent = ''
+        ixn_to_type = {'MI:0208':'PPI_genetic_interaction',
+                       'MI:0403':'PPI_colocalization',
+                       'MI:0407':'PPI_direct_interaction',
+                       'MI:0914':'PPI_association',
+                       'MI:0915':'PPI_physical_association'}
+        desired_keys = ixn_to_type.keys()
+        with open(filename) as infile:
+            for line in infile:
+                if line.startswith('[Term]'):
+                    ID = ''
+                    parent = ''
+                if line.startswith('id:'):
+                    ID = line.split(' ')[1].strip()
+                if line.startswith('def:') and ID != '':
+                    if 'bait' in line.lower():
+                        term_is_bait.append(ID)
+                if line.startswith('is_a'):
+                    parent = line.split(' ')[1].strip()
+                    if ID != '' and parent != '':
+                        if ID in desired_keys:
+                            term_map[ID] = ID
+                        else:
+                            term_map[ID] = parent
+                        ID = ''
+                        parent = ''
+
+        #remap Additive Genetic Interaction to Genetic Interaction
+        term_map['MI:0799'] = 'MI:0208'
+        #remap Genetic Interference to Genetic Interaction
+        term_map['MI:0254'] = 'MI:0208'
+        #remap two-hybird to phyiscal association
+        term_map['MI:0018'] = 'MI:0915'
+        #make physical interaction its own parent
+        term_map['MI:0218'] = 'MI:0218'
+        rem_keys = list()
+        for key in term_map:
+            value = term_map[key]
+            #collapse dictionary
+            while value not in desired_keys:
+                if value not in term_map or term_map[key] == term_map[value]:
+                    value = term_map[key]
+                    break
+                term_map[key] = term_map[value]
+                value = term_map[key]
+            if value not in desired_keys:
+                ##remap the obsolete physical interaction term
+                if value == 'MI:0218':
+                    if key in term_is_bait:
+                        value = 'MI:0914'
+                    else:
+                        value = 'MI:0915'
+                    term_map[key] = value
+                ##remove keys that did not map to our desired edge types
+                else:
+                    rem_keys.append(key)
+                    continue
+            term_map[key] = ixn_to_type[value]
+        for key in rem_keys:
+            del term_map[key]
+        return term_map
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a ppi

@@ -20,9 +20,7 @@ import urllib.request
 import os
 import time
 import json
-
-DIR = os.path.join('..', 'raw_downloads')
-
+import csv
 def get_SrcClass():
     """Returns an object of the source class.
 
@@ -225,7 +223,7 @@ class SrcClass(object):
 
         Returns:
             list: The other aliases defined in self.aliases that the provided
-            alias depends on.
+                alias depends on.
         """
         depends = list()
         for alias_name in self.aliases:
@@ -234,6 +232,31 @@ class SrcClass(object):
             elif self.is_map(alias_name):
                 depends.append(alias_name)
         return depends
+
+    def create_mapping_dict(self, filename):
+        """Return a mapping dictionary for the provided file.
+
+        This returns a dictionary for use in mapping nodes or edge types from
+        the file specified by filetype. By default it opens the file specified
+        by filename creates a dictionary using the first column as the key and
+        the second column as the value.
+
+        Args:
+            filename(str): The name of the file containing the information
+                needed to produce the maping dictionary.
+
+        Returns:
+            dict: A dictionary for use in mapping nodes or edge types.
+        """
+        alias = filename.split[1]
+        map_dict = dict()
+        if not is_map(alias):
+            return map_dict
+        with open(filename) as map_file:
+            reader = csvreader.reader(map_file, delimiter='\t')
+            for line in reader:
+                map_dict[line[0]] = line[1]
+        return map_dict
 
 def compare_versions(src_obj):
     """Return a dictionary with the version information for each alias in the

@@ -12,6 +12,8 @@ Functions:
 from utilities import SrcClass, compare_versions
 import time
 import ftplib
+import csv
+import json
 
 def get_SrcClass():
     """Returns an object of the source class.
@@ -45,7 +47,7 @@ class Species(SrcClass):
         url_base = 'ftp.ncbi.nih.gov'
         aliases = {"species_map": "mapping file for species"}
         super(Species, self).__init__(name, url_base, aliases)
-        self.remote_file = 'nodes.dmp'
+        self.remote_file = 'names.dmp'
 
     def get_source_version(self, alias):
         """Return the release version of the remote species:alias.
@@ -161,10 +163,54 @@ class Species(SrcClass):
 
         Returns:
             list: The other aliases defined in self.aliases that the provided
-            alias depends on.
+                alias depends on.
         """
         return super(Species, self).get_dependencies(alias)
 
+    def create_mapping_dict(self, filename):
+        """Return a mapping dictionary for the provided file.
+
+        This returns a dictionary for use in mapping species name to taxid from
+        the file specified by filetype. Processes filetype by creating a
+        dictionary of the scientific name, the unique name (which is the
+        the scientific name unless this is not unique) and the 4 letter
+        abbreviated name for each organism. This dictionary is written to disk
+        as species.json and then returns a dictionary mapping taxid to species
+        unique name.
+
+        Args:
+            filename(str): The name of the file containing the information
+                needed to produce the maping dictionary.
+
+        Returns:
+            dict: A dictionary for use in mapping nodes or edge types.
+        """
+        species = dict()
+        species2taxid = dict()
+    
+        with open(filename) as infile:
+            reader = csv.reader((line.replace('\t|', '') for line in infile),
+                    delimiter='\t')
+            for line in reader:
+                if line[3] == 'scientific name':
+                    taxid = line[0]
+                    sci_name = line[1]
+                    uniq_name = line[2]
+                    if uniq_name == '':
+                        uniq_name = sci_name
+                    if ' ' in sci_name:
+                        abbr_name = sci_name[0] + sci_name[sci_name.find(' ') + 1:][:3]
+                    else: abbr_name = sci_name[:4]
+                    species[taxid] = dict()
+                    species[taxid]['scientific_name'] = sci_name
+                    species[taxid]['unique_name'] = uniq_name
+                    species[taxid]['abbreviated_name'] = abbr_name
+        with open('species.json', 'w') as outfile:
+            json.dump(species, outfile, indent=4, sort_keys=True)
+        for key in species.keys():
+            s_name = species[key]['unique_name']
+            species2taxid[s_name] = key
+        return species2taxid
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a species
     object
