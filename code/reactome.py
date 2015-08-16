@@ -9,7 +9,7 @@ Functions:
     get_SrcClass: returns a Reactome object
     main: runs compare_versions (see utilities.py) on a Reactome object
 """
-from utilities import SrcClass, compare_versions
+from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
 
@@ -188,10 +188,11 @@ class Reactome(SrcClass):
     def create_mapping_dict(self, filename):
         """Return a mapping dictionary for the provided file.
 
-        This returns a dictionary for use in mapping nodes or edge types from
-        the file specified by filetype. By default it opens the file specified
-        by filename creates a dictionary using the first column as the key and
-        the second column as the value.
+        This returns a dictionary for use in mapping reactome pathway nodes
+        from the file specified by filetype. If the alias is
+        Ensembl2Reactome_All_Levels it uses the second column as the key and
+        the first column as the value, otherwise it creates a dictionary using 
+        the first column as the key and the second column as the value.
 
         Args:
             filename(str): The name of the file containing the information
@@ -200,8 +201,12 @@ class Reactome(SrcClass):
         Returns:
             dict: A dictionary for use in mapping nodes or edge types.
         """
-        return super(Reactome, self).create_mapping_dict(filename)
-
+        alias = filename.split('.')[1]
+        if alias == 'Ensembl2Reactome_All_Levels':
+            return super(Reactome, self).create_mapping_dict(filename, 1, 0)
+        else:
+            return super(Reactome, self).create_mapping_dict(filename)
+       
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a Reactome
     object

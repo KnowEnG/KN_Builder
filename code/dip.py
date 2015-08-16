@@ -8,7 +8,7 @@ Classes:
 Functions:
     main: runs compare_versions (see utilities.py) on a Dip object
 """
-from utilities import SrcClass, compare_versions
+from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
 
