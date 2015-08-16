@@ -1,3 +1,4 @@
 raw_downloads/*
+code/chron_jobs/
 jobs/*
 *.pyc
