@@ -9,8 +9,8 @@ SRC_DIR="$DATA_DIR/$SRC"
 
 CLOUD_BASE="/mnt/storage/post3/apps/P1_source_check/"   # toplevel directory on cloud
 
-CMD1="sh -c 'cd ALIASDIR/; /usr/bin/time -v python3 CODEDIR/fetch_code/utilities.py file_metadata.json;'" # command for current step of pipeline
-CMD2="sh -c 'cd ALIASDIR/; /usr/bin/time -v python3 CODEDIR/fetch_code/utilities.py file_metadata.json;'" # command for current and next step of pipeline
+CMD1="sh -c 'cd ALIASDIR/; /usr/bin/time -v python3 CODEDIR/fetch_utilities.py file_metadata.json;'" # command for current step of pipeline
+CMD2="sh -c 'cd ALIASDIR/; /usr/bin/time -v python3 CODEDIR/fetch_utilities.py file_metadata.json;'" # command for current and next step of pipeline
 
 CMD_TYPE="STEP"  # STEP or PIPELINE
 
@@ -47,7 +47,7 @@ for ALIAS in `ls -d $SRC_DIR/* | sed "s#$SRC_DIR/##g" | sort`; do
 	if [ "$RUN_TYPE" == "CLOUD" ]; then
 		JOBNAME=$(echo "alias_fetch_$SRC.$CTR.$ALIAS" | sed "s#\.#_#g")
 		mkdir -p $CODE_DIR/chron_jobs/
-		cat $CODE_DIR/fetch_code/fetch_template.json | sed "s#IMG#$IMG#g" | sed "s#TMPCMD#$CMD#g" | sed "s#ALIASDIR#/data/#g" | sed "s#CODEDIR#/code/#g" | sed "s#ALIAS_DIR#$ALIAS_DIR/#g" | sed "s#CODE_DIR#$CODE_DIR/#g" | sed "s#CLOUDBASE#$CLOUD_BASE#g" | sed "s#TMPJOB#$JOBNAME#g" > $CODE_DIR/chron_jobs/$JOBNAME.json;
+		cat $CODE_DIR/fetch_template.json | sed "s#IMG#$IMG#g" | sed "s#TMPCMD#$CMD#g" | sed "s#ALIASDIR#/data/#g" | sed "s#CODEDIR#/code/#g" | sed "s#ALIAS_DIR#$ALIAS_DIR/#g" | sed "s#CODE_DIR#$CODE_DIR/#g" | sed "s#CLOUDBASE#$CLOUD_BASE#g" | sed "s#TMPJOB#$JOBNAME#g" > $CODE_DIR/chron_jobs/$JOBNAME.json;
 		CLOUD_CMD=$(echo $CURL | sed "s#CODEDIR#$CODE_DIR/#g" | sed "s#TMPJOB#$JOBNAME#g")
 		echo $CLOUD_CMD
 		eval $CLOUD_CMD

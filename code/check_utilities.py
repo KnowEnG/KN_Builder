@@ -236,29 +236,34 @@ class SrcClass(object):
                 depends.append(alias_name)
         return depends
 
-    def create_mapping_dict(self, filename):
+    def create_mapping_dict(self, filename, key_col=0, value_col=1):
         """Return a mapping dictionary for the provided file.
 
         This returns a dictionary for use in mapping nodes or edge types from
         the file specified by filetype. By default it opens the file specified
-        by filename creates a dictionary using the first column as the key and
-        the second column as the value.
+        by filename creates a dictionary using the key_col column as the key
+        and the value_col column as the value.
 
         Args:
             filename(str): The name of the file containing the information
                 needed to produce the maping dictionary.
+            key_col(int): The column containing the key for creating the
+                dictionary. By default this is column 0.
+            value_col(int): The column containing the value for creating the
+                dictionary. By default this is column 1.
 
         Returns:
             dict: A dictionary for use in mapping nodes or edge types.
         """
-        alias = filename.split[1]
+        alias = filename.split('.')[1]
         map_dict = dict()
-        if not is_map(alias):
+        if not self.is_map(alias):
             return map_dict
-        with open(filename) as map_file:
-            reader = csvreader.reader(map_file, delimiter='\t')
+        with open(filename, 'rb') as map_file:
+            reader = csv.reader((line.decode('utf-8') for line in map_file), 
+                delimiter='\t')
             for line in reader:
-                map_dict[line[0]] = line[1]
+                map_dict[line[key_col]] = line[value_col]
         return map_dict
 
 def compare_versions(src_obj):
