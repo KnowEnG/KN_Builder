@@ -216,14 +216,13 @@ class Ppi(SrcClass):
                         term_is_bait.append(ID)
                 if line.startswith('is_a'):
                     parent = line.split(' ')[1].strip()
-                    if ID != '' and parent != '':
-                        if ID in desired_keys:
-                            term_map[ID] = ID
-                        else:
-                            term_map[ID] = parent
-                        ID = ''
-                        parent = ''
-
+                if ID != '' and parent != '':
+                    if ID in desired_keys:
+                        term_map[ID] = ID
+                    else:
+                        term_map[ID] = parent
+                    ID = ''
+                    parent = ''
         #remap Additive Genetic Interaction to Genetic Interaction
         term_map['MI:0799'] = 'MI:0208'
         #remap Genetic Interference to Genetic Interaction
@@ -238,7 +237,6 @@ class Ppi(SrcClass):
             #collapse dictionary
             while value not in desired_keys:
                 if value not in term_map or term_map[key] == term_map[value]:
-                    value = term_map[key]
                     break
                 term_map[key] = term_map[value]
                 value = term_map[key]
@@ -254,9 +252,12 @@ class Ppi(SrcClass):
                 else:
                     rem_keys.append(key)
                     continue
-            term_map[key] = ixn_to_type[value]
         for key in rem_keys:
             del term_map[key]
+        for key in term_map:
+            value = term_map[key]
+            term_map[key] = ixn_to_type[value]
+        print(len(term_map))
         return term_map
 
 if __name__ == "__main__":
