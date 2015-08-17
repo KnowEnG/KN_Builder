@@ -160,7 +160,7 @@ class Reactome(SrcClass):
         Returns:
             bool: Whether or not the alias is used for mapping.
         """
-        maps = {"Ensembl2Reactome_All_Levels": True,
+        maps = {"Ensembl2Reactome_All_Levels": False,
                    "ReactomePathways": True,
                    "homo_sapiens.interactions": False,
                    "ReactomePathwaysRelation": True}
@@ -202,10 +202,7 @@ class Reactome(SrcClass):
             dict: A dictionary for use in mapping nodes or edge types.
         """
         alias = filename.split('.')[1]
-        if alias == 'Ensembl2Reactome_All_Levels':
-            return super(Reactome, self).create_mapping_dict(filename, 1, 0)
-        else:
-            return super(Reactome, self).create_mapping_dict(filename)
+        return super(Reactome, self).create_mapping_dict(filename)
        
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a Reactome
