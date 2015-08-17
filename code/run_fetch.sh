@@ -16,7 +16,7 @@ CMD_TYPE="STEP"  # STEP or PIPELINE
 
 IMG="cblatti3/python3:0.1" 
 CTR=1
-CURL="curl -i -L -H 'Content-Type: application/json' -X POST -d@CODEDIR/chron_jobs/TMPJOB.json mmaster02.cse.illinois.edu:4400/scheduler/iso8601"
+CURL="curl -i -L -H 'Content-Type: application/json' -X POST -d@CODEDIR/chron_jobs/TMPJOB.json mmaster01.cse.illinois.edu:4400/scheduler/iso8601"
 
 CMD=$CMD1
 if [ "$CMD_TYPE" == "PIPELINE" ]; then
