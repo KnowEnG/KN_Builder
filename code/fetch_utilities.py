@@ -10,6 +10,7 @@ Functions:
         path to the file.
 
 Variables:
+    ARCHIVES: list of supported archive formats.
     CHUNK_SZ: the max size (number of lines) for file chunks
     DIR: the relative path to raw_download/source/alias/ from location of
         script execution
@@ -133,13 +134,47 @@ def chunk(filename, total_lines):
                     md5 = hasher.hexdigest()
                     line_count += 1
                     src = os.path.splitext(filename)[0]
-                    outline = '\t'.join((md5, src, str(line_count), ''))
+                    outline = '\t'.join((src, str(line_count), md5, ''))
                     out.write(outline.encode())
                     out.write(line)
                 if i == num_chunks:
                     for line in infile:
                         out.write(line)
     return num_chunks
+
+def raw_line(filename):
+    """Creates the raw_line table from the provided file and returns the
+       path to the output file.
+
+    This takes the path to a file and reads through the file, adding three tab
+    separated columns to the beginning, saving to disk, and then returning the
+    output file path. Output looks like:
+    raw_lines table (file, line num, line_chksum, rawline)
+
+    Args:
+        filename: the file to convert to raw_line table format
+
+    Returns:
+        str: the path to the output file
+    """
+    #determine file output information
+    path, file = os.path.split(filename)
+    source_alias, ext = os.path.splitext(file)
+    rawline = os.path.join(path, source_alias + '.raw_line' + ext)
+
+    #convert the file to raw_line format
+    line_count = 0
+    with open(filename, 'rb') as infile:
+        with open(rawline, 'wb') as outfile:
+            for line in infile:
+                hasher = hashlib.md5()
+                hasher.update(line)
+                md5 = hasher.hexdigest()
+                line_count += 1
+                outline = '\t'.join([source_alias, str(line_count), md5, ''])
+                outfile.write(outline.encode())
+                outfile.write(line)
+    return rawline
 
 def get_md5_hash(filename):
     """Returns the md5 hash of the file at filename.
@@ -184,9 +219,12 @@ def main(version_json):
     """Fetches and chunks the source:alias described by version_json.
 
     This takes the path to a version_json (source.alias.json) and runs fetch
-    (see fetch) and chunk (see chunk) on it. It also updates version_json to
-    include the total lines in and md5 checksum of the fetched file. It then
-    saves the updated version_json to file.
+    (see fetch). If the alias is a data file, it then runs raw_line (see
+    raw_line) and table (see table as defined in SRC.py). If the alias is a
+    mapping file, it runs create_mapping_dict (see create_mapping_dict in
+    SRC.py). It also updates version_json to include the total lines in and
+    md5 checksum of the fetched file. It then saves the updated version_json to
+    file.
 
     Args:
         version_json (str): path to a json file describing the source:alias
@@ -197,21 +235,21 @@ def main(version_json):
         version_dict = json.load(infile)
     newfile = download(version_dict)
     md5hash, line_count = get_md5_hash(newfile)
+    src_module = __import__(version_dict['source'])
+    SrcClass = src_module.get_SrcClass()
     if version_dict['is_map']:
         num_chunks = 0
-        src_module = __import__(version_dict['source'])
-        SrcClass = src_module.get_SrcClass()
         map_dict = SrcClass.create_mapping_dict(newfile)
         map_file = os.path.splitext(newfile)[0] + '.json'
         with open(map_file, 'w') as outfile:
             json.dump(map_dict, outfile, indent=4, sort_keys=True)
     else:
-        num_chunks = chunk(newfile, line_count)
-
+        rawline = raw_line(newfile)
+        SrcClass.table(rawline, version_dict)
     #update version_dict
     version_dict['checksum'] = md5hash
     version_dict['line_count'] = line_count
-    version_dict['num_chunks'] = num_chunks
+    #version_dict['num_chunks'] = num_chunks
     with open(version_json, 'w') as outfile:
         json.dump(version_dict, outfile, indent=4, sort_keys=True)
 
