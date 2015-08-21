@@ -27,7 +27,7 @@ for i in `ls $LOCAL_BASE/code/*.py | sed -e 's/.py//g' | sed "s#$LOCAL_BASE/code
 	echo "$i"
 	
 	# skip non-source specific files
-	if [ "$i" == "check_utilities" ]|[ "$i" == "fetch_utilities" ]; then
+	if [ "$i" == "check_utilities" ]|[ "$i" == "fetch_utilities" ]|["$i" == "mitab_utilities"]; then
 		continue;
 	fi
 
