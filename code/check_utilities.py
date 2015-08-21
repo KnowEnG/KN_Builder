@@ -266,6 +266,30 @@ class SrcClass(object):
                 map_dict[line[key_col]] = line[value_col]
         return map_dict
 
+    def table(self, rawline, version_dict):
+        """Uses the provided raw_lines file to produce a 2table_edge file, an
+        edge_meta file, and a node_meta file (only for property nodes).
+
+        This returns noting but produces the 2table formatted files from the
+        provided raw_lines file:
+            raw_lines table (file, line num, line_chksum, rawline)
+            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec, 
+                            n2name, n2hint, n2type, n2spec, et_hint, score)
+            edge_meta (line_cksum, info_type, info_desc)
+            node_meta (line_cksum, node_num (1 or 2), 
+                       info_type (evidence, relationship, experiment, or link),
+                       info_desc (text))
+        By default this function does nothing (must be overridden)
+
+        Args:
+            rawline(str): The path to the raw_lines file
+            version_dict (dict): A dictionary describing the attributes of the
+                alias for a source.
+
+        Returns:
+        """
+        return
+
 def compare_versions(src_obj):
     """Return a dictionary with the version information for each alias in the
     source and write a dictionary for each alias to file.
