@@ -12,6 +12,7 @@ Functions:
 from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
+import csv
 
 def get_SrcClass():
     """Returns an object of the source class.
@@ -194,6 +195,72 @@ class Stringdb(SrcClass):
             dict: A dictionary for use in mapping nodes or edge types.
         """
         return super(Stringdb, self).create_mapping_dict(filename)
+
+    def table(self, rawline, version_dict):
+        """Uses the provided rawline file to produce a 2table_edge file, an
+        edge_meta file, and a node_meta file (only for property nodes).
+
+        This returns noting but produces the 2table formatted files from the
+        provided rawline file:
+            rawline table (file, line num, line_chksum, rawline)
+            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec, 
+                            n2name, n2hint, n2type, n2spec, et_hint, score)
+            edge_meta (line_cksum, info_type, info_desc)
+            node_meta (line_cksum, node_num (1 or 2), 
+                       info_type (evidence, relationship, experiment, or link),
+                       info_desc (text))
+
+        Args:
+            rawline(str): The path to the rawline file
+            version_dict (dict): A dictionary describing the attributes of the
+                alias for a source.
+
+        Returns:
+        """
+
+        #outfiles
+        table_file = '.'.join(rawline.split('.')[:-2]) + '.edge.txt'
+        e_meta_file = '.'.join(rawline.split('.')[:-2]) + '.edge_meta.txt'
+
+        #static column values
+        n1type = 'gene'
+        n1hint = 'unknown'
+        n2type = 'gene'
+        n2hint = 'unknown'
+        info_type = 'combined_score'
+        edge_types = {2: 'STRING_neighborhood',
+                      3: 'STRING_fusion',
+                      4: 'STRING_cooccurence',
+                      5: 'STRING_coexpression',
+                      6: 'STRING_experimental',
+                      7: 'STRING_database',
+                      8: 'STRING_textmining'}
+
+        with open(rawline, encoding='utf-8') as infile, \
+            open(table_file, 'w') as edges,\
+            open(e_meta_file, 'w') as e_meta:
+            reader = csv.reader(infile, delimiter='\t')
+            next(reader)
+            edge_writer = csv.writer(edges, delimiter='\t')
+            e_meta_writer = csv.writer(e_meta, delimiter='\t')
+            for line in reader:
+                chksm = line[2]
+                raw = line[3].split(' ')
+                n1list = raw[0].split('.')
+                n2list = raw[1].split('.')
+                if len(n1list) < 2 or len(n2list) < 2:
+                    continue
+                n1spec = n1list[0]
+                n1 = '.'.join(n1list[1:])
+                n2spec = n2list[0]
+                n2 = '.'.join(n2list[1:])
+                for et in edge_types:
+                    et_hint = edge_types[et]
+                    score = raw[et]
+                    edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
+                            n2, n2hint, n2type, n2spec, et_hint, score])
+                publist = raw[9]
+                e_meta_writer.writerow([chksm, info_type, publist])
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a Stringdb
