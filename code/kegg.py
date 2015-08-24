@@ -13,15 +13,18 @@ from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
 import time
+import os
+import json
+import csv
 
 def get_SrcClass():
     """Returns an object of the source class.
 
     This returns an object of the source class to allow access to its functions
     if the module is imported.
-    
+
     Args:
-    
+
     Returns:
         class: a source class object
     """
@@ -171,7 +174,7 @@ class Kegg(SrcClass):
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
-        
+
         This returns a boolean representing if the alias corresponds to a file
         used for mapping. By default this returns True if the alias ends in
         '_map' and False otherwise.
@@ -221,6 +224,76 @@ class Kegg(SrcClass):
             dict: A dictionary for use in mapping nodes or edge types.
         """
         return super(Kegg, self).create_mapping_dict(filename)
+
+    def table(self, rawline, version_dict):
+        """Uses the provided rawline file to produce a 2table_edge file, an
+        edge_meta file, and a node_meta file (only for property nodes).
+
+        This returns noting but produces the 2table formatted files from the
+        provided rawline file:
+            rawline table (file, line num, line_chksum, rawline)
+            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
+                            n2name, n2hint, n2type, n2spec, et_hint, score)
+            edge_meta (line_cksum, info_type, info_desc)
+            node_meta (line_cksum, node_num (1 or 2),
+                       info_type (evidence, relationship, experiment, or link),
+                       info_desc (text))
+
+        Args:
+            rawline(str): The path to the rawline file
+            version_dict (dict): A dictionary describing the attributes of the
+                alias for a source.
+
+        Returns:
+        """
+
+        #outfiles
+        table_file = '.'.join(rawline.split('.')[:-2]) + '.edge.txt'
+        #e_meta_file = '.'.join(rawline.split('.')[:-2]) + '.edge_meta.txt'
+        n_meta_file = '.'.join(rawline.split('.')[:-2]) + '.node_meta.txt'
+
+        #static column values
+        n1type = 'property'
+        n2type = 'gene'
+        score = 1
+        node_num = 1
+        info_type = 'synonym'
+        alias = version_dict['alias']
+
+        #mapping files
+        pathway = os.path.join('..', 'pathway', 'kegg.pathway.json')
+        with open(pathway) as infile:
+            path_map = json.load(infile)
+        a_map = alias + '_map'
+        alias_map = os.path.join('..', a_map, 'kegg.' + a_map + '.json')
+        with open(alias_map) as infile:
+            node_map = json.load(infile)
+        species = (os.path.join('..', '..', 'species', 'species_map',\
+                    'species.species_map.json'))
+        with open(species) as infile:
+           species_map = json.load(infile)
+
+        with open(rawline, encoding='utf-8') as infile, \
+            open(table_file, 'w') as edges,\
+            open(n_meta_file, 'w') as n_meta:
+            reader = csv.reader(infile, delimiter='\t')
+            edge_writer = csv.writer(edges, delimiter='\t')
+            n_meta_writer = csv.writer(n_meta, delimiter='\t')
+            for line in reader:
+                chksm = line[2]
+                raw = line[3:]
+                n1_ID = raw[0]
+                n1_orig_name = path_map[n1_ID.replace(':' + alias, ':map')]
+                n1 = 'kegg_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
+                n1spec = '0'
+                n1hint = 'kegg_pathway'
+                n2_raw = raw[1]
+                n2hint, n2 = node_map[n2_raw].split(':')
+                n2spec = species_map[version_dict['alias_info']]
+                et_hint = 'kegg_pathway'
+                edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
+                    n2, n2hint, n2type, n2spec, et_hint, score])
+                n_meta_writer.writerow([chksm, info_type, n1_orig_name])
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a kegg
