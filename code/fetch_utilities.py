@@ -1,4 +1,4 @@
-"""Utiliites for fetching and chunking a source for the Knowledge Network (KN)
+"""Utiliites for fetching and formatting source for the Knowledge Network (KN)
 that has been updated.
 
 Classes:
@@ -245,7 +245,7 @@ def main(version_json):
             json.dump(map_dict, outfile, indent=4, sort_keys=True)
     else:
         rawline = raw_line(newfile)
-        SrcClass.table(rawline, version_dict)
+        version_dict['rawline_file'] = rawline
     #update version_dict
     version_dict['checksum'] = md5hash
     version_dict['line_count'] = line_count
