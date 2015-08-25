@@ -4,10 +4,10 @@ that has been updated.
 Classes:
 
 Functions:
-    table(version_dict) -> : takes a dictionary object version_dict and
-        determines if the described alias is a data file. If so it runs the
-        source specific table function on it. In either case it returns
-        nothing.
+    table(version_dict, chunkfile) -> : takes a dictionary object version_dict
+        and the path to a file. Determines if the described alias is a data
+        file. If so it runs the source specific table function on it. In either
+        case it returns nothing.
 
 Variables:
 """
@@ -15,10 +15,11 @@ Variables:
 import json
 import sys
 
-def main(version_json):
+def main(chunkfile, version_json):
     """Tables the source:alias described by version_json.
 
-    This takes the path to a version_json (source.alias.json) and runs the
+    This takes the path to a chunked (see fetch_utilities.chunk)  rawline file
+    and it's correpsonding version_json (source.alias.json) and runs the
     source specific table command (see SrcClass.table) if the alias is a data
     file. If it is a mapping file, it does nothing.
 
@@ -32,9 +33,8 @@ def main(version_json):
     src_module = __import__(version_dict['source'])
     SrcClass = src_module.get_SrcClass()
     if not version_dict['is_map']:
-        rawline = version_dict['rawline_file']
-        SrcClass.table(rawline, version_dict)
+        SrcClass.table(chunkfile, version_dict)
     return
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])

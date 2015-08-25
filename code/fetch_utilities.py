@@ -102,7 +102,9 @@ def chunk(filename, total_lines):
 
     This takes the path to a file and reads through the file, splitting it
     into equal chunks with each of size ceiling(num_lines/CHUNK_SZ). It
-    then returns the number of chunks
+    then returns the number of chunks and sets up the raw_lines table in the
+    format: (file, line num, line_chksum, rawline)
+
 
     Args:
         filename: the file to split into chunks
@@ -120,7 +122,7 @@ def chunk(filename, total_lines):
     chunk_dir = os.path.join(path, 'chunks')
     os.makedirs(chunk_dir, exist_ok=True)
     source_alias, ext = os.path.splitext(file)
-    chunk_file = os.path.join(chunk_dir, source_alias + '.')
+    chunk_file = os.path.join(chunk_dir, source_alias + '.rawline.')
 
     #divide file into chunks
     line_count = 0
@@ -220,7 +222,7 @@ def main(version_json):
 
     This takes the path to a version_json (source.alias.json) and runs fetch
     (see fetch). If the alias is a data file, it then runs raw_line (see
-    raw_line) and table (see table as defined in SRC.py). If the alias is a
+    raw_line) and then runs chunk (see chunk) on the output. If the alias is a
     mapping file, it runs create_mapping_dict (see create_mapping_dict in
     SRC.py). It also updates version_json to include the total lines in and
     md5 checksum of the fetched file. It then saves the updated version_json to
@@ -244,12 +246,12 @@ def main(version_json):
         with open(map_file, 'w') as outfile:
             json.dump(map_dict, outfile, indent=4, sort_keys=True)
     else:
-        rawline = raw_line(newfile)
-        version_dict['rawline_file'] = rawline
+        #rawline = raw_line(newfile)
+        num_chunks = chunk(newfile, line_count)
     #update version_dict
     version_dict['checksum'] = md5hash
     version_dict['line_count'] = line_count
-    #version_dict['num_chunks'] = num_chunks
+    version_dict['num_chunks'] = num_chunks
     with open(version_json, 'w') as outfile:
         json.dump(version_dict, outfile, indent=4, sort_keys=True)
 
