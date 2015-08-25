@@ -24,12 +24,12 @@ docker run --name check_master -it -v /mnt/users/blatti/apps/P1_source_check/:/s
 /shared/code/run_check.sh LOCAL STEP
 
 # running only fetch while inside container
-for i in `ls raw_downloads/`; do code/run_fetch.sh $i raw_downloads/ code/ LOCAL; done
-for i in `ls raw_downloads/`; do code/run_fetch.sh $i raw_downloads/ code/ CLOUD; done
+for i in `ls /shared/raw_downloads/`; do /shared/code/run_fetch.sh $i /shared/raw_downloads/ /shared/code/ LOCAL; done
+for i in `ls /shared/raw_downloads/`; do /shared/code/run_fetch.sh $i /shared/raw_downloads/ /shared/code/ CLOUD; done
 
 #### running on KnowEnG cloud
 
 # running whole pipeline on the cloud 
 ./code/run_check.sh CLOUD PIPELINE
 # when complete, be a good citizen and remove jobs from the cloud
-for i in `ls code/chron_jobs/*json | sed "s#code/chron_jobs/##g" | sed "s/.json//g"` ; do CMD="curl -L -X DELETE mmaster02.cse.illinois.edu:4400/scheduler/job/$i"; echo "$CMD"; eval $CMD; done                
+for i in `ls code/chron_jobs/*json | sed "s#code/chron_jobs/##g" | sed "s/.json//g"` ; do CMD="curl -L -X DELETE mmaster01.cse.illinois.edu:4400/scheduler/job/$i"; echo "$CMD"; eval $CMD; done                

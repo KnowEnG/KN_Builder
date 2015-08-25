@@ -283,17 +283,17 @@ class Kegg(SrcClass):
                 chksm = line[2]
                 raw = line[3:]
                 n1_ID = raw[0]
-                n1_orig_name = path_map[n1_ID.replace(':' + alias, ':map')]
+                n1_orig_name = path_map.get(n1_ID.replace(':' + alias, ':map'), "unmapped:no-name")
                 n1 = 'kegg_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
                 n1spec = '0'
                 n1hint = 'kegg_pathway'
                 n2_raw = raw[1]
-                n2hint, n2 = node_map[n2_raw].split(':')
-                n2spec = species_map[version_dict['alias_info']]
+                n2hint, n2 = node_map.get(n2_raw, "unmapped:no-geneid").split(':')
+                n2spec = species_map.get(version_dict['alias_info'], , "unmapped:unsupported-species")
                 et_hint = 'kegg_pathway'
                 edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
                     n2, n2hint, n2type, n2spec, et_hint, score])
-                n_meta_writer.writerow([chksm, info_type, n1_orig_name])
+                n_meta_writer.writerow([chksm, node_num, info_type, n1_orig_name])
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a kegg
