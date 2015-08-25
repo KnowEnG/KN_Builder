@@ -371,5 +371,6 @@ def compare_versions(src_obj):
         f_name = os.path.join(a_dir, 'file_metadata.json')
         with open(f_name, 'w') as outfile:
             json.dump(version_dict[alias], outfile, indent=4, sort_keys=True)
-    print(json.dumps(version_dict, indent=4, sort_keys=True))
+    #print(json.dumps(version_dict, indent=4, sort_keys=True))
+    print("printing file_metadata.json")
     return version_dict

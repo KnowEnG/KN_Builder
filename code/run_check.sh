@@ -1,8 +1,8 @@
 #!/bin/bash
 
-LOCAL_BASE="/workspace/apps/P1_source_check/"   # toplevel local directory inside runner of this script
+LOCAL_BASE="/shared/"   # toplevel local directory inside runner of this script
 #LOCAL_BASE="/shared/"   # when called by container like check_master
-CLOUD_BASE="/mnt/storage/post3/apps/P1_source_check/"   # toplevel directory on cloud
+CLOUD_BASE="/mnt/storage/blatti/apps/P1_source_check/"   # toplevel directory on cloud
 
 RUN_TYPE=$1 # LOCAL, CONTAIN, CLOUD
 CMD_TYPE=$2  # STEP or PIPELINE
@@ -27,7 +27,7 @@ for i in `ls $LOCAL_BASE/code/*.py | sed -e 's/.py//g' | sed "s#$LOCAL_BASE/code
 	echo "$i"
 	
 	# skip non-source specific files
-	if [ "$i" == "check_utilities" ]|[ "$i" == "fetch_utilities" ]|["$i" == "mitab_utilities"]; then
+	if [ "$i" = "check_utilities" -o "$i" = "fetch_utilities" -o "$i" = "mitab_utilities" -o "$i" = "table_utilities" ]; then
 		continue;
 	fi
 
