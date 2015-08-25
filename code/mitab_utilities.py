@@ -61,10 +61,11 @@ def table(rawline, version_dict):
         open(table_file, 'w') as edges,\
         open(e_meta_file, 'w') as e_meta:
         reader = csv.reader(infile, delimiter='\t')
-        next(reader)
         edge_writer = csv.writer(edges, delimiter='\t')
         e_meta_writer = csv.writer(e_meta, delimiter='\t')
         for line in reader:
+            if line[1] == '1':
+                continue
             chksm = line[2]
             raw = line[3:]
             n1list = raw[0].split('|') + raw[2].split('|')
