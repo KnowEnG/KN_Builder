@@ -219,8 +219,9 @@ class Stringdb(SrcClass):
         """
 
         #outfiles
-        table_file = '.'.join(rawline.split('.')[:-2]) + '.edge.txt'
-        e_meta_file = '.'.join(rawline.split('.')[:-2]) + '.edge_meta.txt'
+        table_file = rawline.replace('rawline','edge')
+        #n_meta_file = rawline.replace('rawline','node_meta')
+        e_meta_file = rawline.replace('rawline','edge_meta')
 
         #static column values
         n1type = 'gene'
