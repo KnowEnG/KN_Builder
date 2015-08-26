@@ -248,9 +248,9 @@ class Kegg(SrcClass):
         """
 
         #outfiles
-        table_file = '.'.join(rawline.split('.')[:-2]) + '.edge.txt'
-        #e_meta_file = '.'.join(rawline.split('.')[:-2]) + '.edge_meta.txt'
-        n_meta_file = '.'.join(rawline.split('.')[:-2]) + '.node_meta.txt'
+        table_file = rawline.replace('rawline','edge')
+        n_meta_file = rawline.replace('rawline','node_meta')
+        #e_meta_file = rawline.replace('rawline','edge_meta')
 
         #static column values
         n1type = 'property'
@@ -282,12 +282,12 @@ class Kegg(SrcClass):
             for line in reader:
                 chksm = line[2]
                 raw = line[3:]
-                n1_ID = raw[1]
+                n1_ID = raw[0]
                 n1_orig_name = path_map[n1_ID.replace(':' + alias, ':map')]
                 n1 = 'kegg_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
                 n1spec = '0'
                 n1hint = 'kegg_pathway'
-                n2_raw = raw[0]
+                n2_raw = raw[1]
                 n2hint, n2 = node_map[n2_raw].split(':')
                 n2spec = species_map[version_dict['alias_info']]
                 et_hint = 'kegg_pathway'
