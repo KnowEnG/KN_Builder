@@ -13,6 +13,9 @@ from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
 import time
+import os
+import json
+import csv
 
 def get_SrcClass():
     """Returns an object of the source class.
@@ -214,6 +217,98 @@ class Go(SrcClass):
                         continue
                     term_map[key] = line[6:].strip()
         return term_map
+
+    def table(self, rawline, version_dict):
+        """Uses the provided rawline file to produce a 2table_edge file, an
+        edge_meta file, and a node_meta file (only for property nodes).
+
+        This returns noting but produces the 2table formatted files from the
+        provided rawline file:
+            rawline table (file, line num, line_chksum, rawline)
+            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
+                            n2name, n2hint, n2type, n2spec, et_hint, score)
+            edge_meta (line_cksum, info_type, info_desc)
+            node_meta (line_cksum, node_num (1 or 2),
+                       info_type (evidence, relationship, experiment, or link),
+                       info_desc (text))
+
+        Args:
+            rawline(str): The path to the rawline file
+            version_dict (dict): A dictionary describing the attributes of the
+                alias for a source.
+
+        Returns:
+        """
+
+        #outfiles
+        table_file = '.'.join(rawline.split('.')[:-2]) + '.edge.txt'
+        e_meta_file = '.'.join(rawline.split('.')[:-2]) + '.edge_meta.txt'
+        n_meta_file = '.'.join(rawline.split('.')[:-2]) + '.node_meta.txt'
+
+        #static column values
+        alias = version_dict['alias']
+        source = version_dict['source']
+        n1type = 'property'
+        n1spec = '0'
+        n1hint = source + '_' + alias
+        n2type = 'gene'
+        n2hint = 'UniProt/Ensembl_GeneID'
+        score = 1
+        
+        node_num = 1
+        info_type = 'synonym'
+        info_type1 = 'reference'
+        info_type2 = 'evidence'
+
+        #mapping files
+        obo_file = os.path.join('..', 'obo_map', 'go.obo_map.json')
+        with open(obo_file) as infile:
+            obo_map = json.load(infile)
+
+        with open(rawline, encoding='utf-8') as infile, \
+            open(table_file, 'w') as edges,\
+            open(n_meta_file, 'w') as n_meta,\
+            open(e_meta_file, 'w') as e_meta:
+            reader = csv.reader(infile, delimiter='\t')
+            edge_writer = csv.writer(edges, delimiter='\t')
+            n_meta_writer = csv.writer(n_meta, delimiter='\t')
+            e_meta_writer = csv.writer(e_meta, delimiter='\t')
+            for line in reader:
+                chksm = line[2]
+                raw = line[3:]   
+                
+                # skip commented lines
+                comment_match = re.match('!', raw[0])
+                if comment_match is not None:
+                    continue
+                
+                qualifier = raw[3]
+                # skip "NOT" annotations
+                not_match = re.search('NOT', qualifier)
+                if not_match is not None:
+                    continue
+                
+                n1_ID = raw[4]
+                n1_orig_name = obo_map.get(n1_ID, "unmapped:no-name")
+                n1 = 'go_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
+                
+                n2 = raw[1]
+                n2spec_str = raw[12].split("|",1)[0].rstrip() #only take first species
+                n2spec = int(n2spec_str.split(":",1)[1]) #remove label taxon:
+
+                reference = raw[5]
+                anno_evidence = raw[6]
+
+                et_hint = 'go_curated_evidence'
+                if anno_evidence == 'IEA':
+                    et_hint = 'go_inferred_evidence'
+                    
+                edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
+                    n2, n2hint, n2type, n2spec, et_hint, score])
+                n_meta_writer.writerow([chksm, node_num, info_type, n1_orig_name])
+                e_meta_writer.writerow([chksm, info_type1, reference])
+                e_meta_writer.writerow([chksm, info_type2, anno_evidence])
+
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a Go object.
