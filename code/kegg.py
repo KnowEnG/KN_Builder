@@ -168,7 +168,7 @@ class Kegg(SrcClass):
         elif alias == 'pathway':
             url = self.url_base + 'list/pathway'
         else:
-            url = self.url_base + 'link/' + alias + '/pathway'
+            url = self.url_base + 'link/pathway/' + alias
         return url
 
     def is_map(self, alias):
@@ -282,12 +282,12 @@ class Kegg(SrcClass):
             for line in reader:
                 chksm = line[2]
                 raw = line[3:]
-                n1_ID = raw[0]
+                n1_ID = raw[1]
                 n1_orig_name = path_map[n1_ID.replace(':' + alias, ':map')]
                 n1 = 'kegg_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
                 n1spec = '0'
                 n1hint = 'kegg_pathway'
-                n2_raw = raw[1]
+                n2_raw = raw[0]
                 n2hint, n2 = node_map[n2_raw].split(':')
                 n2spec = species_map[version_dict['alias_info']]
                 et_hint = 'kegg_pathway'
