@@ -6,9 +6,27 @@ Classes:
         blast specific functions required to perform a check on blast.
 
 Functions:
+    get_SrcClass: returns a Blast object
     main: runs compare_versions (see utilities.py) on a Blast object
 """
 from check_utilities import SrcClass, compare_versions
+import os
+import json
+import csv
+import math
+
+def get_SrcClass():
+    """Returns an object of the source class.
+
+    This returns an object of the source class to allow access to its functions
+    if the module is imported.
+
+    Args:
+
+    Returns:
+        class: a source class object
+    """
+    return Blast()
 
 class Blast(SrcClass):
     """Extends SrcClass to provide blast specific check functions.
@@ -49,6 +67,8 @@ class Blast(SrcClass):
                    "Scer64_Scer64": "4932_4932",
                    "Atha10_Atha10": "3702_3702"}
         super(Blast, self).__init__(name, url_base, aliases)
+        self.sc_max =  100  # may want to load these
+        self.sc_min =  2 # may want to load these
 
     def get_source_version(self, alias):
         """Return the release version of the remote blast:alias.
@@ -174,6 +194,71 @@ class Blast(SrcClass):
             dict: A dictionary for use in mapping nodes or edge types.
         """
         return super(Blast, self).create_mapping_dict(filename)
+
+    def table(self, rawline, version_dict):
+        """Uses the provided rawline file to produce a 2table_edge file, an
+        edge_meta file, and a node_meta file (only for property nodes).
+
+        This returns noting but produces the 2table formatted files from the
+        provided rawline file:
+            rawline table (file, line num, line_chksum, rawline)
+            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
+                            n2name, n2hint, n2type, n2spec, et_hint, score)
+            edge_meta (line_cksum, info_type, info_desc)
+            node_meta (line_cksum, node_num (1 or 2),
+                       info_type (evidence, relationship, experiment, or link),
+                       info_desc (text))
+
+        Args:
+            rawline(str): The path to the rawline file
+            version_dict (dict): A dictionary describing the attributes of the
+                alias for a source.
+
+        Returns:
+        """
+
+        #outfiles
+        table_file = '.'.join(rawline.split('.')[:-2]) + '.edge.txt'
+        #e_meta_file = '.'.join(rawline.split('.')[:-2]) + '.edge_meta.txt'
+        #n_meta_file = '.'.join(rawline.split('.')[:-2]) + '.node_meta.txt'
+
+        #static column values
+        n1type = 'gene'
+        n2type = 'gene'
+        n1hint = 'Ensembl_GeneID'
+        n2hint = 'Ensembl_GeneID'
+        et_hint = 'blastp_homology'
+        #node_num = 1
+        #info_type = 'synonym'
+        alias = version_dict['alias']
+
+        n1spec = int(version_dict['alias_info'].split('_', 1)[0])
+        n2spec = int(version_dict['alias_info'].split('_', 1)[1])
+
+        with open(rawline, encoding='utf-8') as infile, \
+            open(table_file, 'w') as edges:
+            reader = csv.reader(infile, delimiter='\t')
+            edge_writer = csv.writer(edges, delimiter='\t')
+            for line in reader:
+                chksm = line[2]
+                raw = line[3:]
+                n1 = raw[0]
+                n2 = raw[1]
+                evalue = raw[10]
+                evalue = float(evalue)
+                score = self.sc_min
+                if(evalue == 0.0):
+                    score = self.sc_max
+                if(evalue > 0.0):
+                    score = round(-1.0*math.log10(evalue),4)
+                if(score > self.sc_max):
+                    score = self.sc_max
+                if(score < self.sc_min):
+                    score = self.sc_min
+                
+                edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
+                    n2, n2hint, n2type, n2spec, et_hint, score])
+
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a blast
