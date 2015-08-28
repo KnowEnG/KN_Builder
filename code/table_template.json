@@ -1,5 +1,5 @@
 {
-    "schedule": "R1\/\/P3M",
+    TMPLAUNCH,
     "name": "TMPJOB",
     "container": {
         "type": "DOCKER",
@@ -9,5 +9,5 @@
     },
     "cpus": "0.5",
     "mem": "512",
-    "command": "sh -c 'cd /raw_downloads/TMPALIASPATH; /usr/bin/time -v python3 /code/fetch_utilities.py file_metadata.json; TMPPIPECMD'" 
+    "command": "sh -c 'cd /raw_downloads/TMPALIASPATH; /usr/bin/time -v python3 /code/table_utilities.py TMPCHUNK file_metadata.json; TMPPIPECMD'" 
 }
