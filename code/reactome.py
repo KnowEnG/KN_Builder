@@ -324,6 +324,7 @@ class Reactome(SrcClass):
                     n1 = n1_str.split(':', 1)[1]
                     n2_str = raw[3]
                     n2hint = n2_str.split(':', 1)[0]
+                    if n2hint == "": continue
                     n2 = n2_str.split(':', 1)[1]
 
                     et_str = raw[6]
