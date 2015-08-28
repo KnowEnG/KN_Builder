@@ -21,6 +21,7 @@ import os
 import time
 import json
 import csv
+import sys
 
 DIR = os.path.join('..', 'raw_downloads')
 
@@ -374,3 +375,24 @@ def compare_versions(src_obj):
     #print(json.dumps(version_dict, indent=4, sort_keys=True))
     print("printing file_metadata.json")
     return version_dict
+
+def check(module):
+    """Runs compare_versions (see utilities.compare_versions) on a 'module'
+    object
+
+    This runs the compare_versions function on a 'module' object to find the
+    version information of the source and determine if a fetch is needed. The
+    version information is also printed.
+
+    Returns:
+        dict: A nested dictionary describing the version information for each
+            alias described in biogrid.
+    """
+    src_module = __import__(module)
+    SrcClass = src_module.get_SrcClass()
+    compare_versions(SrcClass)
+
+    return
+
+if __name__ == "__main__":
+    check(sys.argv[1])

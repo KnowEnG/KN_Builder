@@ -33,3 +33,6 @@ for i in `ls /shared/raw_downloads/`; do /shared/code/run_fetch.sh $i /shared/ra
 ./code/run_check.sh CLOUD PIPELINE
 # when complete, be a good citizen and remove jobs from the cloud
 for i in `ls code/chron_jobs/*json | sed "s#code/chron_jobs/##g" | sed "s/.json//g"` ; do CMD="curl -L -X DELETE mmaster01.cse.illinois.edu:4400/scheduler/job/$i"; echo "$CMD"; eval $CMD; done                
+
+#### running with python
+./code/pipeline_utilities.py CHECK LOCAL PIPELINE -ld /mnt/users/blatti/apps/P1_source_check -dp raw_downloads  
