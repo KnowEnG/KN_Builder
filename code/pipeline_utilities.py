@@ -1,11 +1,16 @@
-"""Utiliites for running single or multiple steps of the pipeline either locally or on the cloud.
+"""Utiliites for running single or multiple steps of the pipeline either 
+        locally or on the cloud.
 
 Classes:
 
 Functions:
-    run_local_check(run_mode) -> : takes a run_mode string 'STEP' or 'PIPELINE'.  Runs all necessary checks.  If 'PIPELINE', calls next step
-    run_local_fetch(run_mode) -> : takes a run_mode string 'STEP' or 'PIPELINE'.  Runs all necessary fetches.  If 'PIPELINE', calls next step
-    run_local_table(run_mode) -> : takes a run_mode string 'STEP' or 'PIPELINE'.  Runs all necessary tables on chunks.  If 'PIPELINE', calls next step
+    run_local_check(run_mode) -> : takes a run_mode string 'STEP' or 
+        'PIPELINE'.  Runs all necessary checks.  If 'PIPELINE', calls next step
+    run_local_fetch(run_mode) -> : takes a run_mode string 'STEP' or 
+        'PIPELINE'.  Runs all necessary fetches.  If 'PIPELINE', calls next step
+    run_local_table(run_mode) -> : takes a run_mode string 'STEP' or 
+        'PIPELINE'.  Runs all necessary tables on chunks.  If 'PIPELINE', 
+        calls next step
 
 Variables:
 """
@@ -45,23 +50,31 @@ def parse_args():
     return args
 
 def run_local_check(args):
+    """Runs checks for all sources on local machine.
+
+    This loops through all sources in the code directory and calls 
+    check_utilities clean() function on each source.
     
+    Args: 
+        arguments from parse_args()
+    
+    Returns:
+    """
     local_code_dir = args.local_dir + os.sep + args.code_path
     os.chdir(local_code_dir)
+    checker = __import__(CHECK_PY)
     ctr = 0
     successful = 0 
     failed = 0
     for filename in sorted(os.listdir(local_code_dir)):
         if not filename.endswith(".py"): continue
-        if 'utilities' in filename:
-            continue;
+        if 'utilities' in filename: continue
 
         ctr += 1;
         module = os.path.splitext(filename)[0]
         print(str(ctr) + "\t" + module)
         
         try:
-            checker = __import__(CHECK_PY)
             checker.check(module)
             successful += 1
         except Exception as e:
@@ -69,12 +82,23 @@ def run_local_check(args):
             print ("Message: " + str(e))
             print (traceback.format_exc())
             failed += 1
-        
+
     print ("CHECK FINISHED. Successful: {0}, Failed: {1}".format(successful, failed))
     if(args.run_mode == "PIPELINE"):
         run_local_fetch(args)
 
 def run_local_fetch(args):
+    """Runs fetches for all aliases on local machine.
+
+    This loops through all aliases in the data directory and calls 
+    fetch_utilities main() function on each alias passing the 
+    file_metadata.json.
+    
+    Args: 
+        arguments from parse_args()
+    
+    Returns:
+    """
     
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
@@ -87,21 +111,39 @@ def run_local_fetch(args):
     for src_name in sorted(os.listdir(local_data_dir)):
         print(src_name)
         for alias_name in sorted(os.listdir(os.path.join(local_data_dir, src_name))):
-            print(str(ctr) + "\t" + alias_name)
             alias_dir = os.path.join(local_data_dir, src_name, alias_name)
             if not os.path.isfile(os.path.join(alias_dir, "file_metadata.json")):
                 continue
 
             os.chdir(alias_dir)
             ctr += 1;
-            fetcher.main("file_metadata.json")
-            successful += 1
+            print(str(ctr) + "\t" + alias_name)
+
+            try:
+                fetcher.main("file_metadata.json")
+                successful += 1
+            except Exception as e:
+                print ("ERROR: " + alias_name + " could not be fetched")
+                print ("Message: " + str(e))
+                print (traceback.format_exc())
+                failed += 1
 
     print ("FETCH FINISHED. Successful: {0}, Failed: {1}".format(successful, failed))
     if(args.run_mode == "PIPELINE"):
         run_local_table(args)
 
 def run_local_table(args):
+    """Runs tables for all aliases on local machine.
+
+    This loops through all chunks in the data directory and calls 
+    table_utilities main() function on each chunk passing the name of the  
+    chunk and the file_metadata.json.
+    
+    Args: 
+        arguments from parse_args()
+    
+    Returns:
+    """
     
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
@@ -118,15 +160,27 @@ def run_local_table(args):
             alias_dir = os.path.join(local_data_dir, src_name, alias_name)
             if not os.path.isfile(os.path.join(alias_dir, "file_metadata.json")):
                 continue
+            chunkdir = os.path.join(alias_dir, "chunks")
+            if not os.path.exists(chunkdir):
+                continue
+                
             os.chdir(alias_dir)
             for chunk_name in sorted(os.listdir(os.path.join(alias_dir, "chunks"))):
                 if "rawline" not in chunk_name:
                     continue
-                print(str(ctr) + "\t\t" + chunk_name)
+                
                 chunkfile = os.path.join("chunks", chunk_name)
-                ctr += 1;
-                tabler.main(chunkfile, "file_metadata.json")
-                successful += 1
+                ctr += 1;                
+                print(str(ctr) + "\t\t" + chunk_name)
+
+                try:
+                    tabler.main(chunkfile, "file_metadata.json")
+                    successful += 1
+                except Exception as e:
+                    print ("ERROR: " + chunk_name + " could not be tabled")
+                    print ("Message: " + str(e))
+                    print (traceback.format_exc())
+                    failed += 1
 
     print ("TABLE FINISHED. Successful: {0}, Failed: {1}".format(successful, failed))
     if(args.run_mode == "PIPELINE"):
