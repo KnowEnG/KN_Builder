@@ -1,26 +1,32 @@
-"""Utiliites for running single or multiple steps of the pipeline either 
+"""Utiliites for running single or multiple steps of the pipeline either
         locally or on the cloud.
 
 Classes:
 
 Functions:
-    run_local_check(run_mode) -> : takes a run_mode string 'STEP' or 
-        'PIPELINE'.  Runs all necessary checks.  If 'PIPELINE', calls next step
-    run_local_fetch(run_mode) -> : takes a run_mode string 'STEP' or 
-        'PIPELINE'.  Runs all necessary fetches.  If 'PIPELINE', calls next step
-    run_local_table(run_mode) -> : takes a run_mode string 'STEP' or 
-        'PIPELINE'.  Runs all necessary tables on chunks.  If 'PIPELINE', 
-        calls next step
+    run_local_check(args) -> : takes in all command line arguments.  Runs all 
+        necessary checks.  If args.run_mode is'PIPELINE', calls next step
+    run_local_fetch(args) -> : takes in all command line arguments.  Runs all 
+        necessary fetches.  If args.run_mode is'PIPELINE', calls next step
+    run_local_table(args) -> : takes in all command line arguments.  Runs all 
+        necessary tables.  If args.run_mode is'PIPELINE', calls next step
+
+    run_cloud_check(args) -> : takes in all command line arguments.  Runs all 
+        necessary checks on cloud.  If args.run_mode is'PIPELINE', each job 
+        calls its next step
+        
 
 Variables:
 """
 
 from argparse import ArgumentParser
 import config_utilities as cf
-import json
 import os
 import re
 import traceback
+import sys
+import subprocess
+import json
 
 DEFAULT_START_STEP = 'CHECK'
 DEFAULT_DEPLOY_LOC = 'LOCAL'
@@ -29,6 +35,7 @@ POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE']
 CHECK_PY = "check_utilities"
 FETCH_PY = "fetch_utilities"
 TABLE_PY = "table_utilities"
+CURL_PREFIX = ["curl", "-i", "-L", "-H", "'Content-Type: application/json'", "-X", "POST"]
 
 def parse_args():
     """Processes command line arguments.
@@ -42,29 +49,29 @@ def parse_args():
     parser.add_argument('run_mode', help='select run mode, must be STEP or PIPELINE', default=DEFAULT_RUN_MODE)
     parser.add_argument('-i', '--image', help='docker image name for pipeline', default=cf.DEFAULT_DOCKER_IMG)
     parser.add_argument('-c', '--chronos', help='url of chronos scheduler', default=cf.DEFAULT_CURL_URL)
-    parser.add_argument('-ld', '--local_dir', help='name of toplevel directory on local machine', default=cf.DEFAULT_LOCAL_BASE)    
-    parser.add_argument('-cd', '-cloud_dir-', help='name of toplevel directory on cloud storage', default=cf.DEFAULT_CLOUD_BASE)    
-    parser.add_argument('-cp', '--code_path', help='relative path of code directory from toplevel ', default=cf.DEFAULT_CODE_PATH)    
-    parser.add_argument('-dp', '--data_path', help='relative path  of data directory from toplevel', default=cf.DEFAULT_DATA_PATH)    
+    parser.add_argument('-ld', '--local_dir', help='name of toplevel directory on local machine', default=cf.DEFAULT_LOCAL_BASE)
+    parser.add_argument('-cd', '--cloud_dir', help='name of toplevel directory on cloud storage', default=cf.DEFAULT_CLOUD_BASE)
+    parser.add_argument('-cp', '--code_path', help='relative path of code directory from toplevel ', default=cf.DEFAULT_CODE_PATH)
+    parser.add_argument('-dp', '--data_path', help='relative path  of data directory from toplevel', default=cf.DEFAULT_DATA_PATH)
     args = parser.parse_args()
     return args
 
 def run_local_check(args):
     """Runs checks for all sources on local machine.
 
-    This loops through all sources in the code directory and calls 
+    This loops through all sources in the code directory and calls
     check_utilities clean() function on each source.
-    
-    Args: 
+
+    Args:
         arguments from parse_args()
-    
+
     Returns:
     """
-    local_code_dir = args.local_dir + os.sep + args.code_path
+    local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     checker = __import__(CHECK_PY)
     ctr = 0
-    successful = 0 
+    successful = 0
     failed = 0
     for filename in sorted(os.listdir(local_code_dir)):
         if not filename.endswith(".py"): continue
@@ -73,7 +80,7 @@ def run_local_check(args):
         ctr += 1;
         module = os.path.splitext(filename)[0]
         print(str(ctr) + "\t" + module)
-        
+
         try:
             checker.check(module)
             successful += 1
@@ -90,23 +97,23 @@ def run_local_check(args):
 def run_local_fetch(args):
     """Runs fetches for all aliases on local machine.
 
-    This loops through all aliases in the data directory and calls 
-    fetch_utilities main() function on each alias passing the 
+    This loops through all aliases in the data directory and calls
+    fetch_utilities main() function on each alias passing the
     file_metadata.json.
-    
-    Args: 
+
+    Args:
         arguments from parse_args()
-    
+
     Returns:
     """
-    
+
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     fetcher = __import__(FETCH_PY)
     local_data_dir = os.path.join(args.local_dir, args.data_path)
     os.chdir(local_data_dir)
     ctr = 0
-    successful = 0 
+    successful = 0
     failed = 0
     for src_name in sorted(os.listdir(local_data_dir)):
         print(src_name)
@@ -135,23 +142,23 @@ def run_local_fetch(args):
 def run_local_table(args):
     """Runs tables for all aliases on local machine.
 
-    This loops through all chunks in the data directory and calls 
-    table_utilities main() function on each chunk passing the name of the  
+    This loops through all chunks in the data directory and calls
+    table_utilities main() function on each chunk passing the name of the
     chunk and the file_metadata.json.
-    
-    Args: 
+
+    Args:
         arguments from parse_args()
-    
+
     Returns:
     """
-    
+
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     tabler = __import__(TABLE_PY)
     local_data_dir = os.path.join(args.local_dir, args.data_path)
     os.chdir(local_data_dir)
     ctr = 0
-    successful = 0 
+    successful = 0
     failed = 0
     for src_name in sorted(os.listdir(local_data_dir)):
         print(src_name)
@@ -163,14 +170,14 @@ def run_local_table(args):
             chunkdir = os.path.join(alias_dir, "chunks")
             if not os.path.exists(chunkdir):
                 continue
-                
+
             os.chdir(alias_dir)
             for chunk_name in sorted(os.listdir(os.path.join(alias_dir, "chunks"))):
                 if "rawline" not in chunk_name:
                     continue
-                
+
                 chunkfile = os.path.join("chunks", chunk_name)
-                ctr += 1;                
+                ctr += 1;
                 print(str(ctr) + "\t\t" + chunk_name)
 
                 try:
@@ -188,7 +195,70 @@ def run_local_table(args):
 
 
 def run_cloud_check(args):
-    pass;
+    """Runs checks for all sources on the cloud.
+
+    This loops through all sources in the code directory, creates a 
+    json chronos jobs for each source that calls check_utilities
+    clean() (and if run_mode 'PIPELINE', the call to 
+    pipeline_utilities FETCH) and curls json to chronos.
+
+    Args:
+        arguments from parse_args()
+
+    Returns:
+    """
+    local_code_dir = os.path.join(args.local_dir, args.code_path)
+    os.chdir(local_code_dir)
+    jobs_dir = os.path.join(local_code_dir, "chron_jobs")
+    if not os.path.exists(jobs_dir):
+        os.makedirs(jobs_dir)
+    template_file = "check_template.json"
+
+    cloud_code_dir = os.path.join(args.cloud_dir, args.code_path)
+    cloud_data_dir = os.path.join(args.cloud_dir, args.data_path)
+
+    ctr = 0
+    for filename in sorted(os.listdir(local_code_dir)):
+        if not filename.endswith(".py"): continue
+        if 'utilities' in filename: continue
+
+        module = os.path.splitext(filename)[0]
+        jobname = "-".join(["check",module])
+        jobfile = jobs_dir + os.sep + jobname + ".json"
+        pipeline_cmd = ""
+        if(args.run_mode == "PIPELINE"):
+            new_opts = [opt.replace(args.local_dir, '/') for opt in sys.argv[2:]]
+            pipeline_cmd = "python3 /code/pipeline_utilities.py FETCH {0};".format(" ".join(new_opts))
+        ctr += 1;
+        print(str(ctr) + "\t" + module)
+
+        with open(template_file, 'r') as infile:
+            job_str = infile.read(10000)
+            job_str = job_str.replace("TMPJOB", jobname)
+            job_str = job_str.replace("TMPIMG", args.image)
+            job_str = job_str.replace("TMPDATADIR", cloud_data_dir)
+            job_str = job_str.replace("TMPCODEDIR", cloud_code_dir)
+            job_str = job_str.replace("TMPSRC", module)
+            job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
+
+        with open(jobfile, 'w') as outfile:
+            outfile.write(job_str)
+
+        curl_cmd = list(CURL_PREFIX)
+        curl_cmd.extend(["-d@" + jobfile])
+        curl_cmd.extend([args.chronos + "/scheduler/iso8601"])
+        print(" ".join(curl_cmd))
+        #subprocess.call(curl_cmd) #does not work
+
+        #annoying workaround
+        shfile = jobs_dir + os.sep + jobname + ".sh"
+        with open(shfile, 'w') as outfile:
+            outfile.write(" ".join(curl_cmd))
+        os.chmod(shfile, 777)    
+        #subprocess.call(['sh', "-c", shfile])
+        os.remove(shfile)
+
+
 
 def run_cloud_fetch(args):
     pass;
@@ -206,7 +276,7 @@ def main():
 
     Returns:
     """
-    
+
     args = parse_args()
     if not args.run_mode == 'PIPELINE' and not args.run_mode == 'STEP':
         print(args.run_mode + ' is an unacceptable run_mode.  Must be STEP or PIPELINE')
@@ -214,26 +284,26 @@ def main():
 
     if args.deploy_loc == 'LOCAL':
         if args.start_step == 'CHECK':
-            run_local_check(args)       
+            run_local_check(args)
         elif args.start_step == 'FETCH':
-            run_local_fetch(args)       
+            run_local_fetch(args)
         elif args.start_step == 'TABLE':
-            run_local_table(args)       
+            run_local_table(args)
         else:
             print(args.start_step + ' is an unacceptable start_step.  Must be ' + str(POSSIBLE_STEPS))
             return
 
     elif args.deploy_loc == 'CLOUD':
         if args.start_step == 'CHECK':
-            run_cloud_check(args)       
+            run_cloud_check(args)
         elif args.start_step == 'FETCH':
-            run_cloud_fetch(args)       
+            run_cloud_fetch(args)
         elif args.start_step == 'TABLE':
-            run_cloud_table(args)       
+            run_cloud_table(args)
         else:
             print(args.start_step + ' is an unacceptable start_step.  Must be ' + str(POSSIBLE_STEPS))
             return
-    
+
     else:
         print(args.deploy_loc + ' is an unacceptable deploy_loc.  Must be LOCAL or CLOUD')
         return
