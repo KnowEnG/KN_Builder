@@ -3,11 +3,11 @@
     "name": "TMPJOB",
     "container": {
         "type": "DOCKER",
-        "image": "IMG",
-        "volumes": [{"containerPath": "/raw_downloads/", "hostPath":"CLOUDBASE/raw_downloads/", "mode":"RW"},
-                    {"containerPath": "/code/", "hostPath":"CLOUDBASE/code/", "mode":"RW"}]
+        "image": "TMPIMG",
+        "volumes": [{"containerPath": "/raw_downloads/", "hostPath":"TMPDATADIR", "mode":"RW"},
+                    {"containerPath": "/code/", "hostPath":"TMPCODEDIR", "mode":"RW"}]
     },
     "cpus": "0.5",
     "mem": "512",
-    "command": "TMPCMD"
+    "command": "sh -c 'cd /code/; /usr/bin/time -v python3 TMPSRC.py; TMPPIPECMD'"
 }
