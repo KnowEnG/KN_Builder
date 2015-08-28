@@ -129,8 +129,8 @@ def chunk(filename, total_lines):
     with open(filename, 'rb') as infile:
         for i in range(1, num_chunks + 1):
             with open(chunk_file + str(i) + ext, 'wb') as out:
-                for j in range(0, num_lines):
-                    line = infile.readline()
+                j = 0
+                for line in infile:
                     hasher = hashlib.md5()
                     hasher.update(line)
                     md5 = hasher.hexdigest()
@@ -139,9 +139,10 @@ def chunk(filename, total_lines):
                     outline = '\t'.join((src, str(line_count), md5, ''))
                     out.write(outline.encode())
                     out.write(line)
-                if i == num_chunks:
-                    for line in infile:
-                        out.write(line)
+                    j += 1
+                    if j == num_lines and i < num_chunks:
+                        break
+
     return num_chunks
 
 def raw_line(filename):
