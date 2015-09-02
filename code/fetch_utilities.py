@@ -46,7 +46,7 @@ def download(version_dict):
     Returns:
         str: The relative path to the newly downloaded file.
     """
-    
+
     ret_file = version_dict['source'] + '.' + version_dict['alias'] + '.txt'
     ret_file = os.path.join(DIR, ret_file)
     #check if remote file must be downloaded
@@ -222,9 +222,10 @@ def main(version_json):
     """Fetches and chunks the source:alias described by version_json.
 
     This takes the path to a version_json (source.alias.json) and runs fetch
-    (see fetch). If the alias is a data file, it then runs raw_line (see
-    raw_line) and then runs chunk (see chunk) on the output. If the alias is a
-    mapping file, it runs create_mapping_dict (see create_mapping_dict in
+    (see fetch). If the source is ensembl, it runs the ensembl specific fetch
+    (see ensembl.fetch). If the alias is a data file, it then runs raw_line
+    (see raw_line) and then runs chunk (see chunk) on the output. If the alias
+    is a mapping file, it runs create_mapping_dict (see create_mapping_dict in
     SRC.py). It also updates version_json to include the total lines in and
     md5 checksum of the fetched file. It then saves the updated version_json to
     file.
@@ -236,9 +237,12 @@ def main(version_json):
     """
     with open(version_json, 'r') as infile:
         version_dict = json.load(infile)
+    src_module = __import__(version_dict['source'])
+    if version_dict['source'] == 'ensembl':
+        src_module.fetch(version_dict)
+        return
     newfile = download(version_dict)
     md5hash, line_count = get_md5_hash(newfile)
-    src_module = __import__(version_dict['source'])
     SrcClass = src_module.get_SrcClass()
     if version_dict['is_map']:
         num_chunks = 0
