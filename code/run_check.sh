@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOCAL_BASE="/shared/"   # toplevel local directory inside runner of this script
+LOCAL_BASE="/workspace/apps/P1_source_check/"   # toplevel local directory inside runner of this script
 #LOCAL_BASE="/shared/"   # when called by container like check_master
 CLOUD_BASE="/mnt/storage/blatti/apps/P1_source_check/"   # toplevel directory on cloud
 

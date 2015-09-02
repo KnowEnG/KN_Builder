@@ -280,6 +280,7 @@ def run_cloud_fetch(args):
     Returns:
     """
     src = args.step_parameters
+    print(src)
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     jobs_dir = os.path.join(local_code_dir, "chron_jobs")
