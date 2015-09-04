@@ -12,6 +12,7 @@ Variables:
 import config_utilities as cf
 import mysql.connector as sql
 import subprocess
+import os
 
 def get_database():
     """Returns an object of the MySQL class.
@@ -39,10 +40,12 @@ def import_ensembl(alias):
     
     Returns:
     """
+    database = 'ensembl_' + alias
     db = MySQL()
-    db.import_schema(alias, 'schema.sql')
-    db.import_table(alias, '*.txt')
-
+    db.init_KnowNet()
+    db.drop_db(database)
+    db.import_schema(database, 'schema.sql')
+    db.import_table(database, '*.txt')
 
 def get_insert_cmd(step):
     """Returns the command to be used with an insert for the provided step.
@@ -208,6 +211,26 @@ class MySQL(object):
         self.cursor.execute('DROP DATABASE IF EXISTS ' + database + ';')
         self.conn.commit()
 
+    def init_KnowNet(self):
+        """Inits the Knowledge Network MySQL DB.
+        
+        Creates the KnowNet database and all of its tables if they do not
+        already exist. Also imports the edge_type, node_type, and species
+        files, but ignores any lines that have the same unique key as those
+        already in the tables.
+
+        Args:
+        Returns:
+        """
+        import_tables = ['node_type.txt', 'edge_type.txt', 'species.txt']
+        mysql_dir = os.path.join('code', 'mysql')
+        if os.path.isdir(cf.DEFAULT_LOCAL_BASE):
+            mysql_dir = os.path.join(cf.DEFAULT_LOCAL_BASE, mysql_dir)
+        self.import_schema('KnowNet', os.path.join(mysql_dir, 'KnowNet.sql'))
+        for table in import_tables:
+            tablefile = os.path.join(mysql_dir, table)
+            self.import_table('KnowNet', tablefile, '--ignore')
+
     def create_db(self, database):
         """Add a database to the MySQL server
 
@@ -316,13 +339,12 @@ class MySQL(object):
 
         Returns:
         """
-        self.drop_db(database)
         self.create_db(database)
         cmd = ['mysql', '-u', self.user, '-h', self.host, '--port', self.port,
                 '--password='+self.passw, database, '<', sqlfile]
         subprocess.call(' '.join(cmd), shell=True)
 
-    def import_table(self, database, tablefile):
+    def import_table(self, database, tablefile, import_flags = '--delete'):
         """Import the data for the table in the provided database described by
         tablefile.
 
@@ -332,11 +354,12 @@ class MySQL(object):
             database (str): name of the database to add to the MySQL server
             tablefile (str): name of the txt file specifying the data for the
                         table
+            import_flag (str): additional flags to pass to mysqlimport
 
         Returns:
         """
         cmd = ['mysqlimport', '-u', self.user, '-h', self.host, '--port',
-                self.port, '--password='+self.passw, '--delete',
+                self.port, '--password='+self.passw, import_flags,
                 '--fields_escaped_by=\\\\', database, '-L', tablefile]
         subprocess.call(' '.join(cmd), shell=True)
 
