@@ -1,0 +1,13 @@
+{
+    "schedule": "R1\/2200-01-01T06:00:00Z\/P3M",
+    "name": "TMPJOB",
+    "container": {
+        "type": "DOCKER",
+        "image": "TMPIMG",
+        "volumes": [{"containerPath": "/raw_downloads/", "hostPath":"TMPDATADIR", "mode":"RW"},
+                    {"containerPath": "/code/", "hostPath":"TMPCODEDIR", "mode":"RW"}]
+    },
+    "cpus": "0.5",
+    "mem": "512",
+    "command": "sh -c 'cd /raw_downloads/TMPALIASPATH; /usr/bin/time echo 'TMPJOB was not supposed to run' >> /raw_downloads/ERROR.txt'" 
+}

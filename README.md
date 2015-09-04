@@ -34,5 +34,19 @@ for i in `ls /shared/raw_downloads/`; do /shared/code/run_fetch.sh $i /shared/ra
 # when complete, be a good citizen and remove jobs from the cloud
 for i in `ls code/chron_jobs/*json | sed "s#code/chron_jobs/##g" | sed "s/.json//g"` ; do CMD="curl -L -X DELETE mmaster01.cse.illinois.edu:4400/scheduler/job/$i"; echo "$CMD"; eval $CMD; done                
 
+# delete ALL jobs on production and development chronos queue
+for c in \
+'mmaster02.cse.illinois.edu:4400' \
+; do 
+    for i in `curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' `; do 
+            CMD="curl -L -X DELETE $c/scheduler/job/$i"; 
+            echo "$CMD"; 
+            eval "$CMD"; 
+    done;
+done;
+
 #### running with python
 ./code/pipeline_utilities.py CHECK LOCAL PIPELINE -ld /mnt/users/blatti/apps/P1_source_check -dp raw_downloads  
+
+
+./code/pipeline_utilities.py CHECK CLOUD STEP -c 192.17.177.186:4400 -ld /mnt/users/blatti/apps/P1_source_check/ -cd /mnt/storage/blatti/apps/P1_source_check/ -cp code -dp raw_downloads 
