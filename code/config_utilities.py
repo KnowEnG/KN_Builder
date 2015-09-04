@@ -29,6 +29,6 @@ DEFAULT_CODE_PATH = 'code'
 DEFAULT_DATA_PATH = 'raw_downloads'
 
 DEFAULT_MYSQL_URL = 'knowcharles.cse.illinois.edu'
-DEFAULT_MYSQL_PORT = '3307'
+DEFAULT_MYSQL_PORT = '3308'
 DEFAULT_MYSQL_USER = 'root'
 DEFAULT_MYSQL_PASS = 'KnowEnG'
