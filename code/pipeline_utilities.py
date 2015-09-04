@@ -27,6 +27,7 @@ import traceback
 import sys
 import subprocess
 import json
+import http.client
 
 DEFAULT_START_STEP = 'CHECK'
 DEFAULT_DEPLOY_LOC = 'LOCAL'
@@ -36,6 +37,7 @@ CHECK_PY = "check_utilities"
 FETCH_PY = "fetch_utilities"
 TABLE_PY = "table_utilities"
 CURL_PREFIX = ["curl", "-i", "-L", "-H", "'Content-Type: application/json'", "-X", "POST"]
+headers = {"Content-type": "application/json"}
 
 def parse_args():
     """Processes command line arguments.
@@ -222,6 +224,7 @@ def run_cloud_check(args):
     cloud_data_dir = os.path.join(args.cloud_dir, args.data_path)
 
     ctr = 0
+#    connection = http.client.HTTPConnection(args.chronos)
     for filename in sorted(os.listdir(local_code_dir)):
         if not filename.endswith(".py"): continue
         if 'utilities' in filename: continue
@@ -252,6 +255,10 @@ def run_cloud_check(args):
         curl_cmd.extend(["-d@" + jobfile])
         curl_cmd.extend([args.chronos + "/scheduler/iso8601"])
         print(" ".join(curl_cmd))
+        #json.dumps(job_str)
+        #connection.request("POST", "/scheduler/iso8601", "-d@"+jobfile, headers)
+        #connection.request("POST", "/scheduler/iso8601", json.dumps(job_str), headers)
+        #connection.getresponse().read()
         #subprocess.call(curl_cmd) #does not work
 
         #annoying workaround
@@ -261,7 +268,7 @@ def run_cloud_check(args):
         os.chmod(shfile, 777)    
         subprocess.call(['sh', "-c", shfile])
         os.remove(shfile)
-
+#    connection.close()
 
 
 def run_cloud_fetch(args):
@@ -280,7 +287,10 @@ def run_cloud_fetch(args):
     Returns:
     """
     src = args.step_parameters
-    print(src)
+    if(src is ''):
+        print("ERROR: 'source' must be specified with --step_parameters (-p)")   
+        return -1
+    print("'source' specified with --step_parameters (-p): {0}".format(src))
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     jobs_dir = os.path.join(local_code_dir, "chron_jobs")
@@ -293,7 +303,7 @@ def run_cloud_fetch(args):
 
     local_src_dir = os.path.join(args.local_dir, args.data_path, src)
     if not os.path.exists(local_src_dir):
-        print ("ERROR: cannot run fetch without source specified with --step_parameters (-p) option")
+        print ("ERROR: source specified with --step_parameters (-p) option, {0},does not have data directory: {1}".format(src, local_src_dir))
         return -1
 
     ctr = 0
@@ -303,7 +313,7 @@ def run_cloud_fetch(args):
         jobname = "-".join(["fetch",src,alias])
         jobfile = jobs_dir + os.sep + jobname + ".json"
         pipeline_cmd = ""
-        if(args.run_mode == "PIPELINES"):
+        if(args.run_mode == "PIPELINE"):
             new_opts = [opt.replace(args.local_dir, '/') for opt in sys.argv[2:]]
             if '-p' in new_opts:
                 new_opts.remove('-p')
@@ -340,8 +350,7 @@ def run_cloud_fetch(args):
     
 
 def run_cloud_table(args):
-    """Runs table for a all chunks from a single alias on 
-    the cloud.
+    """Runs table for a chunk from a single alias on the cloud.
 
     For a single alias, this loops through all chunks in its data directory, 
     creates a json chronos jobs for each alias that calls fetch_utilities
@@ -355,12 +364,18 @@ def run_cloud_table(args):
     Returns:
     """
     src, alias = args.step_parameters.split(",")
+    if(args.step_parameters is ''):
+        print("ERROR: 'source,alias' must be specified with --step_parameters (-p)")   
+        return -1
+    print("'source,alias' specified with --step_parameters (-p): {0}".format(args.step_parameters))
+    
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     jobs_dir = os.path.join(local_code_dir, "chron_jobs")
     if not os.path.exists(jobs_dir):
         os.makedirs(jobs_dir)
-    template_file = "table_template.json"
+    template_file = os.path.join(local_code_dir, "table_template.json")
+    dummy_template_file = os.path.join(local_code_dir, "dummy_template.json")
 
     cloud_code_dir = os.path.join(args.cloud_dir, args.code_path)
     cloud_data_dir = os.path.join(args.cloud_dir, args.data_path)
@@ -368,11 +383,11 @@ def run_cloud_table(args):
     alias_path = os.path.join(src,alias)
     local_alias_dir = os.path.join(args.local_dir, args.data_path, alias_path)
     if not os.path.exists(local_alias_dir):
-        print ("ERROR: cannot run fetch without source and alias specified with --step_parameters (-p) option (e.g. '-p kegg,hsa')")
+        print ("ERROR: 'source,alias' specified with --step_parameters (-p) option, {0}, does not have data directory: {1}".format(args.step_parameters, local_alias_dir))
         return -1
     
     if not os.path.isfile(os.path.join(local_alias_dir, "file_metadata.json")):
-        print ("ERROR: cannot find file_metadata.json")
+        print ("ERROR: cannot find file_metadata.json in {0}".format(local_alias_dir))
         return
             
     local_chunk_dir = os.path.join(local_alias_dir, "chunks")
@@ -382,6 +397,7 @@ def run_cloud_table(args):
     os.chdir(local_alias_dir)
     ctr = 0
 
+    connection = http.client.HTTPConnection(args.chronos)
     for chunk_name in sorted(os.listdir(local_chunk_dir)):
         if "rawline" not in chunk_name:
             continue
@@ -391,6 +407,9 @@ def run_cloud_table(args):
         print(str(ctr) + "\t" + chunk_name)
     
         jobname = "-".join(["table", chunk_name])
+        jobname = jobname.replace(".txt","")
+        jobname = jobname.replace(".","-")
+        
         jobfile = jobs_dir + os.sep + jobname + ".json"
         pipeline_cmd = ""
 #        if(args.run_mode == "PIPELINE"):
@@ -405,42 +424,99 @@ def run_cloud_table(args):
             job_str = job_str.replace("TMPDATADIR", cloud_data_dir)
             job_str = job_str.replace("TMPCODEDIR", cloud_code_dir)
             job_str = job_str.replace("TMPALIASPATH", alias_path)
+            job_str = job_str.replace("TMPCHUNK", chunkfile)
             job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
 
             ## check for dependencies
             with open("file_metadata.json", 'r') as infile:
                 version_dict = json.load(infile)
                 dependencies = version_dict["dependencies"]
-                parents = []
-                # check status of queue
-                #annoying workaround
-                getjson = jobs_dir + os.sep + jobname + ".get.json"
-                get_curl = 'curl -L -X GET {0}/scheduler/jobs > {1}'    .format(args.chronos, getjson)
-                shfile = jobs_dir + os.sep + jobname + ".sh"
-                with open(shfile, 'w') as outfile:
-                    outfile.write(get_curl)
-                os.chmod(shfile, 777)    
-                subprocess.call(['sh', "-c", shfile])
-                os.remove(shfile)
+                if len(dependencies) > 0:
+                
+                    parents = []
+                
+                    # check status of queue
+                    connection.request("GET", "/scheduler/jobs")
+                    response = connection.getresponse().read()
+                    response_str = response.decode("utf-8") 
+                
+                    #annoying workaround
+                    #getjson = jobs_dir + os.sep + jobname + ".get.json"
+                    #get_curl = 'curl -L -X GET {0}/scheduler/jobs > {1}'.format(args.chronos, getjson)
+                    #shfile = jobs_dir + os.sep + jobname + ".sh"
+                    #with open(shfile, 'w') as outfile:
+                    #    outfile.write(get_curl)
+                    #os.chmod(shfile, 777)    
+                    #subprocess.call(['sh', "-c", shfile])
+                    #os.remove(shfile)
             
-                with open(getjson, 'r') as infile2:
-                    queue_dict = json.load(infile2)
+                    #with open(getjson, 'r') as infile2:
+                    #    queue_dict = json.load(infile2)
+                
+                    jobs = json.loads(response_str)
                     for depend in dependencies:
-                        pass
-                        # convert to job name
-                
-                        # if missing, add dummy that does not run
-                
-                        # if successful, not a parent
-            
-                launch_cmd = '"schedule": "R1\/\/P3M"'    
+                        dep_jobname = "-".join(["fetch", src, depend])
+                        jname = -1
+                        jsucc = -1
+                        jerr = -1
+                        for job in jobs:
+                            if dep_jobname == job["name"]:
+                                jname = job["name"]
+                                if job["lastSuccess"] is not '':
+                                    jsucc = job["lastSuccess"]
+                                if job["lastError"] is not '':  
+                                    jerr = job["lastError"]
+                        # end loop through jobs        
+                        print ("\t".join([chunk_name, depend, dep_jobname, jname, str(jsucc), str(jerr)]))
+                        if jname == -1: # no parent on queue
+                            # schedule dummy parent add dependancy
+                            with open(dummy_template_file, 'r') as infile:
+                                dummy_str = infile.read(10000)
+                                dummy_str = dummy_str.replace("TMPJOB", dep_jobname)
+                                dummy_str = dummy_str.replace("TMPIMG", args.image)
+                                dummy_str = dummy_str.replace("TMPDATADIR", cloud_data_dir)
+                                dummy_str = dummy_str.replace("TMPCODEDIR", cloud_code_dir)
+                                dummyfile = jobs_dir + os.sep + dep_jobname + ".json"
+                                with open(dummyfile, 'w') as outfile:
+                                    outfile.write(dummy_str)
+
+                                curl_cmd = list(CURL_PREFIX)
+                                curl_cmd.extend(["-d@" + dummyfile])
+                                curl_cmd.extend([args.chronos + "/scheduler/iso8601"])
+                                print(" ".join(curl_cmd))
+                                #subprocess.call(curl_cmd) #does not work
+
+                                #annoying workaround
+                                shfile = jobs_dir + os.sep + jobname + ".sh"
+                                with open(shfile, 'w') as outfile:
+                                    outfile.write(" ".join(curl_cmd))
+                                os.chmod(shfile, 777)    
+                                subprocess.call(['sh', "-c", shfile])
+                                os.remove(shfile)
+
+                            parents.append(dep_jobname)
+                        elif jsucc == -1: # parent on queue but not succeeded
+                            # add dependency
+                            parents.append(dep_jobname)
+        
+                        elif not jerr == -1: # parent on queue, succeed, has error
+                            if jsucc > jerr: # error happened before success
+                                # add dependency
+                                parents.append(dep_jobname)
+                    # end dependencies loop
+                # end if dependencies
+                #os.remove(getjson)
+                launch_cmd = '"schedule": "R1\/\/P3M"'  
+                print(parents)
                 if len(parents) > 0:
-                    launch_cmd = '"parents": {0}'.format(str(parents))
-
-
+                    launch_cmd = '"parents": ' + str(parents)
+                job_str = job_str.replace("TMPLAUNCH", launch_cmd)
+            
+            # end open metadata
             with open(jobfile, 'w') as outfile:
                 outfile.write(job_str)
-
+        
+        # end open template file
         curl_cmd = list(CURL_PREFIX)
         curl_cmd.extend(["-d@" + jobfile])
         curl_cmd.extend([args.chronos + "/scheduler/iso8601"])
@@ -454,7 +530,8 @@ def run_cloud_table(args):
         os.chmod(shfile, 777)    
         subprocess.call(['sh', "-c", shfile])
         os.remove(shfile)
-    
+    # end chunk
+    connection.close()
 
 
 def main():
