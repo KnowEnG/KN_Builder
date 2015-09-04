@@ -1,5 +1,5 @@
 ############################################################
-# Dockerfile to build blast_node
+# Dockerfile to build python3
 ############################################################
 
 # Set the base image to python v3
@@ -16,3 +16,4 @@ CMD /bin/bash
 
 # Set container execution behavior
 # ENTRYPOINT 
+

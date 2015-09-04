@@ -231,11 +231,12 @@ def run_cloud_check(args):
 
         module = os.path.splitext(filename)[0]
         jobname = "-".join(["check",module])
+        jobname = jobname.replace(".","-")
         jobfile = jobs_dir + os.sep + jobname + ".json"
         pipeline_cmd = ""
         if(args.run_mode == "PIPELINE"):
             new_opts = [opt.replace(args.local_dir, '/') for opt in sys.argv[2:]]
-            pipeline_cmd = "python3 /code/pipeline_utilities.py FETCH {0} -p {1};".format(" ".join(new_opts), module)
+            pipeline_cmd = "python3 /code/pipeline_utilities.py FETCH {0} -p {1} 2> /code/fetch-{2}.err;".format(" ".join(new_opts), module, module)
         ctr += 1;
         print(str(ctr) + "\t" + module)
 
@@ -311,14 +312,16 @@ def run_cloud_fetch(args):
 
         alias_path = os.path.join(src,alias)
         jobname = "-".join(["fetch",src,alias])
+        jobname = jobname.replace(".","-")
         jobfile = jobs_dir + os.sep + jobname + ".json"
         pipeline_cmd = ""
+        print(args.run_mode)
         if(args.run_mode == "PIPELINE"):
             new_opts = [opt.replace(args.local_dir, '/') for opt in sys.argv[2:]]
             if '-p' in new_opts:
                 new_opts.remove('-p')
                 new_opts.remove(args.step_parameters)
-            pipeline_cmd = "python3 /code/pipeline_utilities.py TABLE {0} -p {1};".format(" ".join(new_opts), src + "," + alias)
+            pipeline_cmd = "python3 /code/pipeline_utilities.py TABLE {0} -p {1} 2> /code/table-{2}.err;".format(" ".join(new_opts), src + "," + alias, src + "," + alias)
         ctr += 1;
         print("\t".join([str(ctr),src,alias]))
 

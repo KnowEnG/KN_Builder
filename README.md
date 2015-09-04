@@ -1,7 +1,10 @@
 #### Build correct image
 
-docker build -t cblatti3/python3:0.1 .
+docker build -f Dockerfile -t cblatti3/python3:0.1 .
 docker push cblatti3/python3:0.1
+
+docker build -f Dockerfile.mysql -t cblatti3/py3_mysql:0.1 .
+docker push cblatti3/py3_mysql:0.1
 
 
 #### running outside of docker
@@ -15,7 +18,7 @@ python /workspace/apps/P1_source_check/fetch_utilities.py file_metadata.json
 
 
 #### running inside container with requirements
-docker run --name check_master -it -v /mnt/users/blatti/apps/P1_source_check/:/shared/ cblatti3/python3:0.1 /bin/bash
+docker run --name check_master -it -v /mnt/users/blatti/apps/P1_source_check/:/shared/ cblatti3/py3_mysql:0.1 /bin/bash
 
 # running whole pipeline while inside container
 /shared/code/run_check.sh LOCAL PIPELINE
@@ -37,6 +40,7 @@ for i in `ls code/chron_jobs/*json | sed "s#code/chron_jobs/##g" | sed "s/.json/
 # delete ALL jobs on production and development chronos queue
 for c in \
 'mmaster02.cse.illinois.edu:4400' \
+'192.17.177.186:4400' \
 ; do 
     for i in `curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' `; do 
             CMD="curl -L -X DELETE $c/scheduler/job/$i"; 
