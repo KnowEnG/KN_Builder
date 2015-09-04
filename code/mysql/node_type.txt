@@ -1,0 +1,2 @@
+1	Gene
+2	Property
