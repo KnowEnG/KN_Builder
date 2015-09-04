@@ -1,0 +1,145 @@
+CREATE DATABASE KnowNet;
+USE KnowNet;
+
+CREATE TABLE `raw_line` (
+  `line_id` int(11) NOT NULL AUTO_INCREMENT,
+  `line_hash` varchar(40) NOT NULL,
+  `line_str` text NOT NULL,
+  PRIMARY KEY (`line_id`),
+  UNIQUE KEY `line_hash` (`line_hash`)
+);
+
+CREATE TABLE `raw_file` (
+  `file_id` int(11) NOT NULL AUTO_INCREMENT,
+  `remote_url` varchar(255) NOT NULL,
+  `remote_date` varchar(40) DEFAULT NULL,
+  `remote_version` varchar(40) DEFAULT NULL,
+  `remote_size` int(11) DEFAULT NULL,
+  `date_downloaded` datetime NOT NULL,
+  `local_filename` varchar(255) NOT NULL,
+  `checksum` varchar(80) DEFAULT NULL,
+  PRIMARY KEY (`file_id`),
+  UNIQUE KEY `idx_raw_file_local_filename` (`local_filename`)
+);
+		
+CREATE TABLE `raw_data` (
+  `data_id` int(11) NOT NULL AUTO_INCREMENT,
+  `file_id` int(11) NOT NULL,
+  `line_id` int(11) NOT NULL,
+  `line_num` int(11) DEFAULT NULL,
+  PRIMARY KEY (`data_id`),
+  UNIQUE KEY `idx_raw_data_key` (`file_id`,`line_id`),
+  KEY `line_id` (`line_id`),
+  CONSTRAINT `raw_data_ibfk_1` FOREIGN KEY (`file_id`) REFERENCES `raw_file` (`file_id`),
+  CONSTRAINT `raw_data_ibfk_2` FOREIGN KEY (`line_id`) REFERENCES `raw_line` (`line_id`)
+); 
+
+CREATE TABLE `operation` (
+  `file_id` int(11) NOT NULL,
+  `operation` varchar(40) NOT NULL,
+  `op_date` datetime NOT NULL,
+  KEY `file_id` (`file_id`),
+  CONSTRAINT `operation_ibfk_1` FOREIGN KEY (`file_id`) REFERENCES `raw_file` (`file_id`)
+);
+
+CREATE TABLE `species` (
+  `taxon` int(11) NOT NULL,
+  `sp_abbrev` varchar(8) DEFAULT NULL,
+  `sp_sciname` varchar(255) NOT NULL,
+  `representative` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`taxon`)
+);
+
+CREATE TABLE `node_type` (
+  `n_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `n_type_desc` varchar(80) NOT NULL,
+  PRIMARY KEY (`n_type_id`)
+); 
+
+CREATE TABLE `node` (
+  `node_id` int(11) NOT NULL AUTO_INCREMENT,
+  `n_alias` varchar(80) NOT NULL,
+  `n_orig_name` varchar(255) DEFAULT NULL,
+  `n_type_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`node_id`),
+  UNIQUE KEY `n_orig_name` (`n_orig_name`)
+  CONSTRAINT `node_ibfk_1` FOREIGN KEY (`n_type_id`) REFERENCES `node_type` (`n_type_id`),
+);
+
+CREATE TABLE `node_meta` (
+  `node_id` int(11) NOT NULL,
+  `info_type` varchar(80) NOT NULL,
+  `info_desc` varchar(255) NOT NULL,
+  UNIQUE KEY `idx_node_meta_key` (`node_id`,`info_type`,`info_desc`),
+  CONSTRAINT `node_meta_ibfk_1` FOREIGN KEY (`node_id`) REFERENCES `node` (`node_id`)
+);
+
+CREATE TABLE `node_species` (
+  `node_id` int(11) NOT NULL,
+  `taxon` int(11) NOT NULL,
+  UNIQUE KEY `node_species_key` (`node_id`,`taxon`),
+  KEY `taxon` (`taxon`),
+  CONSTRAINT `node_species_ibfk_1` FOREIGN KEY (`node_id`) REFERENCES `node` (`node_id`),
+  CONSTRAINT `node_species_ibfk_2` FOREIGN KEY (`taxon`) REFERENCES `species` (`taxon`)
+);
+
+CREATE TABLE `edge_type` (
+  `e_type_id` int(11) NOT NULL AUTO_INCREMENT,
+  `et_name` varchar(80) NOT NULL,
+  `n1_type` int(11) NOT NULL,
+  `n2_type` int(11) NOT NULL,
+  `bidir` tinyint(1) NOT NULL,
+  `et_desc` text,
+  `sc_desc` text,
+  `sc_best` float DEFAULT NULL,
+  `sc_worst` float DEFAULT NULL,
+  PRIMARY KEY (`e_type_id`),
+  UNIQUE KEY `idx_edge_type_et_name` (`et_name`),
+  KEY `n1_type` (`n1_type`),
+  KEY `n2_type` (`n2_type`),
+  CONSTRAINT `edge_type_ibfk_1` FOREIGN KEY (`n1_type`) REFERENCES `node_type` (`n_type_id`),
+  CONSTRAINT `edge_type_ibfk_2` FOREIGN KEY (`n2_type`) REFERENCES `node_type` (`n_type_id`)
+);
+		
+CREATE TABLE `edge` (
+  `edge_id` int(11) NOT NULL AUTO_INCREMENT,
+  `n1_id` int(11) NOT NULL,
+  `n2_id` int(11) NOT NULL,
+  `data_id` int(11) NOT NULL,
+  `e_type_id` int(11) NOT NULL,
+  `weight` float NOT NULL,
+  `status` varchar(40) NOT NULL,
+  `status_desc` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`edge_id`),
+  UNIQUE KEY `idx_edge_key` (`n1_id`,`n2_id`,`data_id`,`e_type_id`),
+  KEY `n1_id` (`n1_id`),
+  KEY `n2_id` (`n2_id`),
+  KEY `data_id` (`data_id`),
+  KEY `e_type_id` (`e_type_id`),
+  CONSTRAINT `edge_ibfk_1` FOREIGN KEY (`n1_id`) REFERENCES `node` (`node_id`),
+  CONSTRAINT `edge_ibfk_2` FOREIGN KEY (`n2_id`) REFERENCES `node` (`node_id`),
+  CONSTRAINT `edge_ibfk_3` FOREIGN KEY (`data_id`) REFERENCES `raw_data` (`data_id`),
+  CONSTRAINT `edge_ibfk_4` FOREIGN KEY (`e_type_id`) REFERENCES `edge_type` (`e_type_id`)
+); 
+		
+CREATE TABLE `edge_meta` (
+  `edge_id` int(11) NOT NULL,
+  `info_type` varchar(80) NOT NULL,
+  `info_desc` varchar(255) NOT NULL,
+  UNIQUE KEY `idx_edge_meta_key` (`edge_id`,`info_type`,`info_desc`),
+  CONSTRAINT `edge_meta_ibfk_1` FOREIGN KEY (`edge_id`) REFERENCES `edge` (`edge_id`)
+);
+        
+mysqlimport -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" --compress --delete --fields_escaped_by=\\ KnowNet -L /shared/apps/KnowEnG/KnowNet/node_type.txt
+
+mysqlimport -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" --compress --delete --fields_escaped_by=\\ KnowNet -L /shared/apps/KnowEnG/KnowNet/edge_type.txt
+
+mysqlimport -h"$MYSQL_PORT_3306_TCP_ADDR" -P"$MYSQL_PORT_3306_TCP_PORT" -uroot -p"$MYSQL_ENV_MYSQL_ROOT_PASSWORD" --compress --delete --fields_escaped_by=\\ KnowNet -L /shared/apps/KnowEnG/KnowNet/species.txt
+
+# save schema
+#mysqldump -h192.17.58.147 --no-data --port 3306 -uroot -pKnowEnG KnowNet > KnowNet.sql
+
+# save some tables
+#mysql -h192.17.58.147 --port 3306 -uroot -pKnowEnG KnowNet --execute "select * from species" | tail -n +2 > metadata/mysql/species.txt
+#mysql -h192.17.58.147 --port 3306 -uroot -pKnowEnG KnowNet --execute "select * from node_type" | tail -n +2 > metadata/mysql/node_type.txt
+#mysql -h192.17.58.147 --port 3306 -uroot -pKnowEnG KnowNet --execute "select * from edge_type" | tail -n +2 > metadata/mysql/edge_type.txt

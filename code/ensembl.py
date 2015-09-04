@@ -60,7 +60,7 @@ def fetch(version_dict):
 def db_import(version_json):
     with open(version_json, 'r') as infile:
         version_dict = json.load(infile)
-    db.import_ensembl('ensembl_' + version_dict['alias'])
+    db.import_ensembl(version_dict['alias'])
     db.combine_tables(version_dict['alias'])
 
 class Ensembl(SrcClass):
