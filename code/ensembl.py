@@ -62,6 +62,7 @@ def db_import(version_json):
         version_dict = json.load(infile)
     db.import_ensembl(version_dict['alias'])
     db.combine_tables(version_dict['alias'])
+    db.create_mapping_dicts(version_dict['alias'])
 
 class Ensembl(SrcClass):
     """Extends SrcClass to provide ensembl specific check functions.

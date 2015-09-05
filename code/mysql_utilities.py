@@ -11,8 +11,9 @@ Variables:
 
 import config_utilities as cf
 import mysql.connector as sql
-import subprocess
 import os
+import json
+import subprocess
 
 def get_database():
     """Returns an object of the MySQL class.
@@ -27,6 +28,52 @@ def get_database():
     """
     return MySQL()
 
+def create_dictionary(results):
+    """Creates a dictionary from a MySQL fetched results.
+
+    This returns a dictionary from the MySQL results after a query from the DB.
+    It assumes there are two columns in the results and reads through all of
+    the results, making them into a dictionary.
+
+    Args:
+        results: a list of the results returned from a MySQL query
+    Returns:
+    """
+    map_dict = dict()
+    for (raw, mapped) in results:
+        map_dict[str(raw)] = str(mapped)
+    return map_dict
+
+def create_mapping_dicts(alias):
+    """Creates the mapping dictionaries for the provided alias.
+
+    Produces the ensembl stable mappings dictionary and the all unique mappings
+    dictionary for the provided alias. It then saves them as json objects to
+    file.
+
+    Args:
+        alias (str): An alias defined in ensembl.aliases.
+
+    Returns:
+    """
+    database = 'KnowNet'
+    table = 'all_mappings'
+    cmd = "WHERE species='" + alias + "'"
+    map_dir = os.sep + cf.DEFAULT_MAP_PATH
+    if os.path.isdir(cf.DEFAULT_LOCAL_BASE):
+        map_dir = cf.DEFAULT_LOCAL_BASE + map_dir
+    if not os.path.isdir(map_dir):
+        os.mkdir(map_dir)
+    db = MySQL(database)
+    results = db.query_distinct('stable_id, stable_id', table, cmd)
+    with open(os.path.join(map_dir, alias + '_stable.json'), 'w') as outfile:
+        map_dict = create_dictionary(results)
+        json.dump(map_dict, outfile)
+    results = db.query_distinct('dbprimary_acc, stable_id', table, cmd)
+    with open(os.path.join(map_dir, alias + '_unique.json'), 'w') as outfile:
+        map_dict = create_dictionary(results)
+        json.dump(map_dict, outfile)
+
 def import_ensembl(alias):
     """Imports the ensembl data for the provided alias into the KnowEnG
     database.
@@ -37,7 +84,7 @@ def import_ensembl(alias):
 
     Args:
         alias (str): An alias defined in ensembl.aliases.
-    
+
     Returns:
     """
     database = 'ensembl_' + alias
@@ -46,15 +93,16 @@ def import_ensembl(alias):
     db.drop_db(database)
     db.import_schema(database, 'schema.sql')
     db.import_table(database, '*.txt')
+    db.close()
 
 def get_insert_cmd(step):
     """Returns the command to be used with an insert for the provided step.
-    
+
     This takes a predefined step to determine which type of insert is being
     performed during the production of the knownet_mappings combined tables.
     Based off of this step, it returns a MySQL command to be used with an
     INSERT INTO statement.
-    
+
     Args:
         step (str): the step indicating the step during the production of the
             combined knownet_mapping tables
@@ -135,7 +183,7 @@ def combine_tables(alias):
 
     Args:
         alias (str): An alias defined in ensembl.aliases.
-    
+
     Returns:
     """
     alias_db = 'ensembl_' + alias
@@ -143,7 +191,7 @@ def combine_tables(alias):
     combined_db = 'KnowNet'
     combined_table = alias + '_mappings'
     all_table = 'all_mappings'
-    steps = ['transcript', 'translation', 'transcript2stable', 
+    steps = ['transcript', 'translation', 'transcript2stable',
                 'translation2stable']
     db = MySQL(alias_db)
     db.create_table(tablename, get_insert_cmd('gene'))
@@ -155,7 +203,7 @@ def combine_tables(alias):
     cmd = ("SELECT *, db_display_name AS species FROM " + alias + "_mappings "
             "WHERE 1=2")
     db.create_table(all_table, cmd)
-    cmd = ("DELETE FROM all_mappings WHERE species = '" + alias + "'")
+    cmd = ("DELETE FROM " + all_table + " WHERE species = '" + alias + "'")
     db.execute(cmd)
     cmd = ("SELECT *, '" + alias + "' AS species FROM " + alias + "_mappings")
     db.insert(all_table, cmd)
@@ -213,7 +261,7 @@ class MySQL(object):
 
     def init_KnowNet(self):
         """Inits the Knowledge Network MySQL DB.
-        
+
         Creates the KnowNet database and all of its tables if they do not
         already exist. Also imports the edge_type, node_type, and species
         files, but ignores any lines that have the same unique key as those
@@ -223,9 +271,9 @@ class MySQL(object):
         Returns:
         """
         import_tables = ['node_type.txt', 'edge_type.txt', 'species.txt']
-        mysql_dir = os.path.join('code', 'mysql')
+        mysql_dir = os.sep + os.path.join('code', 'mysql')
         if os.path.isdir(cf.DEFAULT_LOCAL_BASE):
-            mysql_dir = os.path.join(cf.DEFAULT_LOCAL_BASE, mysql_dir)
+            mysql_dir = cf.DEFAULT_LOCAL_BASE + mysql_dir
         self.import_schema('KnowNet', os.path.join(mysql_dir, 'KnowNet.sql'))
         for table in import_tables:
             tablefile = os.path.join(mysql_dir, table)
@@ -298,6 +346,23 @@ class MySQL(object):
                             ' RENAME ' + new_database + '.' + new_table + ';')
         self.conn.commit()
 
+    def copy_table(self, old_database, old_table, new_database, new_table):
+        """Copy a table in the MySQL database
+
+        Copy the provided tablename to the MySQL database.
+
+        Args:
+            tablename (str): name of the table to add to the MySQL database
+
+        Returns:
+        """
+        table1 = old_database + '.' + old_table
+        table2 = new_database + '.' + new_table
+        self.create_table(table2, ' LIKE ' + table1)
+        cmd = 'INSERT INTO ' + table2 + ' SELECT * FROM ' + table1
+        self.cursor.execute(cmd)
+        self.conn.commit()
+
     def insert(self, tablename, cmd):
         """Insert into tablename using cmd.
 
@@ -311,10 +376,10 @@ class MySQL(object):
         """
         self.cursor.execute('INSERT INTO ' + tablename + ' ' + cmd + ';')
         self.conn.commit()
-    
+
     def execute(self, cmd):
         """Run the provided command in MySQL.
-        
+
         This runs the provided command using the current MySQL connection and
         cursor.
 
@@ -322,9 +387,30 @@ class MySQL(object):
             cmd (str): the SQL command to run on the MySQL server
 
         Returns:
+            (list): the fetched results
         """
         self.cursor.execute(cmd + ';')
         self.conn.commit()
+
+    def query_distinct(self, query, table, cmd = ''):
+        """Run the provided query distinct in MySQL.
+
+        This runs the provided distinct query from the provided table with the
+        optional extra cmd using the current MySQL connection and cursor. It
+        then returns the fetched results.
+
+        Args:
+            query (str): the SQL query to run on the MySQL server
+            table (str): the table to query from
+            cmd (str): the addtional SQL command to run on the MySQL server
+                (optional)
+
+        Returns:
+            (list): the fetched results
+        """
+        cmd = 'SELECT DISTINCT ' + query + ' FROM ' + table + ' ' + cmd + ';'
+        self.cursor.execute(cmd)
+        return self.cursor.fetchall()
 
     def import_schema(self, database, sqlfile):
         """Import the schema for the provided database from sqlfile.
@@ -365,14 +451,13 @@ class MySQL(object):
 
     def close(self):
         """Close connection to the MySQL server.
-        
+
         This commits any changes remaining and closes the connection to the
         MySQL server.
-        
+
         Args:
-        
+
         Returns:
         """
         self.conn.commit()
         self.conn.close()
-
