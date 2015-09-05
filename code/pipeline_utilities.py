@@ -225,7 +225,6 @@ def curl_handler(args, jobname, job_str):
     Returns:
     """
     local_code_dir = os.path.join(args.local_dir, args.code_path)
-    os.chdir(local_code_dir)
     jobs_dir = os.path.join(local_code_dir, "chron_jobs")
     if not os.path.exists(jobs_dir):
         os.makedirs(jobs_dir)
@@ -251,7 +250,68 @@ def curl_handler(args, jobname, job_str):
     os.chmod(shfile, 777)
     subprocess.call(['sh', "-c", shfile])
     os.remove(shfile)
-#    connection.close()
+    #connection.close()
+
+
+def list_parents(args, dependencies, response_str, parent_string):
+    """given a list of dependencies, creates and tracks the parents required
+    for the job sent to the cloud
+
+    For each dependency, checks if that parent is on the queue, if not, curls
+    dummy job and adds to parent list.  If so, checks to see that the parent's
+    last update was not a success and adds to parent list.  Returns list of
+    parents to be added to json job description.
+
+    Args:
+        args: arguments from parse_args()
+        dependencies: list of jobs dependencies
+        response_str: array of json job descriptions on queue
+        parent_string: string to map dependencies to parent job names
+
+    Returns:
+        parents: list of parents to be added to json job description.
+"""
+    parents = []
+    jobs = json.loads(response_str)
+    for depend in dependencies:
+        dep_jobname = "-".join([parent_string, depend])
+        jname = -1
+        jsucc = -1
+        jerr = -1
+        for job in jobs:
+            if dep_jobname == job["name"]:
+                jname = job["name"]
+                if job["lastSuccess"] is not '':
+                    jsucc = job["lastSuccess"]
+                if job["lastError"] is not '':
+                    jerr = job["lastError"]
+        # end loop through jobs
+        print("\t".join([dep_jobname, str(jname), str(jsucc), str(jerr)]))
+        if jname == -1: # no parent on queue
+            # schedule dummy parent add dependancy
+            dummy_str = ""
+            with open(os.path.join(args.local_dir, args.code_path,
+                                   "dummy_template.json"), 'r') as infile:
+                dummy_str = infile.read(10000)
+
+            dummy_str = dummy_str.replace("TMPJOB", dep_jobname)
+            dummy_str = dummy_str.replace("TMPIMG", args.image)
+            dummy_str = dummy_str.replace("TMPDATADIR",
+                                          os.path.join(args.cloud_dir, args.data_path))
+            dummy_str = dummy_str.replace("TMPCODEDIR",
+                                          os.path.join(args.cloud_dir, args.code_path))
+            curl_handler(args, dep_jobname, dummy_str)
+            parents.append(dep_jobname)
+
+        elif jsucc == -1: # parent on queue but not succeeded
+            # add dependency
+            parents.append(dep_jobname)
+        elif not jerr == -1: # parent on queue, succeed, has error
+            if jsucc > jerr: # error happened before success
+                # add dependency
+                parents.append(dep_jobname)
+    # end dependencies loop
+    return parents
 
 
 def run_cloud_check(args):
@@ -275,7 +335,7 @@ def run_cloud_check(args):
     cloud_data_dir = os.path.join(args.cloud_dir, args.data_path)
 
     ctr = 0
-#    connection = http.client.HTTPConnection(args.chronos)
+    #connection = http.client.HTTPConnection(args.chronos)
     for filename in sorted(os.listdir(local_code_dir)):
         if not filename.endswith(".py"):
             continue
@@ -432,12 +492,11 @@ def run_cloud_table(args):
         jobname = jobname.replace(".", "-")
 
         pipeline_cmd = ""
-#        if args.run_mode == "PIPELINE":
+        #if args.run_mode == "PIPELINE":
 
         ctr += 1
         print("\t".join([str(ctr), chunk_name]))
 
-        parents = []
         job_str = ""
         with open(template_file, 'r') as infile:
             job_str = infile.read(10000)
@@ -456,51 +515,15 @@ def run_cloud_table(args):
             version_dict = json.load(infile)
 
         dependencies = version_dict["dependencies"]
+        parents = []
         if len(dependencies) > 0:
             # check status of queue
             connection.request("GET", "/scheduler/jobs")
             response = connection.getresponse().read()
             response_str = response.decode("utf-8")
+            parent_string = "-".join(["fetch", src])
+            parents = list_parents(args, dependencies, response_str, parent_string)
 
-            jobs = json.loads(response_str)
-            for depend in dependencies:
-                dep_jobname = "-".join(["fetch", src, depend])
-                jname = -1
-                jsucc = -1
-                jerr = -1
-                for job in jobs:
-                    if dep_jobname == job["name"]:
-                        jname = job["name"]
-                        if job["lastSuccess"] is not '':
-                            jsucc = job["lastSuccess"]
-                        if job["lastError"] is not '':
-                            jerr = job["lastError"]
-                # end loop through jobs
-                print("\t".join([chunk_name, depend, dep_jobname,
-                                 str(jname), str(jsucc), str(jerr)]))
-                if jname == -1: # no parent on queue
-                    # schedule dummy parent add dependancy
-                    dummy_str = ""
-                    with open(dummy_template_file, 'r') as infile:
-                        dummy_str = infile.read(10000)
-
-                    dummy_str = dummy_str.replace("TMPJOB", dep_jobname)
-                    dummy_str = dummy_str.replace("TMPIMG", args.image)
-                    dummy_str = dummy_str.replace("TMPDATADIR", cloud_data_dir)
-                    dummy_str = dummy_str.replace("TMPCODEDIR", cloud_code_dir)
-
-                    curl_handler(args, dep_jobname, dummy_str)
-                    parents.append(dep_jobname)
-
-                elif jsucc == -1: # parent on queue but not succeeded
-                    # add dependency
-                    parents.append(dep_jobname)
-                elif not jerr == -1: # parent on queue, succeed, has error
-                    if jsucc > jerr: # error happened before success
-                        # add dependency
-                        parents.append(dep_jobname)
-            # end dependencies loop
-        # end if dependencies
         launch_cmd = '"schedule": "R1\/\/P3M"'
         print(parents)
         if len(parents) > 0:
