@@ -1,4 +1,6 @@
 raw_downloads/*
 code/chron_jobs/
+code/log*
+id_map/
 jobs/*
 *.pyc
