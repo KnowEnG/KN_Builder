@@ -94,19 +94,25 @@ def create_mapping_dicts(alias):
     table = 'all_mappings'
     cmd = "WHERE species='" + alias + "'"
     map_dir = os.sep + cf.DEFAULT_MAP_PATH
+    species_dir = os.sep + cf.DEFAULT_DATA_PATH
     if os.path.isdir(cf.DEFAULT_LOCAL_BASE):
         map_dir = cf.DEFAULT_LOCAL_BASE + map_dir
+        species_dir = cf.DEFAULT_LOCAL_BASE + species_dir
+        species_dir = os.path.join(species_dir, 'species', 'species_map')
     if not os.path.isdir(map_dir):
         os.mkdir(map_dir)
+    with open(os.path.join(species_dir, 'species.species_map.json')) as infile:
+        species_map = json.load(infile)
+    taxid = str(species_map[alias.capitalize().replace('_', ' ')])
     db = MySQL(database)
     results = db.query_distinct('stable_id, stable_id', table, cmd)
     with open(os.path.join(map_dir, alias + '_stable.json'), 'w') as outfile:
         map_dict = create_dictionary(results)
-        json.dump(map_dict, outfile)
+        json.dump(map_dict, outfile, indent=4)
     results = db.query_distinct('dbprimary_acc, stable_id', table, cmd)
     with open(os.path.join(map_dir, alias + '_unique.json'), 'w') as outfile:
         map_dict = create_dictionary(results)
-        json.dump(map_dict, outfile)
+        json.dump(map_dict, outfile, indent=4)
 
 def get_database():
     """Returns an object of the MySQL class.
