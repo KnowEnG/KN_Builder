@@ -5,6 +5,17 @@ Classes:
         interacting with the MySQL DB.
 
 Functions:
+    combine_tables(str): Combine all of the data imported for the provided
+        alias (str) into a single db
+    create_dictionary(list)->dict: Creates a dictionary from a MySQL fetched
+        results
+    create_mapping_dicts(str): Creates the mapping dictionaries for the
+        provided alias (str)
+    get_database: Returns an object of the MySQL class
+    get_insert_cmd(str)->str: Returns the MySQL command to be used with an
+        insert for the provided step
+    import_ensembl(str): Imports the ensembl data for the provided alias (str)
+        into the KnowEnG database
 
 Variables:
 """
@@ -15,18 +26,41 @@ import os
 import json
 import subprocess
 
-def get_database():
-    """Returns an object of the MySQL class.
+def combine_tables(alias):
+    """Combine all of the data imported from ensembl for the provided alias
+    into a single database.
 
-    This returns an object of the MySQL class to allow access to its functions
-    if the module is imported.
+    This combines the imported tables into a single table knownet_mappings with
+    information from genes, transcripts, and translations. It then merges this
+    table into the KnowNet database for use in gene identifier mapping.
 
     Args:
+        alias (str): An alias defined in ensembl.aliases.
 
     Returns:
-        class: a source class object
     """
-    return MySQL()
+    alias_db = 'ensembl_' + alias
+    tablename = 'knownet_mappings'
+    combined_db = 'KnowNet'
+    combined_table = alias + '_mappings'
+    all_table = 'all_mappings'
+    steps = ['transcript', 'translation', 'transcript2stable',
+             'translation2stable']
+    db = MySQL(alias_db)
+    db.create_table(tablename, get_insert_cmd('gene'))
+    for step in steps:
+        db.insert(tablename, get_insert_cmd(step))
+    db.drop_table(combined_db + '.' + combined_table)
+    db.move_table(alias_db, tablename, combined_db, combined_table)
+    db.use_db(combined_db)
+    cmd = ("SELECT *, db_display_name AS species FROM " + alias + "_mappings "
+           "WHERE 1=2")
+    db.create_table(all_table, cmd)
+    cmd = ("DELETE FROM " + all_table + " WHERE species = '" + alias + "'")
+    db.execute(cmd)
+    cmd = ("SELECT *, '" + alias + "' AS species FROM " + alias + "_mappings")
+    db.insert(all_table, cmd)
+    db.close()
 
 def create_dictionary(results):
     """Creates a dictionary from a MySQL fetched results.
@@ -74,26 +108,18 @@ def create_mapping_dicts(alias):
         map_dict = create_dictionary(results)
         json.dump(map_dict, outfile)
 
-def import_ensembl(alias):
-    """Imports the ensembl data for the provided alias into the KnowEnG
-    database.
+def get_database():
+    """Returns an object of the MySQL class.
 
-    This produces the local copy of the fetched ensembl database for alias.
-    It drops the existing database, creates a new database, imports the
-    relevant ensembl sql schema, and imports the table.
+    This returns an object of the MySQL class to allow access to its functions
+    if the module is imported.
 
     Args:
-        alias (str): An alias defined in ensembl.aliases.
 
     Returns:
+        class: a source class object
     """
-    database = 'ensembl_' + alias
-    db = MySQL()
-    db.init_KnowNet()
-    db.drop_db(database)
-    db.import_schema(database, 'schema.sql')
-    db.import_table(database, '*.txt')
-    db.close()
+    return MySQL()
 
 def get_insert_cmd(step):
     """Returns the command to be used with an insert for the provided step.
@@ -112,107 +138,92 @@ def get_insert_cmd(step):
     """
     if step == 'gene':
         cmd = ("SELECT DISTINCT xref.dbprimary_acc, external_db.db_name, "
-                "external_db.priority, external_db.db_display_name, "
-                "gene.stable_id "
-                "FROM xref INNER JOIN external_db "
-                "ON xref.external_db_id = external_db.external_db_id "
-                "INNER JOIN object_xref "
-                "ON xref.xref_id = object_xref.xref_id "
-                "INNER JOIN gene "
-                "ON object_xref.ensembl_id = gene.gene_id "
-                "WHERE object_xref.ensembl_object_type = 'Gene'")
+               "external_db.priority, external_db.db_display_name, "
+               "gene.stable_id "
+               "FROM xref INNER JOIN external_db "
+               "ON xref.external_db_id = external_db.external_db_id "
+               "INNER JOIN object_xref "
+               "ON xref.xref_id = object_xref.xref_id "
+               "INNER JOIN gene "
+               "ON object_xref.ensembl_id = gene.gene_id "
+               "WHERE object_xref.ensembl_object_type = 'Gene'")
     elif step == 'transcript':
         cmd = ("SELECT DISTINCT xref.dbprimary_acc, external_db.db_name, "
-                "external_db.priority, external_db.db_display_name, "
-                "gene.stable_id "
-                "FROM xref INNER JOIN external_db "
-                "ON xref.external_db_id = external_db.external_db_id "
-                "INNER JOIN object_xref "
-                "ON xref.xref_id = object_xref.xref_id "
-                "INNER JOIN transcript "
-                "ON object_xref.ensembl_id = transcript.transcript_id "
-                "INNER JOIN gene "
-                "ON transcript.gene_id = gene.gene_id "
-                "WHERE object_xref.ensembl_object_type = 'Transcript'")
+               "external_db.priority, external_db.db_display_name, "
+               "gene.stable_id "
+               "FROM xref INNER JOIN external_db "
+               "ON xref.external_db_id = external_db.external_db_id "
+               "INNER JOIN object_xref "
+               "ON xref.xref_id = object_xref.xref_id "
+               "INNER JOIN transcript "
+               "ON object_xref.ensembl_id = transcript.transcript_id "
+               "INNER JOIN gene "
+               "ON transcript.gene_id = gene.gene_id "
+               "WHERE object_xref.ensembl_object_type = 'Transcript'")
     elif step == 'translation':
         cmd = ("SELECT DISTINCT xref.dbprimary_acc, external_db.db_name, "
-                "external_db.priority, external_db.db_display_name, "
-                "gene.stable_id "
-                "FROM xref INNER JOIN external_db "
-                "ON xref.external_db_id = external_db.external_db_id "
-                "INNER JOIN object_xref "
-                "ON xref.xref_id = object_xref.xref_id "
-                "INNER JOIN translation "
-                "ON object_xref.ensembl_id = translation.translation_id "
-                "INNER JOIN transcript "
-                "ON translation.transcript_id = transcript.transcript_id "
-                "INNER JOIN gene "
-                "ON transcript.gene_id = gene.gene_id "
-                "WHERE object_xref.ensembl_object_type = 'Translation'")
+               "external_db.priority, external_db.db_display_name, "
+               "gene.stable_id "
+               "FROM xref INNER JOIN external_db "
+               "ON xref.external_db_id = external_db.external_db_id "
+               "INNER JOIN object_xref "
+               "ON xref.xref_id = object_xref.xref_id "
+               "INNER JOIN translation "
+               "ON object_xref.ensembl_id = translation.translation_id "
+               "INNER JOIN transcript "
+               "ON translation.transcript_id = transcript.transcript_id "
+               "INNER JOIN gene "
+               "ON transcript.gene_id = gene.gene_id "
+               "WHERE object_xref.ensembl_object_type = 'Translation'")
     elif step == 'transcript2stable':
         cmd = ("SELECT DISTINCT transcript.stable_id AS dbprimary_acc, "
-                "'ensembl' AS db_name, "
-                "1000 AS priority, "
-                "'ensembl' AS db_display_name, "
-                "gene.stable_id "
-                "FROM transcript "
-                "INNER JOIN gene "
-                "ON transcript.gene_id = gene.gene_id")
+               "'ensembl' AS db_name, "
+               "1000 AS priority, "
+               "'ensembl' AS db_display_name, "
+               "gene.stable_id "
+               "FROM transcript "
+               "INNER JOIN gene "
+               "ON transcript.gene_id = gene.gene_id")
     elif step == 'translation2stable':
         cmd = ("SELECT DISTINCT translation.stable_id AS dbprimary_acc, "
-                "'ensembl' AS db_name, "
-                "1000 AS priority, "
-                "'ensembl' AS db_display_name, "
-                "gene.stable_id "
-                "FROM translation "
-                "INNER JOIN transcript "
-                "ON translation.transcript_id = transcript.transcript_id "
-                "INNER JOIN gene "
-                "ON transcript.gene_id = gene.gene_id")
+               "'ensembl' AS db_name, "
+               "1000 AS priority, "
+               "'ensembl' AS db_display_name, "
+               "gene.stable_id "
+               "FROM translation "
+               "INNER JOIN transcript "
+               "ON translation.transcript_id = transcript.transcript_id "
+               "INNER JOIN gene "
+               "ON transcript.gene_id = gene.gene_id")
     else:
         cmd = ''
     return cmd
 
-def combine_tables(alias):
-    """Combine all of the data imported from ensembl for the provided alias
-    into a single database.
+def import_ensembl(alias):
+    """Imports the ensembl data for the provided alias into the KnowEnG
+    database.
 
-    This combines the imported tables into a single table knownet_mappings with
-    information from genes, transcripts, and translations. It then merges this
-    table into the KnowNet database for use in gene identifier mapping.
+    This produces the local copy of the fetched ensembl database for alias.
+    It drops the existing database, creates a new database, imports the
+    relevant ensembl sql schema, and imports the table.
 
     Args:
         alias (str): An alias defined in ensembl.aliases.
 
     Returns:
     """
-    alias_db = 'ensembl_' + alias
-    tablename = 'knownet_mappings'
-    combined_db = 'KnowNet'
-    combined_table = alias + '_mappings'
-    all_table = 'all_mappings'
-    steps = ['transcript', 'translation', 'transcript2stable',
-                'translation2stable']
-    db = MySQL(alias_db)
-    db.create_table(tablename, get_insert_cmd('gene'))
-    for step in steps:
-        db.insert(tablename, get_insert_cmd(step))
-    db.drop_table(combined_db + '.' + combined_table)
-    db.move_table(alias_db, tablename, combined_db, combined_table)
-    db.use_db(combined_db)
-    cmd = ("SELECT *, db_display_name AS species FROM " + alias + "_mappings "
-            "WHERE 1=2")
-    db.create_table(all_table, cmd)
-    cmd = ("DELETE FROM " + all_table + " WHERE species = '" + alias + "'")
-    db.execute(cmd)
-    cmd = ("SELECT *, '" + alias + "' AS species FROM " + alias + "_mappings")
-    db.insert(all_table, cmd)
+    database = 'ensembl_' + alias
+    db = MySQL()
+    db.init_knownet()
+    db.drop_db(database)
+    db.import_schema(database, 'schema.sql')
+    db.import_table(database, '*.txt')
     db.close()
 
 class MySQL(object):
     """Class providing functionality for interacting with the MySQL database.
 
-    This class serves as a wrapper for interacting with the KnowEnG MySQL db.MySQL
+    This class serves as a wrapper for interacting with the KnowEnG MySQL
 
     Attributes:
         host (str): the MySQL db hostname
@@ -223,7 +234,7 @@ class MySQL(object):
         conn (object): connection object for the database
         cursor (object): cursor object for the database
     """
-    def __init__(self, database = None):
+    def __init__(self, database=None):
         """Init a MySQL object with the provided parameters.
 
         Constructs a MySQL object with the provided parameters, and connect to
@@ -238,12 +249,12 @@ class MySQL(object):
         self.passw = cf.DEFAULT_MYSQL_PASS
         self.database = database
         if self.database is None:
-            self.conn = sql.connect( host=self.host, port=self.port,
+            self.conn = sql.connect(host=self.host, port=self.port,
                                     user=self.user, password=self.passw)
         else:
-            self.conn = sql.connect( host=self.host, port=self.port,
+            self.conn = sql.connect(host=self.host, port=self.port,
                                     user=self.user, password=self.passw,
-                                    db = self.database)
+                                    db=self.database)
         self.cursor = self.conn.cursor()
 
     def drop_db(self, database):
@@ -259,7 +270,7 @@ class MySQL(object):
         self.cursor.execute('DROP DATABASE IF EXISTS ' + database + ';')
         self.conn.commit()
 
-    def init_KnowNet(self):
+    def init_knownet(self):
         """Inits the Knowledge Network MySQL DB.
 
         Creates the KnowNet database and all of its tables if they do not
@@ -305,7 +316,7 @@ class MySQL(object):
         self.cursor.execute('USE ' + database + ';')
         self.conn.commit()
 
-    def create_table(self, tablename, cmd = ''):
+    def create_table(self, tablename, cmd=''):
         """Add a table to the MySQL database.
 
         Adds the provided tablename to the MySQL database. If cmd is specified,
@@ -392,7 +403,7 @@ class MySQL(object):
         self.cursor.execute(cmd + ';')
         self.conn.commit()
 
-    def query_distinct(self, query, table, cmd = ''):
+    def query_distinct(self, query, table, cmd=''):
         """Run the provided query distinct in MySQL.
 
         This runs the provided distinct query from the provided table with the
@@ -415,8 +426,8 @@ class MySQL(object):
     def import_schema(self, database, sqlfile):
         """Import the schema for the provided database from sqlfile.
 
-        Removes the provided database if it exists, creates a new one, and imports
-        the schema as defined in the provided sqlfile.
+        Removes the provided database if it exists, creates a new one, and
+        imports the schema as defined in the provided sqlfile.
 
         Args:
             database (str): name of the database to add to the MySQL server
@@ -427,10 +438,10 @@ class MySQL(object):
         """
         self.create_db(database)
         cmd = ['mysql', '-u', self.user, '-h', self.host, '--port', self.port,
-                '--password='+self.passw, database, '<', sqlfile]
+               '--password='+self.passw, database, '<', sqlfile]
         subprocess.call(' '.join(cmd), shell=True)
 
-    def import_table(self, database, tablefile, import_flags = '--delete'):
+    def import_table(self, database, tablefile, import_flags='--delete'):
         """Import the data for the table in the provided database described by
         tablefile.
 
@@ -445,8 +456,8 @@ class MySQL(object):
         Returns:
         """
         cmd = ['mysqlimport', '-u', self.user, '-h', self.host, '--port',
-                self.port, '--password='+self.passw, import_flags,
-                '--fields_escaped_by=\\\\', database, '-L', tablefile]
+               self.port, '--password='+self.passw, import_flags,
+               '--fields_escaped_by=\\\\', database, '-L', tablefile]
         subprocess.call(' '.join(cmd), shell=True)
 
     def close(self):

@@ -24,16 +24,16 @@ import time
 import shutil
 
 TABLE_LIST = ['external_db', 'gene', 'object_xref', 'transcript',
-            'translation', 'xref']
+              'translation', 'xref']
 
 def get_SrcClass():
     """Returns an object of the source class.
 
     This returns an object of the source class to allow access to its functions
     if the module is imported.
-    
+
     Args:
-    
+
     Returns:
         class: a source class object
     """
@@ -58,6 +58,19 @@ def fetch(version_dict):
         shutil.move(download(version_dict), table + '.txt')
 
 def db_import(version_json):
+    """Imports the data into the database and saves local id mapping
+    dictionaries.
+
+    This takes the path to a version_json (source.alias.json) and imports all
+    relevant tables into the database. It then combines all the relevant tables
+    for gene id mapping, and saves local copies of the mapping dictionaries.
+
+    Args:
+        version_json (dict): path to the version dictionary describing the
+            source:alias
+
+    Returns:
+    """
     with open(version_json, 'r') as infile:
         version_dict = json.load(infile)
     db.import_ensembl(version_dict['alias'])
@@ -81,12 +94,12 @@ class Ensembl(SrcClass):
         """
         name = 'ensembl'
         url_base = 'ftp.ensembl.org'
-        aliases = { "mus_musculus": "",
-                    "arabidopsis_thaliana": "",
-                    "saccharomyces_cerevisiae": "",
-                    "caenorhabditis_elegans": "",
-                    "drosophila_melanogaster": "",
-                    "homo_sapiens": ""}
+        aliases = {"mus_musculus": "",
+                   "arabidopsis_thaliana": "",
+                   "saccharomyces_cerevisiae": "",
+                   "caenorhabditis_elegans": "",
+                   "drosophila_melanogaster": "",
+                   "homo_sapiens": ""}
         super(Ensembl, self).__init__(name, url_base, aliases)
         self.url_base_plants = 'ftp.ensemblgenomes.org'
 
@@ -235,7 +248,7 @@ class Ensembl(SrcClass):
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
-        
+
         This returns a boolean representing if the alias corresponds to a file
         used for mapping. By default this returns True if the alias ends in
         '_map' and False otherwise.
@@ -246,74 +259,7 @@ class Ensembl(SrcClass):
         Returns:
             bool: Whether or not the alias is used for mapping.
         """
-        return super(Ensembl, self).is_map(alias)
-
-    def get_dependencies(self, alias):
-        """Return a list of other aliases that the provided alias depends on.
-
-        This returns a list of other aliases that must be processed before
-        full processing of the provided alias can be completed.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            list: The other aliases defined in self.aliases that the provided
-                alias depends on.
-        """
-        return super(Ensembl, self).get_dependencies(alias)
-
-    def create_mapping_dict(self, filename):
-        """Return a mapping dictionary for the provided file.
-
-        This returns a dictionary for use in mapping nodes or edge types from
-        the file specified by filetype. By default it opens the file specified
-        by filename creates a dictionary using the first column as the key and
-        the second column as the value.
-
-        Args:
-            filename(str): The name of the file containing the information
-                needed to produce the maping dictionary.
-
-        Returns:
-            dict: A dictionary for use in mapping nodes or edge types.
-        """
-        return super(Ensembl, self).create_mapping_dict(filename)
-
-    def table(self, rawline, version_dict):
-        """Uses the provided raw_lines file to produce a 2table_edge file, an
-        edge_meta file, and a node_meta file (only for property nodes).
-
-        This returns noting but produces the 2table formatted files from the
-        provided raw_lines file:
-            raw_lines table (file, line num, line_chksum, rawline)
-            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec, 
-                            n2name, n2hint, n2type, n2spec, et_hint, score)
-            edge_meta (line_cksum, info_type, info_desc)
-            node_meta (line_cksum, node_num (1 or 2), 
-                       info_type (evidence, relationship, experiment, or link),
-                       info_desc (text))
-        By default this function does nothing (must be overridden)
-
-        Args:
-            rawline(str): The path to the raw_lines file
-            version_dict (dict): A dictionary describing the attributes of the
-                alias for a source.
-
-        Returns:
-        """
-        return table(rawline, version_dict)
+        return True
 
 if __name__ == "__main__":
-    """Runs compare_versions (see utilities.compare_versions) on a ensembl
-    object if no 
-
-    This runs the compare_versions function on a ensembl object to find the
-    version information of the source and determine if a fetch is needed. The
-    version information is also printed.
-
-    Returns:
-        dict: A nested dictionary describing the version information for each
-            alias described in ensembl.
-    """
     compare_versions(Ensembl())
