@@ -1,5 +1,5 @@
-"""Utiliites for running single or multiple steps of the pipeline either
-        locally or on the cloud.
+"""Utiliites for running single or multiple steps of the supermaster pipeline
+        either locally or on the cloud.
 
 Classes:
 
@@ -8,8 +8,6 @@ Functions:
         necessary checks.  If args.run_mode is'PIPELINE', calls next step
     run_local_fetch(args) -> : takes in all command line arguments.  Runs all
         necessary fetches.  If args.run_mode is'PIPELINE', calls next step
-    run_local_table(args) -> : takes in all command line arguments.  Runs all
-        necessary tables.  If args.run_mode is'PIPELINE', calls next step
 
     run_cloud_check(args) -> : takes in all command line arguments.  Runs all
         necessary checks on cloud.  If args.run_mode is'PIPELINE', each job
@@ -17,10 +15,6 @@ Functions:
     run_cloud_fetch(args) -> : takes in all command line arguments and a
         starting source (-p).  Runs all fetches for all aliases of specified
         source on cloud.  If args.run_mode is'PIPELINE', each job
-        calls its next step
-    run_cloud_table(args) -> : takes in all command line arguments and a
-        starting source,alias (-p).  Runs all tables for all chunks in the 
-        source,alias on cloud.  If args.run_mode is'PIPELINE', each job
         calls its next step
 
     curl_handler(args, jobname, job_str) -> : handles creating and sending
@@ -34,6 +28,7 @@ Variables:
 
 from argparse import ArgumentParser
 import config_utilities as cf
+import mysql_utilities as db
 import os
 import traceback
 import sys
@@ -44,10 +39,11 @@ import http.client
 DEFAULT_START_STEP = 'CHECK'
 DEFAULT_DEPLOY_LOC = 'LOCAL'
 DEFAULT_RUN_MODE = 'STEP'
-POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE']
+POSSIBLE_STEPS = ['CHECK', 'FETCH']
+SETUP_FILES = ['species', 'ppi', 'ensembl']
 CHECK_PY = "check_utilities"
 FETCH_PY = "fetch_utilities"
-TABLE_PY = "table_utilities"
+IMPORT_PY = "import_utilities"
 CURL_PREFIX = ["curl", "-i", "-L", "-H", "'Content-Type: application/json'",
                "-X", "POST"]
 #HEADERS = {"Content-type": "application/json"}
@@ -63,7 +59,7 @@ def parse_args():
     """
     parser = ArgumentParser()
     parser.add_argument('start_step', help='select start step, must be CHECK, \
-        FETCH, or TABLE ', default=DEFAULT_START_STEP)
+        FETCH ', default=DEFAULT_START_STEP)
     parser.add_argument('deploy_loc', help='select deployment type, must be \
         LOCAL or CLOUD ', default=DEFAULT_DEPLOY_LOC)
     parser.add_argument('run_mode', help='select run mode, must be STEP or \
@@ -98,18 +94,14 @@ def run_local_check(args):
     """
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
+
     checker = __import__(CHECK_PY)
     ctr = 0
     successful = 0
     failed = 0
-    for filename in sorted(os.listdir(local_code_dir)):
-        if not filename.endswith(".py"):
-            continue
-        if 'utilities' in filename:
-            continue
+    for module in SETUP_FILES:
 
         ctr += 1
-        module = os.path.splitext(filename)[0]
         print(str(ctr) + "\t" + module)
 
         try:
@@ -141,12 +133,13 @@ def run_local_fetch(args):
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     fetcher = __import__(FETCH_PY)
+    importer = __import__(IMPORT_PY)
     local_data_dir = os.path.join(args.local_dir, args.data_path)
     os.chdir(local_data_dir)
     ctr = 0
     successful = 0
     failed = 0
-    for src_name in sorted(os.listdir(local_data_dir)):
+    for src_name in SETUP_FILES:
         print(src_name)
         for alias_name in sorted(os.listdir(os.path.join(local_data_dir, src_name))):
             alias_dir = os.path.join(local_data_dir, src_name, alias_name)
@@ -159,6 +152,8 @@ def run_local_fetch(args):
 
             try:
                 fetcher.main("file_metadata.json")
+                if src_name == 'ensembl':
+                    importer.db_import("file_metadata.json")
                 successful += 1
             except Exception as err:
                 print("ERROR: " + alias_name + " could not be fetched")
@@ -168,61 +163,8 @@ def run_local_fetch(args):
 
     print("FETCH FINISHED. Successful: {0}, Failed: {1}".format(successful, failed))
     if args.run_mode == "PIPELINE":
-        run_local_table(args)
+        pass;
 
-def run_local_table(args):
-    """Runs tables for all aliases on local machine.
-
-    This loops through all chunks in the data directory and calls
-    table_utilities main() function on each chunk passing the name of the
-    chunk and the file_metadata.json.
-
-    Args:
-        arguments from parse_args()
-
-    Returns:
-    """
-
-    local_code_dir = os.path.join(args.local_dir, args.code_path)
-    os.chdir(local_code_dir)
-    tabler = __import__(TABLE_PY)
-    local_data_dir = os.path.join(args.local_dir, args.data_path)
-    os.chdir(local_data_dir)
-    ctr = 0
-    successful = 0
-    failed = 0
-    for src_name in sorted(os.listdir(local_data_dir)):
-        print(src_name)
-        for alias_name in sorted(os.listdir(os.path.join(local_data_dir, src_name))):
-            print("\t" + alias_name)
-            alias_dir = os.path.join(local_data_dir, src_name, alias_name)
-            if not os.path.isfile(os.path.join(alias_dir, "file_metadata.json")):
-                continue
-            chunkdir = os.path.join(alias_dir, "chunks")
-            if not os.path.exists(chunkdir):
-                continue
-
-            os.chdir(alias_dir)
-            for chunk_name in sorted(os.listdir(chunkdir)):
-                if "rawline" not in chunk_name:
-                    continue
-
-                chunkfile = os.path.join("chunks", chunk_name)
-                ctr += 1
-                print(str(ctr) + "\t\t" + chunk_name)
-
-                try:
-                    tabler.main(chunkfile, "file_metadata.json")
-                    successful += 1
-                except Exception as err:
-                    print("ERROR: " + chunk_name + " could not be tabled")
-                    print("Message: " + str(err))
-                    print(traceback.format_exc())
-                    failed += 1
-
-    print("TABLE FINISHED. Successful: {0}, Failed: {1}".format(successful, failed))
-    if args.run_mode == "PIPELINE":
-        pass
 
 def curl_handler(args, jobname, job_str):
     """handles creating and sending jobs to the cloud.
@@ -264,6 +206,7 @@ def curl_handler(args, jobname, job_str):
     subprocess.call(['sh', "-c", shfile])
     os.remove(shfile)
     #connection.close()
+
 
 def list_parents(args, dependencies, response_str, parent_string):
     """given a list of dependencies, creates and tracks the parents required
@@ -348,13 +291,7 @@ def run_cloud_check(args):
 
     ctr = 0
     #connection = http.client.HTTPConnection(args.chronos)
-    for filename in sorted(os.listdir(local_code_dir)):
-        if not filename.endswith(".py"):
-            continue
-        if 'utilities' in filename:
-            continue
-
-        module = os.path.splitext(filename)[0]
+    for module in SETUP_FILES:
         jobname = "-".join(["check", module])
         jobname = jobname.replace(".", "-")
         pipeline_cmd = ""
@@ -378,14 +315,13 @@ def run_cloud_check(args):
 
         curl_handler(args, jobname, job_str)
 
-
 def run_cloud_fetch(args):
     """Runs fetches for all aliases of a single source on
     the cloud.
 
     For a single source, this loops through all aliases in the data directory,
     creates a json chronos jobs for each alias that calls fetch_utilities
-    main() (and if run_mode 'PIPELINE', the call to pipeline_utilities TABLE)
+    main() (and if run_mode 'PIPELINE', the call to )
     and curls json to chronos.
 
     Args:
@@ -421,12 +357,8 @@ def run_cloud_fetch(args):
         pipeline_cmd = ""
         print(args.run_mode)
         if args.run_mode == "PIPELINE":
-            new_opts = [opt.replace(args.local_dir, '/') for opt in sys.argv[2:]]
-            if '-p' in new_opts:
-                new_opts.remove('-p')
-                new_opts.remove(args.step_parameters)
-            pipeline_cmd = "python3 /code/pipeline_utilities.py TABLE {0} -p \
-                {1};".format(" ".join(new_opts), src + "," + alias)
+            if src=='ensembl':
+                pipeline_cmd = "/usr/bin/time -v python3 /code/import_utilities.py file_metadata.json;"
         ctr += 1
         print("\t".join([str(ctr), src, alias]))
 
@@ -443,110 +375,6 @@ def run_cloud_fetch(args):
 
         curl_handler(args, jobname, job_str)
 
-def run_cloud_table(args):
-    """Runs table for a chunk from a single alias on the cloud.
-
-    For a single alias, this loops through all chunks in its data directory,
-    creates a json chronos jobs for each alias that calls fetch_utilities
-    main() (and if run_mode 'PIPELINE', the call to pipeline_utilities TABLE)
-    and curls json to chronos.
-
-    Args:
-        args: arguments from parse_args(), must specific --step_paramters(-p) as
-        single source,alias
-
-    Returns:
-    """
-    src, alias = args.step_parameters.split(",")
-    if args.step_parameters is '':
-        print("ERROR: 'source,alias' must be specified with --step_parameters (-p)")
-        return -1
-    print("'source,alias' specified with --step_parameters (-p): {0}".format(args.step_parameters))
-
-    local_code_dir = os.path.join(args.local_dir, args.code_path)
-    os.chdir(local_code_dir)
-    template_file = os.path.join(local_code_dir, "table_template.json")
-    dummy_template_file = os.path.join(local_code_dir, "dummy_template.json")
-
-    cloud_code_dir = os.path.join(args.cloud_dir, args.code_path)
-    cloud_data_dir = os.path.join(args.cloud_dir, args.data_path)
-
-    alias_path = os.path.join(src, alias)
-    local_alias_dir = os.path.join(args.local_dir, args.data_path, alias_path)
-    if not os.path.exists(local_alias_dir):
-        print("ERROR: 'source,alias' specified with --step_parameters (-p) \
-            option, {0}, does not have data directory: {1}\
-            ".format(args.step_parameters, local_alias_dir))
-        return -1
-
-    if not os.path.isfile(os.path.join(local_alias_dir, "file_metadata.json")):
-        print("ERROR: cannot find file_metadata.json in {0}".format(local_alias_dir))
-        return
-
-    local_chunk_dir = os.path.join(local_alias_dir, "chunks")
-    if not os.path.exists(local_chunk_dir):
-        return
-
-    os.chdir(local_alias_dir)
-    ctr = 0
-
-    connection = http.client.HTTPConnection(args.chronos)
-    for chunk_name in sorted(os.listdir(local_chunk_dir)):
-        if "rawline" not in chunk_name:
-            continue
-
-        chunkfile = os.path.join("chunks", chunk_name)
-        ctr += 1
-        print(str(ctr) + "\t" + chunk_name)
-
-        jobname = "-".join(["table", chunk_name])
-        jobname = jobname.replace(".txt", "")
-        jobname = jobname.replace(".", "-")
-
-        pipeline_cmd = ""
-        #if args.run_mode == "PIPELINE":
-
-        ctr += 1
-        print("\t".join([str(ctr), chunk_name]))
-
-        job_str = ""
-        with open(template_file, 'r') as infile:
-            job_str = infile.read(10000)
-
-        job_str = job_str.replace("TMPJOB", jobname)
-        job_str = job_str.replace("TMPIMG", args.image)
-        job_str = job_str.replace("TMPDATADIR", cloud_data_dir)
-        job_str = job_str.replace("TMPCODEDIR", cloud_code_dir)
-        job_str = job_str.replace("TMPALIASPATH", alias_path)
-        job_str = job_str.replace("TMPCHUNK", chunkfile)
-        job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
-
-        ## check for dependencies
-        version_dict = {}
-        with open("file_metadata.json", 'r') as infile:
-            version_dict = json.load(infile)
-
-        dependencies = version_dict["dependencies"]
-        parents = []
-        if len(dependencies) > 0:
-            # check status of queue
-            connection.request("GET", "/scheduler/jobs")
-            response = connection.getresponse().read()
-            response_str = response.decode("utf-8")
-            parent_string = "-".join(["fetch", src])
-            parents = list_parents(args, dependencies, response_str, parent_string)
-
-        launch_cmd = '"schedule": "R1\/\/P3M"'
-        print(parents)
-        if len(parents) > 0:
-            launch_cmd = '"parents": ' + str(parents)
-        job_str = job_str.replace("TMPLAUNCH", launch_cmd)
-
-        curl_handler(args, jobname, job_str)
-    # end chunk
-    connection.close()
-
-
 def main():
     """Runs the 'start_step' step of the pipeline on the 'deploy_loc' local or
     cloud location, and all subsequent steps if PIPELINE 'run_mode'
@@ -560,17 +388,19 @@ def main():
     """
 
     args = parse_args()
+
     if not args.run_mode == 'PIPELINE' and not args.run_mode == 'STEP':
         print(args.run_mode + ' is an unacceptable run_mode.  Must be STEP or PIPELINE')
         return
+
+    knownet = db.MySQL()
+    knownet.init_knownet()
 
     if args.deploy_loc == 'LOCAL':
         if args.start_step == 'CHECK':
             run_local_check(args)
         elif args.start_step == 'FETCH':
             run_local_fetch(args)
-        elif args.start_step == 'TABLE':
-            run_local_table(args)
         else:
             print(args.start_step + ' is an unacceptable start_step.  Must be \
                 ' + str(POSSIBLE_STEPS))
@@ -581,8 +411,6 @@ def main():
             run_cloud_check(args)
         elif args.start_step == 'FETCH':
             run_cloud_fetch(args)
-        elif args.start_step == 'TABLE':
-            run_cloud_table(args)
         else:
             print(args.start_step + ' is an unacceptable start_step.  Must be \
                 ' + str(POSSIBLE_STEPS))
