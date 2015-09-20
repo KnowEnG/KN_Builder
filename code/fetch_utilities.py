@@ -12,7 +12,7 @@ Functions:
 Variables:
     ARCHIVES: list of supported archive formats.
     CHUNK_SZ: the max size (number of lines) for file chunks
-    DIR: the relative path to raw_download/source/alias/ from location of
+    DIR: the relative path to data/source/alias/ from location of
         script execution
 """
 

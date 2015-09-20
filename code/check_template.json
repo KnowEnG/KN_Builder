@@ -4,7 +4,7 @@
     "container": {
         "type": "DOCKER",
         "image": "TMPIMG",
-        "volumes": [{"containerPath": "/raw_downloads/", "hostPath":"TMPDATADIR", "mode":"RW"},
+        "volumes": [{"containerPath": "/data/", "hostPath":"TMPDATADIR", "mode":"RW"},
                     {"containerPath": "/code/", "hostPath":"TMPCODEDIR", "mode":"RW"}]
     },
     "cpus": "0.5",
