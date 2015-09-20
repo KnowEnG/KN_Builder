@@ -78,6 +78,42 @@ def create_dictionary(results):
         map_dict[str(raw)] = str(mapped)
     return map_dict
 
+def query_all_mappings(alias):
+    """Creates the all mappings dictionary for the provided alias.
+
+    Produces a dictionary of ensembl stable mappings and the all unique mappings
+    the provided alias. It then saves them as json objects to
+    file.
+
+    Args:
+        alias (str): An alias defined in ensembl.aliases.
+
+    Returns:
+    """
+    database = 'KnowNet'
+    table = alias + '_mappings'
+    map_dir = os.sep + cf.DEFAULT_MAP_PATH
+    species_dir = os.sep + cf.DEFAULT_DATA_PATH
+    if os.path.isdir(cf.DEFAULT_LOCAL_BASE):
+        map_dir = cf.DEFAULT_LOCAL_BASE + map_dir
+        species_dir = cf.DEFAULT_LOCAL_BASE + species_dir
+        species_dir = os.path.join(species_dir, 'species', 'species_map')
+    if not os.path.isdir(map_dir):
+        os.mkdir(map_dir)
+    with open(os.path.join(species_dir, 'species.species_map.json')) as infile:
+        species_map = json.load(infile)
+    taxid = str(species_map[alias.capitalize().replace('_', ' ')])
+    db = MySQL(database)
+    results = db.query_distinct('stable_id, stable_id', table)
+    map_dict = dict()
+    for (raw, mapped) in results:
+        map_dict[taxid + '::ENSEMBL_STABLE_ID::' + str(raw)] = str(mapped)
+    results = db.query_distinct('dbprimary_acc, db_name, stable_id', table)
+    for (raw, hint, mapped) in results:
+        map_dict['::'.join([taxid, str(hint), str(raw)])] = str(mapped)
+    with open(os.path.join(map_dir, alias + '_all.json'), 'w') as outfile:
+        json.dump(map_dict, outfile, indent=4)
+
 def create_mapping_dicts(alias):
     """Creates the mapping dictionaries for the provided alias.
 
