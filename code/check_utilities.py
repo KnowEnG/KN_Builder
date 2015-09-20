@@ -12,7 +12,7 @@ Functions:
         a fetch is required
 
 Variables:
-    DIR: relative path to the raw_download folder from location of script
+    DIR: relative path to the data folder from location of script
         execution
 """
 
@@ -23,7 +23,7 @@ import json
 import csv
 import sys
 
-DIR = os.path.join('..', 'raw_downloads')
+DIR = os.path.join('..', 'data')
 
 def get_SrcClass():
     """Returns an object of the source class.

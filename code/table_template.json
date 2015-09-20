@@ -4,10 +4,10 @@
     "container": {
         "type": "DOCKER",
         "image": "TMPIMG",
-        "volumes": [{"containerPath": "/raw_downloads/", "hostPath":"TMPDATADIR", "mode":"RW"},
+        "volumes": [{"containerPath": "/data/", "hostPath":"TMPDATADIR", "mode":"RW"},
                     {"containerPath": "/code/", "hostPath":"TMPCODEDIR", "mode":"RW"}]
     },
     "cpus": "1.5",
     "mem": "2500",
-    "command": "sh -c 'cd /raw_downloads/TMPALIASPATH; /usr/bin/time -v python3 /code/table_utilities.py TMPCHUNK file_metadata.json; TMPPIPECMD'" 
+    "command": "sh -c 'cd /data/TMPALIASPATH; /usr/bin/time -v python3 /code/table_utilities.py TMPCHUNK file_metadata.json; TMPPIPECMD'" 
 }
