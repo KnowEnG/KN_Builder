@@ -41,12 +41,11 @@ def import_ensembl(alias):
     for key in map_dict:
         (taxid, hint, foreign_key) = key.split('::')
         hint = hint.upper()
-        ens_id = map_dict[key]
+        ens_id = map_dict[key].encode()
         rkey = rdb.get('unique::' + foreign_key)
-        if not rkey:
+        if rkey is None:
             rdb.set('unique::' + foreign_key, ens_id)
-        elif rkey != ens_id:
+        elif rkey != ens_id and rkey != 'unmapped-many'.encode():
             rdb.set('unique::' + foreign_key, 'unmapped-many')
         rdb.sadd(foreign_key, '::'.join([taxid, hint]))
         rdb.set('::'.join([taxid, hint, foreign_key]), ens_id)
-
