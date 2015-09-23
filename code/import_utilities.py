@@ -11,8 +11,10 @@ Variables:
 
 import json
 import sys
+import config_utilities as cf
+from argparse import ArgumentParser
 
-def db_import(version_json):
+def db_import(version_json, args=cf.config_args()):
     """Runs the import function on the alias described by version_json.
 
     This runs the import function on the file described by version_json. The
@@ -24,9 +26,25 @@ def db_import(version_json):
         version_dict = json.load(infile)
     if version_dict['source'] == 'ensembl':
         src_module = __import__('ensembl')
-        src_module.db_import(version_json)
+        src_module.db_import(version_json, args)
+
+def main_parse_args():
+    """Processes command line arguments.
+
+    If argument is missing, supplies default value.
+
+    Returns: args as populated namespace
+    """
+    parser = ArgumentParser()
+    parser.add_argument('metadata_json', help='json file produced from check, \
+                        e.g. file_metadata.json')
+    parser = cf.add_config_args(parser)
+    args = parser.parse_args()
+    return args
 
 if __name__ == "__main__":
-    db_import(sys.argv[1])
+    args = main_parse_args()
+    db_import(args.metadata_json, args)
+
 
 

@@ -12,8 +12,9 @@ Functions:
 from check_utilities import SrcClass, compare_versions
 import urllib.request
 import time
+import config_utilities as cf
 
-def get_SrcClass():
+def get_SrcClass(args):
     """Returns an object of the source class.
 
     This returns an object of the source class to allow access to its functions
@@ -24,7 +25,7 @@ def get_SrcClass():
     Returns:
         class: a source class object
     """
-    return Ppi()
+    return Ppi(args)
 
 class Ppi(SrcClass):
     """Extends SrcClass to provide ppi specific check functions.
@@ -36,7 +37,7 @@ class Ppi(SrcClass):
     Attributes:
         see utilities.SrcClass
     """
-    def __init__(self):
+    def __init__(self, args=cf.config_args()):
         """Init a Ppi with the staticly defined parameters.
 
         This calls the SrcClass constructor (see utilities.SrcClass)
@@ -45,7 +46,7 @@ class Ppi(SrcClass):
         url_base = ('http://psidev.cvs.sourceforge.net/viewvc/*checkout*/'
                     'psidev/psi/mi/rel25/data/psi-mi25.obo')
         aliases = {"obo_map": "map file for PPI edge tyeps"}
-        super(Ppi, self).__init__(name, url_base, aliases)
+        super(Ppi, self).__init__(name, url_base, aliases, args)
 
     def get_source_version(self, alias):
         """Return the release version of the remote ppi:alias.
@@ -131,7 +132,7 @@ class Ppi(SrcClass):
         if time_str == '':
             return super(Ppi, self).get_remote_file_modified(url)
         else:
-            time_format = "%m:%d:%Y %H:%M"
+            time_format = "%d:%m:%Y %H:%M"
             return time.mktime(time.strptime(time_str, time_format))
 
     def get_remote_url(self, alias):
