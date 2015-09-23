@@ -34,7 +34,6 @@ import traceback
 import sys
 import subprocess
 import json
-import http.client
 
 DEFAULT_START_STEP = 'CHECK'
 DEFAULT_DEPLOY_LOC = 'LOCAL'
@@ -48,7 +47,7 @@ CURL_PREFIX = ["curl", "-i", "-L", "-H", "'Content-Type: application/json'",
                "-X", "POST"]
 #HEADERS = {"Content-type": "application/json"}
 
-def parse_args():
+def main_parse_args():
     """Processes command line arguments.
 
     Expects three positional arguments(start_step, deploy_loc, run_mode) and
@@ -64,21 +63,21 @@ def parse_args():
         LOCAL or CLOUD ', default=DEFAULT_DEPLOY_LOC)
     parser.add_argument('run_mode', help='select run mode, must be STEP or \
         PIPELINE', default=DEFAULT_RUN_MODE)
-    parser.add_argument('-i', '--image', help='docker image name for \
-        pipeline', default=cf.DEFAULT_DOCKER_IMG)
-    parser.add_argument('-c', '--chronos', help='url of chronos scheduler',
-                        default=cf.DEFAULT_CURL_URL)
-    parser.add_argument('-ld', '--local_dir', help='name of toplevel directory \
-        on local machine', default=cf.DEFAULT_LOCAL_BASE)
-    parser.add_argument('-cd', '--cloud_dir', help='name of toplevel directory \
-        on cloud storage', default=cf.DEFAULT_CLOUD_BASE)
-    parser.add_argument('-cp', '--code_path', help='relative path of code \
-        directory from toplevel ', default=cf.DEFAULT_CODE_PATH)
-    parser.add_argument('-dp', '--data_path', help='relative path of data \
-        directory from toplevel', default=cf.DEFAULT_DATA_PATH)
     parser.add_argument('-p', '--step_parameters', help='parameters needed \
         for single call of step in pipeline', default='')
+    parser = cf.add_config_args(parser)
     args = parser.parse_args()
+
+    config_opts = sys.argv[1:]
+    config_opts.remove(args.start_step)
+    config_opts.remove(args.deploy_loc)
+    config_opts.remove(args.run_mode)
+    if '-p' in config_opts:
+        config_opts.remove('-p')
+        config_opts.remove(args.step_parameters)
+    args.config_opts = " ".join(config_opts)
+    args.cloud_config_opts = cf.cloud_config_opts(args, config_opts)  
+    
     return args
 
 def run_local_check(args):
@@ -92,10 +91,11 @@ def run_local_check(args):
 
     Returns:
     """
+    local_data_dir = os.path.join(args.local_dir, args.data_path)
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
-
     checker = __import__(CHECK_PY)
+    
     ctr = 0
     successful = 0
     failed = 0
@@ -105,7 +105,7 @@ def run_local_check(args):
         print(str(ctr) + "\t" + module)
 
         try:
-            checker.check(module)
+            checker.check(module, args)
             successful += 1
         except Exception as err:
             print("ERROR: " + module + " could not be run")
@@ -151,9 +151,9 @@ def run_local_fetch(args):
             print(str(ctr) + "\t" + alias_name)
 
             try:
-                fetcher.main("file_metadata.json")
+                fetcher.main("file_metadata.json", args)
                 if src_name == 'ensembl':
-                    importer.db_import("file_metadata.json")
+                    importer.db_import("file_metadata.json", args)
                 successful += 1
             except Exception as err:
                 print("ERROR: " + alias_name + " could not be fetched")
@@ -163,7 +163,7 @@ def run_local_fetch(args):
 
     print("FETCH FINISHED. Successful: {0}, Failed: {1}".format(successful, failed))
     if args.run_mode == "PIPELINE":
-        pass;
+        pass
 
 
 def curl_handler(args, jobname, job_str):
@@ -206,7 +206,6 @@ def curl_handler(args, jobname, job_str):
     subprocess.call(['sh', "-c", shfile])
     os.remove(shfile)
     #connection.close()
-
 
 def list_parents(args, dependencies, response_str, parent_string):
     """given a list of dependencies, creates and tracks the parents required
@@ -284,7 +283,7 @@ def run_cloud_check(args):
     """
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
-    template_file = "check_template.json"
+    template_file = os.path.join("template","check_template.json")
 
     cloud_code_dir = os.path.join(args.cloud_dir, args.code_path)
     cloud_data_dir = os.path.join(args.cloud_dir, args.data_path)
@@ -296,9 +295,8 @@ def run_cloud_check(args):
         jobname = jobname.replace(".", "-")
         pipeline_cmd = ""
         if args.run_mode == "PIPELINE":
-            new_opts = [opt.replace(args.local_dir, '/') for opt in sys.argv[2:]]
-            pipeline_cmd = "python3 /code/pipeline_utilities.py FETCH {0} -p \
-                {1};".format(" ".join(new_opts), module)
+           pipeline_cmd = "python3 /code/pipeline_utilities.py FETCH {0} -p \
+                {1};".format(" ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts]), module)
         ctr += 1
         print(str(ctr) + "\t" + module)
 
@@ -311,6 +309,7 @@ def run_cloud_check(args):
         job_str = job_str.replace("TMPDATADIR", cloud_data_dir)
         job_str = job_str.replace("TMPCODEDIR", cloud_code_dir)
         job_str = job_str.replace("TMPSRC", module)
+        job_str = job_str.replace("TMPOPTS", args.cloud_config_opts)        
         job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
 
         curl_handler(args, jobname, job_str)
@@ -337,7 +336,7 @@ def run_cloud_fetch(args):
     print("'source' specified with --step_parameters (-p): {0}".format(src))
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
-    template_file = "fetch_template.json"
+    template_file = os.path.join("template","fetch_template.json")
 
     cloud_code_dir = os.path.join(args.cloud_dir, args.code_path)
     cloud_data_dir = os.path.join(args.cloud_dir, args.data_path)
@@ -355,10 +354,12 @@ def run_cloud_fetch(args):
         jobname = "-".join(["fetch", src, alias])
         jobname = jobname.replace(".", "-")
         pipeline_cmd = ""
-        print(args.run_mode)
+        if src == 'ensembl':
+            pipeline_cmd = "/usr/bin/time -v python3 /code/import_utilities.py \
+                                file_metadata.json {0};".format(args.cloud_config_opts)
         if args.run_mode == "PIPELINE":
-            if src=='ensembl':
-                pipeline_cmd = "/usr/bin/time -v python3 /code/import_utilities.py file_metadata.json;"
+            pass
+    
         ctr += 1
         print("\t".join([str(ctr), src, alias]))
 
@@ -371,6 +372,7 @@ def run_cloud_fetch(args):
         job_str = job_str.replace("TMPDATADIR", cloud_data_dir)
         job_str = job_str.replace("TMPCODEDIR", cloud_code_dir)
         job_str = job_str.replace("TMPALIASPATH", alias_path)
+        job_str = job_str.replace("TMPOPTS", args.cloud_config_opts)        
         job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
 
         curl_handler(args, jobname, job_str)
@@ -387,13 +389,16 @@ def main():
     Returns:
     """
 
-    args = parse_args()
-
+    args = main_parse_args()
     if not args.run_mode == 'PIPELINE' and not args.run_mode == 'STEP':
         print(args.run_mode + ' is an unacceptable run_mode.  Must be STEP or PIPELINE')
         return
 
-    knownet = db.MySQL()
+    local_data_dir = os.path.join(args.local_dir, args.data_path)
+    if not os.path.exists(local_data_dir):
+        os.makedirs(local_data_dir)
+
+    knownet = db.MySQL(None, args)
     knownet.init_knownet()
 
     if args.deploy_loc == 'LOCAL':
