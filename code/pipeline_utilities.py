@@ -215,7 +215,7 @@ def run_local_table(args):
                 print(str(ctr) + "\t\t" + chunk_name)
 
                 try:
-                    tabler.main(chunkfile, "file_metadata.json")
+                    tabler.main(chunkfile, "file_metadata.json", args)
                     successful += 1
                 except Exception as err:
                     print("ERROR: " + chunk_name + " could not be tabled")
