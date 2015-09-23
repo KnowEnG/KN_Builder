@@ -1,58 +1,82 @@
 """Extension of utilities.py to provide functions required to check the
-version information of dip and determine if it needs to be updated.
+version information of blast and determine if it needs to be updated.
 
 Classes:
-    Dip: Extends the SrcClass class and provides the static variables and
-        dip specific functions required to perform a check on dip.
+    Blast: Extends the SrcClass class and provides the static variables and
+        blast specific functions required to perform a check on blast.
 
 Functions:
-    main: runs compare_versions (see utilities.py) on a Dip object
+    get_SrcClass: returns a Blast object
+    main: runs compare_versions (see utilities.py) on a Blast object
 """
 from check_utilities import SrcClass, compare_versions
-from mitab_utilities import table
-import urllib.request
-import re
+import os
+import json
+import csv
+import math
+import config_utilities as cf
 
-def get_SrcClass():
+def get_SrcClass(args):
     """Returns an object of the source class.
 
     This returns an object of the source class to allow access to its functions
     if the module is imported.
-    
+
     Args:
-    
+
     Returns:
         class: a source class object
     """
-    return Dip()
+    return Blast(args)
 
-class Dip(SrcClass):
-    """Extends SrcClass to provide dip specific check functions.
+class Blast(SrcClass):
+    """Extends SrcClass to provide blast specific check functions.
 
-    This Dip class provides source-specific functions that check the
-    dip version information and determine if it differs from the current
+    This Blast class provides source-specific functions that check the
+    blast version information and determine if it differs from the current
     version in the Knowledge Network (KN).
 
     Attributes:
         see utilities.SrcClass
     """
-    def __init__(self):
-        """Init a Dip with the staticly defined parameters.
+    def __init__(self, args=cf.config_args()):
+        """Init a Blast with the staticly defined parameters.
 
         This calls the SrcClass constructor (see utilities.SrcClass)
         """
-        name = 'dip'
-        url_base = 'http://dip.doe-mbi.ucla.edu/dip/script/files/'
-        aliases = {"PPI": "PPI"}
-        super(Dip, self).__init__(name, url_base, aliases)
-        self.year = ''
+        name = 'blast'
+        url_base = 'http://veda.cs.uiuc.edu/blast/'
+        aliases = {"mm9_Atha10": "10090_3702",
+                   "mm9_Scer64": "10090_4932",
+                   "mm9_Cele235": "10090_6239",
+                   "mm9_Dmel5": "10090_7227",
+                   "mm9_hg19": "10090_9606",
+                   "mm9_mm9": "10090_10090",
+                   "hg19_Atha10": "9606_3702",
+                   "hg19_Scer64": "9606_4932",
+                   "hg19_Cele235": "9606_6239",
+                   "hg19_Dmel5": "9606_7227",
+                   "hg19_hg19": "9606_9606",
+                   "Dmel5_Atha10": "7227_3702",
+                   "Dmel5_Scer64": "7227_4932",
+                   "Dmel5_Cele235": "7227_6239",
+                   "Dmel5_Dmel5": "7227_7227",
+                   "Cele235_Atha10": "6239_3702",
+                   "Cele235_Scer64": "6239_4932",
+                   "Cele235_Cele235": "6239_6239",
+                   "Scer64_Atha10": "4932_3702",
+                   "Scer64_Scer64": "4932_4932",
+                   "Atha10_Atha10": "3702_3702"}
+        super(Blast, self).__init__(name, url_base, aliases, args)
+        self.sc_max =  100  # may want to load these
+        self.sc_min =  2 # may want to load these
 
     def get_source_version(self, alias):
-        """Return the release version of the remote dip:alias.
+        """Return the release version of the remote blast:alias.
 
         This returns the release version of the remote source for a specific
-        alias. This value will be the same for every alias. This value is
-        stored in the self.version dictionary object.
+        alias. This value will be the same for every alias and is 'unknown' in
+        this case. This value is stored in the self.version dictionary object.
 
         Args:
             alias (str): An alias defined in self.aliases.
@@ -60,34 +84,7 @@ class Dip(SrcClass):
         Returns:
             str: The remote version of the source.
         """
-        version = super(Dip, self).get_source_version(alias)
-        if version == 'unknown':
-            #get the year to provide a more accurate base_url
-            if self.year == '':
-                response = urllib.request.urlopen(self.url_base)
-                for line in response:
-                    d_line = line.decode()
-                    year_match = re.search(r'href="(\d{4}/)"', d_line)
-                    if year_match is not None:
-                        if year_match.group(1) > self.year:
-                            self.year = year_match.group(1)
-                response.close()
-            url = self.url_base + self.year + 'tab25/'
-            response = urllib.request.urlopen(url)
-            self.version[alias] = ''
-            the_page = response.readlines()
-            for line in the_page:
-                d_line = line.decode()
-                match = re.search(r'href="(dip\d{8}).txt"', d_line)
-                if match is not None:
-                    if match.group(1) > self.version[alias]:
-                        self.version[alias] = match.group(1)
-            response.close()
-            for alias_name in self.aliases:
-                self.version[alias_name] = self.version[alias]
-            return self.version[alias]
-        else:
-            return version
+        return super(Blast, self).get_source_version(alias)
 
     def get_local_file_info(self, alias):
         """Return a dictionary with the local file information for the alias.
@@ -100,7 +97,7 @@ class Dip(SrcClass):
         Returns:
             dict: The local file information for a given source alias.
         """
-        return super(Dip, self).get_local_file_info(alias)
+        return super(Blast, self).get_local_file_info(alias)
 
     def get_remote_file_size(self, alias):
         """Return the remote file size.
@@ -116,7 +113,7 @@ class Dip(SrcClass):
             int: The remote file size in bytes.
         """
         url = self.get_remote_url(alias)
-        return super(Dip, self).get_remote_file_size(url)
+        return super(Blast, self).get_remote_file_size(url)
 
     def get_remote_file_modified(self, alias):
         """Return the remote file date modified.
@@ -133,15 +130,14 @@ class Dip(SrcClass):
                 since the epoch
         """
         url = self.get_remote_url(alias)
-        return super(Dip, self).get_remote_file_modified(url)
+        return super(Blast, self).get_remote_file_modified(url)
 
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the
         alias.
 
         This returns the url needed to fetch the file corresponding to the
-        alias. The url is constructed using the base_url, source version
-        information, and year source was last updated.
+        alias. The url is constructed using the base_url and alias.
 
         Args:
             alias (str): An alias defined in self.aliases.
@@ -149,8 +145,7 @@ class Dip(SrcClass):
         Returns:
             str: The url needed to fetch the file corresponding to the alias.
         """
-        version = self.get_source_version(alias)
-        url = self.url_base + self.year + 'tab25/' + version + '.txt'
+        url = self.url_base + alias + '.out'
         return url
 
     def is_map(self, alias):
@@ -167,7 +162,7 @@ class Dip(SrcClass):
         Returns:
             bool: Whether or not the alias is used for mapping.
         """
-        return super(Dip, self).is_map(alias)
+        return super(Blast, self).is_map(alias)
 
     def get_dependencies(self, alias):
         """Return a list of other aliases that the provided alias depends on.
@@ -182,7 +177,7 @@ class Dip(SrcClass):
             list: The other aliases defined in self.aliases that the provided
                 alias depends on.
         """
-        return super(Dip, self).get_dependencies(alias)
+        return super(Blast, self).get_dependencies(alias)
 
     def create_mapping_dict(self, filename):
         """Return a mapping dictionary for the provided file.
@@ -199,42 +194,83 @@ class Dip(SrcClass):
         Returns:
             dict: A dictionary for use in mapping nodes or edge types.
         """
-        return super(Dip, self).create_mapping_dict(filename)
+        return super(Blast, self).create_mapping_dict(filename)
 
     def table(self, rawline, version_dict):
-        """Uses the provided raw_lines file to produce a 2table_edge file, an
+        """Uses the provided rawline file to produce a 2table_edge file, an
         edge_meta file, and a node_meta file (only for property nodes).
 
         This returns noting but produces the 2table formatted files from the
-        provided raw_lines file:
-            raw_lines table (file, line num, line_chksum, rawline)
-            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec, 
+        provided rawline file:
+            rawline table (file, line num, line_chksum, rawline)
+            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
-            node_meta (line_cksum, node_num (1 or 2), 
+            node_meta (line_cksum, node_num (1 or 2),
                        info_type (evidence, relationship, experiment, or link),
                        info_desc (text))
-        By default this function does nothing (must be overridden)
 
         Args:
-            rawline(str): The path to the raw_lines file
+            rawline(str): The path to the rawline file
             version_dict (dict): A dictionary describing the attributes of the
                 alias for a source.
 
         Returns:
         """
-        return table(rawline, version_dict)
+
+        #outfiles
+        table_file = rawline.replace('rawline','edge')
+        #n_meta_file = rawline.replace('rawline','node_meta')
+        #e_meta_file = rawline.replace('rawline','edge_meta')
+
+        #static column values
+        n1type = 'gene'
+        n2type = 'gene'
+        n1hint = 'Ensembl_GeneID'
+        n2hint = 'Ensembl_GeneID'
+        et_hint = 'blastp_homology'
+        #node_num = 1
+        #info_type = 'synonym'
+        alias = version_dict['alias']
+
+        n1spec = int(version_dict['alias_info'].split('_', 1)[0])
+        n2spec = int(version_dict['alias_info'].split('_', 1)[1])
+
+        with open(rawline, encoding='utf-8') as infile, \
+            open(table_file, 'w') as edges:
+            reader = csv.reader(infile, delimiter='\t')
+            edge_writer = csv.writer(edges, delimiter='\t')
+            for line in reader:
+                chksm = line[2]
+                raw = line[3:]
+                n1 = raw[0]
+                n2 = raw[1]
+                evalue = raw[10]
+                evalue = float(evalue)
+                score = self.sc_min
+                if(evalue == 0.0):
+                    score = self.sc_max
+                if(evalue > 0.0):
+                    score = round(-1.0*math.log10(evalue),4)
+                if(score > self.sc_max):
+                    score = self.sc_max
+                if(score < self.sc_min):
+                    score = self.sc_min
+                
+                edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
+                    n2, n2hint, n2type, n2spec, et_hint, score])
+
 
 if __name__ == "__main__":
-    """Runs compare_versions (see utilities.compare_versions) on a dip
+    """Runs compare_versions (see utilities.compare_versions) on a blast
     object
 
-    This runs the compare_versions function on a dip object to find the
+    This runs the compare_versions function on a blast object to find the
     version information of the source and determine if a fetch is needed. The
     version information is also printed.
 
     Returns:
         dict: A nested dictionary describing the version information for each
-            alias described in dip.
+            alias described in blast.
     """
-    compare_versions(Dip())
+    compare_versions(Blast())

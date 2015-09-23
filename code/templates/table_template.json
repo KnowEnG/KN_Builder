@@ -1,0 +1,13 @@
+{
+    TMPLAUNCH,
+    "name": "TMPJOB",
+    "container": {
+        "type": "DOCKER",
+        "image": "TMPIMG",
+        "volumes": [{"containerPath": "/data/", "hostPath":"TMPDATADIR", "mode":"RW"},
+                    {"containerPath": "/code/", "hostPath":"TMPCODEDIR", "mode":"RW"}]
+    },
+    "cpus": "1",
+    "mem": "2500",
+    "command": "sh -c 'cd /data/TMPALIASPATH; /usr/bin/time -v python3 /code/table_utilities.py TMPCHUNK file_metadata.json; TMPPIPECMD'" 
+}

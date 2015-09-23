@@ -26,10 +26,12 @@ import os
 import sys
 import math
 import hashlib
+import config_utilities as cf
+from argparse import ArgumentParser
 
 ARCHIVES = ['.zip', '.tar', '.gz']
 CHUNK_SZ = float(500000)
-DIR = '.'
+DIR = "."
 
 def download(version_dict):
     """Returns the standardized path to the local file after downloading it
@@ -48,7 +50,6 @@ def download(version_dict):
     """
 
     ret_file = version_dict['source'] + '.' + version_dict['alias'] + '.txt'
-    ret_file = os.path.join(DIR, ret_file)
     #check if remote file must be downloaded
     if not version_dict['fetch_needed'] and version_dict['local_file_exists']:
         return os.path.relpath(ret_file)
@@ -57,7 +58,7 @@ def download(version_dict):
     url = version_dict['remote_url']
     if url[-1] == '/':
         url = url[:-1]
-    filename = os.path.join(DIR, version_dict['local_file_name'])
+    filename = version_dict['local_file_name']
     with urllib.request.urlopen(url) as response:
         with open(filename, 'wb') as outfile:
             shutil.copyfileobj(response, outfile)
@@ -93,7 +94,7 @@ def download(version_dict):
                       "['remote_file'] was not found")
                 exit()
     #move the downloaded file to source.alias.txt
-    shutil.copy2(os.path.join(DIR, filename), ret_file)
+    shutil.copy2(filename, ret_file)
     return os.path.relpath(ret_file)
 
 def chunk(filename, total_lines):
@@ -218,7 +219,7 @@ def get_line_count(filename):
             line_count += 1
     return line_count
 
-def main(version_json):
+def main(version_json, args=cf.config_args()):
     """Fetches and chunks the source:alias described by version_json.
 
     This takes the path to a version_json (source.alias.json) and runs fetch
@@ -237,13 +238,15 @@ def main(version_json):
     """
     with open(version_json, 'r') as infile:
         version_dict = json.load(infile)
+    src_code_dir = os.path.join(args.local_dir, args.code_path, 'srcClass')
+    sys.path.append(src_code_dir)
     src_module = __import__(version_dict['source'])
     if version_dict['source'] == 'ensembl':
         src_module.fetch(version_dict)
         return
     newfile = download(version_dict)
     md5hash, line_count = get_md5_hash(newfile)
-    SrcClass = src_module.get_SrcClass()
+    SrcClass = src_module.get_SrcClass(args)
     if version_dict['is_map']:
         num_chunks = 0
         map_dict = SrcClass.create_mapping_dict(newfile)
@@ -260,5 +263,20 @@ def main(version_json):
     with open(version_json, 'w') as outfile:
         json.dump(version_dict, outfile, indent=4, sort_keys=True)
 
+def main_parse_args():
+    """Processes command line arguments.
+
+    If argument is missing, supplies default     value.
+
+    Returns: args as populated namespace
+    """
+    parser = ArgumentParser()
+    parser.add_argument('metadata_json', help='json file produced from check, \
+                        e.g. file_metadata.json')
+    parser = cf.add_config_args(parser)
+    args = parser.parse_args()
+    return args
+
 if __name__ == "__main__":
-    main(sys.argv[1])
+    args = main_parse_args()
+    main(args.metadata_json, args)
