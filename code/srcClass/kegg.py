@@ -1,65 +1,75 @@
 """Extension of utilities.py to provide functions required to check the
-version information of msigdb and determine if it needs to be updated.
+version information of kegg and determine if it needs to be updated.
 
 Classes:
-    Msigdb: Extends the SrcClass class and provides the static variables and
-        msigdb specific functions required to perform a check on msigdb.
+    Kegg: Extends the SrcClass class and provides the static variables and
+        kegg specific functions required to perform a check on kegg.
 
 Functions:
-    get_SrcClass: returns a Msigdb object
-    main: runs compare_versions (see utilities.py) on a Msigdb object
+    get_SrcClass: returns a Kegg object
+    main: runs compare_versions (see utilities.py) on a Kegg object
 """
 from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
 import time
+import os
+import json
 import csv
+import config_utilities as cf
 
-def get_SrcClass():
+def get_SrcClass(args):
     """Returns an object of the source class.
 
     This returns an object of the source class to allow access to its functions
     if the module is imported.
-    
+
     Args:
-    
+
     Returns:
         class: a source class object
     """
-    return Msigdb()
+    return Kegg(args)
 
-class Msigdb(SrcClass):
-    """Extends SrcClass to provide msigdb specific check functions.
+class Kegg(SrcClass):
+    """Extends SrcClass to provide kegg specific check functions.
 
-    This Msigdb class provides source-specific functions that check the
-    msigdb version information and determine if it differs from the current
+    This Kegg class provides source-specific functions that check the
+    kegg version information and determine if it differs from the current
     version in the Knowledge Network (KN).
 
     Attributes:
         see utilities.SrcClass
     """
-    def __init__(self):
-        """Init a Msigdb with the staticly defined parameters.
+    def __init__(self, args=cf.config_args()):
+        """Init a Kegg with the staticly defined parameters.
 
         This calls the SrcClass constructor (see utilities.SrcClass)
         """
-        name = 'msigdb'
-        url_base = 'http://www.broadinstitute.org/gsea/'
-        aliases = {"c2.cgp": "curated_genes_cpg",
-                   "c3.mir": "motif_gene_mir",
-                   "c4.cgn": "comp_genes_cgn",
-                   "c4.cm": "onco_sigs_cm",
-                   "c6.all": "oncogenic_signatures_all",
-                   "c7.all": "immunologic_signatures_all"}
-        super(Msigdb, self).__init__(name, url_base, aliases)
+        name = 'kegg'
+        url_base = 'http://rest.kegg.jp/'
+        aliases = {"pathway": "pathways",
+                   "ath": "Arabidopsis thaliana",
+                   "ath_map": "Atha_IDmap",
+                   "cel": "Caenorhabditis elegans",
+                   "cel_map": "Cele_IDmap",
+                   "dme": "Drosophila melanogaster",
+                   "dme_map": "Dmel_IDmap",
+                   "hsa": "Homo sapiens",
+                   "hsa_map": "Hsap_IDmap",
+                   "mmu": "Mus musculus",
+                   "mmu_map": "Mmus_IDmap",
+                   "sce": "Saccharomyces cerevisiae",
+                   "sce_map": "Scer_IDmap"}
+        super(Kegg, self).__init__(name, url_base, aliases, args)
         self.date_modified = 'unknown'
 
     def get_source_version(self, alias):
-        """Return the release version of the remote msigdb:alias.
+        """Return the release version of the remote kegg:alias.
 
         This returns the release version of the remote source for a specific
-        alias. This value will be the same for every alias. This value is
-        stored in the self.version dictionary object.
+        alias. This value will be the same for every alias and is 'unknown' in
+        this case. This value is stored in the self.version dictionary object.
 
         Args:
             alias (str): An alias defined in self.aliases.
@@ -67,23 +77,20 @@ class Msigdb(SrcClass):
         Returns:
             str: The remote version of the source.
         """
-        version = super(Msigdb, self).get_source_version(alias)
+        version = super(Kegg, self).get_source_version(alias)
         if version == 'unknown':
-            url = self.url_base + 'msigdb/help.jsp'
+            url = self.url_base + 'info/pathway'
             response = urllib.request.urlopen(url)
             the_page = response.readlines()
             for line in the_page:
-                try:
-                    d_line = line.decode()
-                except:
-                    continue
-                match = re.search('MSigDB database v([^ ]*)', d_line)
+                d_line = line.decode()
+                match = re.search(r'Release (\S+), ([^<\n]*)', d_line)
                 if match is not None:
-                    response.close()
                     self.version[alias] = match.group(1)
+                    response.close()
                     break
             for alias_name in self.aliases:
-                self.version[alias_name] = match.group(1)
+                self.version[alias_name] = self.version[alias]
             return self.version[alias]
         else:
             return version
@@ -99,14 +106,13 @@ class Msigdb(SrcClass):
         Returns:
             dict: The local file information for a given source alias.
         """
-        return super(Msigdb, self).get_local_file_info(alias)
+        return super(Kegg, self).get_local_file_info(alias)
 
     def get_remote_file_size(self, alias):
         """Return the remote file size.
 
-        This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see
-        utilities.SrcClass.get_remote_file_size).
+        This returns -1.0 because the remote file size is not returned by the
+        REST server.
 
         Args:
             alias (str): An alias defined in self.aliases.
@@ -114,8 +120,7 @@ class Msigdb(SrcClass):
         Returns:
             int: The remote file size in bytes.
         """
-        url = self.get_remote_url(alias)
-        return super(Msigdb, self).get_remote_file_size(url)
+        return -1
 
     def get_remote_file_modified(self, alias):
         """Return the remote file date modified.
@@ -131,17 +136,17 @@ class Msigdb(SrcClass):
                 since the epoch
         """
         if self.date_modified == 'unknown':
-            url = self.url_base + 'msigdb/help.jsp'
+            url = self.url_base + 'info/pathway'
             response = urllib.request.urlopen(url)
             the_page = response.readlines()
             for line in the_page:
-                d_line = line.decode('ascii', errors='ignore')
-                match = re.search('updated ([^<]*)', d_line)
+                d_line = line.decode()
+                match = re.search(r'Release (\S+), ([^<\n]*)', d_line)
                 if match is not None:
-                    time_str = match.group(1)
+                    time_str = match.group(2)
                     response.close()
                     break
-            time_format = "%B %Y"
+            time_format = "%b %y"
             date_modified = time.mktime(time.strptime(time_str, time_format))
             self.date_modified = date_modified
         return self.date_modified
@@ -151,8 +156,7 @@ class Msigdb(SrcClass):
         alias.
 
         This returns the url needed to fetch the file corresponding to the
-        alias. The url is constructed using the base_url, alias, and source
-        version information.
+        alias. The url is constructed using the alias and url_base.
 
         Args:
             alias (str): An alias defined in self.aliases.
@@ -160,15 +164,18 @@ class Msigdb(SrcClass):
         Returns:
             str: The url needed to fetch the file corresponding to the alias.
         """
-        version = self.get_source_version(alias)
-        url = self.url_base + 'resources/msigdb/' + version + '/'
-        url += alias + '.v' + version + '.entrez.gmt'
+        if 'map' in alias:
+            url = self.url_base + 'conv/ncbi-geneid/' + alias[:-4]
+        elif alias == 'pathway':
+            url = self.url_base + 'list/pathway'
+        else:
+            url = self.url_base + 'link/pathway/' + alias
         return url
 
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
-        
+
         This returns a boolean representing if the alias corresponds to a file
         used for mapping. By default this returns True if the alias ends in
         '_map' and False otherwise.
@@ -179,7 +186,10 @@ class Msigdb(SrcClass):
         Returns:
             bool: Whether or not the alias is used for mapping.
         """
-        return super(Msigdb, self).is_map(alias)
+        if alias == 'pathway':
+            return True
+        else:
+            return super(Kegg, self).is_map(alias)
 
     def get_dependencies(self, alias):
         """Return a list of other aliases that the provided alias depends on.
@@ -194,7 +204,10 @@ class Msigdb(SrcClass):
             list: The other aliases defined in self.aliases that the provided
                 alias depends on.
         """
-        return super(Msigdb, self).get_dependencies(alias)
+        if alias[-4:] == '_map' or alias == 'pathway':
+            return list()
+        else:
+            return [alias + '_map', 'pathway']
 
     def create_mapping_dict(self, filename):
         """Return a mapping dictionary for the provided file.
@@ -211,7 +224,7 @@ class Msigdb(SrcClass):
         Returns:
             dict: A dictionary for use in mapping nodes or edge types.
         """
-        return super(Msigdb, self).create_mapping_dict(filename)
+        return super(Kegg, self).create_mapping_dict(filename)
 
     def table(self, rawline, version_dict):
         """Uses the provided rawline file to produce a 2table_edge file, an
@@ -241,20 +254,25 @@ class Msigdb(SrcClass):
         #e_meta_file = rawline.replace('rawline','edge_meta')
 
         #static column values
-        alias = version_dict['alias']
-        source = version_dict['source']
         n1type = 'property'
-        n1spec = '0'
-        n1hint = source + '_' + alias
         n2type = 'gene'
-        n2spec = 9606  # assumption of human genes is occasionally incorrect
-        n2hint = 'EntrezGene'
-        et_hint = source + '_' + alias
         score = 1
-
-        info_type1 = 'synonym'
-        info_type2 = 'link'
         node_num = 1
+        info_type = 'synonym'
+        alias = version_dict['alias']
+
+        #mapping files
+        pathway = os.path.join('..', 'pathway', 'kegg.pathway.json')
+        with open(pathway) as infile:
+            path_map = json.load(infile)
+        a_map = alias + '_map'
+        alias_map = os.path.join('..', a_map, 'kegg.' + a_map + '.json')
+        with open(alias_map) as infile:
+            node_map = json.load(infile)
+        species = (os.path.join('..', '..', 'species', 'species_map',\
+                    'species.species_map.json'))
+        with open(species) as infile:
+           species_map = json.load(infile)
 
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
@@ -265,25 +283,32 @@ class Msigdb(SrcClass):
             for line in reader:
                 chksm = line[2]
                 raw = line[3:]
-                n1_orig_name = raw[0]
-                n1_url = raw[1]
-                n1 = 'msigdb_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
-                n_meta_writer.writerow([chksm, node_num, info_type1, n1_orig_name])
-                n_meta_writer.writerow([chksm, node_num, info_type2, n1_url])
-                for n2 in raw[2:]:
-                    edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                        n2, n2hint, n2type, n2spec, et_hint, score])
-                
+                n1_ID = raw[0]
+                n1_orig_name = path_map.get(n1_ID.replace(':' + alias, \
+                    ':map'), "unmapped:no-name")
+                n1 = 'kegg_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
+                n1spec = '0'
+                n1hint = 'kegg_pathway'
+                n2_raw = raw[1]
+                n2hint, n2 = node_map.get(n2_raw, \
+                    "unmapped:unsupported-species").split(':')
+                n2spec = species_map.get(version_dict['alias_info'], \
+                    "unmapped:unsupported-species")
+                et_hint = 'kegg_pathway'
+                edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
+                    n2, n2hint, n2type, n2spec, et_hint, score])
+                n_meta_writer.writerow([chksm, info_type, n1_orig_name])
+
 if __name__ == "__main__":
-    """Runs compare_versions (see utilities.compare_versions) on a Msigdb
+    """Runs compare_versions (see utilities.compare_versions) on a kegg
     object
 
-    This runs the compare_versions function on a Msigdb object to find the
+    This runs the compare_versions function on a kegg object to find the
     version information of the source and determine if a fetch is needed. The
     version information is also printed.
 
     Returns:
         dict: A nested dictionary describing the version information for each
-            alias described in Msigdb.
+            alias described in kegg.
     """
-    compare_versions(Msigdb())
+    compare_versions(Kegg())

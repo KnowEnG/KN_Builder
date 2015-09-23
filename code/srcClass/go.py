@@ -16,8 +16,9 @@ import time
 import os
 import json
 import csv
+import config_utilities as cf
 
-def get_SrcClass():
+def get_SrcClass(args):
     """Returns an object of the source class.
 
     This returns an object of the source class to allow access to its functions
@@ -28,7 +29,7 @@ def get_SrcClass():
     Returns:
         class: a source class object
     """
-    return Go()
+    return Go(args)
 
 class Go(SrcClass):
     """Extends SrcClass to provide go specific check functions.
@@ -40,7 +41,7 @@ class Go(SrcClass):
     Attributes:
         see utilities.SrcClass
     """
-    def __init__(self):
+    def __init__(self, args=cf.config_args()):
         """Init a Stringdb with the staticly defined parameters.
 
         This calls the SrcClass constructor (see utilities.SrcClass)
@@ -56,7 +57,7 @@ class Go(SrcClass):
             "tair": "Arabidopsis thaliana",
             "wb": "Caenorhabditis elegans"
         }
-        super(Go, self).__init__(name, url_base, aliases)
+        super(Go, self).__init__(name, url_base, aliases, args)
 
     def get_source_version(self, alias):
         """Return the release version of the remote go:alias.

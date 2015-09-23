@@ -14,8 +14,9 @@ import time
 import ftplib
 import csv
 import json
+import config_utilities as cf
 
-def get_SrcClass():
+def get_SrcClass(args):
     """Returns an object of the source class.
 
     This returns an object of the source class to allow access to its functions
@@ -26,7 +27,7 @@ def get_SrcClass():
     Returns:
         class: a source class object
     """
-    return Species()
+    return Species(args)
 
 class Species(SrcClass):
     """Extends SrcClass to provide species specific check functions.
@@ -38,7 +39,7 @@ class Species(SrcClass):
     Attributes:
         see utilities.SrcClass
     """
-    def __init__(self):
+    def __init__(self, args=cf.config_args()):
         """Init a Species with the staticly defined parameters.
 
         This calls the SrcClass constructor (see utilities.SrcClass)
@@ -46,7 +47,7 @@ class Species(SrcClass):
         name = 'species'
         url_base = 'ftp.ncbi.nih.gov'
         aliases = {"species_map": "mapping file for species"}
-        super(Species, self).__init__(name, url_base, aliases)
+        super(Species, self).__init__(name, url_base, aliases, args)
         self.remote_file = 'names.dmp'
 
     def get_source_version(self, alias):

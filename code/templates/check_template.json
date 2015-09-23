@@ -1,0 +1,13 @@
+{
+    "schedule": "R1\/\/P3M",
+    "name": "TMPJOB",
+    "container": {
+        "type": "DOCKER",
+        "image": "TMPIMG",
+        "volumes": [{"containerPath": "/data/", "hostPath":"TMPDATADIR", "mode":"RW"},
+                    {"containerPath": "/code/", "hostPath":"TMPCODEDIR", "mode":"RW"}]
+    },
+    "cpus": "1",
+    "mem": "512",
+    "command": "sh -c 'cd /code/; /usr/bin/time -v python3 TMPSRC.py; TMPPIPECMD'"
+}

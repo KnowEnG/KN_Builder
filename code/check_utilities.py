@@ -12,8 +12,6 @@ Functions:
         a fetch is required
 
 Variables:
-    DIR: relative path to the data folder from location of script
-        execution
 """
 
 import urllib.request
@@ -22,21 +20,21 @@ import time
 import json
 import csv
 import sys
+import config_utilities as cf
+from argparse import ArgumentParser
 
-DIR = os.path.join('..', 'data')
-
-def get_SrcClass():
+def get_SrcClass(args):
     """Returns an object of the source class.
 
     This returns an object of the source class to allow access to its functions
     if the module is imported.
-    
+
     Args:
-    
+
     Returns:
         class: a source class object
     """
-    return SrcClass()
+    return SrcClass(args)
 
 class SrcClass(object):
     """Base class to be extended by each supported source in KnowEnG.
@@ -58,7 +56,7 @@ class SrcClass(object):
         version (dict): The release version of each alias in the source.
     """
 
-    def __init__(self, src_name, base_url, aliases):
+    def __init__(self, src_name, base_url, aliases, args=cf.config_args()):
         """Init a SrcClass object with the provided parameters.
 
         Constructs a SrcClass object with the provided parameters, which should
@@ -83,6 +81,7 @@ class SrcClass(object):
         self.aliases = aliases
         self.remote_file = ''
         self.version = dict()
+        self.args = args
 
     def get_source_version(self, alias):
         """Return the release version of the remote source:alias.
@@ -124,8 +123,7 @@ class SrcClass(object):
         Returns:
             dict: The local file information for a given source alias.
         """
-
-        f_dir = os.path.join(DIR, self.name)
+        f_dir = os.path.join(self.args.local_dir, self.args.data_path, self.name)
         f_dir = os.path.join(f_dir, alias)
         url = self.get_remote_url(alias)
         filename = os.path.basename(url)
@@ -198,7 +196,7 @@ class SrcClass(object):
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
-        
+
         This returns a boolean representing if the alias corresponds to a file
         used for mapping. By default this returns True if the alias ends in
         '_map' and False otherwise.
@@ -261,7 +259,7 @@ class SrcClass(object):
         if not self.is_map(alias):
             return map_dict
         with open(filename, 'rb') as map_file:
-            reader = csv.reader((line.decode('utf-8') for line in map_file), 
+            reader = csv.reader((line.decode('utf-8') for line in map_file),
                 delimiter='\t')
             for line in reader:
                 map_dict[line[key_col]] = line[value_col]
@@ -274,10 +272,10 @@ class SrcClass(object):
         This returns noting but produces the 2table formatted files from the
         provided raw_lines file:
             raw_lines table (file, line num, line_chksum, rawline)
-            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec, 
+            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
-            node_meta (line_cksum, node_num (1 or 2), 
+            node_meta (line_cksum, node_num (1 or 2),
                        info_type (evidence, relationship, experiment, or link),
                        info_desc (text))
         By default this function does nothing (must be overridden)
@@ -364,7 +362,9 @@ def compare_versions(src_obj):
         else:
             version_dict[alias]['fetch_needed'] = False
 
-    f_dir = os.path.join(DIR, src_obj.name)
+
+    f_dir = os.path.join(src_obj.args.local_dir, src_obj.args.data_path,
+                         src_obj.name)
     os.makedirs(f_dir, exist_ok=True)
     for alias in src_obj.aliases:
         a_dir = os.path.join(f_dir, alias)
@@ -376,7 +376,7 @@ def compare_versions(src_obj):
     print("printing file_metadata.json")
     return version_dict
 
-def check(module):
+def check(module, args=cf.config_args()):
     """Runs compare_versions (see utilities.compare_versions) on a 'module'
     object
 
@@ -388,11 +388,29 @@ def check(module):
         dict: A nested dictionary describing the version information for each
             alias described in biogrid.
     """
+    src_code_dir = os.path.join(args.local_dir, args.code_path, 'srcClass')
+    sys.path.append(src_code_dir)
     src_module = __import__(module)
-    SrcClass = src_module.get_SrcClass()
+    SrcClass = src_module.get_SrcClass(args)
     compare_versions(SrcClass)
 
     return
 
+def main_parse_args():
+    """Processes command line arguments.
+
+    Expects three positional arguments(start_step, deploy_loc, run_mode) and
+    a number of optional arguments. If argument is missing, supplies default
+    value.
+
+    Returns: args as populated namespace
+    """
+    parser = ArgumentParser()
+    parser.add_argument('module', help='select SrcClass to check, e.g. biogrid')
+    parser = cf.add_config_args(parser)
+    args = parser.parse_args()
+    return args
+
 if __name__ == "__main__":
-    check(sys.argv[1])
+    args = main_parse_args()
+    check(args.module, args)

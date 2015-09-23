@@ -1,5 +1,5 @@
 {
-    "schedule": "R1\/\/P3M",
+    "schedule": "R1\/2200-01-01T06:00:00Z\/P3M",
     "name": "TMPJOB",
     "container": {
         "type": "DOCKER",
@@ -7,7 +7,7 @@
         "volumes": [{"containerPath": "/data/", "hostPath":"TMPDATADIR", "mode":"RW"},
                     {"containerPath": "/code/", "hostPath":"TMPCODEDIR", "mode":"RW"}]
     },
-    "cpus": "0.5",
+    "cpus": "1",
     "mem": "512",
-    "command": "sh -c 'cd /code/; /usr/bin/time -v python3 TMPSRC.py; TMPPIPECMD'"
+    "command": "sh -c 'cd /data/TMPALIASPATH; /usr/bin/time echo 'TMPJOB was not supposed to run' >> /data/ERROR.txt'" 
 }

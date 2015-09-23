@@ -22,11 +22,12 @@ import urllib.request
 import re
 import time
 import shutil
+import config_utilities as cf
 
 TABLE_LIST = ['external_db', 'gene', 'object_xref', 'transcript',
               'translation', 'xref']
 
-def get_SrcClass():
+def get_SrcClass(args):
     """Returns an object of the source class.
 
     This returns an object of the source class to allow access to its functions
@@ -37,7 +38,7 @@ def get_SrcClass():
     Returns:
         class: a source class object
     """
-    return Ensembl()
+    return Ensembl(args)
 
 def fetch(version_dict):
     """Fetches all mysql tables and syntax for alias described by version_json.
@@ -57,7 +58,7 @@ def fetch(version_dict):
         version_dict['remote_url'] = base_url + table + '.txt.gz'
         shutil.move(download(version_dict), table + '.txt')
 
-def db_import(version_json):
+def db_import(version_json, args=cf.config_args()):
     """Imports the data into the database and saves local id mapping
     dictionaries.
 
@@ -73,10 +74,10 @@ def db_import(version_json):
     """
     with open(version_json, 'r') as infile:
         version_dict = json.load(infile)
-    #db.import_ensembl(version_dict['alias'])
-    #db.combine_tables(version_dict['alias'])
-    #db.create_mapping_dicts(version_dict['alias'])
-    db.query_all_mappings(version_dict['alias'])
+    db.import_ensembl(version_dict['alias'], args)
+    db.combine_tables(version_dict['alias'], args)
+    db.create_mapping_dicts(version_dict, args)
+    db.query_all_mappings(version_dict, args)
 
 class Ensembl(SrcClass):
     """Extends SrcClass to provide ensembl specific check functions.
@@ -88,20 +89,20 @@ class Ensembl(SrcClass):
     Attributes:
         see utilities.SrcClass
     """
-    def __init__(self):
+    def __init__(self, args=cf.config_args()):
         """Init a Ensembl with the staticly defined parameters.
 
         This calls the SrcClass constructor (see utilities.SrcClass)
         """
         name = 'ensembl'
         url_base = 'ftp.ensembl.org'
-        aliases = {"mus_musculus": "",
-                   "arabidopsis_thaliana": "",
-                   "saccharomyces_cerevisiae": "",
-                   "caenorhabditis_elegans": "",
-                   "drosophila_melanogaster": "",
-                   "homo_sapiens": ""}
-        super(Ensembl, self).__init__(name, url_base, aliases)
+        aliases = {"mus_musculus": "10090",
+                   "arabidopsis_thaliana": "3702",
+                   "saccharomyces_cerevisiae": "4932",
+                   "caenorhabditis_elegans": "6239",
+                   "drosophila_melanogaster": "7227",
+                   "homo_sapiens": "9606"}
+        super(Ensembl, self).__init__(name, url_base, aliases, args)
         self.url_base_plants = 'ftp.ensemblgenomes.org'
 
     def get_source_version(self, alias):

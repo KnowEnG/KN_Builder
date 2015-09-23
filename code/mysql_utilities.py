@@ -26,7 +26,7 @@ import os
 import json
 import subprocess
 
-def combine_tables(alias):
+def combine_tables(alias, args=cf.config_args()):
     """Combine all of the data imported from ensembl for the provided alias
     into a single database.
 
@@ -46,7 +46,7 @@ def combine_tables(alias):
     all_table = 'all_mappings'
     steps = ['transcript', 'translation', 'transcript2stable',
              'translation2stable']
-    db = MySQL(alias_db)
+    db = MySQL(alias_db, args)
     db.create_table(tablename, get_insert_cmd('gene'))
     for step in steps:
         db.insert(tablename, get_insert_cmd(step))
@@ -78,7 +78,7 @@ def create_dictionary(results):
         map_dict[str(raw)] = str(mapped)
     return map_dict
 
-def query_all_mappings(alias):
+def query_all_mappings(version_dict, args=cf.config_args()):
     """Creates the all mappings dictionary for the provided alias.
 
     Produces a dictionary of ensembl stable mappings and the all unique mappings
@@ -86,24 +86,22 @@ def query_all_mappings(alias):
     file.
 
     Args:
-        alias (str): An alias defined in ensembl.aliases.
+        version_dict (dict): the version dictionary describing the
+            source:alias
 
     Returns:
     """
+    alias = version_dict['alias']
+    taxid = version_dict['alias_info']
     database = 'KnowNet'
     table = alias + '_mappings'
-    map_dir = os.sep + cf.DEFAULT_MAP_PATH
-    species_dir = os.sep + cf.DEFAULT_DATA_PATH
-    if os.path.isdir(cf.DEFAULT_LOCAL_BASE):
-        map_dir = cf.DEFAULT_LOCAL_BASE + map_dir
-        species_dir = cf.DEFAULT_LOCAL_BASE + species_dir
-        species_dir = os.path.join(species_dir, 'species', 'species_map')
+    map_dir = os.path.join(args.data_path, cf.DEFAULT_MAP_PATH)
+    if os.path.isdir(args.local_dir):
+        map_dir =  os.path.join(args.local_dir, map_dir)
     if not os.path.isdir(map_dir):
         os.mkdir(map_dir)
-    with open(os.path.join(species_dir, 'species.species_map.json')) as infile:
-        species_map = json.load(infile)
-    taxid = str(species_map[alias.capitalize().replace('_', ' ')])
-    db = MySQL(database)
+    print(map_dir)
+    db = MySQL(database, args)
     results = db.query_distinct('stable_id, stable_id', table)
     map_dict = dict()
     for (raw, mapped) in results:
@@ -114,7 +112,7 @@ def query_all_mappings(alias):
     with open(os.path.join(map_dir, alias + '_all.json'), 'w') as outfile:
         json.dump(map_dict, outfile, indent=4)
 
-def create_mapping_dicts(alias):
+def create_mapping_dicts(version_dict, args=cf.config_args()):
     """Creates the mapping dictionaries for the provided alias.
 
     Produces the ensembl stable mappings dictionary and the all unique mappings
@@ -122,25 +120,22 @@ def create_mapping_dicts(alias):
     file.
 
     Args:
-        alias (str): An alias defined in ensembl.aliases.
+        version_dict (dict): the version dictionary describing the
+            source:alias
 
     Returns:
     """
+    alias = version_dict['alias']
+    taxid = version_dict['alias_info']
     database = 'KnowNet'
     table = 'all_mappings'
     cmd = "WHERE species='" + alias + "'"
-    map_dir = os.sep + cf.DEFAULT_MAP_PATH
-    species_dir = os.sep + cf.DEFAULT_DATA_PATH
-    if os.path.isdir(cf.DEFAULT_LOCAL_BASE):
-        map_dir = cf.DEFAULT_LOCAL_BASE + map_dir
-        species_dir = cf.DEFAULT_LOCAL_BASE + species_dir
-        species_dir = os.path.join(species_dir, 'species', 'species_map')
+    map_dir = os.path.join(args.data_path, cf.DEFAULT_MAP_PATH)
+    if os.path.isdir(args.local_dir):
+        map_dir =  os.path.join(args.local_dir, map_dir)
     if not os.path.isdir(map_dir):
         os.mkdir(map_dir)
-    with open(os.path.join(species_dir, 'species.species_map.json')) as infile:
-        species_map = json.load(infile)
-    taxid = str(species_map[alias.capitalize().replace('_', ' ')])
-    db = MySQL(database)
+    db = MySQL(database, args)
     results = db.query_distinct('stable_id, stable_id', table, cmd)
     with open(os.path.join(map_dir, alias + '_stable.json'), 'w') as outfile:
         map_dict = create_dictionary(results)
@@ -150,7 +145,7 @@ def create_mapping_dicts(alias):
         map_dict = create_dictionary(results)
         json.dump(map_dict, outfile, indent=4)
 
-def get_database():
+def get_database(args=cf.config_args()):
     """Returns an object of the MySQL class.
 
     This returns an object of the MySQL class to allow access to its functions
@@ -161,7 +156,7 @@ def get_database():
     Returns:
         class: a source class object
     """
-    return MySQL()
+    return MySQL(None, args)
 
 def get_insert_cmd(step):
     """Returns the command to be used with an insert for the provided step.
@@ -241,7 +236,7 @@ def get_insert_cmd(step):
         cmd = ''
     return cmd
 
-def import_ensembl(alias):
+def import_ensembl(alias, args=cf.config_args()):
     """Imports the ensembl data for the provided alias into the KnowEnG
     database.
 
@@ -255,7 +250,7 @@ def import_ensembl(alias):
     Returns:
     """
     database = 'ensembl_' + alias
-    db = MySQL()
+    db = MySQL(None, args)
     db.init_knownet()
     db.drop_db(database)
     db.import_schema(database, 'schema.sql')
@@ -276,7 +271,7 @@ class MySQL(object):
         conn (object): connection object for the database
         cursor (object): cursor object for the database
     """
-    def __init__(self, database=None):
+    def __init__(self, database=None, args=cf.config_args()):
         """Init a MySQL object with the provided parameters.
 
         Constructs a MySQL object with the provided parameters, and connect to
@@ -290,6 +285,7 @@ class MySQL(object):
         self.port = cf.DEFAULT_MYSQL_PORT
         self.passw = cf.DEFAULT_MYSQL_PASS
         self.database = database
+        self.args = args
         if self.database is None:
             self.conn = sql.connect(host=self.host, port=self.port,
                                     user=self.user, password=self.passw)
@@ -325,8 +321,8 @@ class MySQL(object):
         """
         import_tables = ['node_type.txt', 'edge_type.txt', 'species.txt']
         mysql_dir = os.sep + os.path.join('code', 'mysql')
-        if os.path.isdir(cf.DEFAULT_LOCAL_BASE):
-            mysql_dir = cf.DEFAULT_LOCAL_BASE + mysql_dir
+        if os.path.isdir(self.args.local_dir):
+            mysql_dir = self.args.local_dir + mysql_dir
         self.import_schema('KnowNet', os.path.join(mysql_dir, 'KnowNet.sql'))
         for table in import_tables:
             tablefile = os.path.join(mysql_dir, table)
