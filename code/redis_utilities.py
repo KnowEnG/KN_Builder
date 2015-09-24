@@ -14,7 +14,20 @@ import redis
 import json
 import os
 
-def import_ensembl(alias):
+def get_database(args=cf.config_args()):
+    """Returns a Redis database connection.
+
+    This returns a Redis database connection access to its functions if the
+    module is imported.
+
+    Args:
+        args: command line and default arguements
+    Returns:
+        class: a redis connection object
+    """
+    return redis.StrictRedis(host=args.redis_host, port=args.redis_port)
+
+def import_ensembl(alias, args=cf.config_args()):
     """Imports the ensembl data for the provided alias into the Redis database.
 
     This stores the foreign key to ensembl stable ids in the Redis database.
@@ -31,8 +44,7 @@ def import_ensembl(alias):
 
     Returns:
     """
-    rdb = redis.StrictRedis(host=cf.DEFAULT_REDIS_URL,
-        port=cf.DEFAULT_REDIS_PORT, db=0)
+    rdb = get_database(args)
     map_dir = os.sep + cf.DEFAULT_MAP_PATH
     if os.path.isdir(cf.DEFAULT_LOCAL_BASE):
         map_dir = cf.DEFAULT_LOCAL_BASE + map_dir
@@ -88,9 +100,9 @@ def conv_gene(rdb, foreign_key, hint, taxid):
     if taxid_match:
         taxid_ens_ids = list(set(rdb.mget(taxid_match)))
         if len(taxid_ens_ids) == 1:
-            return both_ens_ids[0].decode()
+            return taxid_ens_ids[0].decode()
     if hint_match:
         hint_ens_ids = list(set(rdb.mget(hint_match)))
         if len(taxid_ens_ids) == 1:
-            return both_ens_ids[0].decode()
+            return hint_ens_ids[0].decode()
     return 'unmapped-many'
