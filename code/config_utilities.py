@@ -64,20 +64,6 @@ def add_config_args(parser):
         directory from toplevel ', default=DEFAULT_CODE_PATH)
     parser.add_argument('-dp', '--data_path', help='relative path of data \
         directory from toplevel', default=DEFAULT_DATA_PATH)
-    parser.add_argument('-id', '--id_path', help='relative path of id_map \
-        directory from toplevel', default=DEFAULT_MAP_PATH)
-    parser.add_argument('-mh', '--mysql_host', help='MySQL server url',
-        default=DEFAULT_MYSQL_URL)
-    parser.add_argument('-mp', '--mysql_port', help='MySQL server port',
-        default=DEFAULT_MYSQL_PORT)
-    parser.add_argument('-mu', '--mysql_user', help='MySQL server user',
-        default=DEFAULT_MYSQL_USER)
-    parser.add_argument('-mw', '--mysql_pass', help='MySQL server password',
-        default=DEFAULT_MYSQL_PASS)
-    parser.add_argument('-rh', '--redis_host', help='Redis server url',
-        default=DEFAULT_REDIS_URL)
-    parser.add_argument('-rp', '--redis_port', help='Redis server port',
-        default=DEFAULT_REDIS_PORT)
     return parser
 
 
