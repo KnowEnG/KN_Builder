@@ -58,7 +58,7 @@ def main(chunkfile, version_json, args=cf.config_args()):
     SrcClass = src_module.get_SrcClass(args)
     if not version_dict['is_map']:
         SrcClass.table(chunkfile, version_dict)
-        sort(chunkfile.replace('rawline', 'edge'))
+        #sort(chunkfile.replace('rawline', 'edge'))
 
 def main_parse_args():
     """Processes command line arguments.
