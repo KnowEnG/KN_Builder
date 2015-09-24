@@ -82,6 +82,9 @@ python3 code/pipeline_utilities.py CHECK LOCAL STEP -ld /workspace/prototype/ -d
 ## pipeline fetch local
 python3 code/pipeline_utilities.py FETCH LOCAL STEP -ld /workspace/prototype/ -dp pipe_local_step2
 
+## pipeline table local
+python3 code/pipeline_utilities.py TABLE LOCAL STEP -ld /workspace/prototype/ -dp pipe_local_step2
+
 # pipeline local pipeline
 python3 code/pipeline_utilities.py CHECK LOCAL PIPELINE -ld /workspace/prototype/ -dp pipe_local_pipe
 
@@ -92,4 +95,4 @@ python3 code/pipeline_utilities.py CHECK CLOUD STEP -c mmaster01.cse.illinois.ed
 python3 code/pipeline_utilities.py FETCH CLOUD STEP -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/ -ld /workspace/prototype/ -dp pipe_cloud_step2 -p kegg
 
 # pipeline cloud pipeline
-python3 code/pipeline_utilities.py FETCH CLOUD STEP -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/ -ld /workspace/prototype/ -dp pipe_cloud_step2 -p kegg
+python3 code/pipeline_utilities.py FETCH CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/ -ld /workspace/prototype/ -dp pipe_cloud_pipe 
