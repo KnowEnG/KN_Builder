@@ -19,6 +19,8 @@ Variables:
     DEFAULT_MYSQL_USER = user for MySQL db
     DEFAULT_MYSQL_PASS = password for MySQL db
 
+    DEFAULT_REDIS_URL = location of Redis db
+    DEFAULT_REDIS_PORT = port for Redis db
 """
 from argparse import ArgumentParser
 import os
@@ -30,7 +32,7 @@ DEFAULT_CLOUD_BASE = '/mnt/storage/blatti/apps/P1_source_check/'
 
 DEFAULT_CODE_PATH = 'code'
 DEFAULT_DATA_PATH = 'data'
-DEFAULT_MAP_PATH = 'id_map'
+DEFAULT_MAP_PATH = 'data/id_map'
 
 DEFAULT_MYSQL_URL = 'knowice.cs.illinois.edu'
 DEFAULT_MYSQL_PORT = '3307'
@@ -62,6 +64,20 @@ def add_config_args(parser):
         directory from toplevel ', default=DEFAULT_CODE_PATH)
     parser.add_argument('-dp', '--data_path', help='relative path of data \
         directory from toplevel', default=DEFAULT_DATA_PATH)
+    parser.add_argument('-id', '--id_path', help='relative path of id_map \
+        directory from toplevel', default=DEFAULT_MAP_PATH)
+    parser.add_argument('-mh', '--mysql_host', help='MySQL server url',
+        default=DEFAULT_MYSQL_URL)
+    parser.add_argument('-mp', '--mysql_port', help='MySQL server port',
+        default=DEFAULT_MYSQL_PORT)
+    parser.add_argument('-mu', '--mysql_user', help='MySQL server user',
+        default=DEFAULT_MYSQL_USER)
+    parser.add_argument('-mw', '--mysql_pass', help='MySQL server password',
+        default=DEFAULT_MYSQL_PASS)
+    parser.add_argument('-rh', '--redis_host', help='Redis server url',
+        default=DEFAULT_REDIS_URL)
+    parser.add_argument('-rp', '--redis_port', help='Redis server port',
+        default=DEFAULT_REDIS_PORT)
     return parser
 
 
@@ -74,7 +90,7 @@ def config_args():
     parser = add_config_args(parser)
     args = parser.parse_args('')
     return args
-    
+
 def cloud_config_opts(args, config_opts):
     """Convert config options to the directory structure within containers on cloud
 
