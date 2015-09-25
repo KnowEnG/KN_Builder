@@ -39,6 +39,7 @@ import traceback
 import sys
 import subprocess
 import json
+import re
 import http.client
 
 DEFAULT_START_STEP = 'CHECK'
@@ -72,7 +73,7 @@ def main_parse_args():
         for single call of step in pipeline', default='')
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
-    
+
     config_opts = sys.argv[1:]
     config_opts.remove(args.start_step)
     config_opts.remove(args.deploy_loc)
@@ -81,8 +82,8 @@ def main_parse_args():
         config_opts.remove('-p')
         config_opts.remove(args.step_parameters)
     args.config_opts = " ".join(config_opts)
-    args.cloud_config_opts = cf.cloud_config_opts(args, config_opts)    
-    
+    args.cloud_config_opts = cf.cloud_config_opts(args, config_opts)
+
     return args
 
 def run_local_check(args):
@@ -96,7 +97,6 @@ def run_local_check(args):
 
     Returns:
     """
-    local_data_dir = os.path.join(args.local_dir, args.data_path)
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     checker = __import__(CHECK_PY)
@@ -306,16 +306,12 @@ def list_parents(args, dependencies, response_str, parent_string):
         if jname == -1: # no parent on queue
             # schedule dummy parent add dependancy
             dummy_str = ""
-            with open(os.path.join(args.local_dir, args.code_path,
+            with open(os.path.join(args.local_dir, args.code_path, 'template', 
                                    "dummy_template.json"), 'r') as infile:
                 dummy_str = infile.read(10000)
 
+            dummy_str = cf.cloud_template_subs(args, dummy_str)
             dummy_str = dummy_str.replace("TMPJOB", dep_jobname)
-            dummy_str = dummy_str.replace("TMPIMG", args.image)
-            dummy_str = dummy_str.replace("TMPDATADIR",
-                                          os.path.join(args.cloud_dir, args.data_path))
-            dummy_str = dummy_str.replace("TMPCODEDIR",
-                                          os.path.join(args.cloud_dir, args.code_path))
             curl_handler(args, dep_jobname, dummy_str)
             parents.append(dep_jobname)
 
@@ -345,11 +341,8 @@ def run_cloud_check(args):
     """
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
-    template_file = os.path.join("template","check_template.json")
+    template_file = os.path.join("template", "check_template.json")
     src_code_dir = os.path.join(local_code_dir, 'srcClass')
-
-    cloud_code_dir = os.path.join(args.cloud_dir, args.code_path)
-    cloud_data_dir = os.path.join(args.cloud_dir, args.data_path)
 
     ctr = 0
     #connection = http.client.HTTPConnection(args.chronos)
@@ -364,8 +357,9 @@ def run_cloud_check(args):
         jobname = jobname.replace(".", "-")
         pipeline_cmd = ""
         if args.run_mode == "PIPELINE":
-            pipeline_cmd = "python3 /code/pipeline_utilities.py FETCH {0} -p \
-                {1};".format(" ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts]), module)
+            arg_str = " ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts])
+            pipeline_cmd = "python3 /{0}/pipeline_utilities.py FETCH {1} -p {2}\
+                            ;".format(args.code_path, arg_str, module)
         ctr += 1
         print(str(ctr) + "\t" + module)
 
@@ -373,12 +367,9 @@ def run_cloud_check(args):
         with open(template_file, 'r') as infile:
             job_str = infile.read(10000)
 
+        job_str = cf.cloud_template_subs(args, job_str)
         job_str = job_str.replace("TMPJOB", jobname)
-        job_str = job_str.replace("TMPIMG", args.image)
-        job_str = job_str.replace("TMPDATADIR", cloud_data_dir)
-        job_str = job_str.replace("TMPCODEDIR", cloud_code_dir)
         job_str = job_str.replace("TMPSRC", module)
-        job_str = job_str.replace("TMPOPTS", args.cloud_config_opts)
         job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
 
         curl_handler(args, jobname, job_str)
@@ -405,10 +396,7 @@ def run_cloud_fetch(args):
     print("'source' specified with --step_parameters (-p): {0}".format(src))
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
-    template_file = os.path.join("template","fetch_template.json")
-
-    cloud_code_dir = os.path.join(args.cloud_dir, args.code_path)
-    cloud_data_dir = os.path.join(args.cloud_dir, args.data_path)
+    template_file = os.path.join("template", "fetch_template.json")
 
     local_src_dir = os.path.join(args.local_dir, args.data_path, src)
     if not os.path.exists(local_src_dir):
@@ -424,9 +412,10 @@ def run_cloud_fetch(args):
         jobname = jobname.replace(".", "-")
         pipeline_cmd = ""
         if args.run_mode == "PIPELINE":
-            pipeline_cmd = "python3 /code/pipeline_utilities.py TABLE {0} -p \
-                {1};".format(" ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts]), src + "," + alias)
-                
+            arg_str = " ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts])
+            pipeline_cmd = "python3 /{0}/pipeline_utilities.py TABLE {1} -p {2}\
+                            ;".format(args.code_path, arg_str, src + "," + alias)
+
         ctr += 1
         print("\t".join([str(ctr), src, alias]))
 
@@ -434,12 +423,9 @@ def run_cloud_fetch(args):
         with open(template_file, 'r') as infile:
             job_str = infile.read(10000)
 
+        job_str = cf.cloud_template_subs(args, job_str)
         job_str = job_str.replace("TMPJOB", jobname)
-        job_str = job_str.replace("TMPIMG", args.image)
-        job_str = job_str.replace("TMPDATADIR", cloud_data_dir)
-        job_str = job_str.replace("TMPCODEDIR", cloud_code_dir)
         job_str = job_str.replace("TMPALIASPATH", alias_path)
-        job_str = job_str.replace("TMPOPTS", args.cloud_config_opts)
         job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
 
         curl_handler(args, jobname, job_str)
@@ -466,11 +452,8 @@ def run_cloud_table(args):
 
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
-    template_file = os.path.join(local_code_dir, "table_template.json")
-    dummy_template_file = os.path.join(local_code_dir, "dummy_template.json")
-
-    cloud_code_dir = os.path.join(args.cloud_dir, args.code_path)
-    cloud_data_dir = os.path.join(args.cloud_dir, args.data_path)
+    template_file = os.path.join(local_code_dir, "template", "table_template.json")
+    dummy_template_file = os.path.join(local_code_dir, "template", "dummy_template.json")
 
     alias_path = os.path.join(src, alias)
     local_alias_dir = os.path.join(args.local_dir, args.data_path, alias_path)
@@ -514,10 +497,8 @@ def run_cloud_table(args):
         with open(template_file, 'r') as infile:
             job_str = infile.read(10000)
 
+        job_str = cf.cloud_template_subs(args, job_str)
         job_str = job_str.replace("TMPJOB", jobname)
-        job_str = job_str.replace("TMPIMG", args.image)
-        job_str = job_str.replace("TMPDATADIR", cloud_data_dir)
-        job_str = job_str.replace("TMPCODEDIR", cloud_code_dir)
         job_str = job_str.replace("TMPALIASPATH", alias_path)
         job_str = job_str.replace("TMPCHUNK", chunkfile)
         job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
@@ -597,4 +578,6 @@ def main():
 
 
 if __name__ == "__main__":
+    sys.argv[len(sys.argv)-1] = re.sub(r';$', '', sys.argv[len(sys.argv)-1])
+    print(str(sys.argv))
     main()

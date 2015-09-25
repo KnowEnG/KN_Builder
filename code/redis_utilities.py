@@ -45,7 +45,7 @@ def import_ensembl(alias, args=cf.config_args()):
     Returns:
     """
     rdb = get_database(args)
-    map_dir = os.sep + cf.DEFAULT_MAP_PATH
+    map_dir = os.path.join(args.data_path, cf.DEFAULT_MAP_PATH)
     if os.path.isdir(cf.DEFAULT_LOCAL_BASE):
         map_dir = cf.DEFAULT_LOCAL_BASE + map_dir
     with open(os.path.join(map_dir, alias + '_all.json')) as infile:

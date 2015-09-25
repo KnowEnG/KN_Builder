@@ -4,10 +4,10 @@
     "container": {
         "type": "DOCKER",
         "image": "TMPIMG",
-        "volumes": [{"containerPath": "/data/", "hostPath":"TMPDATADIR", "mode":"RW"},
-                    {"containerPath": "/code/", "hostPath":"TMPCODEDIR", "mode":"RW"}]
+        "volumes": [{"containerPath": "/TMPDATAPATH/", "hostPath":"TMPDATADIR", "mode":"RW"},
+                    {"containerPath": "/TMPCODEPATH/", "hostPath":"TMPCODEDIR", "mode":"RW"}]
     },
     "cpus": "1",
     "mem": "512",
-    "command": "sh -c 'cd /code/; /usr/bin/time -v python3 /code/check_utilities.py TMPSRC TMPOPTS; TMPPIPECMD'"
+    "command": "sh -c 'cd /TMPCODEPATH/; /usr/bin/time -v python3 /TMPCODEPATH/check_utilities.py TMPSRC TMPOPTS; TMPPIPECMD'"
 }

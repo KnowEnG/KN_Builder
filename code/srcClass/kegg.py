@@ -171,7 +171,7 @@ class Kegg(SrcClass):
         else:
             url = self.url_base + 'link/pathway/' + alias
         return url
-
+        
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
