@@ -58,29 +58,16 @@ done;
 
 # setup local pipeline
 python3 code/setup_utilities.py CHECK LOCAL PIPELINE -ld /workspace/apps/P1_source_check/ -dp local_pipe
+# about 36 minutes
 
 # setup cloud pipeline
-python3 code/setup_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/  -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe 
-# about four minutes
-
-
-## pipeline check local
-python3 code/pipeline_utilities.py CHECK LOCAL STEP -ld /workspace/prototype/ -dp pipe_local_step2
-
-## pipeline fetch local
-python3 code/pipeline_utilities.py FETCH LOCAL STEP -ld /workspace/prototype/ -dp pipe_local_step2
-
-## pipeline table local
-python3 code/pipeline_utilities.py TABLE LOCAL STEP -ld /workspace/prototype/ -dp pipe_local_step2
+python3 code/setup_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe 
+# about 22 minutes
 
 # pipeline local pipeline
-python3 code/pipeline_utilities.py CHECK LOCAL PIPELINE -ld /workspace/prototype/ -dp pipe_local_pipe
-
-## pipeline check cloud
-python3 code/pipeline_utilities.py CHECK CLOUD STEP -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/ -ld /workspace/prototype/ -dp pipe_cloud_step2
-
-## pipeline fetch cloud
-python3 code/pipeline_utilities.py FETCH CLOUD STEP -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/ -ld /workspace/prototype/ -dp pipe_cloud_step2 -p kegg
+python3 code/pipeline_utilities.py CHECK LOCAL PIPELINE -ld /workspace/apps/P1_source_check/ -dp local_pipe
+# about 45 minutes
 
 # pipeline cloud pipeline
-python3 code/pipeline_utilities.py FETCH CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/ -ld /workspace/prototype/ -dp pipe_cloud_pipe 
+python3 code/pipeline_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe 
+# about 24 minutes

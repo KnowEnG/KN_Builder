@@ -139,6 +139,7 @@ def chunk(filename, total_lines):
                     src = os.path.splitext(filename)[0]
                     outline = '\t'.join((src, str(line_count), md5, ''))
                     out.write(outline.encode())
+                    line.decode("ascii", errors="ignore")
                     out.write(line)
                     j += 1
                     if j == num_lines and i < num_chunks:

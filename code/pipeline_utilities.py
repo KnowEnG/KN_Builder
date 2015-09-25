@@ -46,6 +46,7 @@ DEFAULT_START_STEP = 'CHECK'
 DEFAULT_DEPLOY_LOC = 'LOCAL'
 DEFAULT_RUN_MODE = 'STEP'
 POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE']
+SETUP_FILES = ['species', 'ppi', 'ensembl', 'id_map']
 CHECK_PY = "check_utilities"
 FETCH_PY = "fetch_utilities"
 TABLE_PY = "table_utilities"
@@ -151,6 +152,8 @@ def run_local_fetch(args):
     failed = 0
     for src_name in sorted(os.listdir(local_data_dir)):
         print(src_name)
+        if src_name in SETUP_FILES:
+            continue
         for alias_name in sorted(os.listdir(os.path.join(local_data_dir, src_name))):
             alias_dir = os.path.join(local_data_dir, src_name, alias_name)
             if not os.path.isfile(os.path.join(alias_dir, "file_metadata.json")):
@@ -306,7 +309,7 @@ def list_parents(args, dependencies, response_str, parent_string):
         if jname == -1: # no parent on queue
             # schedule dummy parent add dependancy
             dummy_str = ""
-            with open(os.path.join(args.local_dir, args.code_path, 'template', 
+            with open(os.path.join(args.local_dir, args.code_path, 'template',
                                    "dummy_template.json"), 'r') as infile:
                 dummy_str = infile.read(10000)
 
@@ -579,5 +582,4 @@ def main():
 
 if __name__ == "__main__":
     sys.argv[len(sys.argv)-1] = re.sub(r';$', '', sys.argv[len(sys.argv)-1])
-    print(str(sys.argv))
     main()

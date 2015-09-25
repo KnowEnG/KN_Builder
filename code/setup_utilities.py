@@ -40,7 +40,7 @@ DEFAULT_START_STEP = 'CHECK'
 DEFAULT_DEPLOY_LOC = 'LOCAL'
 DEFAULT_RUN_MODE = 'STEP'
 POSSIBLE_STEPS = ['CHECK', 'FETCH']
-SETUP_FILES = ['species', 'ppi', 'ensembl']
+SETUP_FILES = ['species', 'ppi', 'ensembl', 'id_map']
 CHECK_PY = "check_utilities"
 FETCH_PY = "fetch_utilities"
 IMPORT_PY = "import_utilities"
@@ -270,7 +270,7 @@ def run_cloud_check(args):
     This loops through all sources in the code directory, creates a
     json chronos jobs for each source that calls check_utilities
     clean() (and if run_mode 'PIPELINE', the call to
-    pipeline_utilities FETCH) and curls json to chronos.
+    setup_utilities FETCH) and curls json to chronos.
 
     Args:
         args: arguments from parse_args()
@@ -289,7 +289,7 @@ def run_cloud_check(args):
         pipeline_cmd = ""
         if args.run_mode == "PIPELINE":
             arg_str = " ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts])
-            pipeline_cmd = "python3 /{0}/pipeline_utilities.py FETCH {1} -p {2}\
+            pipeline_cmd = "python3 /{0}/setup_utilities.py FETCH {1} -p {2}\
                             ;".format(args.code_path, arg_str, module)
         ctr += 1
         print(str(ctr) + "\t" + module)
