@@ -39,8 +39,7 @@ for i in `ls code/chron_jobs/*json | sed "s#code/chron_jobs/##g" | sed "s/.json/
 
 # delete ALL jobs on production and development chronos queue
 for c in \
-'mmaster02.cse.illinois.edu:4400' \
-'192.17.177.186:4400' \
+'mmaster01.cse.illinois.edu:4400' \
 ; do
     for i in `curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' `; do
             CMD="curl -L -X DELETE $c/scheduler/job/$i";
@@ -57,23 +56,12 @@ done;
 
 
 
-## setup check local
-python3 code/setup_utilities.py CHECK LOCAL STEP -ld /workspace/apps/P1_source_check/ -dp set_local_step2
-
-## setup fetch local
-python3 code/setup_utilities.py FETCH LOCAL STEP -ld /workspace/apps/P1_source_check/ -dp set_local_step2
-
 # setup local pipeline
-python3 code/setup_utilities.py CHECK LOCAL PIPELINE -ld /workspace/apps/P1_source_check/ -dp set_local_pipe
-
-## setup check cloud
-python3 code/setup_utilities.py CHECK CLOUD STEP -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/ -ld /workspace/prototype/ -dp set_cloud_step4
-
-# setup fetch cloud
-python3 code/setup_utilities.py FETCH CLOUD STEP -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/ -ld /workspace/prototype/ -dp set_cloud_step4 -p ensembl
+python3 code/setup_utilities.py CHECK LOCAL PIPELINE -ld /workspace/apps/P1_source_check/ -dp local_pipe
 
 # setup cloud pipeline
-python3 code/setup_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/ -ld /workspace/prototype/ -dp set_cloud_pipe 
+python3 code/setup_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/  -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe 
+# about four minutes
 
 
 ## pipeline check local

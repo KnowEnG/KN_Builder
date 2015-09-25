@@ -258,7 +258,7 @@ class Ppi(SrcClass):
         for key in term_map:
             value = term_map[key]
             term_map[key] = ixn_to_type[value]
-        print(len(term_map))
+        #print(len(term_map))
         return term_map
 
 if __name__ == "__main__":

@@ -320,7 +320,7 @@ class MySQL(object):
         Returns:
         """
         import_tables = ['node_type.txt', 'edge_type.txt', 'species.txt']
-        mysql_dir = os.sep + os.path.join('code', 'mysql')
+        mysql_dir = os.sep + os.path.join(self.args.code_path, 'mysql')
         if os.path.isdir(self.args.local_dir):
             mysql_dir = self.args.local_dir + mysql_dir
         self.import_schema('KnowNet', os.path.join(mysql_dir, 'KnowNet.sql'))

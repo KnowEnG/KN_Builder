@@ -26,13 +26,13 @@ from argparse import ArgumentParser
 import os
 
 DEFAULT_DOCKER_IMG = 'cblatti3/py3_mysql:0.1'
-DEFAULT_CURL_URL = '192.17.177.186:4400'
-DEFAULT_LOCAL_BASE = '/workspace/apps/P1_source_check'
-DEFAULT_CLOUD_BASE = '/mnt/storage/blatti/apps/P1_source_check/'
+DEFAULT_CURL_URL = 'mmaster01.cse.illinois.edu:4400'
+DEFAULT_LOCAL_BASE = '/workspace/prototype/P1_source_check'
+DEFAULT_CLOUD_BASE = '/storage-pool/blatti/P1_source_check'
 
 DEFAULT_CODE_PATH = 'code'
 DEFAULT_DATA_PATH = 'data'
-DEFAULT_MAP_PATH = 'data/id_map'
+DEFAULT_MAP_PATH = 'id_map'
 
 DEFAULT_MYSQL_URL = 'knowice.cs.illinois.edu'
 DEFAULT_MYSQL_PORT = '3307'
@@ -86,7 +86,25 @@ def cloud_config_opts(args, config_opts):
 
     Returns: string for command line arguments on cloud
     """
-    cloud_config_opts = [opt.replace(args.local_dir, '/') for opt in config_opts]
-    cloud_config_opts = [opt.replace(args.data_path, 'data') for opt in cloud_config_opts]
-    cloud_config_opts = [opt.replace(args.code_path, 'code') for opt in cloud_config_opts]
-    return " ".join(cloud_config_opts)
+    new_config_opts = [opt.replace(args.local_dir, '/') for opt in config_opts]
+    return " ".join(new_config_opts)
+
+def cloud_template_subs(args, job_str):
+    """Convert tmp values in template json job string to config options
+
+    Args:
+        args: args as populated namespace
+        job_str: json job as string with tmp placeholder values
+
+    Returns: json job as string with cloud tmp values replaced
+    """
+
+    job_str = job_str.replace("TMPIMG", args.image)
+    job_str = job_str.replace("TMPDATADIR", os.path.join(args.cloud_dir, args.data_path))
+    job_str = job_str.replace("TMPCODEDIR", os.path.join(args.cloud_dir, args.code_path))
+    job_str = job_str.replace("TMPDATAPATH", args.data_path)
+    job_str = job_str.replace("TMPCODEPATH", args.code_path)
+    job_str = job_str.replace("TMPOPTS", args.cloud_config_opts)
+
+    return job_str
+    
