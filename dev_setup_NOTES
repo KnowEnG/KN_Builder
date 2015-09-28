@@ -1,0 +1,50 @@
+## Project 1
+# dind container
+mkdir /mnt/storage/project1
+mkdir /mnt/publish/project1
+docker run -it --privileged --restart=always --name project1 -h project1 \
+    -p 3306:3306 -p 8484:80 -p 7474:7474 -p 7422:22 \
+    -v /mnt/storage/project1:/mnt/storage/project1 \
+    -v /mnt/publish/project1:/mnt/publish/project1 \
+    dind_ssh wrapdocker
+
+# mysql container
+docker run -d --restart=always --name p1_mysql -e MYSQL_ROOT_PASSWORD=KnowEnG -p 3306:3306 \
+    -v /mnt/storage/project1/KnowNet_0.2/project1/p1mysql:/var/lib/mysql mysql
+
+# neo4j containers
+docker run -t --restart=always --name hdfs sequenceiq/hadoop-docker:latest /etc/bootstrap.sh -bash #ctrl+C to detach
+docker run -d --restart=always --name mazerunner --link hdfs:hdfs kbastani/neo4j-graph-analytics:latest
+docker run -t --restart=always --name p1_neo4j -p 7474:7474 \
+    --link mazerunner:mazerunner --link hdfs:hdfs \
+    -v /mnt/storage/project1/KnowNet_0.2/project1/p1neo4j/data:/opt/data \
+    -v /mnt/storage/project1/KnowNet_0.2:/shared \
+    kbastani/docker-neo4j #ctrl+C to detach
+
+# cloud9 container
+docker run -d --privileged --restart=always --name p1_cloud9 -h project1_c9 -p 80:8181 \
+    --link p1_mysql:mysql \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v $(which docker):/bin/docker \
+    -v /mnt/storage/project1:/workspace \
+    -v /mnt/publish/project1:/workspace/publish \
+    -e USERNAME='project1' -e PASSWORD='knowdev249' \
+    stefand/cloud9-latest
+
+# install necessary tools
+apt-get update && apt-get install -y time git sshfs vim mysql-client \
+    python3 python3-pip python-pip python-dev r-base r-base-dev
+
+# pip installs
+pip3 install --allow-external mysql-connector-python mysql-connector-python
+pip3 install pylint
+pip3 install redis
+pip install s3cmd
+
+# create a key and add to git interface
+ssh-keygen -t rsa -C "project1@knowice.cs.illinois.edu"
+cat ~/.ssh/id_rsa.pub
+
+# config git
+git config --global user.name project1
+git config --global user.email project1@illinois.com
