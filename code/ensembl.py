@@ -14,15 +14,16 @@ Variables:
     TABLE_LIST: list of tables of interest from Ensembl
 """
 from check_utilities import SrcClass, compare_versions
+import config_utilities as cf
 from fetch_utilities import download
 import mysql_utilities as db
+import redis_utilities as ru
 import ftplib
 import json
 import urllib.request
 import re
 import time
 import shutil
-import config_utilities as cf
 
 TABLE_LIST = ['external_db', 'gene', 'object_xref', 'transcript',
               'translation', 'xref']
@@ -78,6 +79,7 @@ def db_import(version_json, args=cf.config_args()):
     db.combine_tables(version_dict['alias'], args)
     db.create_mapping_dicts(version_dict, args)
     db.query_all_mappings(version_dict, args)
+    ru.import_ensembl(version_dict['alias'], args)
 
 class Ensembl(SrcClass):
     """Extends SrcClass to provide ensembl specific check functions.
