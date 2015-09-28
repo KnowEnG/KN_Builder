@@ -25,10 +25,10 @@ Variables:
 from argparse import ArgumentParser
 import os
 
-DEFAULT_DOCKER_IMG = 'cblatti3/py3_mysql:0.1'
+DEFAULT_DOCKER_IMG = 'cblatti3/py3_redis_mysql:0.1'
 DEFAULT_CURL_URL = 'mmaster01.cse.illinois.edu:4400'
 DEFAULT_LOCAL_BASE = '/workspace/prototype/P1_source_check'
-DEFAULT_CLOUD_BASE = '/storage-pool/blatti/P1_source_check'
+DEFAULT_CLOUD_BASE = '/storage-pool/post3/P1_source_check'
 
 DEFAULT_CODE_PATH = 'code'
 DEFAULT_DATA_PATH = 'data'
@@ -107,4 +107,3 @@ def cloud_template_subs(args, job_str):
     job_str = job_str.replace("TMPOPTS", args.cloud_config_opts)
 
     return job_str
-    
