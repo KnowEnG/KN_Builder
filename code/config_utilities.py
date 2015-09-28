@@ -35,12 +35,12 @@ DEFAULT_DATA_PATH = 'data'
 DEFAULT_MAP_PATH = 'id_map'
 
 DEFAULT_MYSQL_URL = 'knowice.cs.illinois.edu'
-DEFAULT_MYSQL_PORT = '3307'
+DEFAULT_MYSQL_PORT = '3308'
 DEFAULT_MYSQL_USER = 'root'
 DEFAULT_MYSQL_PASS = 'KnowEnG'
 
 DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
-DEFAULT_REDIS_PORT = '6380'
+DEFAULT_REDIS_PORT = '6381'
 
 def add_config_args(parser):
     """Add configuation options to command line arguments.
