@@ -21,26 +21,19 @@ docker run -t --restart=always --name p1_neo4j -p 7474:7474 \
     -v /mnt/storage/project1/KnowNet_0.2:/shared \
     kbastani/docker-neo4j #ctrl+C to detach
 
-# cloud9 container
-docker run -d --privileged --restart=always --name p1_cloud9 -h project1_c9 -p 80:8181 \
-    --link p1_mysql:mysql \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v $(which docker):/bin/docker \
-    -v /mnt/storage/project1:/workspace \
-    -v /mnt/publish/project1:/workspace/publish \
-    -e USERNAME='project1' -e PASSWORD='knowdev249' \
-    stefand/cloud9-latest
-
 # install necessary tools
 apt-get update && apt-get install -y time git sshfs vim mysql-client \
-    python3 python3-pip python-pip python-dev r-base r-base-dev redis-tools \
-    
+    python3 python3-pip r-base r-base-dev redis-tools \
 
 # pip installs
 pip3 install --allow-external mysql-connector-python mysql-connector-python
-pip3 install pylint
-pip3 install redis
-pip install s3cmd
+pip3 install pylint redis
+
+# lincs tools
+apt-get update && apt-get install -y  python-dev python-pip python-tables
+pip install s3cmd numpy pandas requests blessings
+git clone https://github.com/cmap/l1ktools.git /workspace/apps/l1ktools
+ln -s /workspace/apps/l1ktools/python/cmap /usr/local/lib/python2.7/dist-packages/
 
 # create a key and add to git interface
 ssh-keygen -t rsa -C "project1@knowice.cs.illinois.edu"
