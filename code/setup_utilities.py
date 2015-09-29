@@ -342,10 +342,10 @@ def run_cloud_fetch(args):
         jobname = "-".join(["fetch", src, alias])
         jobname = jobname.replace(".", "-")
         pipeline_cmd = ""
-        if src == 'ensembl':
-            pipeline_cmd = "/usr/bin/time -v python3 /{0}/import_utilities.py \
-                            file_metadata.json {1};".format(args.code_path,
-                                                            args.cloud_config_opts)
+        #if src == 'ensembl':
+        #    pipeline_cmd = "/usr/bin/time -v python3 /{0}/import_utilities.py \
+        #                    file_metadata.json {1};".format(args.code_path,
+        #                                                    args.cloud_config_opts)
         if args.run_mode == "PIPELINE":
             pass
 
