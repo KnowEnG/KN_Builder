@@ -56,8 +56,8 @@ def combine_tables(alias, args=cf.config_args()):
     cmd = ("SELECT *, db_display_name AS species FROM " + alias + "_mappings "
            "WHERE 1=2")
     db.create_table(all_table, cmd)
-    cmd = ("DELETE FROM " + all_table + " WHERE species = '" + alias + "'")
-    db.execute(cmd)
+    #cmd = ("DELETE FROM " + all_table + " WHERE species = '" + alias + "'")
+    #db.execute(cmd)
     cmd = ("SELECT *, '" + alias + "' AS species FROM " + alias + "_mappings")
     db.insert(all_table, cmd)
     db.close()
