@@ -550,9 +550,11 @@ def run_cloud_table(args):
         jobname = jobname.replace(".txt", "")
         jobname = jobname.replace(".", "-")
 
-        pipeline_cmd = ""
-        #if args.run_mode == "PIPELINE":
-
+        if args.run_mode == "PIPELINE":
+            arg_str = " ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts,
+                                args.redis_host, args.redis_port])
+            pipeline_cmd = "python3 /{0}/pipeline_utilities.py MAP {1} -p {2}\
+                            ;".format(args.code_path, arg_str, src + "," + alias)
         ctr += 1
         print("\t".join([str(ctr), chunk_name]))
 
@@ -729,6 +731,8 @@ def main():
             run_cloud_fetch(args)
         elif args.start_step == 'TABLE':
             run_cloud_table(args)
+        elif args.start_step == 'MAP':
+            run_cloud_conv(args)
         else:
             print(args.start_step + ' is an unacceptable start_step.  Must be \
                 ' + str(POSSIBLE_STEPS))
