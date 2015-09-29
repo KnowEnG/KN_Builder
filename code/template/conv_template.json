@@ -1,0 +1,13 @@
+{
+    TMPLAUNCH,
+    "name": "TMPJOB",
+    "container": {
+        "type": "DOCKER",
+        "image": "TMPIMG",
+        "volumes": [{"containerPath": "/TMPDATAPATH/", "hostPath":"TMPDATADIR", "mode":"RW"},
+                    {"containerPath": "/TMPCODEPATH/", "hostPath":"TMPCODEDIR", "mode":"RW"}]
+    },
+    "cpus": "1",
+    "mem": "2500",
+    "command": "sh -c 'cd /TMPDATAPATH/TMPALIASPATH; /usr/bin/time -v python3 /TMPCODEPATH/co_utilities.py TMPTBL TMPOPTS; TMPPIPECMD'"
+}
