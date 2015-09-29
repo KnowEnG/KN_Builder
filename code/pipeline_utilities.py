@@ -45,11 +45,12 @@ import http.client
 DEFAULT_START_STEP = 'CHECK'
 DEFAULT_DEPLOY_LOC = 'LOCAL'
 DEFAULT_RUN_MODE = 'STEP'
-POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE']
+POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE', 'MAP']
 SETUP_FILES = ['species', 'ppi', 'ensembl', 'id_map']
 CHECK_PY = "check_utilities"
 FETCH_PY = "fetch_utilities"
 TABLE_PY = "table_utilities"
+CONV_PY = "conv_utilities"
 CURL_PREFIX = ["curl", "-i", "-L", "-H", "'Content-Type: application/json'",
                "-X", "POST"]
 #HEADERS = {"Content-type": "application/json"}
@@ -72,6 +73,10 @@ def main_parse_args():
         PIPELINE', default=DEFAULT_RUN_MODE)
     parser.add_argument('-p', '--step_parameters', help='parameters needed \
         for single call of step in pipeline', default='')
+    parser.add_argument('-rh', '--redis_host', help='url of Redis db',
+                        default=cf.DEFAULT_REDIS_URL)
+    parser.add_argument('-rp', '--redis_port', help='port for Redis db',
+                        default=cf.DEFAULT_REDIS_PORT)
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
 
@@ -227,6 +232,61 @@ def run_local_table(args):
                     failed += 1
 
     print("TABLE FINISHED. Successful: {0}, Failed: {1}".format(successful, failed))
+    if args.run_mode == "PIPELINE":
+        run_local_conv(args)
+        pass
+
+def run_local_conv(args):
+    """Runs id conversion for all aliases on local machine.
+
+    This loops through all tabled edge files in the data directory and calls
+    conv_utilities main() function on each file passing the name of the file
+    and the args.
+
+    Args:
+        arguments from parse_args()
+
+    Returns:
+    """
+
+    local_code_dir = os.path.join(args.local_dir, args.code_path)
+    os.chdir(local_code_dir)
+    converter = __import__(CONV_PY)
+    local_data_dir = os.path.join(args.local_dir, args.data_path)
+    os.chdir(local_data_dir)
+    ctr = 0
+    successful = 0
+    failed = 0
+    for src_name in sorted(os.listdir(local_data_dir)):
+        print(src_name)
+        for alias_name in sorted(os.listdir(os.path.join(local_data_dir, src_name))):
+            print("\t" + alias_name)
+            alias_dir = os.path.join(local_data_dir, src_name, alias_name)
+            if not os.path.isfile(os.path.join(alias_dir, "file_metadata.json")):
+                continue
+            chunkdir = os.path.join(alias_dir, "chunks")
+            if not os.path.exists(chunkdir):
+                continue
+
+            os.chdir(alias_dir)
+            for edge_name in sorted(os.listdir(chunkdir)):
+                if ".edge." not in edge_name:
+                    continue
+
+                edgefile = os.path.join("chunks", edge_name)
+                ctr += 1
+                print(str(ctr) + "\t\t" + edge_name)
+
+                try:
+                    converter.main(edgefile, args)
+                    successful += 1
+                except Exception as err:
+                    print("ERROR: " + edge_name + " could not be converted")
+                    print("Message: " + str(err))
+                    print(traceback.format_exc())
+                    failed += 1
+
+    print("CONV FINISHED. Successful: {0}, Failed: {1}".format(successful, failed))
     if args.run_mode == "PIPELINE":
         pass
 
@@ -531,6 +591,105 @@ def run_cloud_table(args):
     # end chunk
     connection.close()
 
+def run_cloud_conv(args):
+    """Runs id conversion for a single alias on the cloud.
+
+
+    For a single alias, this loops through all tabled edge files in its data
+    directory, creates a json chronos jobs for each alias that calls
+    conv_utilities main() (and if run_mode 'PIPELINE', the call to
+    pipeline_utilities CONV) and curls json to chronos.
+
+    Args:
+        arguments from parse_args()
+
+    Returns:
+    """
+    src, alias = args.step_parameters.split(",")
+    if args.step_parameters is '':
+        print("ERROR: 'source,alias' must be specified with --step_parameters (-p)")
+        return -1
+    print("'source,alias' specified with --step_parameters (-p): {0}".format(args.step_parameters))
+
+    local_code_dir = os.path.join(args.local_dir, args.code_path)
+    os.chdir(local_code_dir)
+    template_file = os.path.join(local_code_dir, "template", "conv_template.json")
+    dummy_template_file = os.path.join(local_code_dir, "template", "dummy_template.json")
+
+    alias_path = os.path.join(src, alias)
+    local_alias_dir = os.path.join(args.local_dir, args.data_path, alias_path)
+    if not os.path.exists(local_alias_dir):
+        print("ERROR: 'source,alias' specified with --step_parameters (-p) \
+            option, {0}, does not have data directory: {1}\
+            ".format(args.step_parameters, local_alias_dir))
+        return -1
+
+    if not os.path.isfile(os.path.join(local_alias_dir, "file_metadata.json")):
+        print("ERROR: cannot find file_metadata.json in {0}".format(local_alias_dir))
+        return
+
+    local_chunk_dir = os.path.join(local_alias_dir, "chunks")
+    if not os.path.exists(local_chunk_dir):
+        return
+
+    os.chdir(local_alias_dir)
+    ctr = 0
+
+    connection = http.client.HTTPConnection(args.chronos)
+    for edge_name in sorted(os.listdir(local_chunk_dir)):
+        if ".edge." not in edge_name:
+            continue
+
+        edgefile = os.path.join("chunks", edge_name)
+        ctr += 1
+        print(str(ctr) + "\t" + edge_name)
+
+        jobname = "-".join(["conv", edge_name])
+        jobname = jobname.replace(".txt", "")
+        jobname = jobname.replace(".", "-")
+
+        pipeline_cmd = ""
+        #if args.run_mode == "PIPELINE":
+
+        ctr += 1
+        print("\t".join([str(ctr), edge_name]))
+
+        job_str = ""
+        with open(template_file, 'r') as infile:
+            job_str = infile.read(10000)
+
+        job_str = cf.cloud_template_subs(args, job_str)
+        job_str = job_str.replace("TMPJOB", jobname)
+        job_str = job_str.replace("TMPALIASPATH", alias_path)
+        job_str = job_str.replace("TMPTBL", edgefile)
+        job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
+
+        ## check for dependencies
+        version_dict = {}
+        with open("file_metadata.json", 'r') as infile:
+            version_dict = json.load(infile)
+
+        dependencies = version_dict["dependencies"]
+        parents = []
+        if len(dependencies) > 0:
+            # check status of queue
+            connection.request("GET", "/scheduler/jobs")
+            response = connection.getresponse().read()
+            response_str = response.decode("utf-8")
+            chunk_name = edge_name.replace('edge', 'rawline')
+            parent_string = "-".join(["table", chunk_name])
+            parents = list_parents(args, dependencies, response_str, parent_string)
+
+        launch_cmd = '"schedule": "R1\/\/P3M"'
+        print(parents)
+        if len(parents) > 0:
+            launch_cmd = '"parents": ' + str(parents)
+        job_str = job_str.replace("TMPLAUNCH", launch_cmd)
+
+        curl_handler(args, jobname, job_str)
+    # end chunk
+    connection.close()
+
 
 def main():
     """Runs the 'start_step' step of the pipeline on the 'deploy_loc' local or
@@ -556,6 +715,8 @@ def main():
             run_local_fetch(args)
         elif args.start_step == 'TABLE':
             run_local_table(args)
+        elif args.start_step == 'MAP':
+            run_local_conv(args)
         else:
             print(args.start_step + ' is an unacceptable start_step.  Must be \
                 ' + str(POSSIBLE_STEPS))
