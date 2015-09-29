@@ -41,7 +41,7 @@ def get_SrcClass(args):
     """
     return Ensembl(args)
 
-def fetch(version_dict):
+def fetch(version_dict, args=cf.config_args()):
     """Fetches all mysql tables and syntax for alias described by version_json.
 
     This takes the path to a version_json (source.alias.json) and downloads
@@ -49,6 +49,7 @@ def fetch(version_dict):
 
     Args:
         version_dict (dict): version dictionary describing the source:alias
+        args: populated namespace from argparse
 
     Returns:
     """
@@ -58,12 +59,13 @@ def fetch(version_dict):
     for table in TABLE_LIST:
         version_dict['remote_url'] = base_url + table + '.txt.gz'
         shutil.move(download(version_dict), table + '.txt')
+    db_import(version_dict, args)
 
-def db_import(version_json, args=cf.config_args()):
+def db_import(version_dict, args=cf.config_args()):
     """Imports the data into the database and saves local id mapping
     dictionaries.
 
-    This takes the path to a version_json (source.alias.json) and imports all
+    This takes the version dictionary (source.alias.json) and imports all
     relevant tables into the database. It then combines all the relevant tables
     for gene id mapping, and saves local copies of the mapping dictionaries.
 
@@ -73,11 +75,11 @@ def db_import(version_json, args=cf.config_args()):
 
     Returns:
     """
-    with open(version_json, 'r') as infile:
-        version_dict = json.load(infile)
+    #with open(version_json, 'r') as infile:
+    #    version_dict = json.load(infile)
     db.import_ensembl(version_dict['alias'], args)
     db.combine_tables(version_dict['alias'], args)
-    db.create_mapping_dicts(version_dict, args)
+    #db.create_mapping_dicts(version_dict, args)
     db.query_all_mappings(version_dict, args)
     ru.import_ensembl(version_dict['alias'], args)
 

@@ -243,7 +243,7 @@ def main(version_json, args=cf.config_args()):
     sys.path.append(src_code_dir)
     src_module = __import__(version_dict['source'])
     if version_dict['source'] == 'ensembl':
-        src_module.fetch(version_dict)
+        src_module.fetch(version_dict, args)
         return
     newfile = download(version_dict)
     md5hash, line_count = get_md5_hash(newfile)

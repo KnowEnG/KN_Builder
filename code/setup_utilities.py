@@ -133,7 +133,7 @@ def run_local_fetch(args):
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     fetcher = __import__(FETCH_PY)
-    importer = __import__(IMPORT_PY)
+    #importer = __import__(IMPORT_PY)
     local_data_dir = os.path.join(args.local_dir, args.data_path)
     os.chdir(local_data_dir)
     ctr = 0
@@ -152,8 +152,8 @@ def run_local_fetch(args):
 
             try:
                 fetcher.main("file_metadata.json", args)
-                if src_name == 'ensembl':
-                    importer.db_import("file_metadata.json", args)
+                #if src_name == 'ensembl':
+                #    importer.db_import("file_metadata.json", args)
                 successful += 1
             except Exception as err:
                 print("ERROR: " + alias_name + " could not be fetched")
