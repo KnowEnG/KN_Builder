@@ -9,5 +9,6 @@
     },
     "cpus": "1",
     "mem": "512",
+    "retries": "0",
     "command": "sh -c 'cd /TMPDATAPATH/TMPALIASPATH; /usr/bin/time echo 'TMPJOB was not supposed to run' >> /TMPDATAPATH/ERROR.txt'" 
 }

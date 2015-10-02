@@ -666,28 +666,6 @@ def run_cloud_conv(args):
         job_str = job_str.replace("TMPTBL", edgefile)
         job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
 
-        ## check for dependencies
-        version_dict = {}
-        with open("file_metadata.json", 'r') as infile:
-            version_dict = json.load(infile)
-
-        dependencies = version_dict["dependencies"]
-        parents = []
-        if len(dependencies) > 0:
-            # check status of queue
-            connection.request("GET", "/scheduler/jobs")
-            response = connection.getresponse().read()
-            response_str = response.decode("utf-8")
-            chunk_name = edge_name.replace('edge', 'rawline')
-            parent_string = "-".join(["table", chunk_name])
-            parents = list_parents(args, dependencies, response_str, parent_string)
-
-        launch_cmd = '"schedule": "R1\/\/P3M"'
-        print(parents)
-        if len(parents) > 0:
-            launch_cmd = '"parents": ' + str(parents)
-        job_str = job_str.replace("TMPLAUNCH", launch_cmd)
-
         curl_handler(args, jobname, job_str)
     # end chunk
     connection.close()

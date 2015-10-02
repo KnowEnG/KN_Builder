@@ -296,7 +296,7 @@ class Go(SrcClass):
 
                 n2 = raw[1]
                 n2spec_str = raw[12].split("|",1)[0].rstrip() #only take first species
-                n2spec = int(n2spec_str.split(":",1)[1]) #remove label taxon:
+                n2spec = n2spec_str.split(":",1)[1] #remove label taxon:
 
                 reference = raw[5]
                 anno_evidence = raw[6]
@@ -307,7 +307,7 @@ class Go(SrcClass):
 
                 hasher = hashlib.md5()
                 hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                    n2, n2hint, n2type, n2spec, et_hint, score]))
+                    n2, n2hint, n2type, n2spec, et_hint, str(score)]).encode())
                 t_chksum = hasher.hexdigest()
                 edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
                         n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])

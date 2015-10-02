@@ -234,8 +234,8 @@ class Blast(SrcClass):
         #info_type = 'synonym'
         alias = version_dict['alias']
 
-        n1spec = int(version_dict['alias_info'].split('_', 1)[0])
-        n2spec = int(version_dict['alias_info'].split('_', 1)[1])
+        n1spec = version_dict['alias_info'].split('_', 1)[0]
+        n2spec = version_dict['alias_info'].split('_', 1)[1]
 
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges:
@@ -260,7 +260,7 @@ class Blast(SrcClass):
 
                 hasher = hashlib.md5()
                 hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                    n2, n2hint, n2type, n2spec, et_hint, score]))
+                    n2, n2hint, n2type, n2spec, et_hint, str(score)]).encode())
                 t_chksum = hasher.hexdigest()
                 edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
                         n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])

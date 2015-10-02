@@ -263,7 +263,8 @@ class Stringdb(SrcClass):
                     score = raw[et]
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                        n2, n2hint, n2type, n2spec, et_hint, score]))
+                        n2, n2hint, n2type, n2spec, et_hint, 
+                        str(score)]).encode())
                     t_chksum = hasher.hexdigest()
                     edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
                             n2, n2hint, n2type, n2spec, et_hint, score, \

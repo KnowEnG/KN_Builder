@@ -1,5 +1,5 @@
 {
-    TMPLAUNCH,
+    "schedule": "R1\/\/P3M",
     "name": "TMPJOB",
     "container": {
         "type": "DOCKER",
@@ -9,5 +9,6 @@
     },
     "cpus": "1",
     "mem": "2500",
+    "retries": "0",
     "command": "sh -c 'cd /TMPDATAPATH/TMPALIASPATH; /usr/bin/time -v python3 /TMPCODEPATH/conv_utilities.py TMPTBL TMPOPTS; TMPPIPECMD'"
 }
