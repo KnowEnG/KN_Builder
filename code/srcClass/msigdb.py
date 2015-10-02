@@ -14,6 +14,7 @@ import urllib.request
 import re
 import time
 import csv
+import hashlib
 import config_utilities as cf
 
 def get_SrcClass(args):
@@ -21,9 +22,9 @@ def get_SrcClass(args):
 
     This returns an object of the source class to allow access to its functions
     if the module is imported.
-    
+
     Args:
-    
+
     Returns:
         class: a source class object
     """
@@ -169,7 +170,7 @@ class Msigdb(SrcClass):
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
-        
+
         This returns a boolean representing if the alias corresponds to a file
         used for mapping. By default this returns True if the alias ends in
         '_map' and False otherwise.
@@ -272,9 +273,14 @@ class Msigdb(SrcClass):
                 n_meta_writer.writerow([chksm, node_num, info_type1, n1_orig_name])
                 n_meta_writer.writerow([chksm, node_num, info_type2, n1_url])
                 for n2 in raw[2:]:
+                    hasher = hashlib.md5()
+                    hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
+                        n2, n2hint, n2type, n2spec, et_hint, score]))
+                    t_chksum = hasher.hexdigest()
                     edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                        n2, n2hint, n2type, n2spec, et_hint, score])
-                
+                            n2, n2hint, n2type, n2spec, et_hint, score, \
+                            t_chksum])
+
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a Msigdb
     object
