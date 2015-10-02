@@ -63,7 +63,7 @@ def main(edgefile, args=cf.config_args()):
                 status = 'production'
                 status_desc = ''
                 hasher = hashlib.md5()
-                hasher.update('\t'.join([n1_map, n2_map, et]))
+                hasher.update('\t'.join([n1_map, n2_map, et_map]))
                 e_chksum = hasher.hexdigest()
                 writer.writerow([n1_map, n2_map, chksum, et_map, weight,
                                 e_chksum])
