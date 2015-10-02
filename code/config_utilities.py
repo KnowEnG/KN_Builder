@@ -86,6 +86,8 @@ def cloud_config_opts(args, config_opts):
 
     Returns: string for command line arguments on cloud
     """
+    if '-ld' not in config_opts:
+        config_opts.extend(['-ld', os.sep])
     new_config_opts = [opt.replace(args.local_dir, os.sep) for opt in config_opts]
     return " ".join(new_config_opts)
 

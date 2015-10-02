@@ -6,6 +6,8 @@ docker push cblatti3/python3:0.1
 docker build -f Dockerfile.mysql -t cblatti3/py3_mysql:0.1 .
 docker push cblatti3/py3_mysql:0.1
 
+docker build -f Dockerfile.redis.mysql -t cblatti3/py3_redis_mysql:0.1 .
+docker push cblatti3/py3_redis_mysql:0.1:0.1
 
 #### running outside of docker
 # check for source named SRC
