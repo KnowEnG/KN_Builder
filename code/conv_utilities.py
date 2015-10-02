@@ -15,6 +15,7 @@ import config_utilities as cf
 import redis_utilities as ru
 from argparse import ArgumentParser
 import csv
+import hashlib
 
 def main(edgefile, args=cf.config_args()):
     """Maps the nodes for the source:alias edgefile.
@@ -33,8 +34,10 @@ def main(edgefile, args=cf.config_args()):
     rdb = ru.get_database(args)
     with open(edgefile, 'r') as infile:
         reader = csv.reader(infile, delimiter = '\t')
-        e_map = open(edgefile.replace('edge', 'edge_mapped'), 'w')
+        e_map = open(edgefile.replace('edge', 'conv'), 'w')
+        e_stat = open(edgefile.replace('edge', 'status'), 'w')
         writer = csv.writer(e_map, delimiter = '\t')
+        s_writer = csv.writer(e_stat, delimiter = '\t')
         for line in reader:
             (n1, hint, ntype, taxid) = line[1:5]
             if ntype == 'gene':
@@ -49,6 +52,7 @@ def main(edgefile, args=cf.config_args()):
             chksum = line[0]
             et_map = line[9]
             weight = line[10]
+            t_chksum = line[11]
             if 'unmapped' in n1_map:
                 status = 'unmapped'
                 status_desc = n1_map
@@ -58,7 +62,12 @@ def main(edgefile, args=cf.config_args()):
             else:
                 status = 'production'
                 status_desc = ''
-            writer.writerow([n1_map, n2_map, chksum, et_map, weight, status,
+                hasher = hashlib.md5()
+                hasher.update('\t'.join([n1_map, n2_map, et]))
+                e_chksum = hasher.hexdigest()
+                writer.writerow([n1_map, n2_map, chksum, et_map, weight,
+                                e_chksum])
+            s_writer.writerow([t_chksum, n1_map, n2_map, et_map, status,
                             status_desc])
         e_map.close()
 
