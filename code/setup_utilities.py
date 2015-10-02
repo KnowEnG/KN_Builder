@@ -133,7 +133,7 @@ def run_local_fetch(args):
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     fetcher = __import__(FETCH_PY)
-    #importer = __import__(IMPORT_PY)
+    #importer = __import__(IMPORT_PY)  # not need since ensembl fetch calls import
     local_data_dir = os.path.join(args.local_dir, args.data_path)
     os.chdir(local_data_dir)
     ctr = 0
