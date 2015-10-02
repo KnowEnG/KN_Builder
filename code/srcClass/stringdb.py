@@ -12,6 +12,7 @@ Functions:
 from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
+import hashlib
 import csv
 import config_utilities as cf
 
@@ -20,9 +21,9 @@ def get_SrcClass(args):
 
     This returns an object of the source class to allow access to its functions
     if the module is imported.
-    
+
     Args:
-    
+
     Returns:
         class: a source class object
     """
@@ -152,7 +153,7 @@ class Stringdb(SrcClass):
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
-        
+
         This returns a boolean representing if the alias corresponds to a file
         used for mapping. By default this returns True if the alias ends in
         '_map' and False otherwise.
@@ -204,10 +205,10 @@ class Stringdb(SrcClass):
         This returns noting but produces the 2table formatted files from the
         provided rawline file:
             rawline table (file, line num, line_chksum, rawline)
-            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec, 
+            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
-            node_meta (line_cksum, node_num (1 or 2), 
+            node_meta (line_cksum, node_num (1 or 2),
                        info_type (evidence, relationship, experiment, or link),
                        info_desc (text))
 
@@ -260,8 +261,13 @@ class Stringdb(SrcClass):
                 for et in edge_types:
                     et_hint = edge_types[et]
                     score = raw[et]
+                    hasher = hashlib.md5()
+                    hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
+                        n2, n2hint, n2type, n2spec, et_hint, score]))
+                    t_chksum = hasher.hexdigest()
                     edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                            n2, n2hint, n2type, n2spec, et_hint, score])
+                            n2, n2hint, n2type, n2spec, et_hint, score, \
+                            t_chksum])
                 publist = raw[9]
                 e_meta_writer.writerow([chksm, info_type, publist])
 

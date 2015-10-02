@@ -14,6 +14,7 @@ import urllib.request
 import re
 import os
 import json
+import hashlib
 import csv
 import config_utilities as cf
 
@@ -22,9 +23,9 @@ def get_SrcClass(args):
 
     This returns an object of the source class to allow access to its functions
     if the module is imported.
-    
+
     Args:
-    
+
     Returns:
         class: a source class object
     """
@@ -153,7 +154,7 @@ class Reactome(SrcClass):
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
-        
+
         This returns a boolean representing if the alias corresponds to a file
         used for mapping. By default this returns True if the alias ends in
         '_map' and False otherwise.
@@ -195,7 +196,7 @@ class Reactome(SrcClass):
         This returns a dictionary for use in mapping reactome pathway nodes
         from the file specified by filetype. If the alias is
         Ensembl2Reactome_All_Levels it uses the second column as the key and
-        the first column as the value, otherwise it creates a dictionary using 
+        the first column as the value, otherwise it creates a dictionary using
         the first column as the key and the second column as the value.
 
         Args:
@@ -229,7 +230,7 @@ class Reactome(SrcClass):
 
         Returns:
         """
-        
+
         alias = version_dict['alias']
         source = version_dict['source']
 
@@ -239,7 +240,7 @@ class Reactome(SrcClass):
         e_meta_file = rawline.replace('rawline','edge_meta')
 
         if alias == 'Ensembl2Reactome_All_Levels' :
-            
+
             #static column values
             n1type = 'property'
             n1spec = '0'
@@ -276,24 +277,27 @@ class Reactome(SrcClass):
                     n1_orig_name = path_map.get(n1_ID, "unmapped:no-name")
                     n1 = 'react_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
                     n1_link = raw[2]
-                
+
                     n2 = raw[0]
                     n2spec_str = raw[5]
                     n2spec = species_map.get(n2spec_str, "unmapped:unsupported-species")
-                    
+
                     e_meta = raw[4]
                     et_hint = "reactome_curated"
                     if e_meta == "IEA":
                         et_hint = "reactome_inferred"
-                        
+                    hasher = hashlib.md5()
+                    hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
+                        n2, n2hint, n2type, n2spec, et_hint, score]))
+                    t_chksum = hasher.hexdigest()
                     edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                    n2, n2hint, n2type, n2spec, et_hint, score])
+                    n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
                     n_meta_writer.writerow([chksm, node_num, info_type, n1_orig_name])
                     n_meta_writer.writerow([chksm, node_num, info_type1, n1_link])
                     e_meta_writer.writerow([chksm, info_type2, e_meta])
 
         if alias == 'homo_sapiens.interactions' :
-            
+
             #static column values
             n1type = 'gene'
             n1spec = '9606'
@@ -302,7 +306,7 @@ class Reactome(SrcClass):
             score = 1
             info_type = 'detail'
             info_type1 = 'reference'
-            
+
             #mapping files
 
             with open(rawline, encoding='utf-8') as infile, \
@@ -314,12 +318,12 @@ class Reactome(SrcClass):
                 for line in reader:
                     chksm = line[2]
                     raw = line[3:]
-                    
+
                     # skip commented lines
                     comment_match = re.match('#', raw[0])
                     if comment_match is not None:
                         continue
-                    
+
                     n1_str = raw[0]
                     n1hint = n1_str.split(':', 1)[0]
                     n1 = n1_str.split(':', 1)[1]
@@ -330,10 +334,10 @@ class Reactome(SrcClass):
 
                     et_str = raw[6]
                     et_hint = 'reactome_PPI_' + et_str
-                    
+
                     detail_str = raw[7]
                     ref_str = raw[8]
-                    
+
                     edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
                     n2, n2hint, n2type, n2spec, et_hint, score])
                     e_meta_writer.writerow([chksm, info_type, detail_str])

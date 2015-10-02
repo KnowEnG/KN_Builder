@@ -16,6 +16,7 @@ import time
 import os
 import json
 import csv
+import hashlib
 import config_utilities as cf
 
 def get_SrcClass(args):
@@ -23,9 +24,9 @@ def get_SrcClass(args):
 
     This returns an object of the source class to allow access to its functions
     if the module is imported.
-    
+
     Args:
-    
+
     Returns:
         class: a source class object
     """
@@ -161,7 +162,7 @@ class Go(SrcClass):
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
-        
+
         This returns a boolean representing if the alias corresponds to a file
         used for mapping. By default this returns True if the alias ends in
         '_map' and False otherwise.
@@ -255,7 +256,7 @@ class Go(SrcClass):
         n2type = 'gene'
         n2hint = 'UniProt/Ensembl_GeneID'
         score = 1
-        
+
         node_num = 1
         info_type = 'synonym'
         info_type1 = 'reference'
@@ -276,23 +277,23 @@ class Go(SrcClass):
             e_meta_writer = csv.writer(e_meta, delimiter='\t')
             for line in reader:
                 chksm = line[2]
-                raw = line[3:]   
-                
+                raw = line[3:]
+
                 # skip commented lines
                 comment_match = re.match('!', raw[0])
                 if comment_match is not None:
                     continue
-                
+
                 qualifier = raw[3]
                 # skip "NOT" annotations
                 not_match = re.search('NOT', qualifier)
                 if not_match is not None:
                     continue
-                
+
                 n1_ID = raw[4]
                 n1_orig_name = obo_map.get(n1_ID, "unmapped:no-name")
                 n1 = 'go_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
-                
+
                 n2 = raw[1]
                 n2spec_str = raw[12].split("|",1)[0].rstrip() #only take first species
                 n2spec = int(n2spec_str.split(":",1)[1]) #remove label taxon:
@@ -303,9 +304,14 @@ class Go(SrcClass):
                 et_hint = 'go_curated_evidence'
                 if anno_evidence == 'IEA':
                     et_hint = 'go_inferred_evidence'
-                    
+
+                hasher = hashlib.md5()
+                hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
+                    n2, n2hint, n2type, n2spec, et_hint, score]))
+                t_chksum = hasher.hexdigest()
                 edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                    n2, n2hint, n2type, n2spec, et_hint, score])
+                        n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
+
                 n_meta_writer.writerow([chksm, node_num, info_type, n1_orig_name])
                 e_meta_writer.writerow([chksm, info_type1, reference])
                 e_meta_writer.writerow([chksm, info_type2, anno_evidence])

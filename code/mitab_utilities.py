@@ -14,6 +14,7 @@ import json
 import os
 import csv
 import re
+import hashlib
 
 def table(rawline, version_dict):
     """Uses the provided rawline file to produce a 2table_edge file, an
@@ -22,8 +23,9 @@ def table(rawline, version_dict):
     This returns noting but produces the 2table formatted files from the
     provided rawline file:
         rawline table (file, line num, line_chksum, rawline)
-        2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec, 
-                        n2name, n2hint, n2type, n2spec, et_hint, score)
+        2tbl_edge table (rawline_cksum, n1name, n1hint, n1type, n1spec, 
+                        n2name, n2hint, n2type, n2spec, et_hint, score,
+                        tableline_cksum)
         edge_meta (line_cksum, info_type, info_desc)
         node_meta (line_cksum, node_num (1 or 2), 
                    info_type (evidence, relationship, experiment, or link),
@@ -99,7 +101,11 @@ def table(rawline, version_dict):
                     if n2tuple.count(':') != 1:
                         continue
                     n2hint, n2 = n2tuple.split(':')
+                    hasher = hashlib.md5()
+                    hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
+                        n2, n2hint, n2type, n2spec, et_hint, score]))
+                    t_chksum = hasher.hexdigest()
                     edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                        n2, n2hint, n2type, n2spec, et_hint, score])
+                        n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
             publist = raw[8]
             e_meta_writer.writerow([chksm, info_type, publist])

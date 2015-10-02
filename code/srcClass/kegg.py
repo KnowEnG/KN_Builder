@@ -14,6 +14,7 @@ import urllib.request
 import re
 import time
 import os
+import hashlib
 import json
 import csv
 import config_utilities as cf
@@ -171,7 +172,7 @@ class Kegg(SrcClass):
         else:
             url = self.url_base + 'link/pathway/' + alias
         return url
-        
+
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
@@ -295,8 +296,12 @@ class Kegg(SrcClass):
                 n2spec = species_map.get(version_dict['alias_info'], \
                     "unmapped:unsupported-species")
                 et_hint = 'kegg_pathway'
+                hasher = hashlib.md5()
+                hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
+                    n2, n2hint, n2type, n2spec, et_hint, score]))
+                t_chksum = hasher.hexdigest()
                 edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                    n2, n2hint, n2type, n2spec, et_hint, score])
+                        n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
                 n_meta_writer.writerow([chksm, info_type, n1_orig_name])
 
 if __name__ == "__main__":

@@ -13,6 +13,7 @@ from check_utilities import SrcClass, compare_versions
 import os
 import json
 import csv
+import hashlib
 import math
 import config_utilities as cf
 
@@ -151,7 +152,7 @@ class Blast(SrcClass):
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
-        
+
         This returns a boolean representing if the alias corresponds to a file
         used for mapping. By default this returns True if the alias ends in
         '_map' and False otherwise.
@@ -256,9 +257,13 @@ class Blast(SrcClass):
                     score = self.sc_max
                 if(score < self.sc_min):
                     score = self.sc_min
-                
+
+                hasher = hashlib.md5()
+                hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
+                    n2, n2hint, n2type, n2spec, et_hint, score]))
+                t_chksum = hasher.hexdigest()
                 edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                    n2, n2hint, n2type, n2spec, et_hint, score])
+                        n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
 
 
 if __name__ == "__main__":
