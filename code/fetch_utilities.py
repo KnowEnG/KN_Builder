@@ -274,6 +274,10 @@ def main_parse_args():
     parser = ArgumentParser()
     parser.add_argument('metadata_json', help='json file produced from check, \
                         e.g. file_metadata.json')
+    parser.add_argument('-rh', '--redis_host', help='url of Redis db',
+                        default=cf.DEFAULT_REDIS_URL)
+    parser.add_argument('-rp', '--redis_port', help='port for Redis db',
+                        default=cf.DEFAULT_REDIS_PORT)
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
     return args
