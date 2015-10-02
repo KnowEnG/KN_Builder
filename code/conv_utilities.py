@@ -32,10 +32,10 @@ def main(edgefile, args=cf.config_args()):
     Returns:
     """
     rdb = ru.get_database(args)
-    with open(edgefile, 'r') as infile:
+    with open(edgefile, 'r') as infile, \
+        open(edgefile.replace('edge', 'conv'), 'w') as e_map, \
+        open(edgefile.replace('edge', 'status'), 'w') as e_stat:
         reader = csv.reader(infile, delimiter = '\t')
-        e_map = open(edgefile.replace('edge', 'conv'), 'w')
-        e_stat = open(edgefile.replace('edge', 'status'), 'w')
         writer = csv.writer(e_map, delimiter = '\t')
         s_writer = csv.writer(e_stat, delimiter = '\t')
         for line in reader:
@@ -63,14 +63,11 @@ def main(edgefile, args=cf.config_args()):
                 status = 'production'
                 status_desc = ''
                 hasher = hashlib.md5()
-                hasher.update('\t'.join([n1_map, n2_map, et_map]))
+                hasher.update('\t'.join([n1_map, n2_map, et_map]).encode())
                 e_chksum = hasher.hexdigest()
-                writer.writerow([n1_map, n2_map, chksum, et_map, weight,
-                                e_chksum])
+                writer.writerow([n1_map, n2_map, et_map, weight, e_chksum])
             s_writer.writerow([t_chksum, n1_map, n2_map, et_map, status,
                             status_desc])
-        e_stat.close()
-        e_map.close()
 
 def main_parse_args():
     """Processes command line arguments.

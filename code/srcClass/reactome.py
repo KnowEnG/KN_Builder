@@ -266,16 +266,17 @@ class Reactome(SrcClass):
                 open(table_file, 'w') as edges,\
                 open(n_meta_file, 'w') as n_meta,\
                 open(e_meta_file, 'w') as e_meta:
-                reader = csv.reader(infile, delimiter='\t')
                 edge_writer = csv.writer(edges, delimiter='\t')
                 n_meta_writer = csv.writer(n_meta, delimiter='\t')
                 e_meta_writer = csv.writer(e_meta, delimiter='\t')
-                for line in reader:
+                for line in infile:
                     chksm = line[2]
-                    raw = line[3:]
+                    raw = line.split('\t')[3:]
                     n1_ID = raw[1]
                     n1_orig_name = path_map.get(n1_ID, "unmapped:no-name")
+                    n1_orig_name = str(n1_orig_name.encode('ascii', 'ignore'))
                     n1 = 'react_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
+                    n1 = str(n1.encode('ascii', 'ignore'))
                     n1_link = raw[2]
 
                     n2 = raw[0]
@@ -288,10 +289,11 @@ class Reactome(SrcClass):
                         et_hint = "reactome_inferred"
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                        n2, n2hint, n2type, n2spec, et_hint, score]))
+                        n2, n2hint, n2type, n2spec, et_hint,
+                        str(score)]).encode())
                     t_chksum = hasher.hexdigest()
                     edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                    n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
+                        n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
                     n_meta_writer.writerow([chksm, node_num, info_type, n1_orig_name])
                     n_meta_writer.writerow([chksm, node_num, info_type1, n1_link])
                     e_meta_writer.writerow([chksm, info_type2, e_meta])
@@ -337,9 +339,13 @@ class Reactome(SrcClass):
 
                     detail_str = raw[7]
                     ref_str = raw[8]
-
+                    hasher = hashlib.md5()
+                    hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
+                        n2, n2hint, n2type, n2spec, et_hint,
+                        str(score)]).encode())
+                    t_chksum = hasher.hexdigest()
                     edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                    n2, n2hint, n2type, n2spec, et_hint, score])
+                        n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
                     e_meta_writer.writerow([chksm, info_type, detail_str])
                     e_meta_writer.writerow([chksm, info_type1, ref_str])
 
