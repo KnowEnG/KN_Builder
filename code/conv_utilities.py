@@ -69,6 +69,7 @@ def main(edgefile, args=cf.config_args()):
                                 e_chksum])
             s_writer.writerow([t_chksum, n1_map, n2_map, et_map, status,
                             status_desc])
+        e_stat.close()
         e_map.close()
 
 def main_parse_args():
