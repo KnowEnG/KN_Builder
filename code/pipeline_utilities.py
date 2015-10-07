@@ -66,7 +66,7 @@ def main_parse_args():
     """
     parser = ArgumentParser()
     parser.add_argument('start_step', help='select start step, must be CHECK, \
-        FETCH ', default=DEFAULT_START_STEP)
+        FETCH, TABLE, MAP', default=DEFAULT_START_STEP)
     parser.add_argument('deploy_loc', help='select deployment type, must be \
         LOCAL or CLOUD ', default=DEFAULT_DEPLOY_LOC)
     parser.add_argument('run_mode', help='select run mode, must be STEP or \
@@ -230,7 +230,6 @@ def run_local_table(args):
     print("TABLE FINISHED. Successful: {0}, Failed: {1}".format(successful, failed))
     if args.run_mode == "PIPELINE":
         run_local_conv(args)
-        pass
 
 def run_local_conv(args):
     """Runs id conversion for all aliases on local machine.
@@ -455,7 +454,7 @@ def run_cloud_fetch(args):
     print("'source' specified with --step_parameters (-p): {0}".format(src))
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
-    template_file = os.path.join("template", "fetch_template.json")
+    template_file = os.path.join(local_code_dir, "template", "fetch_template.json")
 
     local_src_dir = os.path.join(args.local_dir, args.data_path, src)
     if not os.path.exists(local_src_dir):
@@ -510,7 +509,6 @@ def run_cloud_table(args):
     print("'source,alias' specified with --step_parameters (-p): {0}".format(args.step_parameters))
 
     local_code_dir = os.path.join(args.local_dir, args.code_path)
-    os.chdir(local_code_dir)
     template_file = os.path.join(local_code_dir, "template", "table_template.json")
     dummy_template_file = os.path.join(local_code_dir, "template", "dummy_template.json")
 
@@ -545,11 +543,12 @@ def run_cloud_table(args):
         jobname = "-".join(["table", chunk_name])
         jobname = jobname.replace(".txt", "")
         jobname = jobname.replace(".", "-")
+        pipeline_cmd = ""
 
         if args.run_mode == "PIPELINE":
             arg_str = " ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts])
             pipeline_cmd = "python3 /{0}/pipeline_utilities.py MAP {1} -p {2}\
-                            ;".format(args.code_path, arg_str, src + "," + alias)
+                            ;".format(args.code_path, arg_str, chunk_name)
         ctr += 1
         print("\t".join([str(ctr), chunk_name]))
 
@@ -602,66 +601,49 @@ def run_cloud_conv(args):
 
     Returns:
     """
-    src, alias = args.step_parameters.split(",")
+    edgefile = os.path.basename(args.step_parameters)
+    src = edgefile.split('.')[0]
+    alias = edgefile.split('.edge.')[0].split(src+'.')[1]
     if args.step_parameters is '':
-        print("ERROR: 'source,alias' must be specified with --step_parameters (-p)")
+        print("ERROR: 'edgefile' must be specified with --step_parameters (-p)")
         return -1
-    print("'source,alias' specified with --step_parameters (-p): {0}".format(args.step_parameters))
+    print("'edgefile' specified with --step_parameters (-p): {0}".format(args.step_parameters))
 
     local_code_dir = os.path.join(args.local_dir, args.code_path)
-    os.chdir(local_code_dir)
     template_file = os.path.join(local_code_dir, "template", "conv_template.json")
     dummy_template_file = os.path.join(local_code_dir, "template", "dummy_template.json")
 
-    alias_path = os.path.join(src, alias)
-    local_alias_dir = os.path.join(args.local_dir, args.data_path, alias_path)
-    if not os.path.exists(local_alias_dir):
-        print("ERROR: 'source,alias' specified with --step_parameters (-p) \
-            option, {0}, does not have data directory: {1}\
-            ".format(args.step_parameters, local_alias_dir))
+    chunk_path = os.path.join(src, alias, "chunks")
+    local_chunk_dir = os.path.join(args.local_dir, args.data_path, chunk_path)
+    local_edgefile = os.path.join(local_chunk_dir, edgefile)
+
+    if not os.path.exists(local_edgefile):
+        print(("ERROR: 'edgefile' specified with --step_parameters (-p) option,"
+                " {0}, does not exist: {1}").format(args.step_parameters, local_edgefile))
         return -1
 
-    if not os.path.isfile(os.path.join(local_alias_dir, "file_metadata.json")):
-        print("ERROR: cannot find file_metadata.json in {0}".format(local_alias_dir))
-        return
-
-    local_chunk_dir = os.path.join(local_alias_dir, "chunks")
-    if not os.path.exists(local_chunk_dir):
-        return
-
-    os.chdir(local_alias_dir)
     ctr = 0
+    print("\t".join([str(ctr), edgefile]))
 
     connection = http.client.HTTPConnection(args.chronos)
-    for edge_name in sorted(os.listdir(local_chunk_dir)):
-        if ".edge." not in edge_name:
-            continue
+    
+    jobname = "-".join(["conv", edgefile])
+    jobname = jobname.replace(".txt", "")
+    jobname = jobname.replace(".", "-")
 
-        edgefile = os.path.join("chunks", edge_name)
-        ctr += 1
-        print(str(ctr) + "\t" + edge_name)
+    pipeline_cmd = ""
+    #if args.run_mode == "PIPELINE":
 
-        jobname = "-".join(["conv", edge_name])
-        jobname = jobname.replace(".txt", "")
-        jobname = jobname.replace(".", "-")
+    job_str = ""
+    with open(template_file, 'r') as infile:
+        job_str = infile.read(10000)
 
-        pipeline_cmd = ""
-        #if args.run_mode == "PIPELINE":
+    job_str = cf.cloud_template_subs(args, job_str)
+    job_str = job_str.replace("TMPJOB", jobname)
+    job_str = job_str.replace("TMPEDGEPATH", os.path.join(chunk_path, edgefile))
+    job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
 
-        ctr += 1
-        print("\t".join([str(ctr), edge_name]))
-
-        job_str = ""
-        with open(template_file, 'r') as infile:
-            job_str = infile.read(10000)
-
-        job_str = cf.cloud_template_subs(args, job_str)
-        job_str = job_str.replace("TMPJOB", jobname)
-        job_str = job_str.replace("TMPALIASPATH", alias_path)
-        job_str = job_str.replace("TMPTBL", edgefile)
-        job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
-
-        curl_handler(args, jobname, job_str)
+    curl_handler(args, jobname, job_str)
     # end chunk
     connection.close()
 
