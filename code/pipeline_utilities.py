@@ -547,8 +547,7 @@ def run_cloud_table(args):
         jobname = jobname.replace(".", "-")
 
         if args.run_mode == "PIPELINE":
-            arg_str = " ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts,
-                                '-rh', args.redis_host, '-rp', args.redis_port])
+            arg_str = " ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts])
             pipeline_cmd = "python3 /{0}/pipeline_utilities.py MAP {1} -p {2}\
                             ;".format(args.code_path, arg_str, src + "," + alias)
         ctr += 1
