@@ -79,10 +79,6 @@ def main_parse_args():
     parser = ArgumentParser()
     parser.add_argument('edgefile', help='path to a single edge file produced \
                         in table, e.g. biogrid.PPI.edge.1.txt')
-    parser.add_argument('-rh', '--redis_host', help='url of Redis db',
-                        default=cf.DEFAULT_REDIS_URL)
-    parser.add_argument('-rp', '--redis_port', help='port for Redis db',
-                        default=cf.DEFAULT_REDIS_PORT)
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
     return args

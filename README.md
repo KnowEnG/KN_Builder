@@ -59,11 +59,11 @@ done;
 
 
 # setup local pipeline
-python3 code/setup_utilities.py CHECK LOCAL PIPELINE -ld /workspace/apps/P1_source_check/ -dp local_pipe
+python3 code/setup_utilities.py CHECK LOCAL PIPELINE -ld /workspace/apps/P1_source_check/ -dp local_pipe -rh knowice.cs.illinois.edu -rp 6380
 # about 36 minutes
 
 # setup cloud pipeline
-python3 code/setup_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe 
+python3 code/setup_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -rh knowice.cs.illinois.edu -rp 6380 -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe
 # about 22 minutes
 
 # pipeline local pipeline
@@ -71,5 +71,5 @@ python3 code/pipeline_utilities.py CHECK LOCAL PIPELINE -ld /workspace/apps/P1_s
 # about 45 minutes
 
 # pipeline cloud pipeline
-python3 code/pipeline_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe 
+python3 code/pipeline_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe
 # about 24 minutes
