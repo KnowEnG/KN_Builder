@@ -261,6 +261,8 @@ class Stringdb(SrcClass):
                 for et in edge_types:
                     et_hint = edge_types[et]
                     score = raw[et]
+                    if(score == '0'):
+                        continue
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
                         n2, n2hint, n2type, n2spec, et_hint, 
