@@ -7,8 +7,8 @@
         "volumes": [{"containerPath": "/TMPDATAPATH/", "hostPath":"TMPDATADIR", "mode":"RW"},
                     {"containerPath": "/TMPCODEPATH/", "hostPath":"TMPCODEDIR", "mode":"RW"}]
     },
-    "cpus": "1",
+    "cpus": "4",
     "mem": "2500",
     "retries": "0",
-    "command": "sh -c 'cd /TMPDATAPATH/TMPALIASPATH; /usr/bin/time -v python3 /TMPCODEPATH/conv_utilities.py TMPTBL TMPOPTS; TMPPIPECMD'"
+    "command": "sh -c '/usr/bin/time -v python3 /TMPCODEPATH/conv_utilities.py /TMPDATAPATH/TMPEDGEPATH TMPOPTS; TMPPIPECMD'"
 }
