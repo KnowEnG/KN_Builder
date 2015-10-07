@@ -28,19 +28,19 @@ import os
 DEFAULT_DOCKER_IMG = 'cblatti3/py3_redis_mysql:0.1'
 DEFAULT_CURL_URL = 'mmaster01.cse.illinois.edu:4400'
 DEFAULT_LOCAL_BASE = '/workspace/prototype/P1_source_check'
-DEFAULT_CLOUD_BASE = '/storage-pool/post3/P1_source_check'
+DEFAULT_CLOUD_BASE = '/storage-pool/blatti/P1_source_check'
 
 DEFAULT_CODE_PATH = 'code'
 DEFAULT_DATA_PATH = 'data'
 DEFAULT_MAP_PATH = 'id_map'
 
 DEFAULT_MYSQL_URL = 'knowice.cs.illinois.edu'
-DEFAULT_MYSQL_PORT = '3308'
+DEFAULT_MYSQL_PORT = '3307'
 DEFAULT_MYSQL_USER = 'root'
 DEFAULT_MYSQL_PASS = 'KnowEnG'
 
 DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
-DEFAULT_REDIS_PORT = '6381'
+DEFAULT_REDIS_PORT = '6382'
 
 def add_config_args(parser):
     """Add configuation options to command line arguments.
@@ -64,6 +64,10 @@ def add_config_args(parser):
         directory from toplevel ', default=DEFAULT_CODE_PATH)
     parser.add_argument('-dp', '--data_path', help='relative path of data \
         directory from toplevel', default=DEFAULT_DATA_PATH)
+    parser.add_argument('-rh', '--redis_host', help='url of Redis db',
+                        default=DEFAULT_REDIS_URL)
+    parser.add_argument('-rp', '--redis_port', help='port for Redis db',
+                        default=DEFAULT_REDIS_PORT)        
     return parser
 
 

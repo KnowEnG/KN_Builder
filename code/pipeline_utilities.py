@@ -73,10 +73,6 @@ def main_parse_args():
         PIPELINE', default=DEFAULT_RUN_MODE)
     parser.add_argument('-p', '--step_parameters', help='parameters needed \
         for single call of step in pipeline', default='')
-    parser.add_argument('-rh', '--redis_host', help='url of Redis db',
-                        default=cf.DEFAULT_REDIS_URL)
-    parser.add_argument('-rp', '--redis_port', help='port for Redis db',
-                        default=cf.DEFAULT_REDIS_PORT)
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
 
