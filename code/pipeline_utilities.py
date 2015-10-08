@@ -546,9 +546,10 @@ def run_cloud_table(args):
         pipeline_cmd = ""
 
         if args.run_mode == "PIPELINE":
+            edgefile = chunk_name.replace('.rawline.', '.edge.')
             arg_str = " ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts])
             pipeline_cmd = "python3 /{0}/pipeline_utilities.py MAP {1} -p {2}\
-                            ;".format(args.code_path, arg_str, chunk_name)
+                            ;".format(args.code_path, arg_str, edgefile)
         ctr += 1
         print("\t".join([str(ctr), chunk_name]))
 
