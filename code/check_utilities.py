@@ -235,7 +235,7 @@ class SrcClass(object):
                 depends.append(alias_name)
         return depends
 
-    def create_mapping_dict(self, filename, key_col=0, value_col=1):
+    def create_mapping_dict(self, filename, key_col=3, value_col=4):
         """Return a mapping dictionary for the provided file.
 
         This returns a dictionary for use in mapping nodes or edge types from
@@ -247,22 +247,34 @@ class SrcClass(object):
             filename(str): The name of the file containing the information
                 needed to produce the maping dictionary.
             key_col(int): The column containing the key for creating the
-                dictionary. By default this is column 0.
+                dictionary. By default this is column 3.
             value_col(int): The column containing the value for creating the
-                dictionary. By default this is column 1.
+                dictionary. By default this is column 4.
 
         Returns:
             dict: A dictionary for use in mapping nodes or edge types.
         """
+        src = filename.split('.')[0]
         alias = filename.split('.')[1]
         map_dict = dict()
+        info_type = "alt_alias"
+        n_meta_file = filename.replace('rawline','node_meta')
         if not self.is_map(alias):
             return map_dict
-        with open(filename, 'rb') as map_file:
+        with open(filename, 'rb') as map_file, \
+            open(n_meta_file, 'w') as n_meta:
             reader = csv.reader((line.decode('utf-8') for line in map_file),
                 delimiter='\t')
+            n_meta_writer = csv.writer(n_meta, delimiter='\t')
             for line in reader:
-                map_dict[line[key_col]] = line[value_col]
+                chksm = line[2]
+                orig_id = line[key_col].strip()
+                orig_name = line[value_col].strip()
+                kn_id = cf.pretty_name(orig_id)
+                kn_name = cf.pretty_name(src + '_' + orig_name)
+                map_dict[orig_id] =  kn_id + '::' + kn_name
+                n_meta_writer.writerow([chksm, kn_id, info_type, orig_name])
+                n_meta_writer.writerow([chksm, kn_id, info_type, orig_id])
         return map_dict
 
     def table(self, rawline, version_dict):

@@ -310,7 +310,10 @@ def curl_handler(args, jobname, job_str):
 
     curl_cmd = list(CURL_PREFIX)
     curl_cmd.extend(["-d@" + jobfile])
-    curl_cmd.extend([args.chronos + "/scheduler/iso8601"])
+    if job_str.find("schedule") > -1:
+        curl_cmd.extend([args.chronos + "/scheduler/iso8601"])
+    else:
+        curl_cmd.extend([args.chronos + "/scheduler/dependency"])
     print(" ".join(curl_cmd))
     #json.dumps(job_str)
     #connection.request("POST", "/scheduler/iso8601", "-d@"+jobfile, HEADERS)
