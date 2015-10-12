@@ -206,18 +206,40 @@ class Go(SrcClass):
             dict: A dictionary for use in mapping nodes or edge types.
         """
         term_map = dict()
-        is_term = False
-        with open(filename) as infile:
-            for line in infile:
-                if line.startswith('[Term]'):
-                    line = infile.readline()
-                    if not line.startswith('id: '):
-                        continue
-                    key = line[4:].strip()
-                    line = infile.readline()
-                    if not line.startswith('name: '):
-                        continue
-                    term_map[key] = line[6:].strip()
+        info_type = "alt_alias"
+        n_meta_file = filename.replace('rawline', 'node_meta')
+        orig_id, kn_id, orig_name, kn_name = ['', '', '', '']
+        skip = True
+        with open(filename) as infile, \
+            open(n_meta_file, 'w') as n_meta:
+            reader = csv.reader(infile, delimiter='\t')
+            n_meta_writer = csv.writer(n_meta, delimiter='\t')
+            for line in reader:
+                chksm = line[2]
+                raw = line[3]
+                if raw.startswith('[Term]'):
+                    skip = False
+                    orig_id, kn_id, orig_name, kn_name = ['', '', '', '']
+                    continue
+                if raw.startswith('[Typedef]'):
+                    skip = True
+                    continue
+                if skip:
+                    continue
+                if raw.startswith('id: '):
+                    orig_id = raw[4:].strip()
+                    kn_id = cf.pretty_name(orig_id)
+                    continue
+                if raw.startswith('name: '):
+                    orig_name = raw[6:].strip()
+                    kn_name = cf.pretty_name('go_' + orig_name)
+                    term_map[orig_id] = kn_id + '::' + kn_name
+                    n_meta_writer.writerow([chksm, kn_id, info_type, orig_name])
+                    n_meta_writer.writerow([chksm, kn_id, info_type, orig_id])
+                if raw.startswith('alt_id: '):
+                    alt_id = raw[8:].strip()
+                    term_map[alt_id] = kn_id + '::' + kn_name
+                    n_meta_writer.writerow([chksm, kn_id, info_type, alt_id])
         return term_map
 
     def table(self, rawline, version_dict):
@@ -243,22 +265,18 @@ class Go(SrcClass):
         """
 
         #outfiles
-        table_file = rawline.replace('rawline','edge')
-        n_meta_file = rawline.replace('rawline','node_meta')
-        e_meta_file = rawline.replace('rawline','edge_meta')
+        table_file = rawline.replace('rawline', 'edge')
+        e_meta_file = rawline.replace('rawline', 'edge_meta')
 
         #static column values
         alias = version_dict['alias']
         source = version_dict['source']
         n1type = 'property'
         n1spec = '0'
-        n1hint = source + '_' + alias
         n2type = 'gene'
         n2hint = 'UniProt/Ensembl_GeneID'
         score = 1
 
-        node_num = 1
-        info_type = 'synonym'
         info_type1 = 'reference'
         info_type2 = 'evidence'
 
@@ -269,11 +287,9 @@ class Go(SrcClass):
 
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
-            open(n_meta_file, 'w') as n_meta,\
             open(e_meta_file, 'w') as e_meta:
             reader = csv.reader(infile, delimiter='\t')
             edge_writer = csv.writer(edges, delimiter='\t')
-            n_meta_writer = csv.writer(n_meta, delimiter='\t')
             e_meta_writer = csv.writer(e_meta, delimiter='\t')
             for line in reader:
                 chksm = line[2]
@@ -291,12 +307,12 @@ class Go(SrcClass):
                     continue
 
                 n1_ID = raw[4]
-                n1_orig_name = obo_map.get(n1_ID, "unmapped:no-name")
-                n1 = 'go_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
+                n1_mapped = obo_map.get(n1_ID, "unmapped:no-name")
+                (n1, n1hint) = n1_mapped.split('::')
 
                 n2 = raw[1]
-                n2spec_str = raw[12].split("|",1)[0].rstrip() #only take first species
-                n2spec = n2spec_str.split(":",1)[1] #remove label taxon:
+                n2spec_str = raw[12].split("|", 1)[0].rstrip() #only take first species
+                n2spec = n2spec_str.split(":", 1)[1] #remove label taxon:
 
                 reference = raw[5]
                 anno_evidence = raw[6]
@@ -312,7 +328,6 @@ class Go(SrcClass):
                 edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
                         n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
 
-                n_meta_writer.writerow([chksm, node_num, info_type, n1_orig_name])
                 e_meta_writer.writerow([chksm, info_type1, reference])
                 e_meta_writer.writerow([chksm, info_type2, anno_evidence])
 
