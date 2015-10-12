@@ -46,7 +46,7 @@ python3 code/setup_utilities.py CHECK LOCAL PIPELINE -ld /workspace/apps/P1_sour
 ```
 python3 code/pipeline_utilities.py CHECK LOCAL PIPELINE -ld /workspace/apps/P1_source_check/ -dp local_pipe -rh knowice.cs.illinois.edu -rp 6380
 ```
-# about 45 minutes
+##### about 45 minutes
 
 
 ### running all steps in cloud mode
@@ -86,9 +86,12 @@ for i in `ls cloud_pipe/*/*/chunks/*.edge.* | sed 's#cloud_pipe/##g' | sed 's#/c
 
 
 #### when complete, be a good citizen and remove jobs from the cloud
+```
 for i in `ls code/chron_jobs/*json | sed "s#code/chron_jobs/##g" | sed "s/.json//g"` ; do CMD="curl -L -X DELETE mmaster01.cse.illinois.edu:4400/scheduler/job/$i"; echo "$CMD"; eval $CMD; done
+```
 
-#### delete ALL jobs on production and development chronos queue
+#### delete ALL jobs on prototype cloud - USE CAREFULLY
+```
 for c in \
 'mmaster01.cse.illinois.edu:4400' \
 ; do
@@ -98,7 +101,7 @@ for c in \
             eval "$CMD";
     done;
 done;
-
+```
 
 
 
