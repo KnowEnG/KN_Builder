@@ -251,7 +251,7 @@ class Kegg(SrcClass):
                 else:
                     mod_id = src + '_' + orig_id
                     kn_id = orig_name.split(':')[1]
-                    kn_name = orig_name.split(':')[0]
+                    kn_name = 'EntrezGene'
                     map_dict[mod_id] = kn_id + '::' + kn_name
         return map_dict
 
@@ -307,13 +307,13 @@ class Kegg(SrcClass):
                 chksm = line[2]
                 raw = line[3:]
                 n1_orig = raw[1]
-                n1_mapped = path_map.get(n1_orig.replace(alias, 'map'),
-                                         "unmapped:no-name-property")
+                n1_mapped = path_map.get(n1_orig.replace(':'+alias, ':map'),
+                                         "unmapped:no-name-property::unmapped")
                 (n1_id, n1hint) = n1_mapped.split('::')
                 n1spec = '0'
                 n2_raw = raw[0]
                 n2_mapped = node_map.get('kegg_'+n2_raw, \
-                    "unmapped:no-name-gene")
+                    "unmapped:no-name-gene::unmapped")
                 (n2_id, n2hint) = n2_mapped.split('::')
                 n2spec = species_map.get(version_dict['alias_info'], \
                     "unmapped:unsupported-species")

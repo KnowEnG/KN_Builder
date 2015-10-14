@@ -25,7 +25,7 @@ Functions:
 
     curl_handler(args, jobname, job_str) -> : handles creating and sending
         jobs to the cloud
-    list_parents(args, dependencies, response_str, parent_string) -> parents:
+    list_parents(args, dependencies, parent_string) -> parents:
         given a list of dependencies, creates and tracks the parents required
         for the job sent to the cloud
 
@@ -316,11 +316,13 @@ def curl_handler(args, jobname, job_str):
         curl_cmd.extend([args.chronos + "/scheduler/dependency"])
     print(" ".join(curl_cmd))
     #json.dumps(job_str)
+    #connection = http.client.HTTPConnection(args.chronos) 
     #connection.request("POST", "/scheduler/iso8601", "-d@"+jobfile, HEADERS)
     #connection.request("POST", "/scheduler/iso8601", json.dumps(job_str), HEADERS)
     #connection.getresponse().read()
     #subprocess.call(curl_cmd) #does not work
-
+    #connection.close()
+    
     #annoying workaround
     shfile = jobs_dir + os.sep + jobname + ".sh"
     with open(shfile, 'w') as outfile:
@@ -328,9 +330,9 @@ def curl_handler(args, jobname, job_str):
     os.chmod(shfile, 777)
     subprocess.call(['sh', "-c", shfile])
     os.remove(shfile)
-    #connection.close()
 
-def list_parents(args, dependencies, response_str, parent_string):
+
+def list_parents(args, dependencies, parent_string):
     """given a list of dependencies, creates and tracks the parents required
     for the job sent to the cloud
 
@@ -342,14 +344,19 @@ def list_parents(args, dependencies, response_str, parent_string):
     Args:
         args: arguments from parse_args()
         dependencies: list of jobs dependencies
-        response_str: array of json job descriptions on queue
         parent_string: string to map dependencies to parent job names
 
     Returns:
         parents: list of parents to be added to json job description.
     """
-    parents = []
+    connection = http.client.HTTPConnection(args.chronos)    
+    connection.request("GET", "/scheduler/jobs")
+    response = connection.getresponse().read()
+    response_str = response.decode()
     jobs = json.loads(response_str)
+    connection.close()
+
+    parents = []
     for depend in dependencies:
         dep_jobname = "-".join([parent_string, depend])
         jname = -1
@@ -406,7 +413,6 @@ def run_cloud_check(args):
     src_code_dir = os.path.join(local_code_dir, 'srcClass')
 
     ctr = 0
-    #connection = http.client.HTTPConnection(args.chronos)
     for filename in sorted(os.listdir(src_code_dir)):
         if not filename.endswith(".py"):
             continue
@@ -534,14 +540,30 @@ def run_cloud_table(args):
     os.chdir(local_alias_dir)
     ctr = 0
 
-    connection = http.client.HTTPConnection(args.chronos)
+    ## check for dependencies
+    version_dict = {}
+    with open("file_metadata.json", 'r') as infile:
+        version_dict = json.load(infile)
+    dependencies = version_dict["dependencies"]
+    parents = []
+    if len(dependencies) > 0:
+        # check status of queue
+        parent_string = "-".join(["fetch", src])
+        parents = list_parents(args, dependencies, parent_string)
+
+    default_str = ""
+    with open(template_file, 'r') as infile:
+        default_str = infile.read(10000)    
+    default_str = cf.cloud_template_subs(args, default_str)
+    default_str = default_str.replace("TMPALIASPATH", alias_path)
+
     for chunk_name in sorted(os.listdir(local_chunk_dir)):
         if "rawline" not in chunk_name:
             continue
 
         chunkfile = os.path.join("chunks", chunk_name)
         ctr += 1
-        print(str(ctr) + "\t" + chunk_name)
+        print("\t".join([str(ctr), chunk_name]))
 
         jobname = "-".join(["table", chunk_name])
         jobname = jobname.replace(".txt", "")
@@ -553,43 +575,21 @@ def run_cloud_table(args):
             arg_str = " ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts])
             pipeline_cmd = "python3 /{0}/pipeline_utilities.py MAP {1} -p {2}\
                             ;".format(args.code_path, arg_str, edgefile)
-        ctr += 1
-        print("\t".join([str(ctr), chunk_name]))
-
-        job_str = ""
-        with open(template_file, 'r') as infile:
-            job_str = infile.read(10000)
-
-        job_str = cf.cloud_template_subs(args, job_str)
+        job_str = default_str
         job_str = job_str.replace("TMPJOB", jobname)
-        job_str = job_str.replace("TMPALIASPATH", alias_path)
         job_str = job_str.replace("TMPCHUNK", chunkfile)
         job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
-
-        ## check for dependencies
-        version_dict = {}
-        with open("file_metadata.json", 'r') as infile:
-            version_dict = json.load(infile)
-
-        dependencies = version_dict["dependencies"]
-        parents = []
-        if len(dependencies) > 0:
-            # check status of queue
-            connection.request("GET", "/scheduler/jobs")
-            response = connection.getresponse().read()
-            response_str = response.decode("utf-8")
-            parent_string = "-".join(["fetch", src])
-            parents = list_parents(args, dependencies, response_str, parent_string)
 
         launch_cmd = '"schedule": "R1\/\/P3M"'
         print(parents)
         if len(parents) > 0:
-            launch_cmd = '"parents": ' + str(parents)
+            launch_cmd = '"parents": ' + str(parents).replace("'", "\"")
+            
         job_str = job_str.replace("TMPLAUNCH", launch_cmd)
 
         curl_handler(args, jobname, job_str)
     # end chunk
-    connection.close()
+    
 
 def run_cloud_conv(args):
     """Runs id conversion for a single alias on the cloud.
@@ -628,8 +628,6 @@ def run_cloud_conv(args):
 
     ctr = 0
     print("\t".join([str(ctr), edgefile]))
-
-    connection = http.client.HTTPConnection(args.chronos)
     
     jobname = "-".join(["conv", edgefile])
     jobname = jobname.replace(".txt", "")
@@ -649,7 +647,6 @@ def run_cloud_conv(args):
 
     curl_handler(args, jobname, job_str)
     # end chunk
-    connection.close()
 
 
 def main():
