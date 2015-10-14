@@ -270,7 +270,7 @@ class Reactome(SrcClass):
                     chksm = line[2]
                     raw = line[3:]
                     n1_orig_id = raw[1]
-                    n1_mapped = path_map.get(n1_orig_id, "unmapped:no-name")
+                    n1_mapped = path_map.get(n1_orig_id, "unmapped:no-name::unmapped")
                     (n1_id, n1hint) = n1_mapped.split('::')
                     n1_link = raw[2]
 

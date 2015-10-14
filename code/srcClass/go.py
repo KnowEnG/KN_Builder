@@ -274,7 +274,6 @@ class Go(SrcClass):
         n1type = 'property'
         n1spec = '0'
         n2type = 'gene'
-        n2hint = 'UniProt/Ensembl_GeneID'
         score = 1
 
         info_type1 = 'reference'
@@ -307,10 +306,9 @@ class Go(SrcClass):
                     continue
 
                 n1_ID = raw[4]
-                n1_mapped = obo_map.get(n1_ID, "unmapped:no-name")
-                (n1, n1hint) = n1_mapped.split('::')
+                n1_mapped = obo_map.get(n1_ID, "unmapped:no-name::unmapped")
+                (n1_id, n1hint) = n1_mapped.split('::')
 
-                n2 = raw[1]
                 n2spec_str = raw[12].split("|", 1)[0].rstrip() #only take first species
                 n2spec = n2spec_str.split(":", 1)[1] #remove label taxon:
 
@@ -321,12 +319,17 @@ class Go(SrcClass):
                 if anno_evidence == 'IEA':
                     et_hint = 'go_inferred_evidence'
 
-                hasher = hashlib.md5()
-                hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                    n2, n2hint, n2type, n2spec, et_hint, str(score)]).encode())
-                t_chksum = hasher.hexdigest()
-                edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                        n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
+                n2_id = raw[1]
+                n2hint = 'UniProt/Ensembl_GeneID'
+                for i in range(1,3):  # loop twice
+                    hasher = hashlib.md5()
+                    hasher.update('\t'.join([chksm, n1_id, n1hint, n1type, n1spec,\
+                    n2_id, n2hint, n2type, n2spec, et_hint, str(score)]).encode())
+                    t_chksum = hasher.hexdigest()
+                    edge_writer.writerow([chksm, n1_id, n1hint, n1type, n1spec, \
+                        n2_id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
+                    n2_id = raw[2]
+                    n2hint = 'Any'
 
                 e_meta_writer.writerow([chksm, info_type1, reference])
                 e_meta_writer.writerow([chksm, info_type2, anno_evidence])
