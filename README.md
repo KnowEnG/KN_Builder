@@ -58,7 +58,7 @@ python3 code/setup_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.e
 
 #### pipeline cloud pipeline
 ```
-python3 code/pipeline_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe -rh knowice.cs.illinois.edu -rp 6380
+python3 code/pipeline_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/ -rh knowice.cs.illinois.edu -rp 6380 -dp cloud_pipe4
 ```
 ##### about 24 minutes
 
@@ -76,7 +76,7 @@ for i in `ls code/srcClass/*py | sed 's#code/srcClass/##g' | sed 's#.py##g'`; do
 
 #### pipeline cloud all table
 ```
-for i in `ls -d cloud_pipe/*/*/chunks | sed 's#cloud_pipe/##g' | sed 's#/chunks##g' | sed 's#/#,#g'  `; do echo $i; python3 code/pipeline_utilities.py TABLE CLOUD STEP -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe -rh knowice.cs.illinois.edu -rp 6380 -p $i; done;
+for i in `ls -d cloud_pipe/*/*/chunks | sed 's#cloud_pipe/##g' | sed 's#/chunks##g' | sed 's#/#,#g'  `; do echo $i; python3 code/pipeline_utilities.py TABLE CLOUD STEP -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/  -rh knowice.cs.illinois.edu -rp 6380 -p $i -dp cloud_pipe; done;
 ```
 
 #### pipeline cloud all conv
@@ -91,25 +91,19 @@ for i in `ls cloud_pipe/*/*/chunks/*.edge.* | sed 's#cloud_pipe/##g' | sed 's#/c
 for i in `ls code/chron_jobs/*json | sed "s#code/chron_jobs/##g" | sed "s/.json//g"` ; do CMD="curl -L -X DELETE mmaster01.cse.illinois.edu:4400/scheduler/job/$i"; echo "$CMD"; eval $CMD; done
 ```
 
-#### delete ALL jobs on prototype cloud - USE CAREFULLY
+#### delete ALL P1 jobs on prototype cloud - USE CAREFULLY
 ```
-for c in \
-'mmaster01.cse.illinois.edu:4400' \
-; do
-    for i in `curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' `; do
+for c in 'mmaster01.cse.illinois.edu:4400' 'knowmaster.dyndns.org:4400'; do
+    curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
+    for s in 'check-' 'fetch-' 'table-' 'conv-'; do 
+        echo $s
+        for i in `grep "$s" /tmp/t.txt  `; do
             CMD="curl -L -X DELETE $c/scheduler/job/$i";
             echo "$CMD";
             eval "$CMD";
+        done;
     done;
 done;
 ```
-
-
-
-
-
-
-
-
 
 
