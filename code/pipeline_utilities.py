@@ -146,15 +146,17 @@ def run_local_fetch(args):
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     fetcher = __import__(FETCH_PY)
+    local_src_dir = os.path.join(local_code_dir, args.src_path)
+    srcs = os.listdir(local_src_dir)
     local_data_dir = os.path.join(args.local_dir, args.data_path)
     os.chdir(local_data_dir)
     ctr = 0
     successful = 0
     failed = 0
     for src_name in sorted(os.listdir(local_data_dir)):
-        print(src_name)
-        if src_name in SETUP_FILES:
+        if src_name in SETUP_FILES or src_name + '.py' not in srcs:
             continue
+        print(src_name)
         for alias_name in sorted(os.listdir(os.path.join(local_data_dir, src_name))):
             alias_dir = os.path.join(local_data_dir, src_name, alias_name)
             if not os.path.isfile(os.path.join(alias_dir, "file_metadata.json")):
@@ -193,12 +195,16 @@ def run_local_table(args):
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     tabler = __import__(TABLE_PY)
+    local_src_dir = os.path.join(local_code_dir, args.src_path)
+    srcs = os.listdir(local_src_dir)
     local_data_dir = os.path.join(args.local_dir, args.data_path)
     os.chdir(local_data_dir)
     ctr = 0
     successful = 0
     failed = 0
     for src_name in sorted(os.listdir(local_data_dir)):
+        if src_name + '.py' not in srcs:
+            continue
         print(src_name)
         for alias_name in sorted(os.listdir(os.path.join(local_data_dir, src_name))):
             print("\t" + alias_name)
@@ -247,12 +253,16 @@ def run_local_conv(args):
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     converter = __import__(CONV_PY)
+    local_src_dir = os.path.join(local_code_dir, args.src_path)
+    srcs = os.listdir(local_src_dir)
     local_data_dir = os.path.join(args.local_dir, args.data_path)
     os.chdir(local_data_dir)
     ctr = 0
     successful = 0
     failed = 0
     for src_name in sorted(os.listdir(local_data_dir)):
+        if src_name + '.py' not in srcs:
+            continue
         print(src_name)
         for alias_name in sorted(os.listdir(os.path.join(local_data_dir, src_name))):
             print("\t" + alias_name)
