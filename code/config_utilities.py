@@ -24,6 +24,7 @@ Variables:
 """
 from argparse import ArgumentParser
 import os
+import re
 
 DEFAULT_DOCKER_IMG = 'cblatti3/py3_redis_mysql:0.1'
 DEFAULT_CURL_URL = 'mmaster01.cse.illinois.edu:4400'
@@ -113,3 +114,15 @@ def cloud_template_subs(args, job_str):
     job_str = job_str.replace("TMPOPTS", args.cloud_config_opts)
 
     return job_str
+
+def pretty_name(orig_name, endlen = 35):
+    """Shortens names strs and removes problematic characters
+
+    Args:
+        orig_name (string): name string before conversion
+        endlen (int): max length of final pretty string
+
+    Returns: string after formatting changes
+    """    
+    orig_name = re.sub('[^a-zA-Z0-9]','_',orig_name)
+    return orig_name[0:endlen]

@@ -166,9 +166,9 @@ class Reactome(SrcClass):
             bool: Whether or not the alias is used for mapping.
         """
         maps = {"Ensembl2Reactome_All_Levels": False,
-                   "ReactomePathways": True,
-                   "homo_sapiens.interactions": False,
-                   "ReactomePathwaysRelation": True}
+                "ReactomePathways": True,
+                "homo_sapiens.interactions": False,
+                "ReactomePathwaysRelation": True}
         return maps[alias]
 
     def get_dependencies(self, alias):
@@ -185,9 +185,9 @@ class Reactome(SrcClass):
                 alias depends on.
         """
         dependencies = {"Ensembl2Reactome_All_Levels": ['ReactomePathways'],
-                   "ReactomePathways": list(),
-                   "homo_sapiens.interactions": list(),
-                   "ReactomePathwaysRelation": ['ReactomePathways']}
+                        "ReactomePathways": list(),
+                        "homo_sapiens.interactions": list(),
+                        "ReactomePathwaysRelation": ['ReactomePathways']}
         return dependencies[alias]
 
     def create_mapping_dict(self, filename):
@@ -206,7 +206,6 @@ class Reactome(SrcClass):
         Returns:
             dict: A dictionary for use in mapping nodes or edge types.
         """
-        alias = filename.split('.')[1]
         return super(Reactome, self).create_mapping_dict(filename)
 
     def table(self, rawline, version_dict):
@@ -232,24 +231,21 @@ class Reactome(SrcClass):
         """
 
         alias = version_dict['alias']
-        source = version_dict['source']
 
         #outfiles
-        table_file = rawline.replace('rawline','edge')
-        n_meta_file = rawline.replace('rawline','node_meta')
-        e_meta_file = rawline.replace('rawline','edge_meta')
+        table_file = rawline.replace('rawline', 'edge')
+        n_meta_file = rawline.replace('rawline', 'node_meta')
+        e_meta_file = rawline.replace('rawline', 'edge_meta')
 
-        if alias == 'Ensembl2Reactome_All_Levels' :
+        if alias == 'Ensembl2Reactome_All_Levels':
 
             #static column values
             n1type = 'property'
             n1spec = '0'
-            n1hint = source + '_' + alias
             n2type = 'gene'
             n2hint = 'Ensembl_GeneID'
             score = 1
-            node_num = 1
-            info_type = 'synonym'
+            info_type = 'alt_alias'
             info_type1 = 'link'
             info_type2 = 'evidence'
 
@@ -266,20 +262,19 @@ class Reactome(SrcClass):
                 open(table_file, 'w') as edges,\
                 open(n_meta_file, 'w') as n_meta,\
                 open(e_meta_file, 'w') as e_meta:
+                reader = csv.reader(infile, delimiter='\t')
                 edge_writer = csv.writer(edges, delimiter='\t')
                 n_meta_writer = csv.writer(n_meta, delimiter='\t')
                 e_meta_writer = csv.writer(e_meta, delimiter='\t')
-                for line in infile:
+                for line in reader:
                     chksm = line[2]
-                    raw = line.split('\t')[3:]
-                    n1_ID = raw[1]
-                    n1_orig_name = path_map.get(n1_ID, "unmapped:no-name")
-                    n1_orig_name = str(n1_orig_name.encode('ascii', 'ignore'))
-                    n1 = 'react_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
-                    n1 = str(n1.encode('ascii', 'ignore'))
+                    raw = line[3:]
+                    n1_orig_id = raw[1]
+                    n1_mapped = path_map.get(n1_orig_id, "unmapped:no-name::unmapped")
+                    (n1_id, n1hint) = n1_mapped.split('::')
                     n1_link = raw[2]
 
-                    n2 = raw[0]
+                    n2_id = raw[0]
                     n2spec_str = raw[5]
                     n2spec = species_map.get(n2spec_str, "unmapped:unsupported-species")
 
@@ -288,17 +283,16 @@ class Reactome(SrcClass):
                     if e_meta == "IEA":
                         et_hint = "reactome_inferred"
                     hasher = hashlib.md5()
-                    hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                        n2, n2hint, n2type, n2spec, et_hint,
-                        str(score)]).encode())
+                    hasher.update('\t'.join([chksm, n1_id, n1hint, n1type, n1spec,\
+                                             n2_id, n2hint, n2type, n2spec, et_hint,
+                                             str(score)]).encode())
                     t_chksum = hasher.hexdigest()
-                    edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                        n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
-                    n_meta_writer.writerow([chksm, node_num, info_type, n1_orig_name])
-                    n_meta_writer.writerow([chksm, node_num, info_type1, n1_link])
+                    edge_writer.writerow([chksm, n1_id, n1hint, n1type, n1spec, \
+                        n2_id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
+                    n_meta_writer.writerow([chksm, n1_id, info_type1, n1_link])
                     e_meta_writer.writerow([chksm, info_type2, e_meta])
 
-        if alias == 'homo_sapiens.interactions' :
+        if alias == 'homo_sapiens.interactions':
 
             #static column values
             n1type = 'gene'
@@ -328,11 +322,11 @@ class Reactome(SrcClass):
 
                     n1_str = raw[0]
                     n1hint = n1_str.split(':', 1)[0]
-                    n1 = n1_str.split(':', 1)[1]
+                    n1_id = n1_str.split(':', 1)[1]
                     n2_str = raw[3]
                     n2hint = n2_str.split(':', 1)[0]
                     if n2hint == "": continue
-                    n2 = n2_str.split(':', 1)[1]
+                    n2_id = n2_str.split(':', 1)[1]
 
                     et_str = raw[6]
                     et_hint = 'reactome_PPI_' + et_str
@@ -340,12 +334,12 @@ class Reactome(SrcClass):
                     detail_str = raw[7]
                     ref_str = raw[8]
                     hasher = hashlib.md5()
-                    hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                        n2, n2hint, n2type, n2spec, et_hint,
-                        str(score)]).encode())
+                    hasher.update('\t'.join([chksm, n1_id, n1hint, n1type, n1spec,\
+                                             n2_id, n2hint, n2type, n2spec, et_hint,
+                                             str(score)]).encode())
                     t_chksum = hasher.hexdigest()
-                    edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                        n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
+                    edge_writer.writerow([chksm, n1_id, n1hint, n1type, n1spec, \
+                        n2_id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
                     e_meta_writer.writerow([chksm, info_type, detail_str])
                     e_meta_writer.writerow([chksm, info_type1, ref_str])
 

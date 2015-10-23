@@ -13,6 +13,7 @@ from check_utilities import SrcClass, compare_versions
 import urllib.request
 import time
 import config_utilities as cf
+import csv
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -205,8 +206,11 @@ class Ppi(SrcClass):
                        'MI:0914':'PPI_association',
                        'MI:0915':'PPI_physical_association'}
         desired_keys = ixn_to_type.keys()
-        with open(filename) as infile:
-            for line in infile:
+
+        with open(filename, encoding='utf-8') as infile:
+            reader = csv.reader(infile, delimiter='\t')
+            for full_line in reader:
+                line = '\t'.join(full_line[3:])
                 if line.startswith('[Term]'):
                     ID = ''
                     parent = ''
