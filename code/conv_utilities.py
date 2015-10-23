@@ -31,6 +31,8 @@ def main(edgefile, args=cf.config_args()):
 
     Returns:
     """
+    if 'lincs.level4' in edgefile:
+        return
     rdb = ru.get_database(args)
     with open(edgefile, 'r') as infile, \
         open(edgefile.replace('edge', 'conv'), 'w') as e_map, \
