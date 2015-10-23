@@ -232,8 +232,8 @@ class Lincs(SrcClass):
         tab_file = os.path.join('..', 'baseline_gene_expression',
                 '.'.join(['lincs', 'baseline_gene_expression', 'txt']))
         subprocess.Popen(['python',
-            os.path.join(args.local_dir, args.code_path, 'affy2ens.py'),
-            gctx_file, tab_file, args.redis_host,
+            os.path.join(args.local_dir, args.code_path,
+            'affy2ens_utilities.py'), gctx_file, tab_file, args.redis_host,
             args.redis_port]).communicate()
         with open(os.path.splitext(tab_file)[0] + '.json') as infile:
             return json.load(infile)
@@ -340,8 +340,8 @@ def download(version_dict, args):
 
 def gctx_to_txt(gctx_file, remote_version, ret_file, args):
     subprocess.Popen(['python',
-            os.path.join([args.local_dir, args.code_path, 'gctx2tsv.py']),
-            gctx_file, remote_version, ret_file])
+            os.path.join([args.local_dir, args.code_path,
+            'gctx2tsv_utilities.py']), gctx_file, remote_version, ret_file])
     return os.path.relpath(gctx_file.replace('gctx', 'txt'))
 
 if __name__ == "__main__":
