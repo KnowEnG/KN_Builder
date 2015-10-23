@@ -400,7 +400,7 @@ def check(module, args=cf.config_args()):
         dict: A nested dictionary describing the version information for each
             alias described in biogrid.
     """
-    src_code_dir = os.path.join(args.local_dir, args.code_path, 'srcClass')
+    src_code_dir = os.path.join(args.local_dir, args.code_path, args.src_path)
     sys.path.append(src_code_dir)
     src_module = __import__(module)
     SrcClass = src_module.get_SrcClass(args)
