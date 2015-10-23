@@ -106,7 +106,7 @@ def run_local_check(args):
     ctr = 0
     successful = 0
     failed = 0
-    src_code_dir = os.path.join(local_code_dir, 'srcClass')
+    src_code_dir = os.path.join(local_code_dir, args.src_path)
     for filename in sorted(os.listdir(src_code_dir)):
         if not filename.endswith(".py"):
             continue
@@ -316,13 +316,13 @@ def curl_handler(args, jobname, job_str):
         curl_cmd.extend([args.chronos + "/scheduler/dependency"])
     print(" ".join(curl_cmd))
     #json.dumps(job_str)
-    #connection = http.client.HTTPConnection(args.chronos) 
+    #connection = http.client.HTTPConnection(args.chronos)
     #connection.request("POST", "/scheduler/iso8601", "-d@"+jobfile, HEADERS)
     #connection.request("POST", "/scheduler/iso8601", json.dumps(job_str), HEADERS)
     #connection.getresponse().read()
     #subprocess.call(curl_cmd) #does not work
     #connection.close()
-    
+
     #annoying workaround
     shfile = jobs_dir + os.sep + jobname + ".sh"
     with open(shfile, 'w') as outfile:
@@ -349,7 +349,7 @@ def list_parents(args, dependencies, parent_string):
     Returns:
         parents: list of parents to be added to json job description.
     """
-    connection = http.client.HTTPConnection(args.chronos)    
+    connection = http.client.HTTPConnection(args.chronos)
     connection.request("GET", "/scheduler/jobs")
     response = connection.getresponse().read()
     response_str = response.decode()
@@ -410,7 +410,7 @@ def run_cloud_check(args):
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     template_file = os.path.join("template", "check_template.json")
-    src_code_dir = os.path.join(local_code_dir, 'srcClass')
+    src_code_dir = os.path.join(local_code_dir, args.src_path)
 
     ctr = 0
     for filename in sorted(os.listdir(src_code_dir)):
@@ -553,7 +553,7 @@ def run_cloud_table(args):
 
     default_str = ""
     with open(template_file, 'r') as infile:
-        default_str = infile.read(10000)    
+        default_str = infile.read(10000)
     default_str = cf.cloud_template_subs(args, default_str)
     default_str = default_str.replace("TMPALIASPATH", alias_path)
 
@@ -584,12 +584,12 @@ def run_cloud_table(args):
         print(parents)
         if len(parents) > 0:
             launch_cmd = '"parents": ' + str(parents).replace("'", "\"")
-            
+
         job_str = job_str.replace("TMPLAUNCH", launch_cmd)
 
         curl_handler(args, jobname, job_str)
     # end chunk
-    
+
 
 def run_cloud_conv(args):
     """Runs id conversion for a single alias on the cloud.
@@ -628,7 +628,7 @@ def run_cloud_conv(args):
 
     ctr = 0
     print("\t".join([str(ctr), edgefile]))
-    
+
     jobname = "-".join(["conv", edgefile])
     jobname = jobname.replace(".txt", "")
     jobname = jobname.replace(".", "-")
