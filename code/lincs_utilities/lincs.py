@@ -232,7 +232,7 @@ class Lincs(SrcClass):
         tab_file = os.path.join('..', 'baseline_gene_expression',
                 '.'.join(['lincs', 'baseline_gene_expression', 'txt']))
         subprocess.Popen(['python',
-            os.path.join(args.local_dir, args.code_path,
+            os.path.join(args.local_dir, args.code_path, args.src_path,
             'affy2ens_utilities.py'), gctx_file, tab_file, args.redis_host,
             args.redis_port]).communicate()
         with open(os.path.splitext(tab_file)[0] + '.json') as infile:
@@ -295,9 +295,9 @@ class Lincs(SrcClass):
                         if abs(float(scores[idx])) > abs(float(weight)):
                             weight = scores[idx]
                         evaluated[idx] = 1
-                    if weight < 0:
+                    if float(weight) < 0:
                         et_map = 'LINCS_down_signature'
-                        weight = abs(weight)
+                        weight = str(abs(float(weight)))
                     else:
                         et_map = 'LINCS_up_signature'
                     hasher = hashlib.md5()
@@ -325,7 +325,8 @@ def download(version_dict, args):
     ret_file = '.'.join([version_dict['source'], version_dict['alias'], 'txt'])
 
     if not version_dict['fetch_needed'] and version_dict['local_file_exists']:
-        get_SrcClass(args).create_mapping_dict(filename, args)
+        #if version_dict['alias'] == 'level4':
+        #    get_SrcClass(args).create_mapping_dict(filename, args)
         return os.path.relpath(ret_file)
 
     output = subprocess.Popen(['s3cmd', 'ls', version_dict['remote_url']],
@@ -345,7 +346,7 @@ def download(version_dict, args):
 
 def gctx_to_txt(gctx_file, remote_version, ret_file, args):
     subprocess.Popen(['python',
-            os.path.join([args.local_dir, args.code_path,
+            os.path.join([args.local_dir, args.code_path, args.src_path,
             'gctx2tsv_utilities.py']), gctx_file, remote_version, ret_file])
     return os.path.relpath(gctx_file.replace('gctx', 'txt'))
 
