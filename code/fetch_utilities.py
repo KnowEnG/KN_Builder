@@ -32,6 +32,7 @@ from argparse import ArgumentParser
 
 ARCHIVES = ['.zip', '.tar', '.gz']
 CHUNK_SZ = float(500000)
+MAX_CHUNKS = 500
 DIR = "."
 
 def download(version_dict):
@@ -116,7 +117,10 @@ def chunk(filename, total_lines):
         int: the number of chunks filename was split into
     """
     #determine number of chunks
-    num_chunks = math.ceil(total_lines/CHUNK_SZ)
+    if 'lincs.level4' in filename:
+        num_chunks = MAX_CHUNKS
+    else:
+        num_chunks = math.ceil(total_lines/CHUNK_SZ)
     num_lines = int(total_lines/num_chunks)
 
     #determine file output information
@@ -247,10 +251,16 @@ def main(version_json, args=cf.config_args()):
     if version_dict['source'] == 'ensembl':
         src_module.fetch(version_dict, args)
         return
-    newfile = download(version_dict)
+    if version_dict['source'] == 'lincs' and \
+            version_dict['alias'] in ['level4', 'exp_meta']:
+        newfile = src_module.download(version_dict, args)
+    else:
+        newfile = download(version_dict)
     md5hash, line_count = get_md5_hash(newfile)
     SrcClass = src_module.get_SrcClass(args)
-    if version_dict['is_map']:
+    if version_dict['is_map'] and version_dict['source'] == 'lincs':
+        num_chunks = 0
+    elif version_dict['is_map']:
         num_chunks = 0
         rawline = raw_line(newfile)
         map_dict = SrcClass.create_mapping_dict(rawline)
