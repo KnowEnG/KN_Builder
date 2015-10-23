@@ -238,8 +238,8 @@ class Msigdb(SrcClass):
         """
 
         #outfiles
-        table_file = rawline.replace('rawline','edge')
-        n_meta_file = rawline.replace('rawline','node_meta')
+        table_file = rawline.replace('rawline', 'edge')
+        n_meta_file = rawline.replace('rawline', 'node_meta')
         #e_meta_file = rawline.replace('rawline','edge_meta')
 
         #static column values
@@ -254,9 +254,8 @@ class Msigdb(SrcClass):
         et_hint = source + '_' + alias
         score = 1
 
-        info_type1 = 'synonym'
+        info_type1 = 'alt_alias'
         info_type2 = 'link'
-        node_num = 1
 
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
@@ -269,17 +268,22 @@ class Msigdb(SrcClass):
                 raw = line[3:]
                 n1_orig_name = raw[0]
                 n1_url = raw[1]
-                n1 = 'msigdb_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
-                n_meta_writer.writerow([chksm, node_num, info_type1, n1_orig_name])
-                n_meta_writer.writerow([chksm, node_num, info_type2, n1_url])
-                for n2 in raw[2:]:
+                hasher = hashlib.md5()
+                hasher.update(n1_orig_name.encode())
+                n1_chksum = hasher.hexdigest()
+                n1_kn_id = cf.pretty_name('msig_' + n1_chksum)
+                n1_kn_name = cf.pretty_name('msig_' + n1_orig_name)
+                n1hint = n1_kn_name
+                n_meta_writer.writerow([chksm, n1_kn_id, info_type1, n1_orig_name])
+                n_meta_writer.writerow([chksm, n1_kn_id, info_type2, n1_url])
+                for n2_id in raw[2:]:
                     hasher = hashlib.md5()
-                    hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                        n2, n2hint, n2type, n2spec, et_hint,\
+                    hasher.update('\t'.join([chksm, n1_kn_id, n1hint, n1type, n1spec,\
+                        n2_id, n2hint, n2type, n2spec, et_hint,\
                         str(score)]).encode())
                     t_chksum = hasher.hexdigest()
-                    edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                            n2, n2hint, n2type, n2spec, et_hint, score, \
+                    edge_writer.writerow([chksm, n1_kn_id, n1hint, n1type, n1spec, \
+                            n2_id, n2hint, n2type, n2spec, et_hint, score, \
                             t_chksum])
 
 if __name__ == "__main__":

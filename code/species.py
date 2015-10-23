@@ -188,11 +188,12 @@ class Species(SrcClass):
         """
         species = dict()
         species2taxid = dict()
-    
-        with open(filename) as infile:
+
+        with open(filename, encoding='utf-8') as infile:
             reader = csv.reader((line.replace('\t|', '') for line in infile),
                     delimiter='\t')
-            for line in reader:
+            for full_line in reader:
+                line = full_line[3:]
                 if line[3] == 'scientific name':
                     taxid = line[0]
                     sci_name = line[1]

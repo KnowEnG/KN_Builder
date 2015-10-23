@@ -225,7 +225,35 @@ class Kegg(SrcClass):
         Returns:
             dict: A dictionary for use in mapping nodes or edge types.
         """
-        return super(Kegg, self).create_mapping_dict(filename)
+        src = filename.split('.')[0]
+        alias = filename.split('.')[1]
+        map_dict = dict()
+        info_type = "alt_alias"
+        n_meta_file = filename.replace('rawline', 'node_meta')
+        if not self.is_map(alias):
+            return map_dict
+        with open(filename, 'rb') as map_file, \
+            open(n_meta_file, 'w') as n_meta:
+            reader = csv.reader((line.decode('utf-8') for line in map_file),
+                                delimiter='\t')
+            n_meta_writer = csv.writer(n_meta, delimiter='\t')
+            for line in reader:
+                chksm = line[2]
+                orig_id = line[3].strip()
+                orig_name = line[4].strip()
+                if alias == 'pathway':
+                    mod_id = src + '_' + orig_id.replace('map', '')
+                    kn_id = cf.pretty_name(mod_id)
+                    kn_name = cf.pretty_name(src + '_' + orig_name)
+                    map_dict[orig_id] = kn_id + '::' + kn_name
+                    n_meta_writer.writerow([chksm, kn_id, info_type, orig_name])
+                    n_meta_writer.writerow([chksm, kn_id, info_type, orig_id])
+                else:
+                    mod_id = src + '_' + orig_id
+                    kn_id = orig_name.split(':')[1]
+                    kn_name = 'EntrezGene'
+                    map_dict[mod_id] = kn_id + '::' + kn_name
+        return map_dict
 
     def table(self, rawline, version_dict):
         """Uses the provided rawline file to produce a 2table_edge file, an
@@ -250,16 +278,12 @@ class Kegg(SrcClass):
         """
 
         #outfiles
-        table_file = rawline.replace('rawline','edge')
-        n_meta_file = rawline.replace('rawline','node_meta')
-        #e_meta_file = rawline.replace('rawline','edge_meta')
+        table_file = rawline.replace('rawline', 'edge')
 
         #static column values
         n1type = 'property'
         n2type = 'gene'
         score = 1
-        node_num = 1
-        info_type = 'synonym'
         alias = version_dict['alias']
 
         #mapping files
@@ -273,36 +297,33 @@ class Kegg(SrcClass):
         species = (os.path.join('..', '..', 'species', 'species_map',\
                     'species.species_map.json'))
         with open(species) as infile:
-           species_map = json.load(infile)
+            species_map = json.load(infile)
 
         with open(rawline, encoding='utf-8') as infile, \
-            open(table_file, 'w') as edges,\
-            open(n_meta_file, 'w') as n_meta:
+            open(table_file, 'w') as edges:
             reader = csv.reader(infile, delimiter='\t')
             edge_writer = csv.writer(edges, delimiter='\t')
-            n_meta_writer = csv.writer(n_meta, delimiter='\t')
             for line in reader:
                 chksm = line[2]
                 raw = line[3:]
-                n1_ID = raw[0]
-                n1_orig_name = path_map.get(n1_ID.replace(':' + alias, \
-                    ':map'), "unmapped:no-name")
-                n1 = 'kegg_' + re.sub('[^a-zA-Z0-9]','_',n1_orig_name)[0:35]
+                n1_orig = raw[1]
+                n1_mapped = path_map.get(n1_orig.replace(':'+alias, ':map'),
+                                         "unmapped:no-name-property::unmapped")
+                (n1_id, n1hint) = n1_mapped.split('::')
                 n1spec = '0'
-                n1hint = 'kegg_pathway'
-                n2_raw = raw[1]
-                n2hint, n2 = node_map.get(n2_raw, \
-                    "unmapped:unsupported-species").split(':')
+                n2_raw = raw[0]
+                n2_mapped = node_map.get('kegg_'+n2_raw, \
+                    "unmapped:no-name-gene::unmapped")
+                (n2_id, n2hint) = n2_mapped.split('::')
                 n2spec = species_map.get(version_dict['alias_info'], \
                     "unmapped:unsupported-species")
                 et_hint = 'kegg_pathway'
                 hasher = hashlib.md5()
-                hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                    n2, n2hint, n2type, n2spec, et_hint, str(score)]).encode())
+                hasher.update('\t'.join([chksm, n1_id, n1hint, n1type, n1spec,\
+                    n2_id, n2hint, n2type, n2spec, et_hint, str(score)]).encode())
                 t_chksum = hasher.hexdigest()
-                edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                        n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
-                n_meta_writer.writerow([chksm, info_type, n1_orig_name])
+                edge_writer.writerow([chksm, n1_id, n1hint, n1type, n1spec, \
+                        n2_id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a kegg

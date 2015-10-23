@@ -104,3 +104,20 @@ def conv_gene(rdb, foreign_key, hint, taxid):
         if len(taxid_ens_ids) == 1:
             return hint_ens_ids[0].decode()
     return 'unmapped-many'
+
+def import_mapping(map_dict, args=cf.config_args()):
+    """Imports the property mapping data into the Redis database.
+
+    This stores the original id to KnowNet ids in the Redis database.
+
+    Args:
+        map_dict (dict): An dictionary containing all mapping info.
+
+    Returns:
+    """
+    rdb = get_database(args)
+    for orig_id in map_dict:
+        rkey = rdb.getset('property::' + orig_id, map_dict[orig_id])
+        if rkey is not None and rkey != map_dict[orig_id]:
+            rdb.set('property::' + orig_id, 'unmapped-many')
+        rdb.sadd(orig_id, map_dict[orig_id])

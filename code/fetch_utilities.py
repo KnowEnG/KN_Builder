@@ -27,6 +27,7 @@ import sys
 import math
 import hashlib
 import config_utilities as cf
+import redis_utilities as ru
 from argparse import ArgumentParser
 
 ARCHIVES = ['.zip', '.tar', '.gz']
@@ -139,8 +140,8 @@ def chunk(filename, total_lines):
                     src = os.path.splitext(filename)[0]
                     outline = '\t'.join((src, str(line_count), md5, ''))
                     out.write(outline.encode())
-                    line.decode("ascii", errors="ignore")
-                    out.write(line)
+                    cleanline = line.decode("ascii", errors="ignore")
+                    out.write(cleanline.encode())
                     j += 1
                     if j == num_lines and i < num_chunks:
                         break
@@ -165,7 +166,7 @@ def raw_line(filename):
     #determine file output information
     path, file = os.path.split(filename)
     source_alias, ext = os.path.splitext(file)
-    rawline = os.path.join(path, source_alias + '.raw_line' + ext)
+    rawline = os.path.join(path, source_alias + '.rawline' + ext)
 
     #convert the file to raw_line format
     line_count = 0
@@ -178,7 +179,8 @@ def raw_line(filename):
                 line_count += 1
                 outline = '\t'.join([source_alias, str(line_count), md5, ''])
                 outfile.write(outline.encode())
-                outfile.write(line)
+                cleanline = line.decode('ascii', 'ignore')
+                outfile.write(cleanline.encode())
     return rawline
 
 def get_md5_hash(filename):
@@ -250,10 +252,12 @@ def main(version_json, args=cf.config_args()):
     SrcClass = src_module.get_SrcClass(args)
     if version_dict['is_map']:
         num_chunks = 0
-        map_dict = SrcClass.create_mapping_dict(newfile)
+        rawline = raw_line(newfile)
+        map_dict = SrcClass.create_mapping_dict(rawline)
         map_file = os.path.splitext(newfile)[0] + '.json'
         with open(map_file, 'w') as outfile:
             json.dump(map_dict, outfile, indent=4, sort_keys=True)
+        #ru.import_mapping(map_dict, args)
     else:
         #rawline = raw_line(newfile)
         num_chunks = chunk(newfile, line_count)
