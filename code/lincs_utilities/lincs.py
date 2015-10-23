@@ -295,6 +295,11 @@ class Lincs(SrcClass):
                         if abs(float(scores[idx])) > abs(float(weight)):
                             weight = scores[idx]
                         evaluated[idx] = 1
+                    if weight < 0:
+                        et_map = 'LINCS_down_signature'
+                        weight = abs(weight)
+                    else:
+                        et_map = 'LINCS_up_signature'
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([n1_map, n2_map, et_map]).encode())
                     e_chksum = hasher.hexdigest()
