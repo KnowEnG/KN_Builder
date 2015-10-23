@@ -90,7 +90,7 @@ class SrcClass(object):
         alias. This value will be the same for every alias unless the
         the alias can have a different release version than the source
         (this will be source dependent). This value is stored in the
-        self.version dictionary object. If the value does not already,
+        self.version dictionary object. If the value does not already exist,
         all aliases versions are initialized to 'unknown'.
 
         Args:
