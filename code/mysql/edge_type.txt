@@ -1,4 +1,3 @@
-e_type_id	et_name	n1_type	n2_type	bidir	et_desc	sc_desc	sc_best	sc_worst
 1	PPI_association	1	1	1	Interaction between molecules that may participate in formation of one, but possibly more, physical complexes. Often describes a set of molecules that are co-purified in a single pull-down or coimmunoprecipitation but might participate in formation of distinct physical complexes sharing a common bait.	binary value	1	1
 2	PPI_colocalization	1	1	1	Coincident occurrence of molecules in a given subcellular fraction observed with a low resolution methodology from which a physical interaction among those molecules cannot be inferred.	binary value	1	1
 3	PPI_direct_interaction	1	1	1	Interaction between molecules that are in direct contact with each other.	binary value	1	1

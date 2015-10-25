@@ -100,14 +100,27 @@ def query_all_mappings(version_dict, args=cf.config_args()):
         map_dir =  os.path.join(args.local_dir, map_dir)
     if not os.path.isdir(map_dir):
         os.mkdir(map_dir)
-    print(map_dir)
     db = MySQL(database, args)
+    cmd = "WHERE db_name='ENS_LRG_gene'"
+    results = db.query_distinct('dbprimary_acc, stable_id', table, cmd)
+    lrg_dict = create_dictionary(results)
     results = db.query_distinct('stable_id, stable_id', table)
     map_dict = dict()
     for (raw, mapped) in results:
+        if str(raw) in lrg_dict:
+            mapped = lrg_dict[str(raw)]
+        if str(mapped) in lrg_dict:
+            mapped = lrg_dict[str(mapped)]
         map_dict[taxid + '::ENSEMBL_STABLE_ID::' + str(raw)] = str(mapped)
-    results = db.query_distinct('dbprimary_acc, db_name, stable_id', table)
+    results = db.query_distinct(
+                'display_label AS dbprimary_acc, db_name, stable_id', table)
+    results.extend(db.query_distinct('dbprimary_acc, db_name, stable_id',
+                                    table))
     for (raw, hint, mapped) in results:
+        if str(raw) in lrg_dict:
+            mapped = lrg_dict[str(raw)]
+        if str(mapped) in lrg_dict:
+            mapped = lrg_dict[str(mapped)]
         map_dict['::'.join([taxid, str(hint), str(raw)])] = str(mapped)
     with open(os.path.join(map_dir, alias + '_all.json'), 'w') as outfile:
         json.dump(map_dict, outfile, indent=4)
@@ -140,7 +153,11 @@ def create_mapping_dicts(version_dict, args=cf.config_args()):
     with open(os.path.join(map_dir, alias + '_stable.json'), 'w') as outfile:
         map_dict = create_dictionary(results)
         json.dump(map_dict, outfile, indent=4)
-    results = db.query_distinct('dbprimary_acc, stable_id', table, cmd)
+    results = db.query_distinct('display_label AS dbprimary_acc, stable_id',
+                                    table, cmd)
+    results.extend(db.query_distinct('dbprimary_acc, stable_id', table, cmd))
+    cmd += " AND db_name='ENS_LRG_gene'"
+    results.extend(db.query_distinct('dbprimary_acc, stable_id', table, cmd))
     with open(os.path.join(map_dir, alias + '_unique.json'), 'w') as outfile:
         map_dict = create_dictionary(results)
         json.dump(map_dict, outfile, indent=4)
@@ -174,9 +191,9 @@ def get_insert_cmd(step):
             step
     """
     if step == 'gene':
-        cmd = ("SELECT DISTINCT xref.dbprimary_acc, external_db.db_name, "
-               "external_db.priority, external_db.db_display_name, "
-               "gene.stable_id "
+        cmd = ("SELECT DISTINCT xref.dbprimary_acc, xref.display_label, "
+               "external_db.db_name, external_db.priority, "
+               "external_db.db_display_name, gene.stable_id "
                "FROM xref INNER JOIN external_db "
                "ON xref.external_db_id = external_db.external_db_id "
                "INNER JOIN object_xref "
@@ -185,9 +202,9 @@ def get_insert_cmd(step):
                "ON object_xref.ensembl_id = gene.gene_id "
                "WHERE object_xref.ensembl_object_type = 'Gene'")
     elif step == 'transcript':
-        cmd = ("SELECT DISTINCT xref.dbprimary_acc, external_db.db_name, "
-               "external_db.priority, external_db.db_display_name, "
-               "gene.stable_id "
+        cmd = ("SELECT DISTINCT xref.dbprimary_acc, xref.display_label, "
+               "external_db.db_name, external_db.priority, "
+               "external_db.db_display_name, gene.stable_id "
                "FROM xref INNER JOIN external_db "
                "ON xref.external_db_id = external_db.external_db_id "
                "INNER JOIN object_xref "
@@ -198,9 +215,9 @@ def get_insert_cmd(step):
                "ON transcript.gene_id = gene.gene_id "
                "WHERE object_xref.ensembl_object_type = 'Transcript'")
     elif step == 'translation':
-        cmd = ("SELECT DISTINCT xref.dbprimary_acc, external_db.db_name, "
-               "external_db.priority, external_db.db_display_name, "
-               "gene.stable_id "
+        cmd = ("SELECT DISTINCT xref.dbprimary_acc, xref.display_label, "
+               "external_db.db_name, external_db.priority, "
+               "external_db.db_display_name, gene.stable_id "
                "FROM xref INNER JOIN external_db "
                "ON xref.external_db_id = external_db.external_db_id "
                "INNER JOIN object_xref "
@@ -214,6 +231,7 @@ def get_insert_cmd(step):
                "WHERE object_xref.ensembl_object_type = 'Translation'")
     elif step == 'transcript2stable':
         cmd = ("SELECT DISTINCT transcript.stable_id AS dbprimary_acc, "
+               "transcript.stable_id AS display_label, "
                "'ensembl' AS db_name, "
                "1000 AS priority, "
                "'ensembl' AS db_display_name, "
@@ -223,6 +241,7 @@ def get_insert_cmd(step):
                "ON transcript.gene_id = gene.gene_id")
     elif step == 'translation2stable':
         cmd = ("SELECT DISTINCT translation.stable_id AS dbprimary_acc, "
+               "translation.stable_id AS display_label, "
                "'ensembl' AS db_name, "
                "1000 AS priority, "
                "'ensembl' AS db_display_name, "
