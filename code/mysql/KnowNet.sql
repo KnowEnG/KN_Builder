@@ -132,7 +132,8 @@ CREATE TABLE IF NOT EXISTS `edge_meta` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `all_mappings` (
-  `dbprimary_acc` varchar(128) DEFAULT NULL,
+  `dbprimary_acc` varchar(512) DEFAULT NULL,
+  `display_label` varchar(512) DEFAULT NULL,
   `db_name` varchar(100) NOT NULL,
   `priority` int(11) NOT NULL,
   `db_display_name` varchar(255) DEFAULT NULL,
