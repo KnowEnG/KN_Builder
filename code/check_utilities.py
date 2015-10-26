@@ -90,7 +90,7 @@ class SrcClass(object):
         alias. This value will be the same for every alias unless the
         the alias can have a different release version than the source
         (this will be source dependent). This value is stored in the
-        self.version dictionary object. If the value does not already,
+        self.version dictionary object. If the value does not already exist,
         all aliases versions are initialized to 'unknown'.
 
         Args:
@@ -400,7 +400,7 @@ def check(module, args=cf.config_args()):
         dict: A nested dictionary describing the version information for each
             alias described in biogrid.
     """
-    src_code_dir = os.path.join(args.local_dir, args.code_path, 'srcClass')
+    src_code_dir = os.path.join(args.local_dir, args.code_path, args.src_path)
     sys.path.append(src_code_dir)
     src_module = __import__(module)
     SrcClass = src_module.get_SrcClass(args)
