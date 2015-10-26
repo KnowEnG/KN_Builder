@@ -89,11 +89,10 @@ def conv_gene(rdb, foreign_key, hint, taxid):
             both_match.append(taxid_hint_key)
         if taxid == taxid_hint[0]:
             taxid_match.append(taxid_hint_key)
-        if hint in taxid_hint[1]:
+        if hint in taxid_hint[1] and len(hint):
             hint_match.append(taxid_hint_key)
     if both_match:
         both_ens_ids = list(set(rdb.mget(both_match)))
-        if len(both_ens_ids) == 1:
             return both_ens_ids[0].decode()
     if taxid_match:
         taxid_ens_ids = list(set(rdb.mget(taxid_match)))
@@ -101,7 +100,7 @@ def conv_gene(rdb, foreign_key, hint, taxid):
             return taxid_ens_ids[0].decode()
     if hint_match:
         hint_ens_ids = list(set(rdb.mget(hint_match)))
-        if len(taxid_ens_ids) == 1:
+        if len(hint_ens_ids) == 1:
             return hint_ens_ids[0].decode()
     return 'unmapped-many'
 
