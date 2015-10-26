@@ -93,7 +93,7 @@ def conv_gene(rdb, foreign_key, hint, taxid):
             hint_match.append(taxid_hint_key)
     if both_match:
         both_ens_ids = list(set(rdb.mget(both_match)))
-            return both_ens_ids[0].decode()
+        return both_ens_ids[0].decode()
     if taxid_match:
         taxid_ens_ids = list(set(rdb.mget(taxid_match)))
         if len(taxid_ens_ids) == 1:
