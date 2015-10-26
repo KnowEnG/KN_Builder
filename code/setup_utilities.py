@@ -66,8 +66,8 @@ def main_parse_args():
         PIPELINE', default=DEFAULT_RUN_MODE)
     parser.add_argument('-p', '--step_parameters', help='parameters needed \
         for single call of step in pipeline', default='')
-    parser.add_argument('-ne', '--no_ensembl', type=bool, help='do not run \
-        ensembl in pipeline', default=False)
+    parser.add_argument('-ne', '--no_ensembl', dest='no_ensembl', help='do not run \
+        ensembl in pipeline', action='store_true')
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
 
