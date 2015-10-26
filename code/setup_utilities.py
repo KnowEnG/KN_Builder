@@ -66,8 +66,8 @@ def main_parse_args():
         PIPELINE', default=DEFAULT_RUN_MODE)
     parser.add_argument('-p', '--step_parameters', help='parameters needed \
         for single call of step in pipeline', default='')
-    parser.add_argument('-ne', '--no_ensembl', dest='no_ensembl', help='do not run \
-        ensembl in pipeline', action='store_true')
+    parser.add_argument('-ne', '--no_ensembl', dest='no_ensembl', help='do not \
+        run ensembl in pipeline', action='store_true', default=False)
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
 
@@ -146,10 +146,10 @@ def run_local_fetch(args):
     failed = 0
     for src_name in SETUP_FILES:
         print(src_name)
-        
+
         if src_name is 'ensembl' and args.no_ensembl:
             continue
-        
+
         for alias_name in sorted(os.listdir(os.path.join(local_data_dir, src_name))):
             alias_dir = os.path.join(local_data_dir, src_name, alias_name)
             if not os.path.isfile(os.path.join(alias_dir, "file_metadata.json")):
@@ -293,10 +293,10 @@ def run_cloud_check(args):
     ctr = 0
     #connection = http.client.HTTPConnection(args.chronos)
     for module in SETUP_FILES:
-        
+
         if module is 'ensembl' and args.no_ensembl:
             continue
-        
+
         jobname = "-".join(["check", module])
         jobname = jobname.replace(".", "-")
         pipeline_cmd = ""
