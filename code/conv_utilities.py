@@ -7,8 +7,12 @@ Functions:
         format (see table_utilities) and maps the nodes in each line. It also
         formats the line in a similar manner to the edge table in MySQL and
         determines if the status of the line. It returns nothing.
-
+    map_list(namefile, args) -> : takes the path to a file of gene identifers
+        (one per line) and outputs a file with with the KnowEnG gene identifers
+        for each input gene in the tab separated format (mapped, original).
 Variables:
+    DEFAULT_HINT: the default mapping hint for converting identifiers
+    DEFAULT_TAXON: the default taxon to use for converting identfiers
 """
 
 import config_utilities as cf
@@ -16,6 +20,10 @@ import redis_utilities as ru
 from argparse import ArgumentParser
 import csv
 import hashlib
+import os
+
+DEFAULT_HINT = ''
+DEFAULT_TAXON = 9606
 
 def main(edgefile, args=cf.config_args()):
     """Maps the nodes for the source:alias edgefile.
@@ -71,6 +79,28 @@ def main(edgefile, args=cf.config_args()):
             s_writer.writerow([t_chksum, n1_map, n2_map, et_map, status,
                             status_desc])
 
+def map_list(namefile, args=cf.config_args()):
+    """Maps the nodes for the provided namefile.
+
+    This takes the path to an namefile and maps the nodes in it using the Redis
+    DB. It then outputs an mapped file in the format (mapped, original).
+
+    Args:
+        namefile (str): path to an namefile to be mapped
+        args (argparse object): arguments as populated namespace
+
+    Returns:
+    """
+    rdb = ru.get_database(args)
+    with open(namefile, 'r') as infile, \
+        open(os.path.splitext(namefile)[0] + '.mapped.txt', 'w') as n_map:
+        reader = csv.reader(infile, delimiter = '\t')
+        writer = csv.writer(n_map, delimiter = '\t')
+        for line in reader:
+            orig = line[0]
+            mapped = ru.conv_gene(rdb, orig, args.source_hint, args.taxon)
+            writer.writerow([mapped, orig])
+
 def main_parse_args():
     """Processes command line arguments.
 
@@ -79,12 +109,28 @@ def main_parse_args():
     Returns: args as populated namespace
     """
     parser = ArgumentParser()
-    parser.add_argument('edgefile', help='path to a single edge file produced \
-                        in table, e.g. biogrid.PPI.edge.1.txt')
+    parser.add_argument('infile', help='path to the file to be mapped. If mode \
+                        is LIST, it should contain one identifer on each line. \
+                        If mode is EDGE, it should be a single edge file \
+                        produced in table, e.g. biogrid.PPI.edge.1.txt')
+    parser.add_argument('-m', '--mode', help='mode for running convert. "EDGE" \
+                        if mapping and edge file, or "LIST" to map a list of \
+                        names to the stable ids used in the Knowledge Network',
+                        default='EDGE')
+    parser.add_argument('-sh', '--source_hint', help='suggestion for ID source \
+                        database used to resolve ambiguities in mapping',
+                        default=DEFAULT_HINT)
+    parser.add_argument('-t', '--taxon', help='taxon id of species of all gene \
+                        names', default=DEFAULT_TAXON)
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
     return args
 
 if __name__ == "__main__":
     args = main_parse_args()
-    main(args.edgefile, args)
+    if args.mode == 'EDGE':
+        main(args.infile, args)
+    elif args.mode == 'LIST':
+        map_list(args.infile, args)
+    else:
+        print(args.mode + ' is not a valid mode. Must be EDGE or LIST.')
