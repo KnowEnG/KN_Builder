@@ -342,12 +342,11 @@ def download(version_dict, args):
         shutil.copy2(filename, ret_file)
     return os.path.relpath(ret_file)
 
-    return os.path.relpath(version_dict['local_file_name'])
 
 def gctx_to_txt(gctx_file, remote_version, ret_file, args):
     subprocess.Popen(['python',
-            os.path.join([args.local_dir, args.code_path, args.src_path,
-            'gctx2tsv_utilities.py']), gctx_file, remote_version, ret_file])
+            os.path.join(args.local_dir, args.code_path, args.src_path,
+            'gctx2tsv_utilities.py'), gctx_file, remote_version, ret_file])
     return os.path.relpath(gctx_file.replace('gctx', 'txt'))
 
 if __name__ == "__main__":
