@@ -45,8 +45,8 @@ def main(edgefile, args=cf.config_args()):
     rdb = ru.get_database(args)
     conv_file = edgefile.replace('edge', 'conv')
     status_file = edgefile.replace('edge', 'status')
-    uc_file = edgefile.replace('edge', 'uniq_conv')
-    ul2e_file = edgefile.replace('edge', 'uniq_line2edge')
+    uc_file = edgefile.replace('edge', 'unique_conv')
+    ul2e_file = edgefile.replace('edge', 'unique_line2edge')
     with open(edgefile, 'r') as infile, \
         open(conv_file, 'w') as e_map, \
         open(status_file, 'w') as e_stat:
