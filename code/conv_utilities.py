@@ -17,6 +17,7 @@ Variables:
 
 import config_utilities as cf
 import redis_utilities as ru
+import table_utilities as tu
 from argparse import ArgumentParser
 import csv
 import hashlib
@@ -42,9 +43,13 @@ def main(edgefile, args=cf.config_args()):
     if 'lincs.level4' in edgefile:
         return
     rdb = ru.get_database(args)
+    conv_file = edgefile.replace('edge', 'conv')
+    status_file = edgefile.replace('edge', 'status')
+    uc_file = edgefile.replace('edge', 'uniq_conv')
+    ul2e_file = edgefile.replace('edge', 'uniq_line2edge')
     with open(edgefile, 'r') as infile, \
-        open(edgefile.replace('edge', 'conv'), 'w') as e_map, \
-        open(edgefile.replace('edge', 'status'), 'w') as e_stat:
+        open(conv_file, 'w') as e_map, \
+        open(status_file, 'w') as e_stat:
         reader = csv.reader(infile, delimiter = '\t')
         writer = csv.writer(e_map, delimiter = '\t')
         s_writer = csv.writer(e_stat, delimiter = '\t')
@@ -75,9 +80,11 @@ def main(edgefile, args=cf.config_args()):
                 hasher = hashlib.md5()
                 hasher.update('\t'.join([n1_map, n2_map, et_map]).encode())
                 e_chksum = hasher.hexdigest()
-                writer.writerow([n1_map, n2_map, et_map, weight, e_chksum])
+                writer.writerow([n1_map, n2_map, et_map, weight, e_chksum, chksum])
             s_writer.writerow([t_chksum, n1_map, n2_map, et_map, status,
-                            status_desc])
+                            status_desc, chksum])
+    tu.csu(conv_file, uc_file, [2, 3, 4, 5, 6])
+    tu.csu(conv_file, ul2e_file, [1, 6])
 
 def map_list(namefile, args=cf.config_args()):
     """Maps the nodes for the provided namefile.

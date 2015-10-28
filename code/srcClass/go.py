@@ -18,6 +18,7 @@ import json
 import csv
 import hashlib
 import config_utilities as cf
+import table_utilities as tu
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -333,7 +334,8 @@ class Go(SrcClass):
 
                 e_meta_writer.writerow([chksm, info_type1, reference])
                 e_meta_writer.writerow([chksm, info_type2, anno_evidence])
-
+            outfile = e_meta_file.replace('edge_meta','unique_edge_meta')
+            tu.csu(e_meta_file, outfile)
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a Go object.

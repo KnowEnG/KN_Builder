@@ -15,6 +15,7 @@ import re
 import hashlib
 import csv
 import config_utilities as cf
+import table_utilities as tu
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -265,7 +266,7 @@ class Stringdb(SrcClass):
                         continue
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                        n2, n2hint, n2type, n2spec, et_hint, 
+                        n2, n2hint, n2type, n2spec, et_hint,
                         str(score)]).encode())
                     t_chksum = hasher.hexdigest()
                     edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
@@ -273,6 +274,9 @@ class Stringdb(SrcClass):
                             t_chksum])
                 publist = raw[9]
                 e_meta_writer.writerow([chksm, info_type, publist])
+        outfile = e_meta_file.replace('edge_meta','unique_edge_meta')
+        tu.csu(e_meta_file, outfile, [1, 2, 3])
+
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a Stringdb

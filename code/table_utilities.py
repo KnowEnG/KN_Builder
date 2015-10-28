@@ -19,23 +19,28 @@ import os
 import config_utilities as cf
 from argparse import ArgumentParser
 
-def sort(tablefile, c1='5', c2='9'):
-    """Takes a tabled file and sorts it by the defined two columns.
-    
-    Takes a file in table format and sorts by the provided columns using the
-    unix sort command. By detault, this sorts by the two columns which contain
-    the species for node1 and the species for node2.
-    
+def csu(infile, outfile, columns=list()):
+    """Performs a cut | sort | uniq on infile using the provided columns and
+    stores it into outfile.
+
+    Takes a file in tsv format and sorts by the provided columns using the
+    unix sort command and then removes duplicate elements.
+
     Args:
-        tablefile (str): the file to sort
-        c1 (str): primary column to sort by
-        c2 (str): secondary column to sort by
+        infile (str): the file to sort
+        outfile (str): the file to save the result into
+        columns (list): the columns to use in cut or an empty list if all
+                        columns should be used
     Returns:
     """
-    cmd = 'sort -k ' + c1 + ',' + c1 + ' -k ' + c2 + ',' + c2 + ' ' + tablefile
-    outfile = os.path.dirname(tablefile) + os.sep + 'sorted_' + \
-        os.path.basename(tablefile)
-    subprocess.call(cmd + ' > ' + outfile, shell=True)
+    with open(outfile, 'w') as out:
+        cmd2 = ['sort', '-u']
+        if len(columns):
+            cmd1 = ['cut', '-f', ','.join(map(str, columns)), infile]
+        else:
+            cmd1 = ['cat', infile]
+        p1 = subprocess.Popen(cmd1, stdout=subprocess.PIPE)
+        subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
 
 def main(chunkfile, version_json, args=cf.config_args()):
     """Tables the source:alias described by version_json.
@@ -53,12 +58,12 @@ def main(chunkfile, version_json, args=cf.config_args()):
     with open(version_json, 'r') as infile:
         version_dict = json.load(infile)
     src_code_dir = os.path.join(args.local_dir, args.code_path, args.src_path)
-    sys.path.append(src_code_dir)        
+    sys.path.append(src_code_dir)
     src_module = __import__(version_dict['source'])
     SrcClass = src_module.get_SrcClass(args)
     if not version_dict['is_map']:
         SrcClass.table(chunkfile, version_dict)
-        #sort(chunkfile.replace('rawline', 'edge'))
+        #csu(chunkfile.replace('rawline', 'edge'))
 
 def main_parse_args():
     """Processes command line arguments.
