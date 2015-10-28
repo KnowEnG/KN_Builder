@@ -15,6 +15,7 @@ import os
 import csv
 import re
 import hashlib
+import table_utilities as tu
 
 def table(rawline, version_dict):
     """Uses the provided rawline file to produce a 2table_edge file, an
@@ -110,3 +111,5 @@ def table(rawline, version_dict):
                         n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
             publist = raw[8]
             e_meta_writer.writerow([chksm, info_type, publist])
+    outfile = e_meta_file.replace('edge_meta','unique_edge_meta')
+    tu.csu(e_meta_file, outfile)

@@ -17,6 +17,7 @@ import json
 import hashlib
 import csv
 import config_utilities as cf
+import table_utilities as tu
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -291,7 +292,10 @@ class Reactome(SrcClass):
                         n2_id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
                     n_meta_writer.writerow([chksm, n1_id, info_type1, n1_link])
                     e_meta_writer.writerow([chksm, info_type2, e_meta])
-
+            outfile = e_meta_file.replace('edge_meta','unique_edge_meta')
+            tu.csu(e_meta_file, outfile)
+            outfile = n_meta_file.replace('node_meta','unique_node_meta')
+            tu.csu(n_meta_file, outfile)
         if alias == 'homo_sapiens.interactions':
 
             #static column values
@@ -342,6 +346,9 @@ class Reactome(SrcClass):
                         n2_id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
                     e_meta_writer.writerow([chksm, info_type, detail_str])
                     e_meta_writer.writerow([chksm, info_type1, ref_str])
+            outfile = e_meta_file.replace('edge_meta','unique_edge_meta')
+            tu.csu(e_meta_file, outfile)
+
 
 
 if __name__ == "__main__":

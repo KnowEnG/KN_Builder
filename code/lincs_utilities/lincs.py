@@ -344,9 +344,13 @@ def download(version_dict, args):
 
 
 def gctx_to_txt(gctx_file, remote_version, ret_file, args):
+    print(' '.join(['python',
+            os.path.join(args.local_dir, args.code_path, args.src_path,
+            'gctx2tsv_utilities.py'), gctx_file, remote_version, ret_file]))
     subprocess.Popen(['python',
             os.path.join(args.local_dir, args.code_path, args.src_path,
-            'gctx2tsv_utilities.py'), gctx_file, remote_version, ret_file])
+            'gctx2tsv_utilities.py'), gctx_file, remote_version, 
+            ret_file]).communicate()
     return os.path.relpath(gctx_file.replace('gctx', 'txt'))
 
 if __name__ == "__main__":
