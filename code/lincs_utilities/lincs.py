@@ -271,7 +271,6 @@ class Lincs(SrcClass):
         with open(head_file) as infile:
             headers = json.load(infile)
 
-
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges:
             reader = csv.reader(infile, delimiter='\t')
