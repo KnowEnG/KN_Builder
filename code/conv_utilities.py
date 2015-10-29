@@ -46,7 +46,7 @@ def main(edgefile, args=cf.config_args()):
     conv_file = edgefile.replace('edge', 'conv')
     status_file = edgefile.replace('edge', 'status')
     uc_file = edgefile.replace('edge', 'unique_conv')
-    ue2l_file = edgefile.replace('edge', 'unique_edgeline')
+    ue2l_file = edgefile.replace('edge', 'unique_edge2line')
     with open(edgefile, 'r') as infile, \
         open(conv_file, 'w') as e_map, \
         open(status_file, 'w') as e_stat:
