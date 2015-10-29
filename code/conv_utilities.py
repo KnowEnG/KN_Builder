@@ -46,7 +46,7 @@ def main(edgefile, args=cf.config_args()):
     conv_file = edgefile.replace('edge', 'conv')
     status_file = edgefile.replace('edge', 'status')
     uc_file = edgefile.replace('edge', 'unique_conv')
-    ul2e_file = edgefile.replace('edge', 'unique_line2edge')
+    ue2l_file = edgefile.replace('edge', 'unique_edgeline')
     with open(edgefile, 'r') as infile, \
         open(conv_file, 'w') as e_map, \
         open(status_file, 'w') as e_stat:
@@ -83,8 +83,8 @@ def main(edgefile, args=cf.config_args()):
                 writer.writerow([n1_map, n2_map, et_map, weight, e_chksum, chksum])
             s_writer.writerow([t_chksum, n1_map, n2_map, et_map, status,
                             status_desc, chksum])
-    tu.csu(conv_file, uc_file, [2, 3, 4, 5, 6])
-    tu.csu(conv_file, ul2e_file, [1, 6])
+    tu.csu(conv_file, uc_file, [1, 2, 3, 4, 5])
+    tu.csu(conv_file, ue2l_file, [5, 6])
 
 def map_list(namefile, args=cf.config_args()):
     """Maps the nodes for the provided namefile.
