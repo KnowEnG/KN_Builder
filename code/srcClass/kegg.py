@@ -236,7 +236,8 @@ class Kegg(SrcClass):
             open(n_meta_file, 'w') as n_meta:
             reader = csv.reader((line.decode('utf-8') for line in map_file),
                                 delimiter='\t')
-            n_meta_writer = csv.writer(n_meta, delimiter='\t')
+            if alias == 'pathway':
+                n_meta_writer = csv.writer(n_meta, delimiter='\t')
             for line in reader:
                 chksm = line[2]
                 orig_id = line[3].strip()

@@ -58,7 +58,7 @@ python3 code/setup_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.e
 
 #### pipeline cloud pipeline
 ```
-python3 code/pipeline_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/ -rh knowice.cs.illinois.edu -rp 6380 -dp cloud_pipe4
+python3 code/pipeline_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/ -rh knowice.cs.illinois.edu -rp 6380 -dp cloud_pipe
 ```
 ##### about 24 minutes
 
@@ -71,7 +71,7 @@ for i in ensembl ppi species; do python3 code/setup_utilities.py FETCH CLOUD STE
 
 #### pipeline cloud all fetch
 ```
-for i in `ls code/srcClass/*py | sed 's#code/srcClass/##g' | sed 's#.py##g'`; do echo $i; python3 code/pipeline_utilities.py FETCH CLOUD STEP -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe -rh knowice.cs.illinois.edu -rp 6380 -p $i; done; 
+for i in `ls code/srcClass/*py | sed 's#code/srcClass/##g' | sed 's#.py##g'`; do echo $i; python3 code/pipeline_utilities.py FETCH CLOUD STEP -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe -rh knowice.cs.illinois.edu -rp 6380 -p $i; done;
 ```
 
 #### pipeline cloud all table
@@ -95,7 +95,7 @@ for i in `ls code/chron_jobs/*json | sed "s#code/chron_jobs/##g" | sed "s/.json/
 ```
 for c in 'mmaster01.cse.illinois.edu:4400' 'knowmaster.dyndns.org:4400'; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
-    for s in 'check-' 'fetch-' 'table-' 'conv-'; do 
+    for s in 'check-' 'fetch-' 'table-' 'conv-'; do
         echo $s
         for i in `grep "$s" /tmp/t.txt  `; do
             CMD="curl -L -X DELETE $c/scheduler/job/$i";
