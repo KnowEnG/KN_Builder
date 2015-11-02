@@ -44,7 +44,7 @@ class HumanNet(SrcClass):
         """
         name = 'humannet'
         url_base = 'www.functionalnet.org'
-        aliases = {" HumanNet": "HumanNet.v1.join"}
+        aliases = {"HumanNet": "HumanNet.v1.join"}
         comment_strs = ['#']
         super(HumanNet, self).__init__(name, url_base, aliases, args)
         self.remote_file = 'HumanNet.v1.join.txt'
@@ -55,7 +55,7 @@ class HumanNet(SrcClass):
         This returns the release version of the remote source for a specific
         alias. This value will be the same for every alias and is 'unknown' in
         this case. This value is stored in the self.version dictionary object.
-
+/
         Args:
             alias (str): An alias defined in self.aliases.
 

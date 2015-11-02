@@ -212,10 +212,19 @@ class HumanNet(SrcClass):
             reader = csv.reader(infile, delimiter='\t')
             edge_writer = csv.writer(edges, delimiter='\t')
             numedges = len(edge_types)
+    
+            n1spec = 9606 #human
+            n1hint = "Entrez" #might need to update
+            n1type = "gene"
+            n2spec = 9606 #human
+            n2hint = "Entrez" #might need to update
+            n1type = "gene"
             
             for line in reader:
-                gene1 = line[3]
-                gene2 = line[4]
+                line_cksum = line[2] 
+                gene1 = line[3] # gene1 id
+                gene2 = line[4] # gene2 id
+                
                 for edge_num in range(len(line[5:])):
                     score = line[edge_num+5]
                     if(score == 'NA'):
