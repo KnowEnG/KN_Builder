@@ -435,8 +435,8 @@ def run_cloud_check(args):
         pipeline_cmd = ""
         if args.run_mode == "PIPELINE":
             arg_str = " ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts])
-            pipeline_cmd = "python3 /{0}/pipeline_utilities.py FETCH {1} -p {2}\
-                            ;".format(args.code_path, arg_str, module)
+            pipeline_cmd = "python3 /{0}/pipeline_utilities.py FETCH {1} -p {2};".format(
+                                args.code_path, arg_str, module)
         ctr += 1
         print(str(ctr) + "\t" + module)
 
@@ -490,8 +490,8 @@ def run_cloud_fetch(args):
         pipeline_cmd = ""
         if args.run_mode == "PIPELINE":
             arg_str = " ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts])
-            pipeline_cmd = "python3 /{0}/pipeline_utilities.py TABLE {1} -p {2}\
-                            ;".format(args.code_path, arg_str, src + "," + alias)
+            pipeline_cmd = "python3 /{0}/pipeline_utilities.py TABLE {1} -p {2};".format(
+                                args.code_path, arg_str, src + "," + alias)
 
         ctr += 1
         print("\t".join([str(ctr), src, alias]))
@@ -535,8 +535,8 @@ def run_cloud_table(args):
     local_alias_dir = os.path.join(args.local_dir, args.data_path, alias_path)
     if not os.path.exists(local_alias_dir):
         print("ERROR: 'source,alias' specified with --step_parameters (-p) \
-            option, {0}, does not have data directory: {1}\
-            ".format(args.step_parameters, local_alias_dir))
+            option, {0}, does not have data directory: {1}".format(args.step_parameters, 
+                                                                   local_alias_dir))
         return -1
 
     if not os.path.isfile(os.path.join(local_alias_dir, "file_metadata.json")):
@@ -583,8 +583,8 @@ def run_cloud_table(args):
         if args.run_mode == "PIPELINE":
             edgefile = chunk_name.replace('.rawline.', '.edge.')
             arg_str = " ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts])
-            pipeline_cmd = "python3 /{0}/pipeline_utilities.py MAP {1} -p {2}\
-                            ;".format(args.code_path, arg_str, edgefile)
+            pipeline_cmd = "python3 /{0}/pipeline_utilities.py MAP {1} -p {2};".format(
+                                args.code_path, arg_str, edgefile)
         job_str = default_str
         job_str = job_str.replace("TMPJOB", jobname)
         job_str = job_str.replace("TMPCHUNK", chunkfile)
