@@ -238,8 +238,8 @@ class Pfam(SrcClass):
                 chksm = line[2]
                 raw = line[3:]
                 n1 = raw[0]
-                n2 = raw[3]
-                evalue = raw[6]
+                n2 = raw[2]
+                evalue = raw[4]
                 evalue = float(evalue)
                 score = self.sc_min
                 if(evalue == 0.0):
