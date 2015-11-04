@@ -75,12 +75,10 @@ def db_import(version_dict, args=cf.config_args()):
 
     Returns:
     """
-    #with open(version_json, 'r') as infile:
-    #    version_dict = json.load(infile)
     db.import_ensembl(version_dict['alias'], args)
     db.combine_tables(version_dict['alias'], args)
-    #db.create_mapping_dicts(version_dict, args)
     db.query_all_mappings(version_dict, args)
+    db.import_nodes(version_dict, args)
     ru.import_ensembl(version_dict['alias'], args)
 
 class Ensembl(SrcClass):
