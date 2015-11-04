@@ -162,18 +162,18 @@ def create_mapping_dicts(version_dict, args=cf.config_args()):
         map_dict = create_dictionary(results)
         json.dump(map_dict, outfile, indent=4)
 
-def get_database(args=cf.config_args()):
+def get_database(db=None, args=cf.config_args()):
     """Returns an object of the MySQL class.
 
     This returns an object of the MySQL class to allow access to its functions
     if the module is imported.
 
     Args:
-
+        db (str): optional db to connect to
     Returns:
         class: a source class object
     """
-    return MySQL(None, args)
+    return MySQL(db, args)
 
 def get_insert_cmd(step):
     """Returns the command to be used with an insert for the provided step.
@@ -387,6 +387,20 @@ class MySQL(object):
                             cmd + ';')
         self.conn.commit()
 
+    def create_temp_table(self, tablename, cmd=''):
+        """Add a table to the MySQL database.
+
+        Adds the provided tablename to the MySQL database. If cmd is specified,
+        it will create the table using the provided cmd.
+        Args:
+            tablename (str): name of the table to add to the MySQL database
+
+        Returns:
+        """
+        self.cursor.execute('CREATE TEMPORARY TABLE IF NOT EXISTS ' + tablename
+                            + ' ' + cmd + ';')
+        self.conn.commit()
+
     def drop_table(self, tablename):
         """Remove a table from the MySQL database
 
@@ -445,7 +459,7 @@ class MySQL(object):
         self.cursor.execute('INSERT INTO ' + tablename + ' ' + cmd + ';')
         self.conn.commit()
 
-    def execute(self, cmd):
+    def run(self, cmd):
         """Run the provided command in MySQL.
 
         This runs the provided command using the current MySQL connection and
@@ -458,7 +472,12 @@ class MySQL(object):
             (list): the fetched results
         """
         self.cursor.execute(cmd + ';')
+        try:
+            results = self.cursor.fetchall()
+        except:
+            results = list()
         self.conn.commit()
+        return results
 
     def query_distinct(self, query, table, cmd=''):
         """Run the provided query distinct in MySQL.

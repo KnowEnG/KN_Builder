@@ -11,9 +11,8 @@ import redis
 from itertools import chain
 
 gctx_file = sys.argv[1]
-remote_version = sys.argv[2]
-tsv_file = sys.argv[3]
-match = re.search('([0-9]*)x([0-9]*)', remote_version)
+tsv_file = sys.argv[2]
+match = re.search('([0-9]*)x([0-9]*)', gctx_file)
 ncols = int(match.group(1))
 nrows = int(match.group(2))
 chunk_sz = 2000

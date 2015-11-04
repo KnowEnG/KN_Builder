@@ -1,50 +1,58 @@
-"""Utiliites for importing data into the Knowledge Network.
+"""Utiliites for importing edge, edge_meta, and node_meta into the KnowEnG
+MySQL datatbase.
 
 Classes:
 
+
 Functions:
-    import(module) ->: takes a SrcClass object and imports it into the
-    Knowledge Network.
+
 
 Variables:
 """
 
-import json
-import sys
 import config_utilities as cf
-from argparse import ArgumentParser
+import mysql_utilities as mu
+import json
+import os
 
-def db_import(version_json, args=cf.config_args()):
-    """Runs the import function on the alias described by version_json.
 
-    This runs the import function on the file described by version_json. The
-    end result is that the processed data is added to the Knowledge Network.
+def import_file(infile, table, args=cf.config_args()):
+    """Imports the provided  file into the KnowEnG MySQL database.
+
+    Loads the data into a temporary table in MySQL. It then queries from the
+    temporary table into the corresponding permanent table. If a duplication
+    occurs during the query, it uses the provided behavior to handle.
+
+    Args:
+        file (str): path to the file to be imported
+        table (str): name of the permanent table to import to
+        args: command line and default arguements
 
     Returns:
     """
-    with open(version_json, 'r') as infile:
-        version_dict = json.load(infile)
-    if version_dict['source'] == 'ensembl':
-        src_module = __import__('ensembl')
-        src_module.db_import(version_json, args)
+    db = mu.get_database('KnowNet', args)
+    tmptable = os.path.splitext(os.path.basename(edgefile))[0].replace('.', '-')
+    db.create_temp_table(tmptable, 'LIKE ' + table)
+    
+    
 
-def main_parse_args():
-    """Processes command line arguments.
+def import_edge(edgefile, args=cf.config_args()):
+    """Imports the provided edge file and any corresponding meta files into
+    the KnowEnG MySQL database.
 
-    If argument is missing, supplies default value.
+    Loads the data into a temporary table in MySQL. It then queries from the
+    temporary table into the corresponding permanent table. If a duplication
+    occurs during the query, it updates to the maximum edge score if it is an
+    edge file, and ignores if it is metadata.
 
-    Returns: args as populated namespace
+    Args:
+        edgefile (str): path to the file to be imported
+        args: command line and default arguements
+
+    Returns:
     """
-    parser = ArgumentParser()
-    parser.add_argument('metadata_json', help='json file produced from check, \
-                        e.g. file_metadata.json')
-    parser = cf.add_config_args(parser)
-    args = parser.parse_args()
-    return args
-
-if __name__ == "__main__":
-    args = main_parse_args()
-    db_import(args.metadata_json, args)
-
-
+    db = mu.get_database('KnowNet', args)
+    tmptable = os.path.splitext(os.path.basename(edgefile))[0].replace('.', '-')
+    db.create_temp_table(tmptable, 'LIKE edge')
+    
 
