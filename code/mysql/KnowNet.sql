@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `raw_file` (
   `date_downloaded` datetime NOT NULL,
   `local_filename` varchar(255) NOT NULL,
   `checksum` varchar(80) DEFAULT NULL,
-  PRIMARY KEY (`file_id`),
+  PRIMARY KEY (`file_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `raw_line` (
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `raw_line` (
   `line_num` int(11) NOT NULL,
   `file_id` varchar(40) NOT NULL,
   PRIMARY KEY (`line_hash`, `line_num`, `file_id`),
-  CONSTRAINT `raw_data_ibfk_1` FOREIGN KEY (`file_id`) REFERENCES `raw_file` (`file_id`) ON DELETE CASCADE,
+  CONSTRAINT `raw_data_ibfk_1` FOREIGN KEY (`file_id`) REFERENCES `raw_file` (`file_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `species` (
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `node` (
   `node_id` varchar(128) NOT NULL,
   `n_alias` varchar(512) NOT NULL,
   `n_type_id` int(11) DEFAULT NULL,
-  PRIMARY KEY (`node_id`),
+  PRIMARY KEY (`node_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `node_meta` (
@@ -91,11 +91,9 @@ CREATE TABLE IF NOT EXISTS `edge` (
   `e_type_id` int(11) NOT NULL,
   `weight` float NOT NULL,
   `edge_hash` varchar(40) NOT NULL,
-  PRIMARY KEY (`edge_id`),
-  UNIQUE KEY `idx_edge_key` (`n1_id`,`n2_id`,`data_id`,`e_type_id`),
+  PRIMARY KEY (`edge_hash`),
   KEY `n1_id` (`n1_id`),
   KEY `n2_id` (`n2_id`),
-  KEY `data_id` (`data_id`),
   KEY `e_type_id` (`e_type_id`),
   CONSTRAINT `edge_ibfk_1` FOREIGN KEY (`n1_id`) REFERENCES `node` (`node_id`) ON DELETE CASCADE,
   CONSTRAINT `edge_ibfk_2` FOREIGN KEY (`n2_id`) REFERENCES `node` (`node_id`) ON DELETE CASCADE,
