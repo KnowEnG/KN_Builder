@@ -78,6 +78,34 @@ def create_dictionary(results):
         map_dict[str(raw)] = str(mapped)
     return map_dict
 
+def import_nodes(version_dict, args=cf.config_args()):
+    """Imports the gene nodes into the KnowNet nodes and node_species tables.
+
+    Queries the imported ensembl nodes and uses the stable ids as nodes for
+    the KnowNet nodes table and uses the taxid to create the corresponding
+    node_species table.
+
+    Args:
+        version_dict (dict): the version dictionary describing the
+            source:alias
+
+    Returns:
+    """
+    alias = version_dict['alias']
+    taxid = version_dict['alias_info']
+    alias_db = 'ensembl_' + alias
+    db = MySQL(alias_db, args)
+    cmd = ("SELECT DISTINCT gene.stable_id AS node_id, "
+           "SUBSTRING(gene.description, 1, 512) AS n_alias, "
+           "1 AS n_type_id "
+           "FROM gene")
+    tablename = 'KnowNet.node'
+    db.insert(tablename, cmd)
+    cmd = ("SELECT DISTINCT gene.stable_id AS node_id, " + taxid + " AS taxon "
+           "FROM gene")
+    tablename = 'KnowNet.node_species'
+    db.insert(tablename, cmd)
+
 def query_all_mappings(version_dict, args=cf.config_args()):
     """Creates the all mappings dictionary for the provided alias.
 
@@ -394,11 +422,33 @@ class MySQL(object):
         it will create the table using the provided cmd.
         Args:
             tablename (str): name of the table to add to the MySQL database
+            cmd (str): optional additional command
 
         Returns:
         """
         self.cursor.execute('CREATE TEMPORARY TABLE IF NOT EXISTS ' + tablename
                             + ' ' + cmd + ';')
+        self.conn.commit()
+
+    def load_data(self, filename, tablename, cmd='', sep='\t', enc='"'):
+        """Import data into table in the MySQL database.
+
+        Loads the data located on the local machine into the provided MySQL
+        table. Uses the LOAD DATA INFILE command.
+        Args:
+            filename (str): name of the file to import from
+            tablename (str): name of the table to import into
+            sep (str): separator for fields in file
+            enc (str): enclosing character for fields in file
+            cmd (str): optional additional command
+
+        Returns:
+        """
+        self.cursor.execute('LOAD DATA LOCAL INFILE ' + filename +
+                             ' INTO TABLE ' + tablename +
+                             " FIELDS TERMINATED BY '" + sep + "'" +
+                             " OPTIONALLY ENCLOSED BY '" + enc + "'" +
+                             cmd + ";")
         self.conn.commit()
 
     def drop_table(self, tablename):
