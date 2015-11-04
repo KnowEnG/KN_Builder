@@ -332,24 +332,25 @@ def download(version_dict, args):
         stdout=subprocess.PIPE).stdout
     file = output.readlines()[-1].decode()
     (date, mtime, size, path) = file.split()
-    subprocess.Popen(['s3cmd', 'get', '--continue', path,
-                        filename]).communicate()
+
+    ###change --skip-existing --continue for nicer behavior
+    ###this is a hack to prevent needing to download many times
+    cmd = ['s3cmd', '--skip-existing', '--preserve', 'get', path, filename]
+    print(' '.join(cmd))
+    subprocess.Popen(cmd).communicate()
     if version_dict['alias'] == 'level4':
-        gctx_to_txt(filename, version_dict['remote_version'], ret_file, args)
+        gctx_to_txt(filename, ret_file, args)
         get_SrcClass(args).create_mapping_dict(filename, args)
     else:
         shutil.copy2(filename, ret_file)
     return os.path.relpath(ret_file)
 
 
-def gctx_to_txt(gctx_file, remote_version, ret_file, args):
-    print(' '.join(['python',
-            os.path.join(args.local_dir, args.code_path, args.src_path,
-            'gctx2tsv_utilities.py'), gctx_file, remote_version, ret_file]))
-    subprocess.Popen(['python',
-            os.path.join(args.local_dir, args.code_path, args.src_path,
-            'gctx2tsv_utilities.py'), gctx_file, remote_version, 
-            ret_file]).communicate()
+def gctx_to_txt(gctx_file, ret_file, args):
+    cmd = ['python', os.path.join(args.local_dir, args.code_path, args.src_path,
+            'gctx2tsv_utilities.py'), gctx_file, ret_file]
+    print(' '.join(cmd))
+    subprocess.Popen(cmd).communicate()
     return os.path.relpath(gctx_file.replace('gctx', 'txt'))
 
 if __name__ == "__main__":
