@@ -179,9 +179,9 @@ class HumanNet(SrcClass):
         """Uses the provided raw_lines file to produce a 2table_edge file, an
         edge_meta file, and a node_meta file (only for property nodes).
         
-        File format: [gene1] [gene2] [CE-CC] [CE-CX] [CE-GT] [CE-LC] [CE-YH] [DM-PI] [HS-CC] [HS-CX] [HS-DC] [HS-GN] [HS-LC] [HS-MS] [HS-PG] [HS-YH] [SC-CC] [SC-CX] [SC-GT] [SC-LC] [SC-MS] [SC-TS] [SC-YH] [IntNet]        
+        File format: [file] [line_chksum] [gene1] [gene2] [CE-CC] [CE-CX] [CE-GT] [CE-LC] [CE-YH] [DM-PI] [HS-CC] [HS-CX] [HS-DC] [HS-GN] [HS-LC] [HS-MS] [HS-PG] [HS-YH] [SC-CC] [SC-CX] [SC-GT] [SC-LC] [SC-MS] [SC-TS] [SC-YH] [IntNet]        
         
-        We want to convert this to the format: [gene1] [gene2] [edge_name] [value]
+        We want to convert this to the format: [line_chksum] [n1name] [n1hint] [n1type] [n1species] [n2name] [n2hint] [n2type] [n2species] [edgetype_hint] [score]
 
         This returns noting but produces the 2table formatted files from the
         provided raw_lines file:
@@ -213,15 +213,23 @@ class HumanNet(SrcClass):
             edge_writer = csv.writer(edges, delimiter='\t')
             numedges = len(edge_types)
             
+            n1hint = "EntrezGene"
+            n1type = "gene"
+            n1species = "human" 
+            n2hint = "EntrezGene"
+            n2type = "gene"
+            n2species = "human"
+            
             for line in reader:
-                gene1 = line[3]
-                gene2 = line[4]
+                line_cksum = line[2]
+                n1name = line[3]
+                n2name = line[4]
                 for edge_num in range(len(line[5:])):
                     score = line[edge_num+5]
                     if(score == 'NA'):
                         continue
                     else:
-                        edge_writer.writerow([gene1, gene2, edge_types[edge_num], score])
+                        edge_writer.writerow([line_cksum, n1name, n1hint, n1type, n1species, n2name, n2hint, n2type, n2species, edge_types[edge_num], score])
         #return table(rawline, version_dict)
 
 if __name__ == "__main__":
