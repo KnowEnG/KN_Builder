@@ -57,7 +57,7 @@ def conv_gene(rdb, foreign_key, hint, taxid):
             return taxid_ens_ids[0].decode()
     if hint_match:
         hint_ens_ids = list(set(rdb.mget(hint_match)))
-        if len(taxid_ens_ids) == 1:
+        if len(hint_ens_ids) == 1:
             return hint_ens_ids[0].decode()
     return 'unmapped-many'
 

@@ -229,12 +229,15 @@ class Lincs(SrcClass):
             dict: A dictionary for use in mapping nodes or edge types.
         """
         gctx_file = filename
+        print(os.getcwd())
         tab_file = os.path.join('..', 'baseline_gene_expression',
                 '.'.join(['lincs', 'baseline_gene_expression', 'txt']))
-        subprocess.Popen(['python',
-            os.path.join(args.local_dir, args.code_path, args.src_path,
-            'affy2ens_utilities.py'), gctx_file, tab_file, args.redis_host,
-            args.redis_port]).communicate()
+        cmd = ['python',
+               os.path.join(args.local_dir, args.code_path, args.src_path,
+               'affy2ens_utilities.py'), gctx_file, tab_file, args.redis_host,
+               args.redis_port]
+        print(' '.join(cmd))
+        subprocess.Popen(cmd).communicate()
         with open(os.path.splitext(tab_file)[0] + '.json') as infile:
             return json.load(infile)
 
@@ -262,9 +265,10 @@ class Lincs(SrcClass):
         et_map = 'LINCS_signature'
 
         #open mapping files
-        path = os.path.join('..', '..')
-        map_file = os.path.join(path, 'baseline_gene_expression',
+        map_file = os.path.join('..', 'baseline_gene_expression',
                             'lincs.baseline_gene_expression.json')
+        print(map_file)
+        print(os.getcwd())
         head_file = os.path.join(os.path.dirname(map_file), 'headers.json')
         with open(map_file) as infile:
             lincs_map = json.load(infile)
@@ -273,9 +277,9 @@ class Lincs(SrcClass):
 
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges:
-            reader = csv.reader(infile, delimiter='\t')
             writer = csv.writer(edges, delimiter='\t')
-            for line in reader:
+            for line in infile:
+                line = line.replace('"', '').strip().split('\t')
                 n1_map = line[3]
                 if n1_map == '':
                     continue
