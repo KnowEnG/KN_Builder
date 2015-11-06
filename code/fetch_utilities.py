@@ -145,7 +145,8 @@ def chunk(filename, total_lines):
                     outline = '\t'.join((src, str(line_count), md5, ''))
                     out.write(outline.encode())
                     cleanline = line.decode("ascii", errors="ignore")
-                    cleanline = '"' + cleanline + '"'
+                    cleanline = cleanline.replace('\n', '')
+                    cleanline = '"' + cleanline + '"\n'
                     out.write(cleanline.encode())
                     j += 1
                     if j == num_lines and i < num_chunks:
