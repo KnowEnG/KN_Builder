@@ -262,7 +262,7 @@ class Lincs(SrcClass):
         et_map = 'LINCS_signature'
 
         #open mapping files
-        path = os.path.join(os.path.dirname(rawline), '..', '..')
+        path = os.path.join('..', '..')
         map_file = os.path.join(path, 'baseline_gene_expression',
                             'lincs.baseline_gene_expression.json')
         head_file = os.path.join(os.path.dirname(map_file), 'headers.json')
@@ -339,7 +339,7 @@ def download(version_dict, args):
     print(' '.join(cmd))
     subprocess.Popen(cmd).communicate()
     if version_dict['alias'] == 'level4':
-        gctx_to_txt(filename, ret_file, args)
+        #gctx_to_txt(filename, ret_file, args)
         get_SrcClass(args).create_mapping_dict(filename, args)
     else:
         shutil.copy2(filename, ret_file)
