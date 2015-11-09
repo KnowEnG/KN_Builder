@@ -243,10 +243,10 @@ class Stringdb(SrcClass):
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
             open(e_meta_file, 'w') as e_meta:
-            reader = csv.reader(infile, delimiter='\t')
             edge_writer = csv.writer(edges, delimiter='\t')
             e_meta_writer = csv.writer(e_meta, delimiter='\t')
-            for line in reader:
+            for line in infile:
+                line = line.replace('"', '').strip().split('\t')
                 if line[1] == '1':
                     continue
                 chksm = line[2]

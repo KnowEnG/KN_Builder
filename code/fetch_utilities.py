@@ -28,6 +28,7 @@ import math
 import hashlib
 import config_utilities as cf
 import redis_utilities as ru
+import import_utilities as iu
 from argparse import ArgumentParser
 
 ARCHIVES = ['.zip', '.tar', '.gz']
@@ -99,7 +100,7 @@ def download(version_dict):
     shutil.copy2(filename, ret_file)
     return os.path.relpath(ret_file)
 
-def chunk(filename, total_lines):
+def chunk(filename, total_lines, args):
     """Splits the provided file into equal chunks with
     ceiling(num_lines/CHUNK_SZ) lines each.
 
@@ -151,7 +152,7 @@ def chunk(filename, total_lines):
                     j += 1
                     if j == num_lines and i < num_chunks:
                         break
-
+            iu.import_file(chunk_file + str(i) + ext, 'raw_line', '', '', args)
     return num_chunks
 
 def raw_line(filename):
@@ -266,17 +267,24 @@ def main(version_json, args=cf.config_args()):
         num_chunks = 0
         rawline = raw_line(newfile)
         map_dict = SrcClass.create_mapping_dict(rawline)
+        nodefile = rawline.replace('rawline', 'unique_node')
+        if os.path.isfile(nodefile):
+            iu.import_pnode(nodefile, args)
+        nmfile = rawline.replace('rawline', 'unique_node_meta')
+        if os.path.isfile(nmfile):
+            iu.import_nodemeta(nmfile, args)
         map_file = os.path.splitext(newfile)[0] + '.json'
         with open(map_file, 'w') as outfile:
             json.dump(map_dict, outfile, indent=4, sort_keys=True)
         #ru.import_mapping(map_dict, args)
     else:
         #rawline = raw_line(newfile)
-        num_chunks = chunk(newfile, line_count)
+        num_chunks = chunk(newfile, line_count, args)
     #update version_dict
     version_dict['checksum'] = md5hash
     version_dict['line_count'] = line_count
     version_dict['num_chunks'] = num_chunks
+    iu.update_filemeta(version_dict, args)
     with open(version_json, 'w') as outfile:
         json.dump(version_dict, outfile, indent=4, sort_keys=True)
 
