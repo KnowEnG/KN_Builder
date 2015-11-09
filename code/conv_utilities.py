@@ -18,6 +18,7 @@ Variables:
 import config_utilities as cf
 import redis_utilities as ru
 import table_utilities as tu
+import import_utilities as iu
 from argparse import ArgumentParser
 import csv
 import hashlib
@@ -85,6 +86,7 @@ def main(edgefile, args=cf.config_args()):
                             status_desc, chksum])
     tu.csu(conv_file, uc_file, [1, 2, 3, 4, 5])
     tu.csu(conv_file, ue2l_file, [5, 6])
+    iu.import_edge(uc_file, args)
 
 def map_list(namefile, args=cf.config_args()):
     """Maps the nodes for the provided namefile.

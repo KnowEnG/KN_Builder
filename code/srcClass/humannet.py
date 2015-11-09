@@ -20,9 +20,9 @@ def get_SrcClass(args):
 
     This returns an object of the source class to allow access to its functions
     if the module is imported.
-    
+
     Args:
-    
+
     Returns:
         class: a source class object
     """
@@ -130,7 +130,7 @@ class HumanNet(SrcClass):
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
-        
+
         This returns a boolean representing if the alias corresponds to a file
         used for mapping. By default this returns True if the alias ends in
         '_map' and False otherwise.
@@ -178,18 +178,18 @@ class HumanNet(SrcClass):
     def table(self, rawline, version_dict):
         """Uses the provided raw_lines file to produce a 2table_edge file, an
         edge_meta file, and a node_meta file (only for property nodes).
-        
-        File format: [file] [line_chksum] [gene1] [gene2] [CE-CC] [CE-CX] [CE-GT] [CE-LC] [CE-YH] [DM-PI] [HS-CC] [HS-CX] [HS-DC] [HS-GN] [HS-LC] [HS-MS] [HS-PG] [HS-YH] [SC-CC] [SC-CX] [SC-GT] [SC-LC] [SC-MS] [SC-TS] [SC-YH] [IntNet]        
-        
+
+        File format: [file] [line_chksum] [gene1] [gene2] [CE-CC] [CE-CX] [CE-GT] [CE-LC] [CE-YH] [DM-PI] [HS-CC] [HS-CX] [HS-DC] [HS-GN] [HS-LC] [HS-MS] [HS-PG] [HS-YH] [SC-CC] [SC-CX] [SC-GT] [SC-LC] [SC-MS] [SC-TS] [SC-YH] [IntNet]
+
         We want to convert this to the format: [line_chksum] [n1name] [n1hint] [n1type] [n1species] [n2name] [n2hint] [n2type] [n2species] [edgetype_hint] [score]
 
         This returns noting but produces the 2table formatted files from the
         provided raw_lines file:
             raw_lines table (file, line num, line_chksum, rawline)
-            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec, 
+            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
-            node_meta (line_cksum, node_num (1 or 2), 
+            node_meta (line_cksum, node_num (1 or 2),
                        info_type (evidence, relationship, experiment, or link),
                        info_desc (text))
         By default this function does nothing (must be overridden)
@@ -201,26 +201,28 @@ class HumanNet(SrcClass):
 
         Returns:
         """
-        edge_types = ["CE-CC","CE-CX","CE-GT","CE-LC","CE-YH","DM-PI","HS-CC","HS-CX","HS-DC","HS-GN","HS-LC","HS-MS","HS-PG","HS-YH","SC-CC","SC-CX","SC-GT","SC-LC","SC-MS","SC-TS","SC-YH","IntNet"]        
+        edge_types = ["CE-CC","CE-CX","CE-GT","CE-LC","CE-YH","DM-PI","HS-CC","HS-CX","HS-DC","HS-GN","HS-LC","HS-MS","HS-PG","HS-YH","SC-CC","SC-CX","SC-GT","SC-LC","SC-MS","SC-TS","SC-YH","IntNet"]
         data = []
-        
+
         #output file
         table_file = rawline.replace('rawline','edge')
-        
+
         with open(rawline) as infile, \
             open(table_file, 'w') as edges:
-            reader = csv.reader(infile, delimiter='\t')
             edge_writer = csv.writer(edges, delimiter='\t')
             numedges = len(edge_types)
-            
+
             n1hint = "EntrezGene"
             n1type = "gene"
-            n1species = "human" 
+            n1species = "human"
             n2hint = "EntrezGene"
             n2type = "gene"
             n2species = "human"
-            
-            for line in reader:
+
+            for line in infile:
+                line = line.replace('"', '').strip().split('\t')
+                if len(line) == 1:
+                    continue
                 line_cksum = line[2]
                 n1name = line[3]
                 n2name = line[4]

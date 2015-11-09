@@ -24,14 +24,14 @@ def table(rawline, version_dict):
     This returns noting but produces the 2table formatted files from the
     provided rawline file:
         rawline table (file, line num, line_chksum, rawline)
-        2tbl_edge table (rawline_cksum, n1name, n1hint, n1type, n1spec, 
+        2tbl_edge table (rawline_cksum, n1name, n1hint, n1type, n1spec,
                         n2name, n2hint, n2type, n2spec, et_hint, score,
                         tableline_cksum)
         edge_meta (line_cksum, info_type, info_desc)
-        node_meta (line_cksum, node_num (1 or 2), 
+        node_meta (line_cksum, node_num (1 or 2),
                    info_type (evidence, relationship, experiment, or link),
                    info_desc (text))
-    
+
     Args:
         rawline(str): The path to the rawline file
         version_dict (dict): A dictionary describing the attributes of the
@@ -63,10 +63,12 @@ def table(rawline, version_dict):
     with open(rawline, encoding='utf-8') as infile, \
         open(table_file, 'w') as edges,\
         open(e_meta_file, 'w') as e_meta:
-        reader = csv.reader(infile, delimiter='\t')
         edge_writer = csv.writer(edges, delimiter='\t')
         e_meta_writer = csv.writer(e_meta, delimiter='\t')
-        for line in reader:
+        for line in infile:
+            line = line.replace('"', '').strip().split('\t')
+            if len(line) == 1:
+                    continue
             if line[1] == '1':
                 continue
             chksm = line[2]
@@ -104,7 +106,7 @@ def table(rawline, version_dict):
                     n2hint, n2 = n2tuple.split(':')
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                        n2, n2hint, n2type, n2spec, et_hint, 
+                        n2, n2hint, n2type, n2spec, et_hint,
                         str(score)]).encode())
                     t_chksum = hasher.hexdigest()
                     edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
