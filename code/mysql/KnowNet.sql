@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `raw_file` (
   `remote_url` varchar(255) NOT NULL,
   `remote_date` varchar(40) DEFAULT NULL,
   `remote_version` varchar(40) DEFAULT NULL,
-  `remote_size` int(11) DEFAULT NULL,
+  `remote_size` bigint(11) DEFAULT NULL,
   `date_downloaded` datetime NOT NULL,
   `local_filename` varchar(255) NOT NULL,
   `checksum` varchar(80) DEFAULT NULL,
