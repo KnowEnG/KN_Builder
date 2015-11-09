@@ -31,10 +31,6 @@
 31	go_hierarchy	2	2	0	relationship between go terms	Binary value indicating relationship exists	1	1
 32	blastp_homology	1	1	1	protein sequence similarity as measured by basic local alignment search tool 	negative log 10 of E-value, expected number of local alignments with a given score that would be found in random sequences of the same length as the query and database	100	2
 33	pfam_domains	2	1	0	Pfam protein domains found in protein sequences as scored by HMMER	negative log 10 of E-value, expected number of local alignments with a given score that would be found in random sequences of the same length as the query and database	100	2
-<<<<<<< HEAD
-34	LINCS_up_signature	2	1	0	Genes which were shown to be differential up regulated after treatment with a given perturbagen	Robust z-scores for each profile relative to population control	100	2.5
-35	LINCS_down_signature	2	1	0	Genes which were shown to be differential down regulated after treatment with a given perturbagen	Robust z-scores for each profile relative to population control	100	2.5
-=======
 34  CE-CC   2   1   0   Co-citation of worm gene
 35  CE-CX   2   1   0   Co-expression among worm genes
 36  CE-GT   2   1   0   Worm genetic interactions
@@ -57,4 +53,6 @@
 53  SC-TS   2   1   0   Yeast protein interactions inferred from tertiary structures of complexes
 54  SC-YH   2   1   0   High-throughput yeast 2-hybrid assays among yeast genes
 55  IntNet  2   1   0   Integrated network (HumanNet)
+56	LINCS_up_signature	2	1	0	Genes which were shown to be differential up regulated after treatment with a given perturbagen	Robust z-scores for each profile relative to population control	100	2.5
+57	LINCS_down_signature	2	1	0	Genes which were shown to be differential down regulated after treatment with a given perturbagen	Robust z-scores for each profile relative to population control	100	2.5
 >>>>>>> hummannet
