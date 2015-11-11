@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `raw_file` (
   `remote_url` varchar(255) NOT NULL,
   `remote_date` varchar(40) DEFAULT NULL,
   `remote_version` varchar(40) DEFAULT NULL,
-  `remote_size` int(11) DEFAULT NULL,
+  `remote_size` bigint(11) DEFAULT NULL,
   `date_downloaded` datetime NOT NULL,
   `local_filename` varchar(255) NOT NULL,
   `checksum` varchar(80) DEFAULT NULL,
@@ -18,8 +18,7 @@ CREATE TABLE IF NOT EXISTS `raw_line` (
   `line_num` int(11) NOT NULL,
   `line_hash` varchar(40) NOT NULL,
   `line_str` text NOT NULL,
-  PRIMARY KEY (`line_hash`, `line_num`, `file_id`),
-  CONSTRAINT `raw_data_ibfk_1` FOREIGN KEY (`file_id`) REFERENCES `raw_file` (`file_id`) ON DELETE CASCADE
+  PRIMARY KEY (`line_hash`, `line_num`, `file_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `species` (
@@ -47,8 +46,7 @@ CREATE TABLE IF NOT EXISTS `node_meta` (
   `node_id` varchar(128) NOT NULL,
   `info_type` varchar(80) NOT NULL,
   `info_desc` varchar(255) NOT NULL,
-  UNIQUE KEY `idx_node_meta_key` (`node_id`,`info_type`,`info_desc`),
-  CONSTRAINT `node_meta_ibfk_1` FOREIGN KEY (`node_id`) REFERENCES `node` (`node_id`) ON DELETE CASCADE
+  PRIMARY KEY `idx_node_meta_key` (`node_id`,`info_type`,`info_desc`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `node_species` (
@@ -81,8 +79,7 @@ CREATE TABLE IF NOT EXISTS `edge_type` (
 CREATE TABLE IF NOT EXISTS `edge2line`(
   `edge_hash` varchar(40) NOT NULL,
   `line_hash` varchar(40) NOT NULL,
-  PRIMARY KEY (`edge_hash`, `line_hash`),
-  CONSTRAINT `edge2line_ibfk_1` FOREIGN KEY (`line_hash`) REFERENCES `raw_line` (`line_hash`) ON DELETE CASCADE
+  PRIMARY KEY (`edge_hash`, `line_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge` (
@@ -94,19 +91,14 @@ CREATE TABLE IF NOT EXISTS `edge` (
   PRIMARY KEY (`edge_hash`),
   KEY `n1_id` (`n1_id`),
   KEY `n2_id` (`n2_id`),
-  KEY `e_type_id` (`e_type_id`),
-  CONSTRAINT `edge_ibfk_1` FOREIGN KEY (`n1_id`) REFERENCES `node` (`node_id`) ON DELETE CASCADE,
-  CONSTRAINT `edge_ibfk_2` FOREIGN KEY (`n2_id`) REFERENCES `node` (`node_id`) ON DELETE CASCADE,
-  CONSTRAINT `edge_ibfk_3` FOREIGN KEY (`edge_hash`) REFERENCES `edge2line` (`edge_hash`) ON DELETE CASCADE,
-  CONSTRAINT `edge_ibfk_4` FOREIGN KEY (`e_type_id`) REFERENCES `edge_type` (`e_type_id`) ON DELETE CASCADE
+  KEY `e_type_id` (`e_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge_meta` (
   `edge_hash` varchar(40) NOT NULL,
   `info_type` varchar(80) NOT NULL,
   `info_desc` varchar(255) NOT NULL,
-  UNIQUE KEY `idx_edge_meta_key` (`edge_hash`,`info_type`,`info_desc`),
-  CONSTRAINT `edge_meta_ibfk_1` FOREIGN KEY (`edge_hash`) REFERENCES `edge` (`edge_hash`) ON DELETE CASCADE
+  PRIMARY KEY `idx_edge_meta_key` (`edge_hash`,`info_type`,`info_desc`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `all_mappings` (

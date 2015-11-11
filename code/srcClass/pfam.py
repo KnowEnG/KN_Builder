@@ -232,9 +232,11 @@ class Pfam(SrcClass):
 
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges:
-            reader = csv.reader(infile, delimiter='\t')
             edge_writer = csv.writer(edges, delimiter='\t')
-            for line in reader:
+            for line in infile:
+                line = line.replace('"', '').strip().split('\t')
+                if len(line) == 1:
+                    continue
                 chksm = line[2]
                 raw = line[3:]
                 n1 = raw[0]

@@ -335,11 +335,13 @@ class MySQL(object):
         self.args = args
         if self.database is None:
             self.conn = sql.connect(host=self.host, port=self.port,
-                                    user=self.user, password=self.passw)
+                                    user=self.user, password=self.passw,
+                                    client_flags=[sql.ClientFlag.LOCAL_FILES])
         else:
             self.conn = sql.connect(host=self.host, port=self.port,
                                     user=self.user, password=self.passw,
-                                    db=self.database)
+                                    db=self.database,
+                                    client_flags=[sql.ClientFlag.LOCAL_FILES])
         self.cursor = self.conn.cursor()
 
     def drop_db(self, database):
@@ -426,11 +428,11 @@ class MySQL(object):
 
         Returns:
         """
-        self.cursor.execute('CREATE TEMPORARY TABLE IF NOT EXISTS ' + tablename
-                            + ' ' + cmd + ';')
+        self.cursor.execute('CREATE TEMPORARY TABLE IF NOT EXISTS ' + \
+                            tablename + ' ' + cmd + ';')
         self.conn.commit()
 
-    def load_data(self, filename, tablename, cmd='', sep='\t', enc='"'):
+    def load_data(self, filename, tablename, cmd='', sep='\\t', enc='"'):
         """Import data into table in the MySQL database.
 
         Loads the data located on the local machine into the provided MySQL
@@ -444,11 +446,24 @@ class MySQL(object):
 
         Returns:
         """
-        self.cursor.execute('LOAD DATA LOCAL INFILE ' + filename +
-                             ' INTO TABLE ' + tablename +
+        self.cursor.execute("LOAD DATA LOCAL INFILE '" + filename +
+                             "' INTO TABLE " + tablename +
                              " FIELDS TERMINATED BY '" + sep + "'" +
-                             " OPTIONALLY ENCLOSED BY '" + enc + "'" +
+                             " OPTIONALLY ENCLOSED BY '" + enc + "' " +
                              cmd + ";")
+        self.conn.commit()
+
+    def drop_temp_table(self, tablename):
+        """Remove a temporary table from the MySQL database
+
+        Drops the provided tablename from the MySQL database.
+
+        Args:
+            tablename (str): name of the table to remove from the MySQL database
+
+        Returns:
+        """
+        self.cursor.execute('DROP TEMPORARY TABLE IF EXISTS ' + tablename + ';')
         self.conn.commit()
 
     def drop_table(self, tablename):
@@ -507,6 +522,34 @@ class MySQL(object):
         Returns:
         """
         self.cursor.execute('INSERT INTO ' + tablename + ' ' + cmd + ';')
+        self.conn.commit()
+
+    def replace(self, tablename, cmd):
+        """Insert into tablename using cmd.
+
+        Replace into tablename using cmd.
+
+        Args:
+            tablename (str): name of the table to add to the MySQL database
+            cmd (str): a valid SQL command to use for inserting into tablename
+
+        Returns:
+        """
+        self.cursor.execute('REPLACE INTO ' + tablename + ' ' + cmd + ';')
+        self.conn.commit()
+
+    def insert_ignore(self, tablename, cmd=''):
+        """Insert into tablename using cmd.
+
+        Insert into tablename using cmd.
+
+        Args:
+            tablename (str): name of the table to add to the MySQL database
+            cmd (str): a valid SQL command to use for inserting into tablename
+
+        Returns:
+        """
+        self.cursor.execute('INSERT IGNORE INTO ' + tablename + ' ' + cmd + ';')
         self.conn.commit()
 
     def run(self, cmd):

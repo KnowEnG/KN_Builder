@@ -17,6 +17,7 @@ import sys
 import subprocess
 import os
 import config_utilities as cf
+import import_utilities as iu
 from argparse import ArgumentParser
 
 def csu(infile, outfile, columns=list()):

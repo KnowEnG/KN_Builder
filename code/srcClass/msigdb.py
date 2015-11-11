@@ -261,10 +261,12 @@ class Msigdb(SrcClass):
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
             open(n_meta_file, 'w') as n_meta:
-            reader = csv.reader(infile, delimiter='\t')
             edge_writer = csv.writer(edges, delimiter='\t')
             n_meta_writer = csv.writer(n_meta, delimiter='\t')
-            for line in reader:
+            for line in infile:
+                line = line.replace('"', '').strip().split('\t')
+                if len(line) == 1:
+                    continue
                 chksm = line[2]
                 raw = line[3:]
                 n1_orig_name = raw[0]
