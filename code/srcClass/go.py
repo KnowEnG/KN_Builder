@@ -19,6 +19,7 @@ import csv
 import hashlib
 import config_utilities as cf
 import table_utilities as tu
+import import_utilities as iu
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -209,12 +210,15 @@ class Go(SrcClass):
         term_map = dict()
         info_type = "alt_alias"
         n_meta_file = filename.replace('rawline', 'node_meta')
+        node_file = filename.replace('rawline', 'node')
         orig_id, kn_id, orig_name, kn_name = ['', '', '', '']
         skip = True
         with open(filename) as infile, \
-            open(n_meta_file, 'w') as n_meta:
+            open(n_meta_file, 'w') as n_meta, \
+            open(node_file, 'w') as nfile:
             reader = csv.reader(infile, delimiter='\t')
             n_meta_writer = csv.writer(n_meta, delimiter='\t')
+            n_writer = csv.writer(nfile, delimiter='\t')
             for line in reader:
                 chksm = line[2]
                 raw = line[3]
@@ -235,12 +239,18 @@ class Go(SrcClass):
                     orig_name = raw[6:].strip()
                     kn_name = cf.pretty_name('go_' + orig_name)
                     term_map[orig_id] = kn_id + '::' + kn_name
+                    n_writer.writerow([kn_id, kn_name])
                     n_meta_writer.writerow([chksm, kn_id, info_type, orig_name])
                     n_meta_writer.writerow([chksm, kn_id, info_type, orig_id])
                 if raw.startswith('alt_id: '):
                     alt_id = raw[8:].strip()
                     term_map[alt_id] = kn_id + '::' + kn_name
                     n_meta_writer.writerow([chksm, kn_id, info_type, alt_id])
+        outfile = node_file.replace('node','unique_node')
+        tu.csu(node_file, outfile)
+        outfile = n_meta_file.replace('node_meta','unique_node_meta')
+        tu.csu(n_meta_file, outfile)
+
         return term_map
 
     def table(self, rawline, version_dict):
@@ -288,10 +298,12 @@ class Go(SrcClass):
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
             open(e_meta_file, 'w') as e_meta:
-            reader = csv.reader(infile, delimiter='\t')
             edge_writer = csv.writer(edges, delimiter='\t')
             e_meta_writer = csv.writer(e_meta, delimiter='\t')
-            for line in reader:
+            for line in infile:
+                line = line.replace('"', '').strip().split('\t')
+                if len(line) == 1:
+                    continue
                 chksm = line[2]
                 raw = line[3:]
 
