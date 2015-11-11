@@ -280,6 +280,8 @@ class Lincs(SrcClass):
             writer = csv.writer(edges, delimiter='\t')
             for line in infile:
                 line = line.replace('"', '').strip().split('\t')
+                if len(line) == 1:
+                    continue
                 n1_map = line[3]
                 if n1_map == '':
                     continue
