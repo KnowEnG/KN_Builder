@@ -33,6 +33,14 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=cf.config_args()):
 
     Returns:
     """
+    table_cmds = {'node_meta': 'node_meta.node_id = node_meta.id',
+                'raw_line' : 'raw_line.file_id = raw_line.file_id',
+                'edge2line': 'edge2line.edge_hash = edge2line.edge_hash',
+                'edge_meta': 'edge_meta.edge_hash = edge_meta.edge_hash',
+                'edge': ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
+                    '{0}.weight)')}
+    if not dup_cmd and table in table_cmds:
+        dup_cmd = table_cmds[table]
     db = mu.get_database('KnowNet', args)
     tmptable = os.path.splitext(os.path.basename(file_name))[0].replace('.', '_')
     print('Creating temporary table ' + tmptable)
@@ -126,14 +134,9 @@ def import_edge(edgefile, args=cf.config_args()):
     imports = ['node_meta', 'edge2line', 'edge', 'edge_meta']
     #uedge_cmd  = ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
     #                '{0}.weight)')
-    dup_cmds = {'node_meta': 'node_meta.node_id = node_meta.id',
-                'edge2line': 'edge2line.edge_hash = edge2line.edge_hash',
-                'edge_meta': 'edge_meta.edge_hash = edge_meta.edge_hash',
-                'edge': ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
-                    '{0}.weight)')}
     for table in imports:
         ld_cmd = ''
-        dup_cmd = dup_cmds[table]
+        dup_cmd = ''
         if table == 'edge':
             filename = edgefile
         else:
