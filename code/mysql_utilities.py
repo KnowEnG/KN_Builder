@@ -524,6 +524,37 @@ class MySQL(object):
         self.cursor.execute('INSERT INTO ' + tablename + ' ' + cmd + ';')
         self.conn.commit()
 
+    def set_isolation(self, duration='', level='REPEATABLE READ'):
+        """Sets the transaction isolation level.
+
+        Modify the transaction isolation level to modulate lock status behavior.
+        Default InnoDB is repeatable read. For other levels check online at
+        https://dev.mysql.com/doc/refman/5.7/en/set-transaction.html
+
+        Args:
+            duration (str): time for isolation level to be used. Can be empty,
+                GLOBAL, or SESSION
+            level (str): isolation level. In order of locking level:
+                SERIALIZABLE, REPEATABLE READ, READ COMMITTED, READ UNCOMMITTED
+
+        Returns:
+        """
+        cmd = 'SET ' + duration + ' TRANSACTION ISOLATION LEVEL ' + level + ';'
+        self.cursor.execute(cmd)
+    
+    def start_transaction(self, level='REPEATABLE READ'):
+        """Starts a mysql transaction with the provided isolation level
+        
+        Uses the provided isolation level to start a MySQL transaction using 
+        the current connection. Transaction persists until the next commit.
+        
+        Args:
+        level (str): isolation level. In order of locking level:
+                SERIALIZABLE, REPEATABLE READ, READ COMMITTED, READ UNCOMMITTED
+        Returns:
+        """
+        self.conn.start_transaction(isolation_level=level)
+
     def replace(self, tablename, cmd):
         """Insert into tablename using cmd.
 
