@@ -42,8 +42,10 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=cf.config_args()):
     cmd = 'SELECT * FROM ' + tmptable
     if dup_cmd:
         cmd += ' ON DUPLICATE KEY UPDATE ' + dup_cmd.format(tmptable)
+        db.start_transaction(level='READ COMMITTED')
         db.insert(table, cmd)
     else:
+        db.start_transaction(level='READ COMMITTED')
         db.replace(table, cmd)
     db.drop_table(tmptable)
     db.close()
