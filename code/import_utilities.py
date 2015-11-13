@@ -21,7 +21,8 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=cf.config_args()):
 
     Loads the data into a temporary table in MySQL. It then queries from the
     temporary table into the corresponding permanent table. If a duplication
-    occurs during the query, it uses the provided behavior to handle.
+    occurs during the query, it uses the provided behavior to handle. If no
+    behavior is provided, it replaces into the table.
 
     Args:
         file_name (str): path to the file to be imported
@@ -123,14 +124,18 @@ def import_edge(edgefile, args=cf.config_args()):
     Returns:
     """
     imports = ['node_meta', 'edge2line', 'edge', 'edge_meta']
-    uedge_cmd  = ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
-                    '{0}.weight)')
+    #uedge_cmd  = ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
+    #                '{0}.weight)')
+    dup_cmds = {'node_meta': 'node_meta.node_id = node_meta.id',
+                'edge2line': 'edge2line.edge_hash = edge2line.edge_hash',
+                'edge_meta': 'edge_meta.edge_hash = edge_meta.edge_hash',
+                'edge': ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
+                    '{0}.weight)')}
     for table in imports:
         ld_cmd = ''
-        dup_cmd = ''
+        dup_cmd = dup_cmds[table]
         if table == 'edge':
             filename = edgefile
-            dup_cmd = uedge_cmd
         else:
             filename = edgefile.replace('conv', table)
         if not os.path.isfile(filename):
@@ -156,7 +161,7 @@ def import_nodemeta(nmfile, args=cf.config_args()):
     Returns:
     """
     table = 'node_meta'
-    dup_cmd = ''
+    dup_cmd = 'node_meta.node_id = node_meta.node_id'
     ld_cmd = '(@dummy, node_id, info_type, info_desc)'
     import_file(nmfile, table, ld_cmd, dup_cmd, args)
 
@@ -175,6 +180,6 @@ def import_pnode(filename, args=cf.config_args()):
     Returns:
     """
     ld_cmd = '(node_id, n_alias) SET n_type_id=2'
-    dup_cmd = ''
+    dup_cmd = 'node.node_id = node.node_id'
     table = 'node'
     import_file(filename, table, ld_cmd, dup_cmd, args)
