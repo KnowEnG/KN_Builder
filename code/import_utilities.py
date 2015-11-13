@@ -27,7 +27,7 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=cf.config_args()):
         file_name (str): path to the file to be imported
         table (str): name of the permanent table to import to
         ld_cmd (str): optional additional command for loading data
-        dup_cmd (str): command for handling duplicates, by default it ignores
+        dup_cmd (str): command for handling duplicates
         args: command line and default arguements
 
     Returns:
@@ -41,7 +41,7 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=cf.config_args()):
     print('Inserting data from ' + tmptable + ' into ' + table)
     cmd = 'SELECT * FROM ' + tmptable
     if dup_cmd:
-        cmd += ' ON DUPLICATE KEY UPDATE ' + dup_cmd
+        cmd += ' ON DUPLICATE KEY UPDATE ' + dup_cmd.format(tmptable)
         db.insert(table, cmd)
     else:
         db.replace(table, cmd)
@@ -121,8 +121,8 @@ def import_edge(edgefile, args=cf.config_args()):
     Returns:
     """
     imports = ['node_meta', 'edge2line', 'edge', 'edge_meta']
-    uedge_cmd  = ('weight = IF(weight > VALUES(weight), weight, '
-                    'VALUES(weight))')
+    uedge_cmd  = ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
+                    '{0}.weight)')
     for table in imports:
         ld_cmd = ''
         dup_cmd = ''
