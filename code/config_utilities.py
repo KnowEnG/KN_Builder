@@ -28,8 +28,8 @@ import re
 
 DEFAULT_DOCKER_IMG = 'cblatti3/py3_redis_mysql:0.1'
 DEFAULT_CURL_URL = 'mmaster01.cse.illinois.edu:4400'
-DEFAULT_LOCAL_BASE = '/workspace/prototype/P1_source_check'
-DEFAULT_CLOUD_BASE = '/storage-pool/blatti/P1_source_check'
+DEFAULT_LOCAL_BASE = '/workspace/prototype/KnowNet_Pipeline'
+DEFAULT_CLOUD_BASE = '/storage-pool/blatti/KnowNet_Pipeline'
 
 DEFAULT_CODE_PATH = 'code'
 DEFAULT_DATA_PATH = 'data'
@@ -68,6 +68,14 @@ def add_config_args(parser):
         directory from toplevel', default=DEFAULT_DATA_PATH)
     parser.add_argument('-sp', '--src_path', help='relative path of source \
         code directory from code directory', default=DEFAULT_SRC_PATH)
+    parser.add_argument('-myh', '--mysql_host', help='url of mySQL db',
+                        default=DEFAULT_MYSQL_URL)
+    parser.add_argument('-myp', '--mysql_port', help='port for mySQL db',
+                        default=DEFAULT_MYSQL_PORT)    
+    parser.add_argument('-myu', '--mysql_user', help='user for mySQL db',
+                        default=DEFAULT_MYSQL_USER)
+    parser.add_argument('-myps', '--mysql_pass', help='password for mySQL db',
+                        default=DEFAULT_MYSQL_PASS)                          
     parser.add_argument('-rh', '--redis_host', help='url of Redis db',
                         default=DEFAULT_REDIS_URL)
     parser.add_argument('-rp', '--redis_port', help='port for Redis db',
