@@ -327,10 +327,10 @@ class MySQL(object):
         Args:
         database (str): the MySQL database to connect to (optional)
         """
-        self.user = cf.DEFAULT_MYSQL_USER
-        self.host = cf.DEFAULT_MYSQL_URL
-        self.port = cf.DEFAULT_MYSQL_PORT
-        self.passw = cf.DEFAULT_MYSQL_PASS
+        self.user = args.mysql_user
+        self.host = args.mysql_host
+        self.port = args.mysql_port
+        self.passw = args.mysql_pass
         self.database = database
         self.args = args
         if self.database is None:
