@@ -127,6 +127,7 @@ class Ensembl(SrcClass):
             rest_url = 'http://rest.ensembl.org'
             query = '/info/data/?content-type=application/json'
             key = 'releases'
+        print('\t'.join([rest_url,query,key]))
         response = urllib.request.urlopen(rest_url + query)
         json_obj = json.loads(response.read().decode())
         version = str(json_obj[key])

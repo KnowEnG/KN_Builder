@@ -37,12 +37,12 @@ DEFAULT_SRC_PATH = 'srcClass'
 DEFAULT_MAP_PATH = 'id_map'
 
 DEFAULT_MYSQL_URL = 'knowice.cs.illinois.edu'
-DEFAULT_MYSQL_PORT = '3308'
+DEFAULT_MYSQL_PORT = '3306'
 DEFAULT_MYSQL_USER = 'root'
 DEFAULT_MYSQL_PASS = 'KnowEnG'
 
 DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
-DEFAULT_REDIS_PORT = '6381'
+DEFAULT_REDIS_PORT = '6379'
 
 def add_config_args(parser):
     """Add configuation options to command line arguments.
@@ -71,11 +71,11 @@ def add_config_args(parser):
     parser.add_argument('-myh', '--mysql_host', help='url of mySQL db',
                         default=DEFAULT_MYSQL_URL)
     parser.add_argument('-myp', '--mysql_port', help='port for mySQL db',
-                        default=DEFAULT_MYSQL_PORT)    
+                        default=DEFAULT_MYSQL_PORT)
     parser.add_argument('-myu', '--mysql_user', help='user for mySQL db',
                         default=DEFAULT_MYSQL_USER)
     parser.add_argument('-myps', '--mysql_pass', help='password for mySQL db',
-                        default=DEFAULT_MYSQL_PASS)                          
+                        default=DEFAULT_MYSQL_PASS)
     parser.add_argument('-rh', '--redis_host', help='url of Redis db',
                         default=DEFAULT_REDIS_URL)
     parser.add_argument('-rp', '--redis_port', help='port for Redis db',
