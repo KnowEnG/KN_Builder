@@ -36,15 +36,67 @@ python3 ../../../code/table_utilities.py chunks/SRC.ALIAS.rawfile.1.txt file_met
 
 
 ### running all steps in local mode
-#### setup local pipeline
+#### setup
+may want to 
+clear out mysql: 
 ```
-python3 code/setup_utilities.py CHECK LOCAL PIPELINE -ld /workspace/apps/P1_source_check/ -dp local_pipe -rh knowice.cs.illinois.edu -rp 6380
+mysql -hknowcharles.dyndns.org --port 3306 -uroot -pKnowEnG KnowNet \
+    --execute "drop database KnowNet;"
 ```
-##### about 36 minutes
+clear out redis: 
+```
+redis-cli -h knowcharles.dyndns.org FLUSHDB
+```
+##### check for remote sources updates
+```
+python3 code/setup_utilities.py CHECK LOCAL STEP -dp local_pipe \
+     -ld /workspace/apps/KnowNet_Pipeline/ \
+     -myh knowcharles.dyndns.org -rh knowcharles.dyndns.org
+```
+##### fetch updated files from remote sources, process ontologies and databases
+```
+python3 code/setup_utilities.py FETCH LOCAL STEP -dp local_pipe \
+    -ld /workspace/apps/KnowNet_Pipeline/ \
+    -myh knowcharles.dyndns.org -rh knowcharles.dyndns.org
+```
+##### run full setup pipeline without ensembl
+```
+python3 code/setup_utilities.py CHECK LOCAL PIPELINE -dp local_pipe -ne \
+    -ld /workspace/apps/KnowNet_Pipeline/ \
+    -myh knowcharles.dyndns.org -rh knowcharles.dyndns.org
+```
+###### about 36 minutes
 
-#### pipeline local pipeline
+#### pipeline local
+##### check for remote sources updates
 ```
-python3 code/pipeline_utilities.py CHECK LOCAL PIPELINE -ld /workspace/apps/P1_source_check/ -dp local_pipe -rh knowice.cs.illinois.edu -rp 6380
+python3 code/pipeline_utilities.py CHECK LOCAL STEP -dp local_pipe \
+    -ld /workspace/apps/KnowNet_Pipeline/ \
+    -myh knowcharles.dyndns.org -rh knowcharles.dyndns.org
+```
+##### fetch updated files from remote sources, process ontologies
+```
+python3 code/pipeline_utilities.py FETCH LOCAL STEP -dp local_pipe \
+    -ld /workspace/apps/KnowNet_Pipeline/ \
+    -myh knowcharles.dyndns.org -rh knowcharles.dyndns.org
+```
+##### convert files to standard table format
+```
+python3 code/pipeline_utilities.py TABLE LOCAL STEP -dp local_pipe \
+    -ld /workspace/apps/KnowNet_Pipeline/ \
+    -myh knowcharles.dyndns.org -rh knowcharles.dyndns.org
+```
+##### map entries to KN entities and produce edges and metadata files
+```
+python3 code/pipeline_utilities.py MAP LOCAL STEP -dp local_pipe \
+    -ld /workspace/apps/KnowNet_Pipeline/ \
+    -myh knowcharles.dyndns.org -rh knowcharles.dyndns.org
+```
+##### run full sources pipeline
+```
+python3 code/pipeline_utilities.py CHECK LOCAL PIPELINE -dp local_pipe \
+    -ld /workspace/apps/KnowNet_Pipeline/ \
+    -myh knowcharles.dyndns.org -rh knowcharles.dyndns.org
 ```
 ##### about 45 minutes
 
@@ -66,7 +118,13 @@ python3 code/pipeline_utilities.py CHECK CLOUD PIPELINE -c mmaster01.cse.illinoi
 ### running one full step in cloud mode
 #### setup cloud all fetch
 ```
-for i in ensembl ppi species; do python3 code/setup_utilities.py FETCH CLOUD STEP -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -rh knowice.cs.illinois.edu -rp 6380 -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe -p $i; done
+for i in ensembl ppi species; do
+echo $i
+python3 code/setup_utilities.py FETCH CLOUD STEP -dp cloud_pipe -p $i \
+    -ld /workspace/prototype/KnowNet_Pipeline/ \
+    -rh knowcharles.dyndns.org -myh knowcharles.dyndns.org \
+    -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/ \
+; done;
 ```
 
 #### pipeline cloud all fetch
