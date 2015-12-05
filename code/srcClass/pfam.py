@@ -234,11 +234,17 @@ class Pfam(SrcClass):
             open(table_file, 'w') as edges:
             edge_writer = csv.writer(edges, delimiter='\t')
             for line in infile:
-                line = line.replace('"', '').strip().split('\t')
+                line = line.replace('"', '').strip().split()
                 if len(line) == 1:
                     continue
                 chksm = line[2]
                 raw = line[3:]
+                
+                # skip commented lines
+                comment_match = re.match('#', raw[0])
+                if comment_match is not None:
+                    continue
+                
                 n1 = raw[0]
                 n2 = raw[2]
                 evalue = raw[4]
