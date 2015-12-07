@@ -191,7 +191,7 @@ class Lincs(SrcClass):
         Returns:
             bool: Whether or not the alias is used for mapping.
         """
-        if alias == 'level4':
+        if alias == 'level4' or alias == 'exp_meta':
             return False
         else:
             return True
@@ -257,12 +257,30 @@ class Lincs(SrcClass):
 
         Returns:
         """
+        if version_dict['alias'] == 'level4':
+            self.table_level4(rawline, version_dict)
+        elif version_dict['alias'] == 'exp_meta':
+            self.table_expmeta(rawline, version_dict)
+
+    def table_level4(self, rawline, version_dict):
+        """Uses the provided level4 rawline file to produce an edge file.
+
+        This returns noting but produces the edge file formatted files from the
+        provided rawline file (performs both the conv and table steps).
+        It outputs an edge_mapped file in the format (n1, n2, line_checksum,
+        edge_type, weight, status, status_desc), where status is production if
+        both nodes mapped and unmapped otherwise.
+
+        Args:
+            rawline(str): The path to the rawline file
+            version_dict (dict): A dictionary describing the attributes of the
+                alias for a source.
+
+        Returns:
+        """
 
         #outfiles
         table_file = rawline.replace('rawline','conv')
-
-        #static column values
-        et_map = 'LINCS_signature'
 
         #open mapping files
         map_file = os.path.join('..', 'baseline_gene_expression',
@@ -282,6 +300,7 @@ class Lincs(SrcClass):
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:
                     continue
+                chksum = line[2]
                 n1_map = line[3]
                 if n1_map == '':
                     continue
@@ -308,8 +327,55 @@ class Lincs(SrcClass):
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([n1_map, n2_map, et_map]).encode())
                     e_chksum = hasher.hexdigest()
-                    writer.writerow([n1_map, n2_map, et_map, weight, e_chksum])
+                    writer.writerow([n1_map, n2_map, et_map, weight, e_chksum, chksum])
 
+    def table_expmeta(self, rawline, version_dict):
+        """Uses the provided exp_meta rawline file to produce an edge file.
+
+        This returns noting but produces the edge file formatted files from the
+        provided rawline file (performs both the conv and table steps).
+        It outputs an edge_mapped file in the format (n1, n2, line_checksum,
+        edge_type, weight, status, status_desc), where status is production if
+        both nodes mapped and unmapped otherwise.
+
+        Args:
+            rawline(str): The path to the rawline file
+            version_dict (dict): A dictionary describing the attributes of the
+                alias for a source.
+
+        Returns:
+        """
+
+        #outfiles
+        table_file = rawline.replace('rawline','conv')
+
+        #static column values
+        et_map = 'LINCS_meta'
+        weight = 1
+        with open(rawline, encoding='utf-8') as infile, \
+            open(table_file, 'w') as edges:
+            writer = csv.writer(edges, delimiter='\t')
+            for line in infile:
+                line = line.replace('"', '').strip().split('\t')
+                if len(line) == 1:
+                    continue
+                chksum = line[2]
+                line = line[3:]
+                n1_map = line[0]
+                if n1_map == 'distil_id':
+                    continue
+                pert = line[1]
+                cell = line[3]
+                time = line[4] + line[5]
+                dose = line[6] + line[7]
+                metadata = [pert, cell, time, dose]
+                for n2_map in metadata:
+                    if n2_map == '-666' or n2_map == '':
+                        continue
+                    hasher = hashlib.md5()
+                    hasher.update('\t'.join([n1_map, n2_map, et_map]).encode())
+                    e_chksum = hasher.hexdigest()
+                    writer.writerow([n1_map, n2_map, et_map, weight, e_chksum, chksum])
 
 def download(version_dict, args):
     """Returns the standardized path to the local file after downloading it
@@ -353,6 +419,18 @@ def download(version_dict, args):
 
 
 def gctx_to_txt(gctx_file, ret_file, args):
+    """Converts the provided gctx file to a text file.
+
+    This takes the path to a gctx file and calls gctx2tsv_utilities.py to
+    convert it to a text flat file.
+
+    Args:
+        gctx_file (str): name of the gctx_file to convert
+        ret_file (str): name of the text file to produce
+        args: local and runtime arguemnts
+    Returns:
+        The relative path to the converted file.
+    """
     cmd = ['python', os.path.join(args.local_dir, args.code_path, args.src_path,
             'gctx2tsv_utilities.py'), gctx_file, ret_file]
     print(' '.join(cmd))
