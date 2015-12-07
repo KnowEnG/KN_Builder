@@ -41,7 +41,8 @@ def main(edgefile, args=cf.config_args()):
 
     Returns:
     """
-    if 'lincs.level4' in edgefile:
+    if 'lincs.level4' in edgefile or 'lincs.exp_meta' in edgefile:
+        iu.import_edge(edgefile, args)
         return
     rdb = ru.get_database(args)
     conv_file = edgefile.replace('edge', 'conv')
