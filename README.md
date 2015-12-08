@@ -37,13 +37,13 @@ python3 ../../../code/table_utilities.py chunks/SRC.ALIAS.rawfile.1.txt file_met
 
 ### running all steps in local mode
 #### setup
-may want to 
-clear out mysql: 
+may want to
+clear out mysql:
 ```
 mysql -hknowcharles.dyndns.org --port 3306 -uroot -pKnowEnG KnowNet \
     --execute "drop database KnowNet;"
 ```
-clear out redis: 
+clear out redis:
 ```
 redis-cli -h knowcharles.dyndns.org FLUSHDB
 ```
