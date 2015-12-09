@@ -25,7 +25,8 @@ def get_database(args=cf.config_args()):
     Returns:
         class: a redis connection object
     """
-    return redis.StrictRedis(host=args.redis_host, port=args.redis_port)
+    return redis.StrictRedis(host=args.redis_host, port=args.redis_port,
+        password=args.redis_pass)
 
 def import_ensembl(alias, args=cf.config_args()):
     """Imports the ensembl data for the provided alias into the Redis database.
