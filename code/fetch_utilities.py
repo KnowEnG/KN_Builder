@@ -276,7 +276,7 @@ def main(version_json, args=cf.config_args()):
         map_file = os.path.splitext(newfile)[0] + '.json'
         with open(map_file, 'w') as outfile:
             json.dump(map_dict, outfile, indent=4, sort_keys=True)
-        #ru.import_mapping(map_dict, args)
+        ru.import_mapping(map_dict, args)
     else:
         #rawline = raw_line(newfile)
         num_chunks = chunk(newfile, line_count, args)
