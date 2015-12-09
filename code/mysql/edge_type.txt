@@ -55,4 +55,7 @@
 55	IntNet	2	1	0	Integrated network (HumanNet)
 56	LINCS_up_signature	2	1	0	Genes which were shown to be differential up regulated after treatment with a given perturbagen	Robust z-scores for each profile relative to population control	100	2.5
 57	LINCS_down_signature	2	1	0	Genes which were shown to be differential down regulated after treatment with a given perturbagen	Robust z-scores for each profile relative to population control	100	2.5
-58  LINCS_meta  2   2   0   Meta data descriptors for LINCS experiments binary value    1   1
+58	LINCS_cell_type	2	2	0	Cell type from LINCS experiment	binary value	1	1
+59	LINCS_perturbagen	2	2	0	Perturbagen from LINCS experiment	binary value	1	1
+60	LINCS_perturbagen_time	2	2	0	Perturbagen time from LINCS experiment	binary value	1	1
+61	LINCS_perturbagen_dose	2	2	0	Perturbagen time from LINCS experiment	binary value	1	1
