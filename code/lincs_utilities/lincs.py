@@ -17,6 +17,7 @@ import csv
 import os
 import time
 import config_utilities as cf
+import table_utilities as tu
 import subprocess
 import shutil
 import json
@@ -355,7 +356,9 @@ class Lincs(SrcClass):
         #static column values
         et_map_list = ['LINCS_perturbagen', 'LINCS_cell_type', \
                     'LINCS_perturbagen_time', 'LINCS_perturbagen_dose']
+        info_type = "alt_alias"
         weight = 1
+
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges, \
             open(n_meta_file, 'w') as n_meta, \
@@ -378,16 +381,26 @@ class Lincs(SrcClass):
                 time = line[4] + line[5]
                 dose = line[6] + line[7]
                 metadata = [pert, cell, time, dose]
+                n_writer.writerow([n1_map, n1_map])
+                n_meta_writer.writerow([n1_map, info_type, n1])
                 for i in range(0, len(metadata)):
-                    n2_map = metadata[i]
+                    n2 = metadata[i]
                     et_map = et_map_list[i]
-                    if n2_map == '-666' or n2_map == '':
+                    if n2 == '-666' or n2 == '':
                         continue
-                    n2_map = cf.pretty_name('LINCS_' + n2_map, 6 + len(n2_map))
+                    n2_map = cf.pretty_name('LINCS_' + n2, 6 + len(n2))
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([n1_map, n2_map, et_map]).encode())
                     e_chksum = hasher.hexdigest()
-                    writer.writerow([n1_map, n2_map, et_map, weight, e_chksum, chksum])
+                    n_writer.writerow([n2_map, n2_map])
+                    n_meta_writer.writerow([n2_map, info_type, n2])
+                    writer.writerow([n1_map, n2_map, et_map, weight, e_chksum,
+                                    chksum])
+        outfile = node_file.replace('node','unique_node')
+        tu.csu(node_file, outfile)
+        outfile = n_meta_file.replace('node_meta','unique_node_meta')
+        tu.csu(n_meta_file, outfile)
+
 
 def download(version_dict, args):
     """Returns the standardized path to the local file after downloading it
