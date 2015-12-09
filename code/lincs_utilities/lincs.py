@@ -302,7 +302,7 @@ class Lincs(SrcClass):
                     continue
                 chksum = line[2]
                 n1_map = line[3]
-                if n1_map == '' or 'unmapped' in n1_map:
+                if n1_map == '':
                     continue
                 n1_map = cf.pretty_name('LINCS_' + n1_map, 6 + len(n1_map))
                 scores = line[4:]
@@ -314,7 +314,7 @@ class Lincs(SrcClass):
                     evaluated[i] = 1
                     n2 = headers[str(i)]
                     (n2_map, probe_list, idx_list) = lincs_map[n2]
-                    if 'unmapped' in n1_map or n1_map == 'NA':
+                    if 'unmapped' in n2_map or n2_map == 'NA':
                         continue
                     for idx in idx_list:
                         if abs(float(scores[idx])) > abs(float(weight)):
