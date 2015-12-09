@@ -72,7 +72,8 @@ def main_parse_args():
     parser.add_argument('run_mode', help='select run mode, must be STEP or \
         PIPELINE', default=DEFAULT_RUN_MODE)
     parser.add_argument('-p', '--step_parameters', help='parameters needed \
-        for single call of step in pipeline', default='')
+        for single call of step in pipeline (always the data source alias when \
+        running LOCAL mode)', default='')
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
 
@@ -107,7 +108,18 @@ def run_local_check(args):
     successful = 0
     failed = 0
     src_code_dir = os.path.join(local_code_dir, args.src_path)
-    for filename in sorted(os.listdir(src_code_dir)):
+
+    src_names = sorted(os.listdir(src_code_dir))
+    if args.step_parameters is not '':
+        local_src_py = os.path.join(src_code_dir, args.step_parameters + '.py')
+        if not os.path.exists(local_src_py):
+            print("ERROR: source specified with --step_parameters (-p) option, "
+            "{0}, does not have srcClass: {1}".format(args.step_parameters, local_src_py))
+            return -1
+        src_names = [args.step_parameters + '.py']
+
+
+    for filename in src_names:
         if not filename.endswith(".py"):
             continue
         if 'utilities' in filename:
@@ -153,7 +165,17 @@ def run_local_fetch(args):
     ctr = 0
     successful = 0
     failed = 0
-    for src_name in sorted(os.listdir(local_data_dir)):
+
+    src_names = sorted(os.listdir(local_data_dir))
+    if args.step_parameters is not '':
+        local_src_dir = os.path.join(local_data_dir, args.step_parameters)
+        if not os.path.exists(local_src_dir):
+            print("ERROR: source specified with --step_parameters (-p) option, "
+            "{0}, does not have data directory: {1}".format(args.step_parameters, local_src_dir))
+            return -1
+        src_names = [args.step_parameters]
+
+    for src_name in src_names:
         if src_name in SETUP_FILES or src_name + '.py' not in srcs:
             continue
         print(src_name)
@@ -202,7 +224,17 @@ def run_local_table(args):
     ctr = 0
     successful = 0
     failed = 0
-    for src_name in sorted(os.listdir(local_data_dir)):
+
+    src_names = sorted(os.listdir(local_data_dir))
+    if args.step_parameters is not '':
+        local_src_dir = os.path.join(local_data_dir, args.step_parameters)
+        if not os.path.exists(local_src_dir):
+            print("ERROR: source specified with --step_parameters (-p) option, "
+            "{0}, does not have data directory: {1}".format(args.step_parameters, local_src_dir))
+            return -1
+        src_names = [args.step_parameters]
+
+    for src_name in src_names:
         if src_name + '.py' not in srcs:
             continue
         print(src_name)
@@ -260,7 +292,17 @@ def run_local_conv(args):
     ctr = 0
     successful = 0
     failed = 0
-    for src_name in sorted(os.listdir(local_data_dir)):
+
+    src_names = sorted(os.listdir(local_data_dir))
+    if args.step_parameters is not '':
+        local_src_dir = os.path.join(local_data_dir, args.step_parameters)
+        if not os.path.exists(local_src_dir):
+            print("ERROR: source specified with --step_parameters (-p) option, "
+            "{0}, does not have data directory: {1}".format(args.step_parameters, local_src_dir))
+            return -1
+        src_names = [args.step_parameters]
+
+    for src_name in src_names:
         if src_name + '.py' not in srcs:
             continue
         print(src_name)
@@ -477,8 +519,8 @@ def run_cloud_fetch(args):
 
     local_src_dir = os.path.join(args.local_dir, args.data_path, src)
     if not os.path.exists(local_src_dir):
-        print("ERROR: source specified with --step_parameters (-p) option, \
-            {0}, does not have data directory: {1}".format(src, local_src_dir))
+        print("ERROR: source specified with --step_parameters (-p) option, "
+            "{0}, does not have data directory: {1}".format(src, local_src_dir))
         return -1
 
     ctr = 0
@@ -534,8 +576,8 @@ def run_cloud_table(args):
     alias_path = os.path.join(src, alias)
     local_alias_dir = os.path.join(args.local_dir, args.data_path, alias_path)
     if not os.path.exists(local_alias_dir):
-        print("ERROR: 'source,alias' specified with --step_parameters (-p) \
-            option, {0}, does not have data directory: {1}".format(args.step_parameters, 
+        print("ERROR: 'source,alias' specified with --step_parameters (-p) "
+            "option, {0}, does not have data directory: {1}".format(args.step_parameters,
                                                                    local_alias_dir))
         return -1
 
@@ -686,8 +728,8 @@ def main():
         elif args.start_step == 'MAP':
             run_local_conv(args)
         else:
-            print(args.start_step + ' is an unacceptable start_step.  Must be \
-                ' + str(POSSIBLE_STEPS))
+            print(args.start_step + ' is an unacceptable start_step.  Must be '
+                  + str(POSSIBLE_STEPS))
             return
 
     elif args.deploy_loc == 'CLOUD':
@@ -700,8 +742,8 @@ def main():
         elif args.start_step == 'MAP':
             run_cloud_conv(args)
         else:
-            print(args.start_step + ' is an unacceptable start_step.  Must be \
-                ' + str(POSSIBLE_STEPS))
+            print(args.start_step + ' is an unacceptable start_step.  Must be '
+                  + str(POSSIBLE_STEPS))
             return
 
     else:
