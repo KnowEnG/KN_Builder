@@ -33,8 +33,7 @@ docker run -d --privileged --restart=always --name p1_cloud9 -h project1_c9 -p 8
 
 # install necessary tools
 apt-get update && apt-get install -y time git sshfs vim mysql-client \
-    python3 python3-pip python-pip python-dev r-base r-base-dev redis-tools \
-    
+    python3 python3-pip python-pip python-dev r-base r-base-dev
 
 # pip installs
 pip3 install --allow-external mysql-connector-python mysql-connector-python
@@ -46,6 +45,16 @@ pip install s3cmd
 ssh-keygen -t rsa -C "project1@knowice.cs.illinois.edu"
 cat ~/.ssh/id_rsa.pub
 
+
 # config git
 git config --global user.name project1
 git config --global user.email project1@illinois.com
+
+# l1ktools
+pip install numpy
+pip install pandas
+pip install requests
+pip install blessings
+apt-get update && apt-get install -y python-tables
+git clone https://github.com/cmap/l1ktools.git /workspace/LINCS/l1ktools
+ln -s /workspace/LINCS/l1ktools/python/cmap/ /usr/local/lib/python2.7/dist-packages/cmap 
