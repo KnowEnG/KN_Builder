@@ -16,24 +16,44 @@ docker push cblatti3/py3_redis_mysql:0.1
 
 
 ### running single step outside of docker
-#### check for source named SRC
+#### check for updates to remote file for source named SRC
+    - updates file_metadata json and mysql 
 ```
-cd /workspace/apps/P1_source_check/code/
-python SRC.py
-```
-
-#### fetch for alias named ALIAS of source SRC
-```
-cd P1_source_check/data/SRC/ALIAS
-python3 ../../../code/fetch_utilities.py file_metadata.json
+python3 code/check_utilities.py SRC -dp DATA_PATH -ld LOCAL_DIR -myh MYSQL_HOST
 ```
 
-#### table for alias named ALIAS of source SRC
+#### fetch remote files for alias named ALIAS of source SRC
+    - for ontology files, extracts mapping dictionary and imports into redis, 
+        extracts nodes and node_metadata and imports into mysql, updates 
+        file_metadata json and mysql
+    - for data files, creates .rawline. chunks and imports to mysql, updates 
+        file_metadata json and mysql  
+    - for ensembl, imports mysql database, extracts gene mappings into redis, 
+        imports nodes into mysql, updates file_metadata json and mysql
 ```
-cd P1_source_check/data/SRC/ALIAS
-python3 ../../../code/table_utilities.py chunks/SRC.ALIAS.rawfile.1.txt file_metadata.json
+cd DATA_PATH/SRC/ALIAS
+python3 ../../../code/fetch_utilities.py file_metadata.json -dp DATA_PATH \
+    -ld LOCAL_DIR -myh MYSQL_HOST -rh REDIS_HOST
 ```
 
+#### table for chunk CHUNK of alias named ALIAS of source SRC
+    - converts .rawline. file into 11 column description .edge. file to prepare 
+        edges for entity mapping, also created edge and node metadata files as 
+        necessary and sort, uniques them
+```
+cd DATA_PATH/SRC/ALIAS
+python3 ../../../code/table_utilities.py chunks/SRC.ALIAS.rawfile.CHUNK.txt \
+    file_metadata.json -dp DATA_PATH -ld LOCAL_DIR 
+```
+
+#### entity mapping for chunk CHUNK of alias named ALIAS of source SRC
+    - converts .edge. file into 6 column description .conv. file and .status.    
+        file using redis, sorts and uniques .conv. and .edge2line., and inserts
+        .conv., .node_meta., .edge_meta., and .edge2line. file into mysql 
+```
+python3 code/conv_utilities.py DATA_PATH/SRC/ALIASchunks/SRC.ALIAS.edge.CHUNK.txt \
+    -dp DATA_PATH -ld LOCAL_DIR -myh MYSQL_HOST -rh REDIS_HOST
+```
 
 ### running all steps in local mode
 #### setup
@@ -59,6 +79,7 @@ python3 code/setup_utilities.py FETCH LOCAL STEP -dp local_pipe \
     -ld /workspace/apps/KnowNet_Pipeline/ \
     -myh knowcharles.dyndns.org -rh knowcharles.dyndns.org
 ```
+###### 20,462,422 redis keys
 ##### run full setup pipeline without ensembl
 ```
 python3 code/setup_utilities.py CHECK LOCAL PIPELINE -dp local_pipe -ne \
@@ -142,6 +163,10 @@ for i in `ls -d cloud_pipe/*/*/chunks | sed 's#cloud_pipe/##g' | sed 's#/chunks#
 for i in `ls cloud_pipe/*/*/chunks/*.edge.* | sed 's#cloud_pipe/##g' | sed 's#/chunks##g' | sed 's#/#\t#g' | cut -f3  `; do echo $i; python3 code/pipeline_utilities.py MAP CLOUD STEP -c mmaster01.cse.illinois.edu:4400 -cd /storage-pool/blatti/P1_source_check/ -ld /workspace/prototype/P1_source_check/ -dp cloud_pipe -rh knowice.cs.illinois.edu -rp 6380 -p $i; done
 ```
 
+### quick check for completeness
+```
+code/reports/enumerate_files.sh local_pipe/
+```
 
 ### cloud cleanup
 #### when complete, be a good citizen and remove jobs from the cloud
