@@ -200,11 +200,10 @@ class Ensembl(SrcClass):
         if alias == 'arabidopsis_thaliana':
             url = self.url_base_plants
             chdir = '/pub/current/plants/mysql/'
-            chk_file = '/CHECKSUMS'
         else:
             url = self.url_base
             chdir = '/pub/current_mysql/'
-            chk_file = '/CHECKSUMS.gz'
+        chk_file = '/CHECKSUMS'
         ftp = ftplib.FTP(url)
         ftp.login()
         ftp.cwd(chdir)
