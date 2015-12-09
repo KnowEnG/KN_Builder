@@ -302,7 +302,7 @@ class Lincs(SrcClass):
                     continue
                 chksum = line[2]
                 n1_map = line[3]
-                if n1_map == '':
+                if n1_map == '' or 'unmapped' in n1_map:
                     continue
                 n1_map = cf.pretty_name('LINCS_' + n1_map, 6 + len(n1_map))
                 scores = line[4:]
