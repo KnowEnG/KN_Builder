@@ -33,7 +33,7 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=cf.config_args()):
 
     Returns:
     """
-    table_cmds = {'node_meta': 'node_meta.node_id = node_meta.id',
+    table_cmds = {'node_meta': 'node_meta.node_id = node_meta.node_id',
                 'raw_line' : 'raw_line.file_id = raw_line.file_id',
                 'edge2line': 'edge2line.edge_hash = edge2line.edge_hash',
                 'edge_meta': 'edge_meta.edge_hash = edge_meta.edge_hash',
