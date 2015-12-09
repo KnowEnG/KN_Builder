@@ -350,7 +350,8 @@ class Lincs(SrcClass):
         table_file = rawline.replace('rawline','conv')
 
         #static column values
-        et_map = 'LINCS_meta'
+        et_map_list = ['LINCS_perturbagen', 'LINCS_cell_type', \
+                    'LINCS_perturbagen_time', 'LINCS_perturbagen_dose']
         weight = 1
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges:
@@ -369,7 +370,9 @@ class Lincs(SrcClass):
                 time = line[4] + line[5]
                 dose = line[6] + line[7]
                 metadata = [pert, cell, time, dose]
-                for n2_map in metadata:
+                for i in range(0, len(metadata)):
+                    n2_map = metadata[i]
+                    et_map = et_map_list[i]
                     if n2_map == '-666' or n2_map == '':
                         continue
                     hasher = hashlib.md5()
