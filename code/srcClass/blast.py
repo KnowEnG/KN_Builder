@@ -227,8 +227,8 @@ class Blast(SrcClass):
         #static column values
         n1type = 'gene'
         n2type = 'gene'
-        n1hint = 'Ensembl_GeneID'
-        n2hint = 'Ensembl_GeneID'
+        n1hint = 'ENSEMBL_STABLE_ID'
+        n2hint = 'ENSEMBL_STABLE_ID'
         et_hint = 'blastp_homology'
         #node_num = 1
         #info_type = 'synonym'
