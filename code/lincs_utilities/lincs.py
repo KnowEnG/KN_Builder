@@ -304,6 +304,7 @@ class Lincs(SrcClass):
                 n1_map = line[3]
                 if n1_map == '':
                     continue
+                n1_map = cf.pretty_name('LINCS_' + n1_map, 6 + len(n1_map))
                 scores = line[4:]
                 evaluated = [0]*len(scores)
                 for i in range(0, len(scores)):
@@ -348,23 +349,30 @@ class Lincs(SrcClass):
 
         #outfiles
         table_file = rawline.replace('rawline','conv')
+        n_meta_file = rawline.replace('rawline', 'node_meta')
+        node_file = rawline.replace('rawline', 'node')
 
         #static column values
         et_map_list = ['LINCS_perturbagen', 'LINCS_cell_type', \
                     'LINCS_perturbagen_time', 'LINCS_perturbagen_dose']
         weight = 1
         with open(rawline, encoding='utf-8') as infile, \
-            open(table_file, 'w') as edges:
+            open(table_file, 'w') as edges, \
+            open(n_meta_file, 'w') as n_meta, \
+            open(node_file, 'w') as nfile:
             writer = csv.writer(edges, delimiter='\t')
+            n_meta_writer = csv.writer(n_meta, delimiter='\t')
+            n_writer = csv.writer(nfile, delimiter='\t')
             for line in infile:
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:
                     continue
                 chksum = line[2]
                 line = line[3:]
-                n1_map = line[0]
-                if n1_map == 'distil_id':
+                n1 = line[0]
+                if n1 == 'distil_id':
                     continue
+                n1_map = cf.pretty_name('LINCS_' + n1, 6 + len(n1))
                 pert = line[1]
                 cell = line[3]
                 time = line[4] + line[5]
@@ -375,6 +383,7 @@ class Lincs(SrcClass):
                     et_map = et_map_list[i]
                     if n2_map == '-666' or n2_map == '':
                         continue
+                    n2_map = cf.pretty_name('LINCS_' + n2_map, 6 + len(n2_map))
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([n1_map, n2_map, et_map]).encode())
                     e_chksum = hasher.hexdigest()
