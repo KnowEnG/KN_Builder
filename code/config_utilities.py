@@ -43,6 +43,7 @@ DEFAULT_MYSQL_PASS = 'KnowEnG'
 
 DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
 DEFAULT_REDIS_PORT = '6379'
+DEFAULT_REDIS_PASS = 'KnowEnG'
 
 def add_config_args(parser):
     """Add configuation options to command line arguments.
@@ -80,6 +81,8 @@ def add_config_args(parser):
                         default=DEFAULT_REDIS_URL)
     parser.add_argument('-rp', '--redis_port', help='port for Redis db',
                         default=DEFAULT_REDIS_PORT)
+    parser.add_argument('-rps', '--redis_pass', help='password for Redis db',
+                        default=DEFAULT_REDIS_PASS)
     return parser
 
 
