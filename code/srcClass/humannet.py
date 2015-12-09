@@ -14,6 +14,7 @@ from mitab_utilities import table
 import time
 import config_utilities as cf
 import csv
+import hashlib
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -202,7 +203,14 @@ class HumanNet(SrcClass):
         Returns:
         """
         edge_types = ["CE-CC","CE-CX","CE-GT","CE-LC","CE-YH","DM-PI","HS-CC","HS-CX","HS-DC","HS-GN","HS-LC","HS-MS","HS-PG","HS-YH","SC-CC","SC-CX","SC-GT","SC-LC","SC-MS","SC-TS","SC-YH","IntNet"]
-        data = []
+
+        #static column values
+        n1hint = "EntrezGene"
+        n1type = "gene"
+        n1spec = "9606"
+        n2hint = "EntrezGene"
+        n2type = "gene"
+        n2spec = "9606"
 
         #output file
         table_file = rawline.replace('rawline','edge')
@@ -210,29 +218,28 @@ class HumanNet(SrcClass):
         with open(rawline) as infile, \
             open(table_file, 'w') as edges:
             edge_writer = csv.writer(edges, delimiter='\t')
-            numedges = len(edge_types)
-
-            n1hint = "EntrezGene"
-            n1type = "gene"
-            n1species = "human"
-            n2hint = "EntrezGene"
-            n2type = "gene"
-            n2species = "human"
-
             for line in infile:
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:
                     continue
-                line_cksum = line[2]
+                chksm = line[2]
                 n1name = line[3]
                 n2name = line[4]
                 for edge_num in range(len(line[5:])):
                     score = line[edge_num+5]
+                    et_hint = edge_types[edge_num]
                     if(score == 'NA'):
                         continue
-                    else:
-                        edge_writer.writerow([line_cksum, n1name, n1hint, n1type, n1species, n2name, n2hint, n2type, n2species, edge_types[edge_num], score])
-        #return table(rawline, version_dict)
+                    hasher = hashlib.md5()
+                    hasher.update('\t'.join([chksm, n1name, n1hint, n1type, 
+                                             n1spec, n2name, n2hint, n2type,
+                                             n2spec, et_hint, str(score)]).encode())
+                    t_chksum = hasher.hexdigest()
+                    edge_writer.writerow([chksm, n1name, n1hint, n1type, n1spec,
+                                          n2name, n2hint, n2type, n2spec, 
+                                          et_hint, score, t_chksum])
+
+
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a HumanNet
