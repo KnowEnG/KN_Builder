@@ -59,7 +59,6 @@ CREATE TABLE IF NOT EXISTS `node_species` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge_type` (
-  `e_type_id` int(11) NOT NULL AUTO_INCREMENT,
   `et_name` varchar(80) NOT NULL,
   `n1_type` int(11) NOT NULL,
   `n2_type` int(11) NOT NULL,
@@ -68,8 +67,7 @@ CREATE TABLE IF NOT EXISTS `edge_type` (
   `sc_desc` text,
   `sc_best` float DEFAULT NULL,
   `sc_worst` float DEFAULT NULL,
-  PRIMARY KEY (`e_type_id`),
-  UNIQUE KEY `idx_edge_type_et_name` (`et_name`),
+  PRIMARY KEY (`et_name`),
   KEY `n1_type` (`n1_type`),
   KEY `n2_type` (`n2_type`),
   CONSTRAINT `edge_type_ibfk_1` FOREIGN KEY (`n1_type`) REFERENCES `node_type` (`n_type_id`) ON DELETE CASCADE,
@@ -85,13 +83,13 @@ CREATE TABLE IF NOT EXISTS `edge2line`(
 CREATE TABLE IF NOT EXISTS `edge` (
   `n1_id` varchar(128) NOT NULL,
   `n2_id` varchar(128) NOT NULL,
-  `e_type_id` int(11) NOT NULL,
+  `et_name` varchar(80) NOT NULL,
   `weight` float NOT NULL,
   `edge_hash` varchar(40) NOT NULL,
   PRIMARY KEY (`edge_hash`),
   KEY `n1_id` (`n1_id`),
   KEY `n2_id` (`n2_id`),
-  KEY `e_type_id` (`e_type_id`)
+  KEY `et_name` (`et_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge_meta` (
