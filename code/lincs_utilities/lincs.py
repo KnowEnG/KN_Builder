@@ -286,8 +286,6 @@ class Lincs(SrcClass):
         #open mapping files
         map_file = os.path.join('..', 'baseline_gene_expression',
                             'lincs.baseline_gene_expression.json')
-        print(map_file)
-        print(os.getcwd())
         head_file = os.path.join(os.path.dirname(map_file), 'headers.json')
         with open(map_file) as infile:
             lincs_map = json.load(infile)
@@ -378,8 +376,8 @@ class Lincs(SrcClass):
                 n1_map = cf.pretty_name('LINCS_' + n1, 6 + len(n1))
                 pert = line[1]
                 cell = line[3]
-                time = line[4] + line[5]
-                dose = line[6] + line[7]
+                time = line[4] + '_' + line[5]
+                dose = line[6] + '_' + line[7]
                 metadata = [pert, cell, time, dose]
                 n_writer.writerow([n1_map, n1_map])
                 n_meta_writer.writerow([n1_map, info_type, n1])
@@ -388,7 +386,7 @@ class Lincs(SrcClass):
                     et_map = et_map_list[i]
                     if n2 == '-666' or n2 == '':
                         continue
-                    n2_map = cf.pretty_name('LINCS_' + n2, 6 + len(n2))
+                    n2_map = 'LINCS_' + n2
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([n1_map, n2_map, et_map]).encode())
                     e_chksum = hasher.hexdigest()
