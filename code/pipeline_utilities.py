@@ -301,7 +301,6 @@ def run_local_conv(args):
             "{0}, does not have data directory: {1}".format(args.step_parameters, local_src_dir))
             return -1
         src_names = [args.step_parameters]
-
     for src_name in src_names:
         if src_name + '.py' not in srcs:
             continue
@@ -317,7 +316,9 @@ def run_local_conv(args):
 
             os.chdir(alias_dir)
             for edge_name in sorted(os.listdir(chunkdir)):
-                if ".edge." not in edge_name:
+                if ".edge." not in edge_name and src_name != 'lincs':
+                    continue
+                if '.conv' not in edge_name and src_name == 'lincs':
                     continue
 
                 edgefile = os.path.join("chunks", edge_name)
