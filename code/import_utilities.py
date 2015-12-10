@@ -143,8 +143,6 @@ def import_edge(edgefile, args=cf.config_args()):
             filename = edgefile.replace('conv', table)
         if not os.path.isfile(filename):
             continue
-        if table == 'node_meta':
-            ld_cmd = '(@dummy, node_id, info_type, info_desc)'
         import_file(filename, table, ld_cmd, dup_cmd, args)
 
 
@@ -165,7 +163,7 @@ def import_nodemeta(nmfile, args=cf.config_args()):
     """
     table = 'node_meta'
     dup_cmd = 'node_meta.node_id = node_meta.node_id'
-    ld_cmd = '(@dummy, node_id, info_type, info_desc)'
+    ld_cmd = ''
     import_file(nmfile, table, ld_cmd, dup_cmd, args)
 
 def import_pnode(filename, args=cf.config_args()):
