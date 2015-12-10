@@ -277,8 +277,8 @@ class Msigdb(SrcClass):
                 n1_kn_id = cf.pretty_name('msig_' + n1_chksum)
                 n1_kn_name = cf.pretty_name('msig_' + n1_orig_name)
                 n1hint = n1_kn_name
-                n_meta_writer.writerow([chksm, n1_kn_id, info_type1, n1_orig_name])
-                n_meta_writer.writerow([chksm, n1_kn_id, info_type2, n1_url])
+                n_meta_writer.writerow([n1_kn_id, info_type1, n1_orig_name])
+                n_meta_writer.writerow([n1_kn_id, info_type2, n1_url])
                 for n2_id in raw[2:]:
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1_kn_id, n1hint, n1type, n1spec,\
