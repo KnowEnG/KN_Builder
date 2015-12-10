@@ -384,7 +384,7 @@ class Lincs(SrcClass):
                 for i in range(0, len(metadata)):
                     n2 = metadata[i]
                     et_map = et_map_list[i]
-                    if n2 == '-666' or n2 == '':
+                    if n2 == '-666' or n2 == '-666.0' or n2 == '':
                         continue
                     n2_map = 'LINCS_' + n2
                     hasher = hashlib.md5()
