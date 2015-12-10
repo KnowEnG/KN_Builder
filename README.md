@@ -17,19 +17,19 @@ docker push cblatti3/py3_redis_mysql:0.1
 
 ### running single step outside of docker
 #### check for updates to remote file for source named SRC
-    - updates file_metadata json and mysql 
+  *- updates file_metadata json and mysql*
 ```
 python3 code/check_utilities.py SRC -dp DATA_PATH -ld LOCAL_DIR -myh MYSQL_HOST
 ```
 
 #### fetch remote files for alias named ALIAS of source SRC
-    - for ontology files, extracts mapping dictionary and imports into redis, 
-        extracts nodes and node_metadata and imports into mysql, updates 
+  *- for ontology files, extracts mapping dictionary and imports into redis,
+        extracts nodes and node_metadata and imports into mysql, updates
         file_metadata json and mysql
-    - for data files, creates .rawline. chunks and imports to mysql, updates 
-        file_metadata json and mysql  
-    - for ensembl, imports mysql database, extracts gene mappings into redis, 
-        imports nodes into mysql, updates file_metadata json and mysql
+  - for data files, creates .rawline. chunks and imports to mysql, updates
+        file_metadata json and mysql
+  - for ensembl, imports mysql database, extracts gene mappings into redis,
+        imports nodes into mysql, updates file_metadata json and mysql*
 ```
 cd DATA_PATH/SRC/ALIAS
 python3 ../../../code/fetch_utilities.py file_metadata.json -dp DATA_PATH \
@@ -37,19 +37,19 @@ python3 ../../../code/fetch_utilities.py file_metadata.json -dp DATA_PATH \
 ```
 
 #### table for chunk CHUNK of alias named ALIAS of source SRC
-    - converts .rawline. file into 11 column description .edge. file to prepare 
-        edges for entity mapping, also created edge and node metadata files as 
+    - converts .rawline. file into 11 column description .edge. file to prepare
+        edges for entity mapping, also created edge and node metadata files as
         necessary and sort, uniques them
 ```
 cd DATA_PATH/SRC/ALIAS
 python3 ../../../code/table_utilities.py chunks/SRC.ALIAS.rawfile.CHUNK.txt \
-    file_metadata.json -dp DATA_PATH -ld LOCAL_DIR 
+    file_metadata.json -dp DATA_PATH -ld LOCAL_DIR
 ```
 
 #### entity mapping for chunk CHUNK of alias named ALIAS of source SRC
-    - converts .edge. file into 6 column description .conv. file and .status.    
+    - converts .edge. file into 6 column description .conv. file and .status.
         file using redis, sorts and uniques .conv. and .edge2line., and inserts
-        .conv., .node_meta., .edge_meta., and .edge2line. file into mysql 
+        .conv., .node_meta., .edge_meta., and .edge2line. file into mysql
 ```
 python3 code/conv_utilities.py DATA_PATH/SRC/ALIASchunks/SRC.ALIAS.edge.CHUNK.txt \
     -dp DATA_PATH -ld LOCAL_DIR -myh MYSQL_HOST -rh REDIS_HOST
@@ -60,12 +60,12 @@ python3 code/conv_utilities.py DATA_PATH/SRC/ALIASchunks/SRC.ALIAS.edge.CHUNK.tx
 may want to
 clear out mysql:
 ```
-mysql -hknowcharles.dyndns.org --port 3306 -uroot -pKnowEnG KnowNet \
+mysql -h MYSQL_HOST --port 3306 -uroot -pKnowEnG KnowNet \
     --execute "drop database KnowNet;"
 ```
 clear out redis:
 ```
-redis-cli -h knowcharles.dyndns.org FLUSHDB
+redis-cli -h REDIS_HOST -a KnowEnG FLUSHDB
 ```
 ##### check for remote sources updates
 ```
