@@ -19,7 +19,7 @@ chunk_sz = 2000
 
 count = 0
 with open(tsv_file, 'w') as outfile:
-    writer = csv.writer(outfile, delimiter='\t')
+    writer = csv.writer(outfile, delimiter='\t', lineterminator='\n')
     GCTObject = gct.GCT(gctx_file)
     GCTObject.read(col_inds=range(0, 1))
 

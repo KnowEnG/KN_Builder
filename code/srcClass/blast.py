@@ -239,7 +239,7 @@ class Blast(SrcClass):
 
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges:
-            edge_writer = csv.writer(edges, delimiter='\t')
+            edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
             for line in infile:
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:

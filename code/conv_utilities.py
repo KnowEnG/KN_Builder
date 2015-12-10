@@ -53,8 +53,8 @@ def main(edgefile, args=cf.config_args()):
         open(conv_file, 'w') as e_map, \
         open(status_file, 'w') as e_stat:
         reader = csv.reader(infile, delimiter = '\t')
-        writer = csv.writer(e_map, delimiter = '\t')
-        s_writer = csv.writer(e_stat, delimiter = '\t')
+        writer = csv.writer(e_map, delimiter = '\t', lineterminator='\n')
+        s_writer = csv.writer(e_stat, delimiter = '\t', lineterminator='\n')
         for line in reader:
             (n1, hint, ntype, taxid) = line[1:5]
             if ntype == 'gene':
@@ -66,6 +66,7 @@ def main(edgefile, args=cf.config_args()):
                 n2_map = ru.conv_gene(rdb, n2, hint, taxid)
             else:
                 n2_map = n2
+ #           print("\t".join([taxid, hint, n1, n1_map, n2, n2_map]))
             chksum = line[0]
             et_map = line[9]
             weight = line[10]
@@ -105,7 +106,7 @@ def map_list(namefile, args=cf.config_args()):
     with open(namefile, 'r') as infile, \
         open(os.path.splitext(namefile)[0] + '.mapped.txt', 'w') as n_map:
         reader = csv.reader(infile, delimiter = '\t')
-        writer = csv.writer(n_map, delimiter = '\t')
+        writer = csv.writer(n_map, delimiter = '\t', lineterminator='\n')
         for line in reader:
             orig = line[0]
             mapped = ru.conv_gene(rdb, orig, args.source_hint, args.taxon)

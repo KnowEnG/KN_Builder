@@ -234,15 +234,15 @@ class Kegg(SrcClass):
         node_file = filename.replace('rawline', 'node')
         if not self.is_map(alias):
             return map_dict
-            
-        if alias == 'pathway':    
+
+        if alias == 'pathway':
             with open(filename, 'rb') as map_file, \
                 open(n_meta_file, 'w') as n_meta, \
                 open(node_file, 'w') as nfile:
                 reader = csv.reader((line.decode('utf-8') for line in map_file),
                                     delimiter='\t')
-                n_meta_writer = csv.writer(n_meta, delimiter='\t')
-                n_writer = csv.writer(nfile, delimiter='\t')
+                n_meta_writer = csv.writer(n_meta, delimiter='\t', lineterminator='\n')
+                n_writer = csv.writer(nfile, delimiter='\t', lineterminator='\n')
                 for line in reader:
                     chksm = line[2]
                     orig_id = line[3].strip()
@@ -257,13 +257,13 @@ class Kegg(SrcClass):
             outfile = node_file.replace('node','unique_node')
             tu.csu(node_file, outfile)
             outfile = n_meta_file.replace('node_meta','unique_node_meta')
-            tu.csu(n_meta_file, outfile)       
+            tu.csu(n_meta_file, outfile)
 
         else:
             with open(filename, 'rb') as map_file:
                 reader = csv.reader((line.decode('utf-8') for line in map_file),
                                     delimiter='\t')
-                for line in reader:                    
+                for line in reader:
                     chksm = line[2]
                     orig_id = line[3].strip()
                     orig_name = line[4].strip()
@@ -320,7 +320,7 @@ class Kegg(SrcClass):
 
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges:
-            edge_writer = csv.writer(edges, delimiter='\t')
+            edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
             for line in infile:
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:

@@ -217,8 +217,8 @@ class Go(SrcClass):
             open(n_meta_file, 'w') as n_meta, \
             open(node_file, 'w') as nfile:
             reader = csv.reader(infile, delimiter='\t')
-            n_meta_writer = csv.writer(n_meta, delimiter='\t')
-            n_writer = csv.writer(nfile, delimiter='\t')
+            n_meta_writer = csv.writer(n_meta, delimiter='\t', lineterminator='\n')
+            n_writer = csv.writer(nfile, delimiter='\t', lineterminator='\n')
             for line in reader:
                 chksm = line[2]
                 raw = line[3]
@@ -298,8 +298,8 @@ class Go(SrcClass):
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
             open(e_meta_file, 'w') as e_meta:
-            edge_writer = csv.writer(edges, delimiter='\t')
-            e_meta_writer = csv.writer(e_meta, delimiter='\t')
+            edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
+            e_meta_writer = csv.writer(e_meta, delimiter='\t', lineterminator='\n')
             for line in infile:
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:

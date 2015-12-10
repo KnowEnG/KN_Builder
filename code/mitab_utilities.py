@@ -63,8 +63,8 @@ def table(rawline, version_dict):
     with open(rawline, encoding='utf-8') as infile, \
         open(table_file, 'w') as edges,\
         open(e_meta_file, 'w') as e_meta:
-        edge_writer = csv.writer(edges, delimiter='\t')
-        e_meta_writer = csv.writer(e_meta, delimiter='\t')
+        edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
+        e_meta_writer = csv.writer(e_meta, delimiter='\t', lineterminator='\n')
         for line in infile:
             line = line.replace('"', '').strip().split('\t')
             if len(line) == 1:
