@@ -30,28 +30,28 @@ reactome_hierarchy	2	2	0	parent-->child relationship between pathways	Binary val
 go_hierarchy	2	2	0	relationship between go terms	Binary value indicating relationship exists	1	1
 blastp_homology	1	1	1	protein sequence similarity as measured by basic local alignment search tool 	negative log 10 of E-value, expected number of local alignments with a given score that would be found in random sequences of the same length as the query and database	100	2
 pfam_domains	2	1	0	Pfam protein domains found in protein sequences as scored by HMMER	negative log 10 of E-value, expected number of local alignments with a given score that would be found in random sequences of the same length as the query and database	100	2
-hn_CE_CC	2	1	0	Co-citation of worm gene
-hn_CE_CX	2	1	0	Co-expression among worm genes
-hn_CE_GT	2	1	0	Worm genetic interactions
-hn_CE_LC	2	1	0	Literature curated worm protein physical interactions
-hn_CE_YH	2	1	0	High-throughput yeast 2-hybrid assays among worm genes
-hn_DM_PI	2	1	0	Fly protein physical interactions
-hn_HS_CC	2	1	0	Co-citation of human genes
-hn_HS_CX	2	1	0	Co-expression among human genes
-hn_HS_DC	2	1	0	Co-occurrence of domains among human proteins
-hn_HS_GN	2	1	0	Gene neighbourhoods of bacterial and archaeal orthologs of human genes
-hn_HS_LC	2	1	0	Literature curated human protein physical interactions
-hn_HS_MS	2	1	0	human protein complexes from affinity purification/mass spectrometry
-hn_HS_PG	2	1	0	Co-inheritance of bacterial and archaeal orthologs of human genes
-hn_HS_YH	2	1	0	High-throughput yeast 2-hybrid assays among human genes
-hn_SC_CC	2	1	0	Co-citation of yeast genes
-hn_SC_CX	2	1	0	Co-expression among yeast genes
-hn_SC_GT	2	1	0	Yeast genetic interactions
-hn_SC_LC	2	1	0	Literature curated yeast protein physical interactions
-hn_SC_MS	2	1	0	Yeast protein complexes from affinity purification/mass spectrometry
-hn_SC_TS	2	1	0	Yeast protein interactions inferred from tertiary structures of complexes
-hn_SC_YH	2	1	0	High-throughput yeast 2-hybrid assays among yeast genes
-hn_IntNet	2	1	0	Integrated network (HumanNet)
+hn_CE_CC	2	1	0	Co-citation of worm genes	log likelihood value	10	0
+hn_CE_CX	2	1	0	Co-expression among worm genes	log likelihood value	10	0
+hn_CE_GT	2	1	0	Worm genetic interactions	log likelihood value	10	0
+hn_CE_LC	2	1	0	Literature curated worm protein physical interactions	log likelihood value	10	0
+hn_CE_YH	2	1	0	High-throughput yeast 2-hybrid assays among worm genes	log likelihood value	10	0
+hn_DM_PI	2	1	0	Fly protein physical interactions	log likelihood value	10	0
+hn_HS_CC	2	1	0	Co-citation of human genes	log likelihood value	10	0
+hn_HS_CX	2	1	0	Co-expression among human genes	log likelihood value	10	0
+hn_HS_DC	2	1	0	Co-occurrence of domains among human proteins	log likelihood value	10	0
+hn_HS_GN	2	1	0	Gene neighbourhoods of bacterial and archaeal orthologs of human genes	log likelihood value	10	0
+hn_HS_LC	2	1	0	Literature curated human protein physical interactions	log likelihood value	10	0
+hn_HS_MS	2	1	0	human protein complexes from affinity purification/mass spectrometry	log likelihood value	10	0
+hn_HS_PG	2	1	0	Co-inheritance of bacterial and archaeal orthologs of human genes	log likelihood value	10	0
+hn_HS_YH	2	1	0	High-throughput yeast 2-hybrid assays among human genes	log likelihood value	10	0
+hn_SC_CC	2	1	0	Co-citation of yeast genes	log likelihood value	10	0
+hn_SC_CX	2	1	0	Co-expression among yeast genes	log likelihood value	10	0
+hn_SC_GT	2	1	0	Yeast genetic interactions	log likelihood value	10	0
+hn_SC_LC	2	1	0	Literature curated yeast protein physical interactions	log likelihood value	10	0
+hn_SC_MS	2	1	0	Yeast protein complexes from affinity purification/mass spectrometry	log likelihood value	10	0
+hn_SC_TS	2	1	0	Yeast protein interactions inferred from tertiary structures of complexes	log likelihood value	10	0
+hn_SC_YH	2	1	0	High-throughput yeast 2-hybrid assays among yeast genes	log likelihood value	10	0
+hn_IntNet	2	1	0	Integrated network (HumanNet)	log likelihood value	10	0
 LINCS_up_signature	2	1	0	Genes which were shown to be differential up regulated after treatment with a given perturbagen	Robust z-scores for each profile relative to population control	100	2.5
 LINCS_down_signature	2	1	0	Genes which were shown to be differential down regulated after treatment with a given perturbagen	Robust z-scores for each profile relative to population control	100	2.5
 LINCS_cell_type	2	2	0	Cell type from LINCS experiment	binary value	1	1
