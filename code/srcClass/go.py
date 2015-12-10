@@ -240,12 +240,12 @@ class Go(SrcClass):
                     kn_name = cf.pretty_name('go_' + orig_name)
                     term_map[orig_id] = kn_id + '::' + kn_name
                     n_writer.writerow([kn_id, kn_name])
-                    n_meta_writer.writerow([chksm, kn_id, info_type, orig_name])
-                    n_meta_writer.writerow([chksm, kn_id, info_type, orig_id])
+                    n_meta_writer.writerow([kn_id, info_type, orig_name])
+                    n_meta_writer.writerow([kn_id, info_type, orig_id])
                 if raw.startswith('alt_id: '):
                     alt_id = raw[8:].strip()
                     term_map[alt_id] = kn_id + '::' + kn_name
-                    n_meta_writer.writerow([chksm, kn_id, info_type, alt_id])
+                    n_meta_writer.writerow([kn_id, info_type, alt_id])
         outfile = node_file.replace('node','unique_node')
         tu.csu(node_file, outfile)
         outfile = n_meta_file.replace('node_meta','unique_node_meta')
