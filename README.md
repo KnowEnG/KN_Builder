@@ -65,7 +65,7 @@ may first want to
 clear out mysql:
 ```
 KNP_CMD="mysql -h $KNP_MYSQL_HOST --port 3306 -uroot -pKnowEnG KnowNet \
-    --execute "drop database KnowNet;"
+    --execute \"drop database KnowNet;\""
 echo $KNP_CMD
 ```
 clear out redis:
@@ -86,7 +86,6 @@ KNP_CMD="python3 code/setup_utilities.py FETCH LOCAL STEP -dp $KNP_DATA_PATH \
     -ld $KNP_LOCAL_DIR -myh $KNP_MYSQL_HOST -rh $KNP_REDIS_HOST"
 echo $KNP_CMD
 ```
-###### 20,462,422 redis keys
 ##### run full setup pipeline without redoing ensembl
 ```
 KNP_CMD="python3 code/setup_utilities.py CHECK LOCAL PIPELINE -dp $KNP_DATA_PATH -ne \
@@ -195,7 +194,7 @@ done;
 ## checks and reports
 ### quick check for completeness
 ```
-code/reports/enumerate_files.sh local_pipe/
+code/reports/enumerate_files.sh local_pipe/ COUNTS
 ```
 
 
