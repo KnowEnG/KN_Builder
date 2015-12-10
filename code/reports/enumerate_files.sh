@@ -15,6 +15,8 @@ KNP_DATA_PATH=$1
 VERBOSE=$2
 
 FILE_CTR=0
+echo -e "tnum\ttype\tsnum\tsource\tfile\tempty\ttime\tlines"
+
 for KNP_FILE_TYPE in "*/file_metadata.json" "*/*.*.txt" "*json" "*/*json" \
     "*/*rawline*" "*/*.node_meta.*" "*/chunks/*rawline*" \
     "*/chunks/*.node_meta.*" "*/chunks/*.edge_meta.*" \
@@ -57,7 +59,7 @@ for KNP_FILE_TYPE in "*/file_metadata.json" "*/*.*.txt" "*json" "*/*json" \
                 finish=`find $KNP_DATA_PATH/$KNP_SRC/$KNP_FILE_TYPE -type f -exec ls -lt {} + | head -n 1 | awk {'print $6, $7,$8'}`
                 mins=$(( $(date -d "$finish" +"%s") / 60 - $(date -d "$start" +"%s") / 60 ))
                 if [ "$VERBOSE" == "COUNTS" ]; then
-                    lines=`cat $KNP_DATA_PATH/*/$KNP_FILE_TYPE | wc -l`
+                    lines=`cat $KNP_DATA_PATH/$KNP_SRC/$KNP_FILE_TYPE | wc -l`
                 fi
             fi
             break
