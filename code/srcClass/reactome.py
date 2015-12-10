@@ -292,7 +292,7 @@ class Reactome(SrcClass):
                     t_chksum = hasher.hexdigest()
                     edge_writer.writerow([chksm, n1_id, n1hint, n1type, n1spec, \
                         n2_id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
-                    n_meta_writer.writerow([chksm, n1_id, info_type1, n1_link])
+                    n_meta_writer.writerow([n1_id, info_type1, n1_link])
                     e_meta_writer.writerow([chksm, info_type2, e_meta])
             outfile = e_meta_file.replace('edge_meta','unique_edge_meta')
             tu.csu(e_meta_file, outfile)
