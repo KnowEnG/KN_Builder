@@ -269,8 +269,8 @@ class SrcClass(object):
             open(node_file, 'w') as nfile:
             reader = csv.reader((line.decode('utf-8') for line in map_file),
                 delimiter='\t')
-            n_meta_writer = csv.writer(n_meta, delimiter='\t')
-            n_writer = csv.writer(nfile, delimiter='\t')
+            n_meta_writer = csv.writer(n_meta, delimiter='\t', lineterminator='\n')
+            n_writer = csv.writer(nfile, delimiter='\t', lineterminator='\n')
             for line in reader:
                 chksm = line[2]
                 orig_id = line[key_col].strip()

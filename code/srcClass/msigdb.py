@@ -252,7 +252,7 @@ class Msigdb(SrcClass):
         n2type = 'gene'
         n2spec = '9606'  # assumption of human genes is occasionally incorrect
         n2hint = 'EntrezGene'
-        et_hint = source + '_' + alias
+        et_hint = source + '_' + alias.replace(".","_")
         score = 1
 
         info_type1 = 'alt_alias'
@@ -261,8 +261,8 @@ class Msigdb(SrcClass):
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
             open(n_meta_file, 'w') as n_meta:
-            edge_writer = csv.writer(edges, delimiter='\t')
-            n_meta_writer = csv.writer(n_meta, delimiter='\t')
+            edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
+            n_meta_writer = csv.writer(n_meta, delimiter='\t', lineterminator='\n')
             for line in infile:
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:

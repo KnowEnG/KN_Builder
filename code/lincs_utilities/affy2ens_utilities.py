@@ -147,7 +147,7 @@ if __name__ == '__main__':
             erev[ens].append(symbol)
 
     with open(probemap_file, 'w') as out:
-        writer = csv.writer(out, delimiter = '\t')
+        writer = csv.writer(out, delimiter = '\t', lineterminator='\n')
         writer.writerow(['probe_id', 'gene_symbol', 'ens_gene', 'category',
                         'synonyms'])
         map_dict = dict()

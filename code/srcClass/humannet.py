@@ -180,9 +180,14 @@ class HumanNet(SrcClass):
         """Uses the provided raw_lines file to produce a 2table_edge file, an
         edge_meta file, and a node_meta file (only for property nodes).
 
-        File format: [file] [line_chksum] [gene1] [gene2] [CE-CC] [CE-CX] [CE-GT] [CE-LC] [CE-YH] [DM-PI] [HS-CC] [HS-CX] [HS-DC] [HS-GN] [HS-LC] [HS-MS] [HS-PG] [HS-YH] [SC-CC] [SC-CX] [SC-GT] [SC-LC] [SC-MS] [SC-TS] [SC-YH] [IntNet]
+        File format: [file] [line_chksum] [gene1] [gene2] [CE-CC] [CE-CX] 
+            [CE-GT] [CE-LC] [CE-YH] [DM-PI] [HS-CC] [HS-CX] [HS-DC] [HS-GN] 
+            [HS-LC] [HS-MS] [HS-PG] [HS-YH] [SC-CC] [SC-CX] [SC-GT] [SC-LC] 
+            [SC-MS] [SC-TS] [SC-YH] [IntNet]
 
-        We want to convert this to the format: [line_chksum] [n1name] [n1hint] [n1type] [n1species] [n2name] [n2hint] [n2type] [n2species] [edgetype_hint] [score]
+        We want to convert this to the format: [line_chksum] [n1name] [n1hint] 
+            [n1type] [n1species] [n2name] [n2hint] [n2type] [n2species] 
+            [edgetype_hint] [score]
 
         This returns noting but produces the 2table formatted files from the
         provided raw_lines file:
@@ -202,7 +207,11 @@ class HumanNet(SrcClass):
 
         Returns:
         """
-        edge_types = ["CE-CC","CE-CX","CE-GT","CE-LC","CE-YH","DM-PI","HS-CC","HS-CX","HS-DC","HS-GN","HS-LC","HS-MS","HS-PG","HS-YH","SC-CC","SC-CX","SC-GT","SC-LC","SC-MS","SC-TS","SC-YH","IntNet"]
+        edge_types = ["hn_CE_CC","hn_CE_CX","hn_CE_GT","hn_CE_LC","hn_CE_YH",
+                      "hn_DM_PI","hn_HS_CC","hn_HS_CX","hn_HS_DC","hn_HS_GN",
+                      "hn_HS_LC","hn_HS_MS","hn_HS_PG","hn_HS_YH","hn_SC_CC",
+                      "hn_SC_CX","hn_SC_GT","hn_SC_LC","hn_SC_MS","hn_SC_TS",
+                      "hn_SC_YH","hn_IntNet"]
 
         #static column values
         n1hint = "EntrezGene"
@@ -217,7 +226,7 @@ class HumanNet(SrcClass):
 
         with open(rawline) as infile, \
             open(table_file, 'w') as edges:
-            edge_writer = csv.writer(edges, delimiter='\t')
+            edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
             for line in infile:
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:
