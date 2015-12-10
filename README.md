@@ -194,7 +194,7 @@ done;
 ## checks and reports
 ### quick check for completeness
 ```
-code/reports/enumerate_files.sh local_pipe/
+code/reports/enumerate_files.sh local_pipe/ COUNTS
 ```
 
 
