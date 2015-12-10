@@ -376,8 +376,14 @@ class Lincs(SrcClass):
                 n1_map = cf.pretty_name('LINCS_' + n1, 6 + len(n1))
                 pert = line[1]
                 cell = line[3]
-                time = line[4] + '_' + line[5]
-                dose = line[6] + '_' + line[7]
+                if line[5] == '-666' or line[5] == '-666.0' or line[5] == '':
+                    time = line[4]
+                else:
+                    time = line[4] + '_' + line[5]
+                if line[7] == '-666' or line[7] == '-666.0' or line[7] == '':
+                    dose = line[6]
+                else:
+                    dose = line[6] + '_' + line[7]
                 metadata = [pert, cell, time, dose]
                 n_writer.writerow([n1_map, n1_map])
                 n_meta_writer.writerow([n1_map, info_type, n1])
