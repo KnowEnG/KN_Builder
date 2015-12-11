@@ -42,6 +42,8 @@ def main(edgefile, args=cf.config_args()):
     Returns:
     """
     if 'lincs.level4' in edgefile or 'lincs.exp_meta' in edgefile:
+        if os.path.isfile(edgefile.replace('conv', 'node')):
+            iu.import_pnode(edgefile.replace('conv', 'node'), args)
         iu.import_edge(edgefile, args)
         return
     rdb = ru.get_database(args)
