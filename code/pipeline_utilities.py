@@ -114,7 +114,8 @@ def run_local_check(args):
         local_src_py = os.path.join(src_code_dir, args.step_parameters + '.py')
         if not os.path.exists(local_src_py):
             print("ERROR: source specified with --step_parameters (-p) option, "
-            "{0}, does not have srcClass: {1}".format(args.step_parameters, local_src_py))
+                  "{0}, does not have srcClass: {1}".format(args.step_parameters, 
+                                                            local_src_py))
             return -1
         src_names = [args.step_parameters + '.py']
 
@@ -171,7 +172,8 @@ def run_local_fetch(args):
         local_src_dir = os.path.join(local_data_dir, args.step_parameters)
         if not os.path.exists(local_src_dir):
             print("ERROR: source specified with --step_parameters (-p) option, "
-            "{0}, does not have data directory: {1}".format(args.step_parameters, local_src_dir))
+                  "{0}, does not have data directory: {1}".format(args.step_parameters, 
+                                                                  local_src_dir))
             return -1
         src_names = [args.step_parameters]
 
@@ -230,7 +232,8 @@ def run_local_table(args):
         local_src_dir = os.path.join(local_data_dir, args.step_parameters)
         if not os.path.exists(local_src_dir):
             print("ERROR: source specified with --step_parameters (-p) option, "
-            "{0}, does not have data directory: {1}".format(args.step_parameters, local_src_dir))
+                  "{0}, does not have data directory: {1}".format(args.step_parameters, 
+                                                                  local_src_dir))
             return -1
         src_names = [args.step_parameters]
 
@@ -298,7 +301,8 @@ def run_local_conv(args):
         local_src_dir = os.path.join(local_data_dir, args.step_parameters)
         if not os.path.exists(local_src_dir):
             print("ERROR: source specified with --step_parameters (-p) option, "
-            "{0}, does not have data directory: {1}".format(args.step_parameters, local_src_dir))
+                  "{0}, does not have data directory: {1}".format(args.step_parameters, 
+                                                                  local_src_dir))
             return -1
         src_names = [args.step_parameters]
     for src_name in src_names:
@@ -521,7 +525,7 @@ def run_cloud_fetch(args):
     local_src_dir = os.path.join(args.local_dir, args.data_path, src)
     if not os.path.exists(local_src_dir):
         print("ERROR: source specified with --step_parameters (-p) option, "
-            "{0}, does not have data directory: {1}".format(src, local_src_dir))
+              "{0}, does not have data directory: {1}".format(src, local_src_dir))
         return -1
 
     ctr = 0
@@ -578,7 +582,7 @@ def run_cloud_table(args):
     local_alias_dir = os.path.join(args.local_dir, args.data_path, alias_path)
     if not os.path.exists(local_alias_dir):
         print("ERROR: 'source,alias' specified with --step_parameters (-p) "
-            "option, {0}, does not have data directory: {1}".format(args.step_parameters,
+              "option, {0}, does not have data directory: {1}".format(args.step_parameters,
                                                                    local_alias_dir))
         return -1
 
@@ -676,7 +680,7 @@ def run_cloud_conv(args):
 
     if not os.path.exists(local_edgefile):
         print(("ERROR: 'edgefile' specified with --step_parameters (-p) option,"
-                " {0}, does not exist: {1}").format(args.step_parameters, local_edgefile))
+               " {0}, does not exist: {1}").format(args.step_parameters, local_edgefile))
         return -1
 
     ctr = 0

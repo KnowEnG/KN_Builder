@@ -10,9 +10,7 @@ Functions:
     main: runs compare_versions (see utilities.py) on a Pfam object
 """
 from check_utilities import SrcClass, compare_versions
-import urllib.request
 import re
-import time
 import os
 import json
 import csv
@@ -59,8 +57,8 @@ class Pfam(SrcClass):
             "Cele235": "Caenorhabditis elegans"
         }
         super(Pfam, self).__init__(name, url_base, aliases, args)
-        self.sc_max =  100  # may want to load these
-        self.sc_min =  2 # may want to load these
+        self.sc_max = 100  # may want to load these
+        self.sc_min = 2 # may want to load these
 
     def get_source_version(self, alias):
         """Return the release version of the remote pfam:alias.
@@ -208,9 +206,9 @@ class Pfam(SrcClass):
         """
 
         #outfiles
-        table_file = rawline.replace('rawline','edge')
-        #n_meta_file = rawline.replace('rawline','node_meta')
-        #e_meta_file = rawline.replace('rawline','edge_meta')
+        table_file = rawline.replace('rawline', 'edge')
+        #n_meta_file = rawline.replace('rawline', 'node_meta')
+        #e_meta_file = rawline.replace('rawline', 'edge_meta')
 
         #static column values
         n1type = 'property'
@@ -218,9 +216,9 @@ class Pfam(SrcClass):
         n1hint = 'Pfam/Family'
         n2hint = 'UniProt/Ensembl_GeneID'
         et_hint = 'pfam_domains'
-       
+
         n1spec = '0'
-        
+
         ###Map the file name
         species = (os.path.join('..', '..', 'species', 'species_map',\
                     'species.species_map.json'))
@@ -228,7 +226,7 @@ class Pfam(SrcClass):
             species_map = json.load(infile)
         n2spec = species_map.get(version_dict['alias_info'], \
                     "unmapped:unsupported-species")
-                    
+
 
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges:
@@ -239,32 +237,32 @@ class Pfam(SrcClass):
                     continue
                 chksm = line[2]
                 raw = line[3:]
-                
+
                 # skip commented lines
                 comment_match = re.match('#', raw[0])
                 if comment_match is not None:
                     continue
-                
-                n1 = raw[0]
-                n2 = raw[2]
+
+                n1orig = raw[0]
+                n2orig = raw[2]
                 evalue = raw[4]
                 evalue = float(evalue)
                 score = self.sc_min
-                if(evalue == 0.0):
+                if evalue == 0.0:
                     score = self.sc_max
-                if(evalue > 0.0):
-                    score = round(-1.0*math.log10(evalue),4)
-                if(score > self.sc_max):
+                if evalue > 0.0:
+                    score = round(-1.0*math.log10(evalue), 4)
+                if score > self.sc_max:
                     score = self.sc_max
-                if(score < self.sc_min):
+                if score < self.sc_min:
                     score = self.sc_min
 
                 hasher = hashlib.md5()
-                hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                    n2, n2hint, n2type, n2spec, et_hint, str(score)]).encode())
+                hasher.update('\t'.join([chksm, n1orig, n1hint, n1type, n1spec,\
+                    n2orig, n2hint, n2type, n2spec, et_hint, str(score)]).encode())
                 t_chksum = hasher.hexdigest()
-                edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                        n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
+                edge_writer.writerow([chksm, n1orig, n1hint, n1type, n1spec, \
+                        n2orig, n2hint, n2type, n2spec, et_hint, score, t_chksum])
 
 
 if __name__ == "__main__":

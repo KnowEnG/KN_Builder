@@ -10,8 +10,6 @@ Functions:
     main: runs compare_versions (see utilities.py) on a Blast object
 """
 from check_utilities import SrcClass, compare_versions
-import os
-import json
 import csv
 import hashlib
 import math
@@ -69,8 +67,8 @@ class Blast(SrcClass):
                    "Scer64_Scer64": "4932_4932",
                    "Atha10_Atha10": "3702_3702"}
         super(Blast, self).__init__(name, url_base, aliases, args)
-        self.sc_max =  100  # may want to load these
-        self.sc_min =  2 # may want to load these
+        self.sc_max = 100  # may want to load these
+        self.sc_min = 2 # may want to load these
 
     def get_source_version(self, alias):
         """Return the release version of the remote blast:alias.
@@ -220,9 +218,9 @@ class Blast(SrcClass):
         """
 
         #outfiles
-        table_file = rawline.replace('rawline','edge')
-        #n_meta_file = rawline.replace('rawline','node_meta')
-        #e_meta_file = rawline.replace('rawline','edge_meta')
+        table_file = rawline.replace('rawline', 'edge')
+        #n_meta_file = rawline.replace('rawline', 'node_meta')
+        #e_meta_file = rawline.replace('rawline', 'edge_meta')
 
         #static column values
         n1type = 'gene'
@@ -246,26 +244,26 @@ class Blast(SrcClass):
                     continue
                 chksm = line[2]
                 raw = line[3:]
-                n1 = raw[0]
-                n2 = raw[1]
+                n1id = raw[0]
+                n2id = raw[1]
                 evalue = raw[10]
                 evalue = float(evalue)
                 score = self.sc_min
-                if(evalue == 0.0):
+                if evalue == 0.0:
                     score = self.sc_max
-                if(evalue > 0.0):
-                    score = round(-1.0*math.log10(evalue),4)
-                if(score > self.sc_max):
+                if evalue > 0.0:
+                    score = round(-1.0*math.log10(evalue), 4)
+                if score > self.sc_max:
                     score = self.sc_max
-                if(score < self.sc_min):
+                if score < self.sc_min:
                     score = self.sc_min
 
                 hasher = hashlib.md5()
-                hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                    n2, n2hint, n2type, n2spec, et_hint, str(score)]).encode())
+                hasher.update('\t'.join([chksm, n1id, n1hint, n1type, n1spec,\
+                    n2id, n2hint, n2type, n2spec, et_hint, str(score)]).encode())
                 t_chksum = hasher.hexdigest()
-                edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                        n2, n2hint, n2type, n2spec, et_hint, score, t_chksum])
+                edge_writer.writerow([chksm, n1id, n1hint, n1type, n1spec, \
+                        n2id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
 
 
 if __name__ == "__main__":

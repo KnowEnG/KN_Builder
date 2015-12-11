@@ -222,9 +222,9 @@ class Stringdb(SrcClass):
         """
 
         #outfiles
-        table_file = rawline.replace('rawline','edge')
-        #n_meta_file = rawline.replace('rawline','node_meta')
-        e_meta_file = rawline.replace('rawline','edge_meta')
+        table_file = rawline.replace('rawline', 'edge')
+        #n_meta_file = rawline.replace('rawline', 'node_meta')
+        e_meta_file = rawline.replace('rawline', 'edge_meta')
 
         #static column values
         n1type = 'gene'
@@ -256,25 +256,25 @@ class Stringdb(SrcClass):
                 if len(n1list) < 2 or len(n2list) < 2:
                     continue
                 n1spec = n1list[0]
-                n1 = '.'.join(n1list[1:])
+                n1id = '.'.join(n1list[1:])
                 n2spec = n2list[0]
-                n2 = '.'.join(n2list[1:])
-                for et in edge_types:
-                    et_hint = edge_types[et]
-                    score = raw[et]
-                    if(score == '0'):
+                n2id = '.'.join(n2list[1:])
+                for ety in edge_types:
+                    et_hint = edge_types[ety]
+                    score = raw[ety]
+                    if score == '0':
                         continue
                     hasher = hashlib.md5()
-                    hasher.update('\t'.join([chksm, n1, n1hint, n1type, n1spec,\
-                        n2, n2hint, n2type, n2spec, et_hint,
-                        str(score)]).encode())
+                    hasher.update('\t'.join([chksm, n1id, n1hint, n1type, n1spec,
+                                             n2id, n2hint, n2type, n2spec, et_hint,
+                                             str(score)]).encode())
                     t_chksum = hasher.hexdigest()
-                    edge_writer.writerow([chksm, n1, n1hint, n1type, n1spec, \
-                            n2, n2hint, n2type, n2spec, et_hint, score, \
-                            t_chksum])
+                    edge_writer.writerow([chksm, n1id, n1hint, n1type, n1spec,
+                                          n2id, n2hint, n2type, n2spec, et_hint,
+                                          score, t_chksum])
                 publist = raw[9]
                 e_meta_writer.writerow([chksm, info_type, publist])
-        outfile = e_meta_file.replace('edge_meta','unique_edge_meta')
+        outfile = e_meta_file.replace('edge_meta', 'unique_edge_meta')
         tu.csu(e_meta_file, outfile, [1, 2, 3])
 
 

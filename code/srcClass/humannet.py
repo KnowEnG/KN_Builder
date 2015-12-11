@@ -10,8 +10,6 @@ Functions:
     main: runs compare_versions (see utilities.py) on a Intact object
 """
 from check_utilities import SrcClass, compare_versions
-from mitab_utilities import table
-import time
 import config_utilities as cf
 import csv
 import hashlib
@@ -47,7 +45,6 @@ class HumanNet(SrcClass):
         name = 'humannet'
         url_base = 'www.functionalnet.org'
         aliases = {"HumanNet": "HumanNet.v1.join"}
-        comment_strs = ['#']
         super(HumanNet, self).__init__(name, url_base, aliases, args)
         self.remote_file = 'HumanNet.v1.join.txt'
 
@@ -180,13 +177,13 @@ class HumanNet(SrcClass):
         """Uses the provided raw_lines file to produce a 2table_edge file, an
         edge_meta file, and a node_meta file (only for property nodes).
 
-        File format: [file] [line_chksum] [gene1] [gene2] [CE-CC] [CE-CX] 
-            [CE-GT] [CE-LC] [CE-YH] [DM-PI] [HS-CC] [HS-CX] [HS-DC] [HS-GN] 
-            [HS-LC] [HS-MS] [HS-PG] [HS-YH] [SC-CC] [SC-CX] [SC-GT] [SC-LC] 
+        File format: [file] [line_chksum] [gene1] [gene2] [CE-CC] [CE-CX]
+            [CE-GT] [CE-LC] [CE-YH] [DM-PI] [HS-CC] [HS-CX] [HS-DC] [HS-GN]
+            [HS-LC] [HS-MS] [HS-PG] [HS-YH] [SC-CC] [SC-CX] [SC-GT] [SC-LC]
             [SC-MS] [SC-TS] [SC-YH] [IntNet]
 
-        We want to convert this to the format: [line_chksum] [n1name] [n1hint] 
-            [n1type] [n1species] [n2name] [n2hint] [n2type] [n2species] 
+        We want to convert this to the format: [line_chksum] [n1name] [n1hint]
+            [n1type] [n1species] [n2name] [n2hint] [n2type] [n2species]
             [edgetype_hint] [score]
 
         This returns noting but produces the 2table formatted files from the
@@ -207,11 +204,11 @@ class HumanNet(SrcClass):
 
         Returns:
         """
-        edge_types = ["hn_CE_CC","hn_CE_CX","hn_CE_GT","hn_CE_LC","hn_CE_YH",
-                      "hn_DM_PI","hn_HS_CC","hn_HS_CX","hn_HS_DC","hn_HS_GN",
-                      "hn_HS_LC","hn_HS_MS","hn_HS_PG","hn_HS_YH","hn_SC_CC",
-                      "hn_SC_CX","hn_SC_GT","hn_SC_LC","hn_SC_MS","hn_SC_TS",
-                      "hn_SC_YH","hn_IntNet"]
+        edge_types = ["hn_CE_CC", "hn_CE_CX", "hn_CE_GT", "hn_CE_LC", "hn_CE_YH",
+                      "hn_DM_PI", "hn_HS_CC", "hn_HS_CX", "hn_HS_DC", "hn_HS_GN",
+                      "hn_HS_LC", "hn_HS_MS", "hn_HS_PG", "hn_HS_YH", "hn_SC_CC",
+                      "hn_SC_CX", "hn_SC_GT", "hn_SC_LC", "hn_SC_MS", "hn_SC_TS",
+                      "hn_SC_YH", "hn_IntNet"]
 
         #static column values
         n1hint = "EntrezGene"
@@ -222,7 +219,7 @@ class HumanNet(SrcClass):
         n2spec = "9606"
 
         #output file
-        table_file = rawline.replace('rawline','edge')
+        table_file = rawline.replace('rawline', 'edge')
 
         with open(rawline) as infile, \
             open(table_file, 'w') as edges:
@@ -237,15 +234,15 @@ class HumanNet(SrcClass):
                 for edge_num in range(len(line[5:])):
                     score = line[edge_num+5]
                     et_hint = edge_types[edge_num]
-                    if(score == 'NA'):
+                    if score == 'NA':
                         continue
                     hasher = hashlib.md5()
-                    hasher.update('\t'.join([chksm, n1name, n1hint, n1type, 
+                    hasher.update('\t'.join([chksm, n1name, n1hint, n1type,
                                              n1spec, n2name, n2hint, n2type,
                                              n2spec, et_hint, str(score)]).encode())
                     t_chksum = hasher.hexdigest()
                     edge_writer.writerow([chksm, n1name, n1hint, n1type, n1spec,
-                                          n2name, n2hint, n2type, n2spec, 
+                                          n2name, n2hint, n2type, n2spec,
                                           et_hint, score, t_chksum])
 
 
@@ -263,3 +260,4 @@ if __name__ == "__main__":
             alias described in intact.
     """
     print(compare_versions(HumanNet()))
+    

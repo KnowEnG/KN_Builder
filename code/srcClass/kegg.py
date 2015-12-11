@@ -244,7 +244,6 @@ class Kegg(SrcClass):
                 n_meta_writer = csv.writer(n_meta, delimiter='\t', lineterminator='\n')
                 n_writer = csv.writer(nfile, delimiter='\t', lineterminator='\n')
                 for line in reader:
-                    chksm = line[2]
                     orig_id = line[3].strip()
                     orig_name = line[4].strip()
                     mod_id = src + '_' + orig_id.replace('map', '')
@@ -254,9 +253,9 @@ class Kegg(SrcClass):
                     n_writer.writerow([kn_id, kn_name])
                     n_meta_writer.writerow([kn_id, info_type, orig_name])
                     n_meta_writer.writerow([kn_id, info_type, orig_id])
-            outfile = node_file.replace('node','unique_node')
+            outfile = node_file.replace('node', 'unique_node')
             tu.csu(node_file, outfile)
-            outfile = n_meta_file.replace('node_meta','unique_node_meta')
+            outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
             tu.csu(n_meta_file, outfile)
 
         else:
@@ -264,7 +263,6 @@ class Kegg(SrcClass):
                 reader = csv.reader((line.decode('utf-8') for line in map_file),
                                     delimiter='\t')
                 for line in reader:
-                    chksm = line[2]
                     orig_id = line[3].strip()
                     orig_name = line[4].strip()
                     mod_id = src + '_' + orig_id

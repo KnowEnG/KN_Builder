@@ -260,7 +260,7 @@ class SrcClass(object):
         alias = filename.split('.')[1]
         map_dict = dict()
         info_type = "alt_alias"
-        n_meta_file = filename.replace('rawline','node_meta')
+        n_meta_file = filename.replace('rawline', 'node_meta')
         node_file = filename.replace('rawline', 'node')
         if not self.is_map(alias):
             return map_dict
@@ -268,7 +268,7 @@ class SrcClass(object):
             open(n_meta_file, 'w') as n_meta, \
             open(node_file, 'w') as nfile:
             reader = csv.reader((line.decode('utf-8') for line in map_file),
-                delimiter='\t')
+                                delimiter='\t')
             n_meta_writer = csv.writer(n_meta, delimiter='\t', lineterminator='\n')
             n_writer = csv.writer(nfile, delimiter='\t', lineterminator='\n')
             for line in reader:
@@ -277,13 +277,13 @@ class SrcClass(object):
                 orig_name = line[value_col].strip()
                 kn_id = cf.pretty_name(orig_id)
                 kn_name = cf.pretty_name(src + '_' + orig_name)
-                map_dict[orig_id] =  kn_id + '::' + kn_name
+                map_dict[orig_id] = kn_id + '::' + kn_name
                 n_writer.writerow([kn_id, kn_name])
                 n_meta_writer.writerow([chksm, kn_id, info_type, orig_name])
                 n_meta_writer.writerow([chksm, kn_id, info_type, orig_id])
-        outfile = node_file.replace('node','unique_node')
+        outfile = node_file.replace('node', 'unique_node')
         tu.csu(node_file, outfile)
-        outfile = n_meta_file.replace('node_meta','unique_node_meta')
+        outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
         tu.csu(n_meta_file, outfile)
         return map_dict
 
@@ -438,3 +438,4 @@ def main_parse_args():
 if __name__ == "__main__":
     args = main_parse_args()
     check(args.module, args)
+    

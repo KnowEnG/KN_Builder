@@ -65,7 +65,7 @@ def download(version_dict):
     with urllib.request.urlopen(url) as response:
         with open(filename, 'wb') as outfile:
             shutil.copyfileobj(response, outfile)
-    os.utime(filename, (0,version_dict['remote_date']))
+    os.utime(filename, (0, version_dict['remote_date']))
 
     #unzip remote file
     while os.path.splitext(filename)[1] in ARCHIVES:

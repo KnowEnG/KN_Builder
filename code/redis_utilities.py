@@ -26,7 +26,7 @@ def get_database(args=cf.config_args()):
         class: a redis connection object
     """
     return redis.StrictRedis(host=args.redis_host, port=args.redis_port,
-        password=args.redis_pass)
+                             password=args.redis_pass)
 
 def import_ensembl(alias, args=cf.config_args()):
     """Imports the ensembl data for the provided alias into the Redis database.
@@ -86,13 +86,14 @@ def conv_gene(rdb, foreign_key, hint, taxid):
         taxid_hint = taxid_hint.decode()
         taxid_hint_key = '::'.join([taxid_hint, foreign_key])
         taxid_hint = taxid_hint.split('::')
+        if len(taxid_hint) < 2: # species key in redis
+            continue
         if taxid == taxid_hint[0] and hint in taxid_hint[1]:
             both_match.append(taxid_hint_key)
         if taxid == taxid_hint[0]:
             taxid_match.append(taxid_hint_key)
-        if len(taxid_hint)>1:
-            if hint in taxid_hint[1] and len(hint):
-                hint_match.append(taxid_hint_key)
+        if hint in taxid_hint[1] and len(hint):
+            hint_match.append(taxid_hint_key)
     if both_match:
         both_ens_ids = list(set(rdb.mget(both_match)))
         return both_ens_ids[0].decode()
