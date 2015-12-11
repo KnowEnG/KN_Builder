@@ -21,9 +21,9 @@ def get_SrcClass(args):
 
     This returns an object of the source class to allow access to its functions
     if the module is imported.
-    
+
     Args:
-    
+
     Returns:
         class: a source class object
     """
@@ -140,7 +140,7 @@ class Species(SrcClass):
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
-        
+
         This returns a boolean representing if the alias corresponds to a file
         used for mapping. By default this returns True if the alias ends in
         '_map' and False otherwise.
@@ -191,7 +191,7 @@ class Species(SrcClass):
 
         with open(filename, encoding='utf-8') as infile:
             reader = csv.reader((line.replace('\t|', '') for line in infile),
-                    delimiter='\t')
+                                delimiter='\t')
             for full_line in reader:
                 line = full_line[3:]
                 if line[3] == 'scientific name':

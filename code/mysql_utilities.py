@@ -125,7 +125,7 @@ def query_all_mappings(version_dict, args=cf.config_args()):
     table = alias + '_mappings'
     map_dir = os.path.join(args.data_path, cf.DEFAULT_MAP_PATH)
     if os.path.isdir(args.local_dir):
-        map_dir =  os.path.join(args.local_dir, map_dir)
+        map_dir = os.path.join(args.local_dir, map_dir)
     if not os.path.isdir(map_dir):
         os.mkdir(map_dir)
     db = MySQL(database, args)
@@ -140,10 +140,10 @@ def query_all_mappings(version_dict, args=cf.config_args()):
         if str(mapped) in lrg_dict:
             mapped = lrg_dict[str(mapped)]
         map_dict[taxid + '::ENSEMBL_STABLE_ID::' + str(raw)] = str(mapped)
-    results = db.query_distinct(
-                'display_label AS dbprimary_acc, db_name, stable_id', table)
+    results = db.query_distinct('display_label AS dbprimary_acc, db_name, stable_id',
+                                table)
     results.extend(db.query_distinct('dbprimary_acc, db_name, stable_id',
-                                    table))
+                                     table))
     for (raw, hint, mapped) in results:
         if str(raw) in lrg_dict:
             mapped = lrg_dict[str(raw)]
@@ -173,7 +173,7 @@ def create_mapping_dicts(version_dict, args=cf.config_args()):
     cmd = "WHERE species='" + alias + "'"
     map_dir = os.path.join(args.data_path, cf.DEFAULT_MAP_PATH)
     if os.path.isdir(args.local_dir):
-        map_dir =  os.path.join(args.local_dir, map_dir)
+        map_dir = os.path.join(args.local_dir, map_dir)
     if not os.path.isdir(map_dir):
         os.mkdir(map_dir)
     db = MySQL(database, args)
@@ -182,7 +182,7 @@ def create_mapping_dicts(version_dict, args=cf.config_args()):
         map_dict = create_dictionary(results)
         json.dump(map_dict, outfile, indent=4)
     results = db.query_distinct('display_label AS dbprimary_acc, stable_id',
-                                    table, cmd)
+                                table, cmd)
     results.extend(db.query_distinct('dbprimary_acc, stable_id', table, cmd))
     cmd += " AND db_name='ENS_LRG_gene'"
     results.extend(db.query_distinct('dbprimary_acc, stable_id', table, cmd))
@@ -447,10 +447,10 @@ class MySQL(object):
         Returns:
         """
         self.cursor.execute("LOAD DATA LOCAL INFILE '" + filename +
-                             "' INTO TABLE " + tablename +
-                             " FIELDS TERMINATED BY '" + sep + "'" +
-                             " OPTIONALLY ENCLOSED BY '" + enc + "' " +
-                             cmd + ";")
+                            "' INTO TABLE " + tablename +
+                            " FIELDS TERMINATED BY '" + sep + "'" +
+                            " OPTIONALLY ENCLOSED BY '" + enc + "' " +
+                            cmd + ";")
         self.conn.commit()
 
     def drop_temp_table(self, tablename):
@@ -541,13 +541,13 @@ class MySQL(object):
         """
         cmd = 'SET ' + duration + ' TRANSACTION ISOLATION LEVEL ' + level + ';'
         self.cursor.execute(cmd)
-    
+
     def start_transaction(self, level='REPEATABLE READ'):
         """Starts a mysql transaction with the provided isolation level
-        
-        Uses the provided isolation level to start a MySQL transaction using 
+
+        Uses the provided isolation level to start a MySQL transaction using
         the current connection. Transaction persists until the next commit.
-        
+
         Args:
         level (str): isolation level. In order of locking level:
                 SERIALIZABLE, REPEATABLE READ, READ COMMITTED, READ UNCOMMITTED

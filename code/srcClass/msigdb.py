@@ -252,7 +252,7 @@ class Msigdb(SrcClass):
         n2type = 'gene'
         n2spec = '9606'  # assumption of human genes is occasionally incorrect
         n2hint = 'EntrezGene'
-        et_hint = source + '_' + alias.replace(".","_")
+        et_hint = source + '_' + alias.replace(".", "_")
         score = 1
 
         info_type1 = 'alt_alias'
@@ -288,7 +288,7 @@ class Msigdb(SrcClass):
                     edge_writer.writerow([chksm, n1_kn_id, n1hint, n1type, n1spec, \
                             n2_id, n2hint, n2type, n2spec, et_hint, score, \
                             t_chksum])
-            outfile = n_meta_file.replace('node_meta','unique_node_meta')
+            outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
             tu.csu(n_meta_file, outfile)
 
 if __name__ == "__main__":

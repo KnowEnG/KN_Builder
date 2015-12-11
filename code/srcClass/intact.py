@@ -20,9 +20,9 @@ def get_SrcClass(args):
 
     This returns an object of the source class to allow access to its functions
     if the module is imported.
-    
+
     Args:
-    
+
     Returns:
         class: a source class object
     """
@@ -46,7 +46,6 @@ class Intact(SrcClass):
         name = 'intact'
         url_base = 'ftp.ebi.ac.uk'
         aliases = {"PPI": "PPI"}
-        comment_strs = ['#']
         super(Intact, self).__init__(name, url_base, aliases, args)
         self.remote_file = 'intact.txt'
 
@@ -140,7 +139,7 @@ class Intact(SrcClass):
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
-        
+
         This returns a boolean representing if the alias corresponds to a file
         used for mapping. By default this returns True if the alias ends in
         '_map' and False otherwise.
@@ -192,10 +191,10 @@ class Intact(SrcClass):
         This returns noting but produces the 2table formatted files from the
         provided raw_lines file:
             raw_lines table (file, line num, line_chksum, rawline)
-            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec, 
+            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
-            node_meta (line_cksum, node_num (1 or 2), 
+            node_meta (line_cksum, node_num (1 or 2),
                        info_type (evidence, relationship, experiment, or link),
                        info_desc (text))
         By default this function does nothing (must be overridden)

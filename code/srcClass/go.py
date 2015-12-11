@@ -19,7 +19,6 @@ import csv
 import hashlib
 import config_utilities as cf
 import table_utilities as tu
-import import_utilities as iu
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -220,7 +219,6 @@ class Go(SrcClass):
             n_meta_writer = csv.writer(n_meta, delimiter='\t', lineterminator='\n')
             n_writer = csv.writer(nfile, delimiter='\t', lineterminator='\n')
             for line in reader:
-                chksm = line[2]
                 raw = line[3]
                 if raw.startswith('[Term]'):
                     skip = False
@@ -246,9 +244,9 @@ class Go(SrcClass):
                     alt_id = raw[8:].strip()
                     term_map[alt_id] = kn_id + '::' + kn_name
                     n_meta_writer.writerow([kn_id, info_type, alt_id])
-        outfile = node_file.replace('node','unique_node')
+        outfile = node_file.replace('node', 'unique_node')
         tu.csu(node_file, outfile)
-        outfile = n_meta_file.replace('node_meta','unique_node_meta')
+        outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
         tu.csu(n_meta_file, outfile)
 
         return term_map
@@ -318,8 +316,8 @@ class Go(SrcClass):
                 if not_match is not None:
                     continue
 
-                n1_ID = raw[4]
-                n1_mapped = obo_map.get(n1_ID, "unmapped:no-name::unmapped")
+                n1orig = raw[4]
+                n1_mapped = obo_map.get(n1orig, "unmapped:no-name::unmapped")
                 (n1_id, n1hint) = n1_mapped.split('::')
 
                 n2spec_str = raw[12].split("|", 1)[0].rstrip() #only take first species
@@ -334,7 +332,7 @@ class Go(SrcClass):
 
                 n2_id = raw[1]
                 n2hint = 'UniProt/Ensembl_GeneID'
-                for i in range(1,3):  # loop twice
+                for idx in range(1, 3):  # loop twice
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1_id, n1hint, n1type, n1spec,\
                     n2_id, n2hint, n2type, n2spec, et_hint, str(score)]).encode())
@@ -346,7 +344,7 @@ class Go(SrcClass):
 
                 e_meta_writer.writerow([chksm, info_type1, reference])
                 e_meta_writer.writerow([chksm, info_type2, anno_evidence])
-            outfile = e_meta_file.replace('edge_meta','unique_edge_meta')
+            outfile = e_meta_file.replace('edge_meta', 'unique_edge_meta')
             tu.csu(e_meta_file, outfile)
 
 if __name__ == "__main__":
