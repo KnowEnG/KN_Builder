@@ -272,7 +272,7 @@ def run_local_table(args):
     if args.run_mode == "PIPELINE":
         run_local_conv(args)
 
-def run_local_conv(args):
+def run_local_conv(args, x=0):
     """Runs id conversion for all aliases on local machine.
 
     This loops through all tabled edge files in the data directory and calls
@@ -284,7 +284,9 @@ def run_local_conv(args):
 
     Returns:
     """
-
+    
+    subprocess.Popen(['docker', 'start', 'lincs_mysql']).wait()
+    subprocess.Popen(['sleep', '1m']).wait()
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
     converter = __import__(CONV_PY)
@@ -330,7 +332,8 @@ def run_local_conv(args):
                 print(str(ctr) + "\t\t" + edge_name)
 
                 try:
-                    converter.main(edgefile, args)
+                    if ctr > x:
+                        converter.main(edgefile, args)
                     successful += 1
                 except Exception as err:
                     print("ERROR: " + edge_name + " could not be converted")
@@ -339,6 +342,8 @@ def run_local_conv(args):
                     failed += 1
 
     print("CONV FINISHED. Successful: {0}, Failed: {1}".format(successful, failed))
+    if successful < ctr:
+        run_local_conv(args, successful)
     if args.run_mode == "PIPELINE":
         pass
 
