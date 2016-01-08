@@ -1,12 +1,12 @@
 """Utiliites for interacting with the KnowEnG Redis db through python.
 
-Classes:
+Contains module functions::
 
-
-Functions:
-
-
-Variables:
+    get_database(args=None)
+    import_ensembl(alias, args=None) 
+    conv_gene(rdb, foreign_key, hint, taxid)
+    import_mapping(map_dict, args=None)
+    
 """
 
 import config_utilities as cf
@@ -14,21 +14,23 @@ import redis
 import json
 import os
 
-def get_database(args=cf.config_args()):
+def get_database(args=None):
     """Returns a Redis database connection.
 
     This returns a Redis database connection access to its functions if the
     module is imported.
 
     Args:
-        args: command line and default arguements
+        args (Namespace): args as populated namespace or 'None' for defaults
     Returns:
-        class: a redis connection object
+        StrictRedis: a redis connection object
     """
+    if args is None:
+        args=cf.config_args()
     return redis.StrictRedis(host=args.redis_host, port=args.redis_port,
                              password=args.redis_pass)
 
-def import_ensembl(alias, args=cf.config_args()):
+def import_ensembl(alias, args=None):
     """Imports the ensembl data for the provided alias into the Redis database.
 
     This stores the foreign key to ensembl stable ids in the Redis database.
@@ -42,9 +44,10 @@ def import_ensembl(alias, args=cf.config_args()):
 
     Args:
         alias (str): An alias defined in ensembl.aliases.
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     rdb = get_database(args)
     map_dir = os.path.join(args.local_dir, args.data_path, cf.DEFAULT_MAP_PATH)
     with open(os.path.join(map_dir, alias + '_all.json')) as infile:
@@ -71,6 +74,9 @@ def conv_gene(rdb, foreign_key, hint, taxid):
         foreign_key (str): the foreign gene identifer to be translated
         hint (str): a hint for conversion
         taxid (str): the species taxid
+    
+    Returns:
+        str: result of seaching for gene in redis DB
     """
     hint = hint.upper()
     unique = rdb.get('unique::' + foreign_key)
@@ -107,16 +113,17 @@ def conv_gene(rdb, foreign_key, hint, taxid):
             return hint_ens_ids[0].decode()
     return 'unmapped-many'
 
-def import_mapping(map_dict, args=cf.config_args()):
+def import_mapping(map_dict, args=None):
     """Imports the property mapping data into the Redis database.
 
     This stores the original id to KnowNet ids in the Redis database.
 
     Args:
         map_dict (dict): An dictionary containing all mapping info.
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     rdb = get_database(args)
     for orig_id in map_dict:
         rkey = rdb.getset('property::' + orig_id, map_dict[orig_id])

@@ -1,13 +1,15 @@
 """Utiliites for importing edge, edge_meta, and node_meta into the KnowEnG
 MySQL datatbase.
 
-Classes:
+Contains module functions::
 
+    import_file(file_name, table, ld_cmd='', dup_cmd='', args=None)
+    import_filemeta(version_dict, args=None)
+    update_filemeta(version_dict, args=None)
+    import_edge(edgefile, args=None)
+    import_nodemeta(nmfile, args=None)
+    import_pnode(filename, args=None)
 
-Functions:
-
-
-Variables:
 """
 
 import config_utilities as cf
@@ -15,8 +17,7 @@ import mysql_utilities as mu
 import json
 import os
 
-
-def import_file(file_name, table, ld_cmd='', dup_cmd='', args=cf.config_args()):
+def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
     """Imports the provided  file into the KnowEnG MySQL database.
 
     Loads the data into a temporary table in MySQL. It then queries from the
@@ -29,10 +30,10 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=cf.config_args()):
         table (str): name of the permanent table to import to
         ld_cmd (str): optional additional command for loading data
         dup_cmd (str): command for handling duplicates
-        args: command line and default arguements
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     table_cmds = {'node_meta': 'node_meta.node_id = node_meta.node_id',
                 'raw_line' : 'raw_line.file_id = raw_line.file_id',
                 'edge2line': 'edge2line.edge_hash = edge2line.edge_hash',
@@ -59,17 +60,17 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=cf.config_args()):
     db.drop_table(tmptable)
     db.close()
 
-def import_filemeta(version_dict, args=cf.config_args()):
+def import_filemeta(version_dict, args=None):
     """Imports the provided version_dict into the KnowEnG MySQL database.
 
     Loads the data from an version dictionary into the raw_file table.
 
     Args:
         version_dict (dict): version dictionary describing a downloaded file
-        args: command line and default arguements
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     db = mu.get_database('KnowNet', args)
     values = [version_dict["source"] + '.' + version_dict["alias"],
               version_dict["remote_url"], version_dict["remote_date"],
@@ -87,17 +88,17 @@ def import_filemeta(version_dict, args=cf.config_args()):
     cmd = 'VALUES( ' + ','.join(values) + ')'
     db.replace('raw_file', cmd)
 
-def update_filemeta(version_dict, args=cf.config_args()):
+def update_filemeta(version_dict, args=None):
     """Updates the provided filemeta into the KnowEnG MySQL database.
 
     Updates the data from an version dictionary into the raw_file table.
 
     Args:
         version_dict (dict): version dictionary describing a downloaded file
-        args: command line and default arguements
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     db = mu.get_database('KnowNet', args)
     values = [version_dict["source"] + '.' + version_dict["alias"],
               version_dict["remote_url"], version_dict["remote_date"],
@@ -116,7 +117,7 @@ def update_filemeta(version_dict, args=cf.config_args()):
     cmd = 'VALUES( ' + ','.join(values) + ')'
     db.replace('raw_file', cmd)
 
-def import_edge(edgefile, args=cf.config_args()):
+def import_edge(edgefile, args=None):
     """Imports the provided edge file and any corresponding meta files into
     the KnowEnG MySQL database.
 
@@ -127,10 +128,10 @@ def import_edge(edgefile, args=cf.config_args()):
 
     Args:
         edgefile (str): path to the file to be imported
-        args: command line and default arguements
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     imports = ['node_meta', 'edge2line', 'edge', 'edge_meta']
     #uedge_cmd  = ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
     #                '{0}.weight)')
@@ -146,7 +147,7 @@ def import_edge(edgefile, args=cf.config_args()):
         import_file(filename, table, ld_cmd, dup_cmd, args)
 
 
-def import_nodemeta(nmfile, args=cf.config_args()):
+def import_nodemeta(nmfile, args=None):
     """Imports the provided node_meta file and any corresponding meta files into
     the KnowEnG MySQL database.
 
@@ -156,17 +157,17 @@ def import_nodemeta(nmfile, args=cf.config_args()):
     edge file, and ignores if it is metadata.
 
     Args:
-        nm (str): path to the file to be imported
-        args: command line and default arguements
-
-    Returns:
+        nmfile (str): path to the file to be imported
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     table = 'node_meta'
     dup_cmd = 'node_meta.node_id = node_meta.node_id'
     ld_cmd = ''
     import_file(nmfile, table, ld_cmd, dup_cmd, args)
 
-def import_pnode(filename, args=cf.config_args()):
+def import_pnode(filename, args=None):
     """Imports the provided property node file into the KnowEnG MySQL database.
 
     Loads the data into a temporary table in MySQL. It then queries from the
@@ -176,10 +177,10 @@ def import_pnode(filename, args=cf.config_args()):
 
     Args:
         filename (str): path to the file to be imported
-        args: command line and default arguements
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     ld_cmd = '(node_id, n_alias) SET n_type_id=2'
     dup_cmd = 'node.node_id = node.node_id'
     table = 'node'

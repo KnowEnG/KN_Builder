@@ -1,26 +1,26 @@
-"""Place to store global variables
+"""config module to manage global variables
 
-Classes:
+This module establishes default values and argument parsers for commonly
+used variables
 
-Functions:
+Attributes:
+    DEFAULT_DOCKER_IMG (str): docker image to run pipeline steps
+    DEFAULT_CURL_URL (str): address of chronos scheduler
+    DEFAULT_LOCAL_BASE (str): toplevel directory on local machine
+    DEFAULT_CLOUD_BASE (str): toplevel directory on shared cloud storage
 
-Variables:
-    DEFAULT_DOCKER_IMG: docker image to run pipeline steps
-    DEFAULT_CURL_URL: address of chronos scheduler
-    DEFAULT_LOCAL_BASE: toplevel directory on local machine
-    DEFAULT_CLOUD_BASE: toplevel directory on shared cloud storage
+    DEFAULT_CODE_PATH (str): relative path of code dir from toplevel
+    DEFAULT_DATA_PATH (str): relative path of data dir from toplevel
+    DEFAULT_MAP_PATH (str): relative path of id_map dir from toplevel
 
-    DEFAULT_CODE_PATH: relative path of code dir from toplevel
-    DEFAULT_DATA_PATH: relative path of data dir from toplevel
-    DEFAULT_MAP_PATH: relative path of id_map dir from toplevel
+    DEFAULT_MYSQL_URL (str): location of MySQL db
+    DEFAULT_MYSQL_PORT (int): port for MySQL db
+    DEFAULT_MYSQL_USER (str): user for MySQL db
+    DEFAULT_MYSQL_PASS (str): password for MySQL db
 
-    DEFAULT_MYSQL_URL = location of MySQL db
-    DEFAULT_MYSQL_PORT = port for MySQL db
-    DEFAULT_MYSQL_USER = user for MySQL db
-    DEFAULT_MYSQL_PASS = password for MySQL db
-
-    DEFAULT_REDIS_URL = location of Redis db
-    DEFAULT_REDIS_PORT = port for Redis db
+    DEFAULT_REDIS_URL (str): location of Redis db
+    DEFAULT_REDIS_PORT (int): port for Redis db
+    DEFAULT_REDIS_PASS (str): password for Redis db   
 """
 from argparse import ArgumentParser
 import os
@@ -46,14 +46,15 @@ DEFAULT_REDIS_PORT = '6379'
 DEFAULT_REDIS_PASS = 'KnowEnG'
 
 def add_config_args(parser):
-    """Add configuation options to command line arguments.
+    """Add global configuation options to command line arguments.
 
-    If argument is missing, supplies default value.
+    If global arguments are not specified, supplies their default values.
 
     Args:
-        parser: a parser to add config opts to
+        parser (argparse.ArgumentParser): a parser to add global config opts to
 
-    Returns: parser with appending options
+    Returns: 
+        argparse.ArgumentParser: parser with appended global options
     """
     parser.add_argument('-i', '--image', help='docker image name for \
         pipeline', default=DEFAULT_DOCKER_IMG)
@@ -87,9 +88,10 @@ def add_config_args(parser):
 
 
 def config_args():
-    """Create a default parser with options defaults
+    """Create a default parser with option defaults
 
-    Returns: args as populated namespace
+    Returns: 
+        Namespace: args as populated namespace
     """
     parser = ArgumentParser()
     parser = add_config_args(parser)
@@ -99,11 +101,14 @@ def config_args():
 def cloud_config_opts(args, config_opts):
     """Convert config options to the directory structure within containers on cloud
 
-    Args:
-        args: args as populated namespace
-        config_opts: list of command line arguments
+    changes/appends arg.local_dir to root of container's file system
 
-    Returns: string for command line arguments on cloud
+    Args:
+        args (Namespace): args as populated namespace
+        config_opts (list): list of command line arguments
+
+    Returns: 
+        str: string for command line arguments on cloud
     """
     if '-ld' not in config_opts:
         config_opts.extend(['-ld', os.sep])
@@ -114,10 +119,11 @@ def cloud_template_subs(args, job_str):
     """Convert tmp values in template json job string to config options
 
     Args:
-        args: args as populated namespace
-        job_str: json job as string with tmp placeholder values
+        args (Namespace): args as populated namespace
+        job_str (str): json job as string with tmp placeholder values
 
-    Returns: json job as string with cloud tmp values replaced
+    Returns: 
+        str: json job as string with cloud tmp values replaced
     """
 
     job_str = job_str.replace("TMPIMG", args.image)
@@ -133,11 +139,11 @@ def pretty_name(orig_name, endlen=35):
     """Shortens names strs and removes problematic characters
 
     Args:
-        orig_name (string): name string before conversion
+        orig_name (str): name string before conversion
         endlen (int): max length of final pretty string
 
-    Returns: string after formatting changes
+    Returns: 
+        str: string after formatting changes
     """
     orig_name = re.sub('[^a-zA-Z0-9]', '_', orig_name)
     return orig_name[0:endlen]
-    

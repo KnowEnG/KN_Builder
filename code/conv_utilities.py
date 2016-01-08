@@ -1,18 +1,27 @@
 """Utiliites for mapping the gene identifiers in an edge file.
 
-Classes:
+Contains module functions::
 
-Functions:
-    main(edgefile, args) -> : takes the path to an edge file in the table
-        format (see table_utilities) and maps the nodes in each line. It also
-        formats the line in a similar manner to the edge table in MySQL and
-        determines if the status of the line. It returns nothing.
-    map_list(namefile, args) -> : takes the path to a file of gene identifers
-        (one per line) and outputs a file with with the KnowEnG gene identifers
-        for each input gene in the tab separated format (mapped, original).
-Variables:
-    DEFAULT_HINT: the default mapping hint for converting identifiers
-    DEFAULT_TAXON: the default taxon to use for converting identfiers
+    map_list(namefile, args=None)
+    main_parse_args()
+    main(edgefile, args=None)
+
+Attributes:
+    DEFAULT_HINT (str): the default mapping hint for converting identifiers
+    DEFAULT_TAXON (int): the default taxon id to use for converting identfiers
+
+Examples:
+    To run conv on a single source (e.g. dip) after table complete::
+
+        $ python3 code/conv_utilities.py data/dip/PPI/chunks/dip.PPI.edge.1.txt
+        
+    To run conv on a file of gene names::
+
+        $ python3 code/conv_utilities.py -m LIST list_of_gene_names.txt    
+
+    To view all optional arguments that can be specified::
+
+        $ python3 code/conv_utilities.py -h
 """
 
 import config_utilities as cf
@@ -27,7 +36,7 @@ import os
 DEFAULT_HINT = ''
 DEFAULT_TAXON = 9606
 
-def main(edgefile, args=cf.config_args()):
+def main(edgefile, args=None):
     """Maps the nodes for the source:alias edgefile.
 
     This takes the path to an edgefile (see table_utilities.main) and maps
@@ -37,10 +46,10 @@ def main(edgefile, args=cf.config_args()):
 
     Args:
         edgefile (str): path to an edgefile to be mapped
-        args (argparse object): arguments as populated namespace
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     if 'lincs.level4' in edgefile or 'lincs.exp_meta' in edgefile:
         if os.path.isfile(edgefile.replace('conv', 'node')):
             iu.import_pnode(edgefile.replace('conv', 'node'), args)
@@ -92,7 +101,7 @@ def main(edgefile, args=cf.config_args()):
     tu.csu(conv_file, ue2l_file, [5, 6])
     iu.import_edge(uc_file, args)
 
-def map_list(namefile, args=cf.config_args()):
+def map_list(namefile, args=None):
     """Maps the nodes for the provided namefile.
 
     This takes the path to an namefile and maps the nodes in it using the Redis
@@ -100,10 +109,10 @@ def map_list(namefile, args=cf.config_args()):
 
     Args:
         namefile (str): path to an namefile to be mapped
-        args (argparse object): arguments as populated namespace
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     rdb = ru.get_database(args)
     with open(namefile, 'r') as infile, \
         open(os.path.splitext(namefile)[0] + '.mapped.txt', 'w') as n_map:
@@ -117,9 +126,11 @@ def map_list(namefile, args=cf.config_args()):
 def main_parse_args():
     """Processes command line arguments.
 
-    If argument is missing, supplies default     value.
+    Expects one positional argument (infile) and number of optional
+    arguments. If arguments are missing, supplies default values.
 
-    Returns: args as populated namespace
+    Returns:
+        Namespace: args as populated namespace
     """
     parser = ArgumentParser()
     parser.add_argument('infile', help='path to the file to be mapped. If mode \

@@ -1,29 +1,44 @@
 """Utiliites for running single or multiple steps of the supermaster pipeline
         either locally or on the cloud.
 
-Classes:
+Contains module functions::
 
-Functions:
-    run_local_check(args) -> : takes in all command line arguments.  Runs all
-        necessary checks.  If args.run_mode is'PIPELINE', calls next step
-    run_local_fetch(args) -> : takes in all command line arguments.  Runs all
-        necessary fetches.  If args.run_mode is'PIPELINE', calls next step
+    run_local_check(args)
+    run_local_fetch(args)
+    curl_handler(args, jobname, job_str)
+    list_parents(args, dependencies, response_str, parent_string)
+    run_cloud_check(args)
+    run_cloud_fetch(args)
+    main_parse_args() 
+    main()
+    
+Attributes:
+    DEFAULT_START_STEP (str): first step of setup
+    DEFAULT_DEPLOY_LOC (str): where to run setup
+    DEFAULT_RUN_MODE (str): how to run setup
+    POSSIBLE_STEPS (list): list of all steps
+    SETUP_FILES (list): list of setup SrcClasses
+    CHECK_PY (str): check module name
+    FETCH_PY (str): fetch module name
+    IMPORT_PY (str): import module name
+    CURL_PREFIX (list): parts of the chronos curl command
+    
+Examples:
+    To view all optional arguments that can be specified::
 
-    run_cloud_check(args) -> : takes in all command line arguments.  Runs all
-        necessary checks on cloud.  If args.run_mode is'PIPELINE', each job
-        calls its next step
-    run_cloud_fetch(args) -> : takes in all command line arguments and a
-        starting source (-p).  Runs all fetches for all aliases of specified
-        source on cloud.  If args.run_mode is'PIPELINE', each job
-        calls its next step
+        $ python3 code/setup_utilities.py -h
+        
+    To run just check step of setup locally::
 
-    curl_handler(args, jobname, job_str) -> : handles creating and sending
-        jobs to the cloud
-    list_parents(args, dependencies, response_str, parent_string) -> parents:
-        given a list of dependencies, creates and tracks the parents required
-        for the job sent to the cloud
+        $ python3 code/setup_utilities.py CHECK LOCAL STEP
 
-Variables:
+    To run just fetch step of setup locally after completed check::
+
+        $ python3 code/setup_utilities.py FETCH LOCAL STEP
+
+    To run all steps of setup on cloud::
+
+        $ python3 code/setup_utilities.py CHECK CLOUD PIPELINE
 """
 
 from argparse import ArgumentParser
@@ -55,7 +70,8 @@ def main_parse_args():
     a number of optional arguments. If argument is missing, supplies default
     value.
 
-    Returns: args as populated namespace
+    Returns:
+        Namespace: args as populated namespace
     """
     parser = ArgumentParser()
     parser.add_argument('start_step', help='select start step, must be CHECK, \
@@ -90,9 +106,7 @@ def run_local_check(args):
     check_utilities clean() function on each source.
 
     Args:
-        arguments from parse_args()
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args
     """
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
@@ -130,9 +144,7 @@ def run_local_fetch(args):
     file_metadata.json.
 
     Args:
-        arguments from parse_args()
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args
     """
 
     local_code_dir = os.path.join(args.local_dir, args.code_path)
@@ -182,11 +194,9 @@ def curl_handler(args, jobname, job_str):
     Curls the json object to chronos specified in the input arguments.
 
     Args:
-        args: arguments from parse_args()
-        jobname: name for job on queue
-        job_str: string description of json to submit to run job
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args
+        jobname (str): name for job on queue
+        job_str (str): string description of json to submit to run job
     """
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     jobs_dir = os.path.join(local_code_dir, "chron_jobs")
@@ -226,13 +236,13 @@ def list_parents(args, dependencies, response_str, parent_string):
     parents to be added to json job description.
 
     Args:
-        args: arguments from parse_args()
-        dependencies: list of jobs dependencies
-        response_str: array of json job descriptions on queue
-        parent_string: string to map dependencies to parent job names
+        args (Namespace): args as populated namespace from parse_args
+        dependencies (list): list of jobs dependencies
+        response_str (str): array of json job descriptions on queue
+        parent_string (str): string to map dependencies to parent job names
 
     Returns:
-        parents: list of parents to be added to json job description.
+        list: list of parents to be added to json job description.
     """
     parents = []
     jobs = json.loads(response_str)
@@ -282,9 +292,7 @@ def run_cloud_check(args):
     setup_utilities FETCH) and curls json to chronos.
 
     Args:
-        args: arguments from parse_args()
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args
     """
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
@@ -327,10 +335,8 @@ def run_cloud_fetch(args):
     and curls json to chronos.
 
     Args:
-        args: arguments from parse_args(), must specific --step_paramters(-p) as
-        single source
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args, must 
+            specify --step_paramters(-p) as single source
     """
     src = args.step_parameters
     if src is '':
@@ -381,10 +387,6 @@ def main():
 
     Parses the arguments and runs the specified part of the pipeline using the
     specified local or cloud resources.
-
-    Args:
-
-    Returns:
     """
 
     args = main_parse_args()

@@ -1,15 +1,22 @@
 """Utiliites for fetching and chunking a source for the Knowledge Network (KN)
 that has been updated.
 
-Classes:
+Contains module functions::
 
-Functions:
-    table(version_dict, chunkfile) -> : takes a dictionary object version_dict
-        and the path to a file. Determines if the described alias is a data
-        file. If so it runs the source specific table function on it. In either
-        case it returns nothing.
+    csu(infile, outfile, columns=list())
+    main_parse_args()
+    main(chunkfile, version_json, args=None)
 
-Variables:
+Examples:
+    To run table on a single source (e.g. dip) after fetch complete::
+
+        $ cd data/dip/PPI
+        $ python3 ../../../code/table_utilities.py chunks/dip.PPI.rawline.1.txt \
+            file_metadata.json
+
+    To view all optional arguments that can be specified::
+
+        $ python3 code/table_utilities.py -h
 """
 
 import json
@@ -31,7 +38,6 @@ def csu(infile, outfile, columns=list()):
         outfile (str): the file to save the result into
         columns (list): the columns to use in cut or an empty list if all
                         columns should be used
-    Returns:
     """
     with open(outfile, 'w') as out:
         cmd2 = ['sort', '-u']
@@ -42,7 +48,7 @@ def csu(infile, outfile, columns=list()):
         p1 = subprocess.Popen(cmd1, stdout=subprocess.PIPE)
         subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
 
-def main(chunkfile, version_json, args=cf.config_args()):
+def main(chunkfile, version_json, args=None):
     """Tables the source:alias described by version_json.
 
     This takes the path to a chunked (see fetch_utilities.chunk)  rawline file
@@ -51,10 +57,12 @@ def main(chunkfile, version_json, args=cf.config_args()):
     file. If it is a mapping file, it does nothing.
 
     Args:
+        version_json (str): path to a chunk file in raw_line format
         version_json (str): path to a json file describing the source:alias
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     with open(version_json, 'r') as infile:
         version_dict = json.load(infile)
     src_code_dir = os.path.join(args.local_dir, args.code_path, args.src_path)
@@ -68,13 +76,15 @@ def main(chunkfile, version_json, args=cf.config_args()):
 def main_parse_args():
     """Processes command line arguments.
 
-    If argument is missing, supplies default     value.
+    Expects two positional arguments (chunkfile, metadata_json) and number of
+    optional arguments. If arguments are missing, supplies default values.
 
-    Returns: args as populated namespace
+    Returns:
+        Namespace: args as populated namespace
     """
     parser = ArgumentParser()
     parser.add_argument('chunkfile', help='path to a single chunk file produced \
-                        in fetch, e.g. biogrid.PPI.rawline.1.txt')
+                        in fetch, e.g. dip.PPI.rawline.1.txt')
     parser.add_argument('metadata_json', help='json file produced from check, \
                         e.g. file_metadata.json')
     parser = cf.add_config_args(parser)

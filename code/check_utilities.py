@@ -1,17 +1,24 @@
-"""Utiliites for checking if a source needs to be updated in the Knowledge
-Network (KN).
+"""module for checking if source needs to be updated in Knowledge Network (KN).
 
-Classes:
-    SrcClass: Extends the object class and serves as the base class for each
-        supported source in the KN.
+Contains the class SrcClass which serves as the base class for each supported
+source in the KN.
 
-Functions:
-    get_SrcClass: returns a SrcClass object
-    compare_versions(SrcClass) -> dict: takes a SrcClass object and returns a
-        dictionary containing the most recent file version information and if
-        a fetch is required
+Contains module functions::
 
-Variables:
+    get_SrcClass(args)
+    compare_versions(SrcClass)
+    check(module, args=None)
+    main_parse_args()
+
+Examples:
+    To run check on a single source (e.g. dip)::
+
+        $ python3 code/check_utilities.py dip
+
+    To view all optional arguments that can be specified::
+
+        $ python3 code/check_utilities.py -h
+
 """
 
 import urllib.request
@@ -24,19 +31,6 @@ import config_utilities as cf
 import table_utilities as tu
 import import_utilities as iu
 from argparse import ArgumentParser
-
-def get_SrcClass(args):
-    """Returns an object of the source class.
-
-    This returns an object of the source class to allow access to its functions
-    if the module is imported.
-
-    Args:
-
-    Returns:
-        class: a source class object
-    """
-    return SrcClass(args)
 
 class SrcClass(object):
     """Base class to be extended by each supported source in KnowEnG.
@@ -58,7 +52,7 @@ class SrcClass(object):
         version (dict): The release version of each alias in the source.
     """
 
-    def __init__(self, src_name, base_url, aliases, args=cf.config_args()):
+    def __init__(self, src_name, base_url, aliases, args=None):
         """Init a SrcClass object with the provided parameters.
 
         Constructs a SrcClass object with the provided parameters, which should
@@ -74,10 +68,10 @@ class SrcClass(object):
                 be included in the KN  as the keys (e.g. different species,
                 data types, or interaction types), and a short string with
                 information about the alias as the value.
-            version (dict): The release version of each alias in the source.
-                Default empty dictionary if not provided by the extending
-                class.
+            args (Namespace): args as populated namespace or 'None' for defaults
         """
+        if args is None:
+            args=cf.config_args()
         self.name = src_name
         self.url_base = base_url
         self.aliases = aliases
@@ -110,14 +104,17 @@ class SrcClass(object):
         """Return a dictionary with the local file information for the alias.
 
         This returns the local file information for a given source alias, which
-        will always contain the following keys:
-            'local_file_name' (str): name of the file locally
-            'local_file_exists' (bool): boolean if file exists at path
-                indicated by 'local_file_name'
-        and will also conatin the following if 'local_file_exists' is True:
-            'local_size' (int): size of local file in bytes
-            'local_date' (float): time of last modification time of local file
-                in seconds since the epoch
+        will always contain the following keys::
+
+            'local_file_name' (str):        name of the file locally
+            'local_file_exists' (bool):     boolean if file exists at path
+                                            indicated by 'local_file_name'
+
+        and will also contain the following if 'local_file_exists' is True::
+
+            'local_size' (int):     size of local file in bytes
+            'local_date' (float):   time of last modification time of local
+                                    file in seconds since the epoch
 
         Args:
             alias (str): An alias defined in self.aliases.
@@ -204,7 +201,7 @@ class SrcClass(object):
         '_map' and False otherwise.
 
         Args:
-            alias(str): An alias defined in self.aliases.
+            alias (str): An alias defined in self.aliases.
 
         Returns:
             bool: Whether or not the alias is used for mapping.
@@ -246,11 +243,11 @@ class SrcClass(object):
         and the value_col column as the value.
 
         Args:
-            filename(str): The name of the file containing the information
+            filename (str): The name of the file containing the information
                 needed to produce the maping dictionary.
-            key_col(int): The column containing the key for creating the
+            key_col (int): The column containing the key for creating the
                 dictionary. By default this is column 3.
-            value_col(int): The column containing the value for creating the
+            value_col (int): The column containing the value for creating the
                 dictionary. By default this is column 4.
 
         Returns:
@@ -279,8 +276,8 @@ class SrcClass(object):
                 kn_name = cf.pretty_name(src + '_' + orig_name)
                 map_dict[orig_id] = kn_id + '::' + kn_name
                 n_writer.writerow([kn_id, kn_name])
-                n_meta_writer.writerow([chksm, kn_id, info_type, orig_name])
-                n_meta_writer.writerow([chksm, kn_id, info_type, orig_id])
+                n_meta_writer.writerow([kn_id, info_type, orig_name])
+                n_meta_writer.writerow([kn_id, info_type, orig_id])
         outfile = node_file.replace('node', 'unique_node')
         tu.csu(node_file, outfile)
         outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
@@ -291,50 +288,46 @@ class SrcClass(object):
         """Uses the provided raw_lines file to produce a 2table_edge file, an
         edge_meta file, and a node_meta file (only for property nodes).
 
-        This returns noting but produces the 2table formatted files from the
-        provided raw_lines file:
+        This returns nothing but produces the 2table formatted files from the
+        provided raw_lines file::
+
             raw_lines table (file, line num, line_chksum, rawline)
             2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
-            node_meta (line_cksum, node_num (1 or 2),
-                       info_type (evidence, relationship, experiment, or link),
+            node_meta (node_id,
+                       info_type (alt_alias, relationship, experiment, or link),
                        info_desc (text))
+
         By default this function does nothing (must be overridden)
 
         Args:
-            rawline(str): The path to the raw_lines file
+            rawline (str): The path to the raw_lines file
             version_dict (dict): A dictionary describing the attributes of the
                 alias for a source.
-
-        Returns:
         """
         return
+
+def get_SrcClass(args):
+    """Returns an object of the source class.
+
+    This returns an object of the source class to allow access to its functions
+    if the module is imported.
+
+    Args:
+        args (Namespace): args as populated namespace or 'None' for defaults
+
+    Returns:
+        SrcClass: a source class object
+    """
+    return SrcClass(args)
 
 def compare_versions(src_obj):
     """Return a dictionary with the version information for each alias in the
     source and write a dictionary for each alias to file.
 
     This returns a nested dictionary describing the version information of each
-    alias in the source. The version information is also printed. For each
-    alias the following keys are defined:
-        'source' (str): The source name
-        'alias' (str): The alias name
-        'alias_info' (str): A short string with information about the alias.
-        'is_map' (bool): See is_map.
-        'dependencies' (lists): See get_dependencies.
-        'remote_url' (str): See get_remote_url.
-        'remote_date' (float): See get_remote_file_modified.
-        'remote_version' (str): See get_source_version.
-        'remote_file' (str): File to extract if remote file location is a
-            directory.
-        'remote_size' (int): See get_remote_file_size.
-        'local_file_name' (str): See get_local_file_info.
-        'local_file_exists' (bool): See get_local_file_info.
-        'fetch_needed' (bool): True if file needs to be downloaded from remote
-            source. A fetch will be needed if the local file does not exist,
-            or if the local and remote files have different date modified or
-            file sizes.
+    alias in the source. The version information is also printed.
 
     Args:
         src_obj (SrcClass): A SrcClass object for which the comparison should
@@ -342,7 +335,30 @@ def compare_versions(src_obj):
 
     Returns:
         dict: A nested dictionary describing the version information for each
-            alias described in src_obj.
+            alias described in src_obj.  For each alias the following keys are
+            defined::
+
+                'source' (str):                 The source name,
+                'alias' (str):                  The alias name,
+                'alias_info' (str):             A short string with information
+                                                about the alias,
+                'is_map' (bool):                See is_map,
+                'dependencies' (lists):         See get_dependencies,
+                'remote_url' (str):             See get_remote_url,
+                'remote_date' (float):          See get_remote_file_modified,
+                'remote_version' (str):         See get_source_version,
+                'remote_file' (str):            File to extract if remote file
+                                                location is a directory,
+                'remote_size' (int):            See get_remote_file_size,
+                'local_file_name' (str):        See get_local_file_info,
+                'local_file_exists' (bool):     See get_local_file_info,
+                'fetch_needed' (bool):          True if file needs to be downloaded
+                                                from remote source. A fetch will
+                                                be needed if the local file does
+                                                not exist, or if the local and
+                                                remote files have different date
+                                                modified or file sizes.
+
     """
     version_dict = dict()
     local_dict = dict()
@@ -398,18 +414,23 @@ def compare_versions(src_obj):
     print("printing file_metadata.json")
     return version_dict
 
-def check(module, args=cf.config_args()):
-    """Runs compare_versions (see utilities.compare_versions) on a 'module'
-    object
+def check(module, args=None):
+    """Runs compare_versions(SrcClass) on a 'module' object
 
     This runs the compare_versions function on a 'module' object to find the
     version information of the source and determine if a fetch is needed. The
     version information is also printed.
 
+    Args:
+        module (str): string name of module defining source specific class
+        args (Namespace): args as populated namespace or 'None' for defaults
+
     Returns:
         dict: A nested dictionary describing the version information for each
-            alias described in biogrid.
+            alias described in source.
     """
+    if args is None:
+        args=cf.config_args()
     src_code_dir = os.path.join(args.local_dir, args.code_path, args.src_path)
     sys.path.append(src_code_dir)
     src_module = __import__(module)
@@ -417,20 +438,20 @@ def check(module, args=cf.config_args()):
     version_dict = compare_versions(SrcClass)
     for alias in version_dict:
         iu.import_filemeta(version_dict[alias], args)
-
-    return
+    return version_dict
 
 def main_parse_args():
     """Processes command line arguments.
 
     Expects three positional arguments(start_step, deploy_loc, run_mode) and
-    a number of optional arguments. If argument is missing, supplies default
-    value.
+    a number of optional arguments. If arguments are missing, supplies default
+    values.
 
-    Returns: args as populated namespace
+    Returns:
+        Namespace: args as populated namespace
     """
     parser = ArgumentParser()
-    parser.add_argument('module', help='select SrcClass to check, e.g. biogrid')
+    parser.add_argument('module', help='select SrcClass to check, e.g. dip')
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
     return args
@@ -438,4 +459,3 @@ def main_parse_args():
 if __name__ == "__main__":
     args = main_parse_args()
     check(args.module, args)
-    

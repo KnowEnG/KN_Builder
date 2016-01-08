@@ -1,23 +1,18 @@
 """Utiliites for interacting with the KnowEnG MySQL db through python.
 
-Classes:
-    MySQL: Extends the object class to provide functions neeeded format
-        interacting with the MySQL DB.
+Contains the class MySQL which provides functionality for interacting with
+MySQL database
 
-Functions:
-    combine_tables(str): Combine all of the data imported for the provided
-        alias (str) into a single db
-    create_dictionary(list)->dict: Creates a dictionary from a MySQL fetched
-        results
-    create_mapping_dicts(str): Creates the mapping dictionaries for the
-        provided alias (str)
-    get_database: Returns an object of the MySQL class
-    get_insert_cmd(str)->str: Returns the MySQL command to be used with an
-        insert for the provided step
-    import_ensembl(str): Imports the ensembl data for the provided alias (str)
-        into the KnowEnG database
+Contains module functions::
 
-Variables:
+    combine_tables(alias, args=None)
+    create_dictionary(results)
+    import_nodes(version_dict, args=None)
+    query_all_mappings(version_dict, args=None)
+    create_mapping_dicts(version_dict, args=None)
+    get_database(db=None, args=None)
+    get_insert_cmd(step)
+    import_ensembl(alias, args=None)
 """
 
 import config_utilities as cf
@@ -26,7 +21,7 @@ import os
 import json
 import subprocess
 
-def combine_tables(alias, args=cf.config_args()):
+def combine_tables(alias, args=None):
     """Combine all of the data imported from ensembl for the provided alias
     into a single database.
 
@@ -36,9 +31,10 @@ def combine_tables(alias, args=cf.config_args()):
 
     Args:
         alias (str): An alias defined in ensembl.aliases.
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     alias_db = 'ensembl_' + alias
     tablename = 'knownet_mappings'
     combined_db = 'KnowNet'
@@ -70,15 +66,17 @@ def create_dictionary(results):
     the results, making them into a dictionary.
 
     Args:
-        results: a list of the results returned from a MySQL query
+        results (list): a list of the results returned from a MySQL query
+
     Returns:
+        dict: dictionary with first column as key and second as values
     """
     map_dict = dict()
     for (raw, mapped) in results:
         map_dict[str(raw)] = str(mapped)
     return map_dict
 
-def import_nodes(version_dict, args=cf.config_args()):
+def import_nodes(version_dict, args=None):
     """Imports the gene nodes into the KnowNet nodes and node_species tables.
 
     Queries the imported ensembl nodes and uses the stable ids as nodes for
@@ -88,9 +86,10 @@ def import_nodes(version_dict, args=cf.config_args()):
     Args:
         version_dict (dict): the version dictionary describing the
             source:alias
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     alias = version_dict['alias']
     taxid = version_dict['alias_info']
     alias_db = 'ensembl_' + alias
@@ -106,7 +105,7 @@ def import_nodes(version_dict, args=cf.config_args()):
     tablename = 'KnowNet.node_species'
     db.insert(tablename, cmd)
 
-def query_all_mappings(version_dict, args=cf.config_args()):
+def query_all_mappings(version_dict, args=None):
     """Creates the all mappings dictionary for the provided alias.
 
     Produces a dictionary of ensembl stable mappings and the all unique mappings
@@ -116,9 +115,10 @@ def query_all_mappings(version_dict, args=cf.config_args()):
     Args:
         version_dict (dict): the version dictionary describing the
             source:alias
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     alias = version_dict['alias']
     taxid = version_dict['alias_info']
     database = 'KnowNet'
@@ -153,7 +153,7 @@ def query_all_mappings(version_dict, args=cf.config_args()):
     with open(os.path.join(map_dir, alias + '_all.json'), 'w') as outfile:
         json.dump(map_dict, outfile, indent=4)
 
-def create_mapping_dicts(version_dict, args=cf.config_args()):
+def create_mapping_dicts(version_dict, args=None):
     """Creates the mapping dictionaries for the provided alias.
 
     Produces the ensembl stable mappings dictionary and the all unique mappings
@@ -163,9 +163,10 @@ def create_mapping_dicts(version_dict, args=cf.config_args()):
     Args:
         version_dict (dict): the version dictionary describing the
             source:alias
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     alias = version_dict['alias']
     taxid = version_dict['alias_info']
     database = 'KnowNet'
@@ -190,7 +191,7 @@ def create_mapping_dicts(version_dict, args=cf.config_args()):
         map_dict = create_dictionary(results)
         json.dump(map_dict, outfile, indent=4)
 
-def get_database(db=None, args=cf.config_args()):
+def get_database(db=None, args=None):
     """Returns an object of the MySQL class.
 
     This returns an object of the MySQL class to allow access to its functions
@@ -198,9 +199,13 @@ def get_database(db=None, args=cf.config_args()):
 
     Args:
         db (str): optional db to connect to
+        args (Namespace): args as populated namespace or 'None' for defaults
+
     Returns:
-        class: a source class object
+        MySQL: a source class object
     """
+    if args is None:
+        args=cf.config_args()
     return MySQL(db, args)
 
 def get_insert_cmd(step):
@@ -214,9 +219,9 @@ def get_insert_cmd(step):
     Args:
         step (str): the step indicating the step during the production of the
             combined knownet_mapping tables
+
     Returns:
-        (str): the command to be used with an INSERT INTO statement at this
-            step
+        str: the command to be used with an INSERT INTO statement at this step
     """
     if step == 'gene':
         cmd = ("SELECT DISTINCT xref.dbprimary_acc, xref.display_label, "
@@ -283,7 +288,7 @@ def get_insert_cmd(step):
         cmd = ''
     return cmd
 
-def import_ensembl(alias, args=cf.config_args()):
+def import_ensembl(alias, args=None):
     """Imports the ensembl data for the provided alias into the KnowEnG
     database.
 
@@ -293,9 +298,10 @@ def import_ensembl(alias, args=cf.config_args()):
 
     Args:
         alias (str): An alias defined in ensembl.aliases.
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     database = 'ensembl_' + alias
     db = MySQL(None, args)
     db.init_knownet()
@@ -318,15 +324,18 @@ class MySQL(object):
         conn (object): connection object for the database
         cursor (object): cursor object for the database
     """
-    def __init__(self, database=None, args=cf.config_args()):
+    def __init__(self, database=None, args=None):
         """Init a MySQL object with the provided parameters.
 
         Constructs a MySQL object with the provided parameters, and connect to
         the relevant database.
 
         Args:
-        database (str): the MySQL database to connect to (optional)
+            database (str): the MySQL database to connect to (optional)
+            args (Namespace): args as populated namespace or 'None' for defaults
         """
+        if args is None:
+            args=cf.config_args()
         self.user = args.mysql_user
         self.host = args.mysql_host
         self.port = args.mysql_port
@@ -351,8 +360,6 @@ class MySQL(object):
 
         Args:
             database (str): name of the database to remove from the MySQL server
-
-        Returns:
         """
         self.cursor.execute('DROP DATABASE IF EXISTS ' + database + ';')
         self.conn.commit()
@@ -364,9 +371,6 @@ class MySQL(object):
         already exist. Also imports the edge_type, node_type, and species
         files, but ignores any lines that have the same unique key as those
         already in the tables.
-
-        Args:
-        Returns:
         """
         import_tables = ['node_type.txt', 'edge_type.txt', 'species.txt']
         mysql_dir = os.sep + os.path.join(self.args.code_path, 'mysql')
@@ -384,8 +388,6 @@ class MySQL(object):
 
         Args:
             database (str): name of the database to add to the MySQL server
-
-        Returns:
         """
         self.cursor.execute('CREATE DATABASE IF NOT EXISTS ' + database + ';')
         self.conn.commit()
@@ -397,8 +399,6 @@ class MySQL(object):
 
         Args:
             database (str): name of the database to use from the MySQL server
-
-        Returns:
         """
         self.cursor.execute('USE ' + database + ';')
         self.conn.commit()
@@ -408,10 +408,10 @@ class MySQL(object):
 
         Adds the provided tablename to the MySQL database. If cmd is specified,
         it will create the table using the provided cmd.
+
         Args:
             tablename (str): name of the table to add to the MySQL database
-
-        Returns:
+            cmd (str): optional string to overwrite default create table
         """
         self.cursor.execute('CREATE TABLE IF NOT EXISTS ' + tablename + ' ' +
                             cmd + ';')
@@ -422,11 +422,10 @@ class MySQL(object):
 
         Adds the provided tablename to the MySQL database. If cmd is specified,
         it will create the table using the provided cmd.
+
         Args:
             tablename (str): name of the table to add to the MySQL database
             cmd (str): optional additional command
-
-        Returns:
         """
         self.cursor.execute('CREATE TEMPORARY TABLE IF NOT EXISTS ' + \
                             tablename + ' ' + cmd + ';')
@@ -437,14 +436,13 @@ class MySQL(object):
 
         Loads the data located on the local machine into the provided MySQL
         table. Uses the LOAD DATA INFILE command.
+
         Args:
             filename (str): name of the file to import from
             tablename (str): name of the table to import into
             sep (str): separator for fields in file
             enc (str): enclosing character for fields in file
             cmd (str): optional additional command
-
-        Returns:
         """
         self.cursor.execute("LOAD DATA LOCAL INFILE '" + filename +
                             "' INTO TABLE " + tablename +
@@ -460,8 +458,6 @@ class MySQL(object):
 
         Args:
             tablename (str): name of the table to remove from the MySQL database
-
-        Returns:
         """
         self.cursor.execute('DROP TEMPORARY TABLE IF EXISTS ' + tablename + ';')
         self.conn.commit()
@@ -473,8 +469,6 @@ class MySQL(object):
 
         Args:
             tablename (str): name of the table to remove from the MySQL database
-
-        Returns:
         """
         self.cursor.execute('DROP TABLE IF EXISTS ' + tablename + ';')
         self.conn.commit()
@@ -485,9 +479,10 @@ class MySQL(object):
         Moves the provided tablename to the MySQL database.
 
         Args:
-            tablename (str): name of the table to add to the MySQL database
-
-        Returns:
+            old_database (str): name of the database to move from
+            old_table (str): name of the table to move from
+            new_database (str): name of the database to move to
+            new_table (str): name of the table to move to
         """
         self.cursor.execute('ALTER TABLE ' + old_database + '.' + old_table +
                             ' RENAME ' + new_database + '.' + new_table + ';')
@@ -499,9 +494,10 @@ class MySQL(object):
         Copy the provided tablename to the MySQL database.
 
         Args:
-            tablename (str): name of the table to add to the MySQL database
-
-        Returns:
+            old_database (str): name of the database to move from
+            old_table (str): name of the table to move from
+            new_database (str): name of the database to move to
+            new_table (str): name of the table to move to
         """
         table1 = old_database + '.' + old_table
         table2 = new_database + '.' + new_table
@@ -513,13 +509,9 @@ class MySQL(object):
     def insert(self, tablename, cmd):
         """Insert into tablename using cmd.
 
-        Insert into tablename using cmd.
-
         Args:
             tablename (str): name of the table to add to the MySQL database
             cmd (str): a valid SQL command to use for inserting into tablename
-
-        Returns:
         """
         self.cursor.execute('INSERT INTO ' + tablename + ' ' + cmd + ';')
         self.conn.commit()
@@ -536,8 +528,6 @@ class MySQL(object):
                 GLOBAL, or SESSION
             level (str): isolation level. In order of locking level:
                 SERIALIZABLE, REPEATABLE READ, READ COMMITTED, READ UNCOMMITTED
-
-        Returns:
         """
         cmd = 'SET ' + duration + ' TRANSACTION ISOLATION LEVEL ' + level + ';'
         self.cursor.execute(cmd)
@@ -549,9 +539,8 @@ class MySQL(object):
         the current connection. Transaction persists until the next commit.
 
         Args:
-        level (str): isolation level. In order of locking level:
+            level (str): isolation level. In order of locking level:
                 SERIALIZABLE, REPEATABLE READ, READ COMMITTED, READ UNCOMMITTED
-        Returns:
         """
         self.conn.start_transaction(isolation_level=level)
 
@@ -563,22 +552,16 @@ class MySQL(object):
         Args:
             tablename (str): name of the table to add to the MySQL database
             cmd (str): a valid SQL command to use for inserting into tablename
-
-        Returns:
         """
         self.cursor.execute('REPLACE INTO ' + tablename + ' ' + cmd + ';')
         self.conn.commit()
 
     def insert_ignore(self, tablename, cmd=''):
-        """Insert into tablename using cmd.
-
-        Insert into tablename using cmd.
+        """Insert ignore into tablename using cmd.
 
         Args:
             tablename (str): name of the table to add to the MySQL database
             cmd (str): a valid SQL command to use for inserting into tablename
-
-        Returns:
         """
         self.cursor.execute('INSERT IGNORE INTO ' + tablename + ' ' + cmd + ';')
         self.conn.commit()
@@ -593,7 +576,7 @@ class MySQL(object):
             cmd (str): the SQL command to run on the MySQL server
 
         Returns:
-            (list): the fetched results
+            list: the fetched results
         """
         self.cursor.execute(cmd + ';')
         try:
@@ -617,7 +600,7 @@ class MySQL(object):
                 (optional)
 
         Returns:
-            (list): the fetched results
+            list: the fetched results
         """
         cmd = 'SELECT DISTINCT ' + query + ' FROM ' + table + ' ' + cmd + ';'
         self.cursor.execute(cmd)
@@ -633,8 +616,6 @@ class MySQL(object):
             database (str): name of the database to add to the MySQL server
             sqlfile (str): name of the sql file specifying the format for the
                         database
-
-        Returns:
         """
         self.create_db(database)
         cmd = ['mysql', '-u', self.user, '-h', self.host, '--port', self.port,
@@ -650,10 +631,8 @@ class MySQL(object):
         Args:
             database (str): name of the database to add to the MySQL server
             tablefile (str): name of the txt file specifying the data for the
-                        table
+                table
             import_flag (str): additional flags to pass to mysqlimport
-
-        Returns:
         """
         cmd = ['mysqlimport', '-u', self.user, '-h', self.host, '--port',
                self.port, '--password='+self.passw, import_flags,
@@ -665,10 +644,6 @@ class MySQL(object):
 
         This commits any changes remaining and closes the connection to the
         MySQL server.
-
-        Args:
-
-        Returns:
         """
         self.conn.commit()
         self.conn.close()

@@ -1,35 +1,49 @@
 """Utiliites for running single or multiple steps of the pipeline either
         locally or on the cloud.
 
-Classes:
+Contains module functions::
 
-Functions:
-    run_local_check(args) -> : takes in all command line arguments.  Runs all
-        necessary checks.  If args.run_mode is'PIPELINE', calls next step
-    run_local_fetch(args) -> : takes in all command line arguments.  Runs all
-        necessary fetches.  If args.run_mode is'PIPELINE', calls next step
-    run_local_table(args) -> : takes in all command line arguments.  Runs all
-        necessary tables.  If args.run_mode is'PIPELINE', calls next step
+    run_local_check(args)
+    run_local_fetch(args)
+    run_local_table(args)
+    run_local_conv(args)
+    curl_handler(args, jobname, job_str)
+    list_parents(args, dependencies, response_str, parent_string)
+    run_cloud_check(args)
+    run_cloud_fetch(args)
+    run_cloud_table(args)
+    run_cloud_conv(args)    
+    main_parse_args()
+    main()
 
-    run_cloud_check(args) -> : takes in all command line arguments.  Runs all
-        necessary checks on cloud.  If args.run_mode is'PIPELINE', each job
-        calls its next step
-    run_cloud_fetch(args) -> : takes in all command line arguments and a
-        starting source (-p).  Runs all fetches for all aliases of specified
-        source on cloud.  If args.run_mode is'PIPELINE', each job
-        calls its next step
-    run_cloud_table(args) -> : takes in all command line arguments and a
-        starting source,alias (-p).  Runs all tables for all chunks in the
-        source,alias on cloud.  If args.run_mode is'PIPELINE', each job
-        calls its next step
+Attributes:
+    DEFAULT_START_STEP (str): first step of setup
+    DEFAULT_DEPLOY_LOC (str): where to run setup
+    DEFAULT_RUN_MODE (str): how to run setup
+    POSSIBLE_STEPS (list): list of all steps
+    SETUP_FILES (list): list of setup SrcClasses
+    CHECK_PY (str): check module name
+    FETCH_PY (str): fetch module name
+    TABLE_PY (str): table module name
+    CONV_PY (str): convert module name
+    CURL_PREFIX (list): parts of the chronos curl command
+    
+Examples:
+    To view all optional arguments that can be specified::
 
-    curl_handler(args, jobname, job_str) -> : handles creating and sending
-        jobs to the cloud
-    list_parents(args, dependencies, parent_string) -> parents:
-        given a list of dependencies, creates and tracks the parents required
-        for the job sent to the cloud
+        $ python3 code/pipeline_utilities.py -h
 
-Variables:
+    To run just check step of pipeline locally::
+
+        $ python3 code/pipeline_utilities.py CHECK LOCAL STEP
+
+    To run just fetch step of pipeline locally after completed check::
+
+        $ python3 code/pipeline_utilities.py FETCH LOCAL STEP
+
+    To run all steps of pipeline on cloud::
+
+        $ python3 code/pipeline_utilities.py CHECK CLOUD PIPELINE
 """
 
 from argparse import ArgumentParser
@@ -62,7 +76,8 @@ def main_parse_args():
     a number of optional arguments. If argument is missing, supplies default
     value.
 
-    Returns: args as populated namespace
+    Returns:
+        Namespace: args as populated namespace
     """
     parser = ArgumentParser()
     parser.add_argument('start_step', help='select start step, must be CHECK, \
@@ -96,9 +111,7 @@ def run_local_check(args):
     check_utilities clean() function on each source.
 
     Args:
-        arguments from parse_args()
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args
     """
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
@@ -151,9 +164,7 @@ def run_local_fetch(args):
     file_metadata.json.
 
     Args:
-        arguments from parse_args()
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args
     """
 
     local_code_dir = os.path.join(args.local_dir, args.code_path)
@@ -211,9 +222,7 @@ def run_local_table(args):
     chunk and the file_metadata.json.
 
     Args:
-        arguments from parse_args()
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args
     """
 
     local_code_dir = os.path.join(args.local_dir, args.code_path)
@@ -280,9 +289,7 @@ def run_local_conv(args):
     and the args.
 
     Args:
-        arguments from parse_args()
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args
     """
 
     local_code_dir = os.path.join(args.local_dir, args.code_path)
@@ -350,11 +357,9 @@ def curl_handler(args, jobname, job_str):
     Curls the json object to chronos specified in the input arguments.
 
     Args:
-        args: arguments from parse_args()
-        jobname: name for job on queue
-        job_str: string description of json to submit to run job
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args
+        jobname (str): name for job on queue
+        job_str (str): string description of json to submit to run job
     """
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     jobs_dir = os.path.join(local_code_dir, "chron_jobs")
@@ -399,12 +404,12 @@ def list_parents(args, dependencies, parent_string):
     parents to be added to json job description.
 
     Args:
-        args: arguments from parse_args()
-        dependencies: list of jobs dependencies
-        parent_string: string to map dependencies to parent job names
+        args (Namespace): args as populated namespace from parse_args
+        dependencies (list): list of jobs dependencies
+        parent_string (str): string to map dependencies to parent job names
 
     Returns:
-        parents: list of parents to be added to json job description.
+        list: list of parents to be added to json job description.
     """
     connection = http.client.HTTPConnection(args.chronos)
     connection.request("GET", "/scheduler/jobs")
@@ -460,9 +465,7 @@ def run_cloud_check(args):
     pipeline_utilities FETCH) and curls json to chronos.
 
     Args:
-        args: arguments from parse_args()
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args
     """
     local_code_dir = os.path.join(args.local_dir, args.code_path)
     os.chdir(local_code_dir)
@@ -508,10 +511,8 @@ def run_cloud_fetch(args):
     and curls json to chronos.
 
     Args:
-        args: arguments from parse_args(), must specific --step_paramters(-p) as
-        single source
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args, must
+            specify --step_paramters(-p) as single source
     """
     src = args.step_parameters
     if src is '':
@@ -563,10 +564,8 @@ def run_cloud_table(args):
     and curls json to chronos.
 
     Args:
-        args: arguments from parse_args(), must specific --step_paramters(-p) as
-        single source,alias
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args, must
+            specify --step_paramters(-p) as single source,alias
     """
     src, alias = args.step_parameters.split(",")
     if args.step_parameters is '':
@@ -658,9 +657,8 @@ def run_cloud_conv(args):
     pipeline_utilities CONV) and curls json to chronos.
 
     Args:
-        arguments from parse_args()
-
-    Returns:
+        args (Namespace): args as populated namespace from parse_args, must
+            specify --step_paramters(-p) as single edgefile
     """
     edgefile = os.path.basename(args.step_parameters)
     src = edgefile.split('.')[0]
@@ -712,10 +710,6 @@ def main():
 
     Parses the arguments and runs the specified part of the pipeline using the
     specified local or cloud resources.
-
-    Args:
-
-    Returns:
     """
 
     args = main_parse_args()

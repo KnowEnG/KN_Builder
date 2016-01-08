@@ -1,19 +1,33 @@
 """Utiliites for fetching and formatting source for the Knowledge Network (KN)
 that has been updated.
 
-Classes:
+Contains module functions::
 
-Functions:
-    download(version_dict) -> str: takes a dictionary object version_dict and
-        determines if the described alias needs to be downloaded. If so,
-        downloads the files. In either case, it returns the filename of the
-        path to the file.
+    download(version_dict)
+    chunk(filename, total_lines, args)
+    raw_line(filename)
+    get_md5_hash(filename)
+    get_line_count(filename)
+    main_parse_args()
+    main(version_json, args=None)
 
-Variables:
-    ARCHIVES: list of supported archive formats.
-    CHUNK_SZ: the max size (number of lines) for file chunks
-    DIR: the relative path to data/source/alias/ from location of
+Attributes:
+    ARCHIVES (list): list of supported archive formats.
+    CHUNK_SZ (int): the max size (number of lines) for file chunks
+    DIR (str): the relative path to data/source/alias/ from location of
         script execution
+    MAX_CHUNKS (int): maximum number of chunks to split file into
+
+Examples:
+    To run fetch on a single source (e.g. dip) after check complete::
+
+        $ cd data/dip/PPI
+        $ python3 ../../../code/fetch_utilities.py file_metadata.json
+
+    To view all optional arguments that can be specified::
+
+        $ python3 code/fetch_utilities.py -h
+
 """
 
 import urllib.request
@@ -46,7 +60,7 @@ def download(version_dict):
 
     Args:
         version_dict (dict): A dictionary describing the attributes of the
-        alias for a source.
+            alias for a source.
 
     Returns:
         str: The relative path to the newly downloaded file.
@@ -109,10 +123,10 @@ def chunk(filename, total_lines, args):
     then returns the number of chunks and sets up the raw_lines table in the
     format: (file, line num, line_chksum, rawline)
 
-
     Args:
-        filename: the file to split into chunks
-        total_lines: the number of lines in the file at filename
+        filename (str): the file to split into chunks
+        total_lines (int): the number of lines in the file at filename
+        args (Namespace): args as populated namespace or 'None' for defaults
 
     Returns:
         int: the number of chunks filename was split into
@@ -165,7 +179,7 @@ def raw_line(filename):
     raw_lines table (file, line num, line_chksum, rawline)
 
     Args:
-        filename: the file to convert to raw_line table format
+        filename (str): the file to convert to raw_line table format
 
     Returns:
         str: the path to the output file
@@ -197,7 +211,7 @@ def get_md5_hash(filename):
     producing both the md5 hash and a count of the number of lines.
 
     Args:
-        filename: the file to split into chunks
+        filename (str): the file to split into chunks
 
     Returns:
         str: the md5 hash of the file at filename
@@ -218,7 +232,7 @@ def get_line_count(filename):
     producing a count of the number of lines.
 
     Args:
-        filename: the file to split into chunks
+        filename (str): the file to split into chunks
 
     Returns:
         int: the number of lines in the file at int
@@ -229,7 +243,7 @@ def get_line_count(filename):
             line_count += 1
     return line_count
 
-def main(version_json, args=cf.config_args()):
+def main(version_json, args=None):
     """Fetches and chunks the source:alias described by version_json.
 
     This takes the path to a version_json (source.alias.json) and runs fetch
@@ -243,9 +257,10 @@ def main(version_json, args=cf.config_args()):
 
     Args:
         version_json (str): path to a json file describing the source:alias
-
-    Returns:
+        args (Namespace): args as populated namespace or 'None' for defaults
     """
+    if args is None:
+        args=cf.config_args()
     with open(version_json, 'r') as infile:
         version_dict = json.load(infile)
     src_code_dir = os.path.join(args.local_dir, args.code_path, args.src_path)
@@ -291,9 +306,11 @@ def main(version_json, args=cf.config_args()):
 def main_parse_args():
     """Processes command line arguments.
 
-    If argument is missing, supplies default     value.
+    Expects one positional argument (metadata_json) and number of optional
+    arguments. If arguments are missing, supplies default values.
 
-    Returns: args as populated namespace
+    Returns:
+        Namespace: args as populated namespace
     """
     parser = ArgumentParser()
     parser.add_argument('metadata_json', help='json file produced from check, \
