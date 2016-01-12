@@ -1,9 +1,10 @@
-.. _modules-ref:
+.. _formats-ref:
 
 KnowNet Pipeline Data Formats
 *****************************
 
-.. _file_metadata-label
+.. _file-metadata-label:
+
 file_metadata
 -------------
 ::
@@ -80,3 +81,4 @@ node_meta
     'n1id' (str):           node1 mapped identifier
     'info_type' (str):      type of metadate: 'alt_alias', 'link', etc
     'info_desc' (str):      description string of metadata
+
