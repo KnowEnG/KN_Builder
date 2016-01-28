@@ -57,4 +57,5 @@ LINCS_down_signature	2	1	0	Genes which were shown to be differential down regula
 LINCS_cell_type	2	2	0	Cell type from LINCS experiment	binary value	1	1
 LINCS_perturbagen	2	2	0	Perturbagen from LINCS experiment	binary value	1	1
 LINCS_perturbagen_time	2	2	0	Perturbagen time from LINCS experiment	binary value	1	1
-LINCS_perturbagen_dose	2	2	0	Perturbagen time from LINCS experiment	binary value	1	1
+LINCS_perturbagen_dose	2	2	0	Perturbagen dose from LINCS experiment	binary value	1	1
+LINCS_perturbagen_type	2	2	0	Perturbagen type from LINCS experiment	binary value	1	1
