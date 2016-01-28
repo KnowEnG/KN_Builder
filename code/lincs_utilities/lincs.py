@@ -353,7 +353,8 @@ class Lincs(SrcClass):
 
         #static column values
         et_map_list = ['LINCS_perturbagen', 'LINCS_cell_type', \
-                    'LINCS_perturbagen_time', 'LINCS_perturbagen_dose']
+                    'LINCS_perturbagen_time', 'LINCS_perturbagen_dose', \
+                    'LINCS_perturbagen_type']
         info_type = "alt_alias"
         weight = 1
 
@@ -384,7 +385,8 @@ class Lincs(SrcClass):
                     dose = line[6]
                 else:
                     dose = line[6] + '_' + line[7]
-                metadata = [pert, cell, time, dose]
+                pert_type = line[23]
+                metadata = [pert, cell, time, dose, pert_type]
                 n_writer.writerow([n1_map, n1_map])
                 n_meta_writer.writerow([n1_map, info_type, n1])
                 for i in range(0, len(metadata)):
