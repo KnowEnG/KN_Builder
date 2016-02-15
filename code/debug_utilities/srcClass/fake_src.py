@@ -219,10 +219,11 @@ class Fake_src(SrcClass):
             n_meta_writer = csv.writer(n_meta, delimiter='\t', \
                 lineterminator='\n')
             for line in infile:
-                line = line.strip().split('\t')
+                line = line.replace('"', '').strip().split('\t')
                 if line[1] == '1':
                     continue
                 chksm = line[2]
+
                 (n1id, n1hint, n1type, n1spec, n2id, n2hint, n2type, n2spec, \
                     et_hint, score, info) = line[3:]
                 info_type = 'fake_info'
