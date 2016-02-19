@@ -39,7 +39,8 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
                 'edge2line': 'edge2line.edge_hash = edge2line.edge_hash',
                 'edge_meta': 'edge_meta.edge_hash = edge_meta.edge_hash',
                 'edge': ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
-                    '{0}.weight)')}
+                    '{0}.weight)'),
+                'status': 'status.edge_hash = status.edge_hash'}
     if not dup_cmd and table in table_cmds:
         dup_cmd = table_cmds[table]
     db = mu.get_database('KnowNet', args)
@@ -146,6 +147,34 @@ def import_edge(edgefile, args=None):
             continue
         import_file(filename, table, ld_cmd, dup_cmd, args)
 
+def import_status(statusfile, args=None):
+    """Imports the provided status file and any corresponding meta files into
+    the KnowEnG MySQL database.
+
+    Loads the data into a temporary table in MySQL. It then queries from the
+    temporary table into the corresponding permanent table. If a duplication
+    occurs during the query, it updates to the maximum edge score if it is an
+    edge file, and ignores if it is metadata.
+
+    Args:
+        status (str): path to the file to be imported
+        args (Namespace): args as populated namespace or 'None' for defaults
+    """
+    if args is None:
+        args=cf.config_args()
+    imports = ['node_meta', 'edge2line', 'status', 'edge_meta']
+    #uedge_cmd  = ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
+    #                '{0}.weight)')
+    for table in imports:
+        ld_cmd = ''
+        dup_cmd = ''
+        if table == 'status':
+            filename = statusfile
+        else:
+            filename = statusfile.replace('conv', table)
+        if not os.path.isfile(filename):
+            continue
+        import_file(filename, table, ld_cmd, dup_cmd, args)
 
 def import_nodemeta(nmfile, args=None):
     """Imports the provided node_meta file and any corresponding meta files into

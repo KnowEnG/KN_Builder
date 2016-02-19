@@ -14,10 +14,10 @@ Examples:
     To run conv on a single source (e.g. dip) after table complete::
 
         $ python3 code/conv_utilities.py data/dip/PPI/chunks/dip.PPI.edge.1.txt
-        
+
     To run conv on a file of gene names::
 
-        $ python3 code/conv_utilities.py -m LIST list_of_gene_names.txt    
+        $ python3 code/conv_utilities.py -m LIST list_of_gene_names.txt
 
     To view all optional arguments that can be specified::
 
@@ -78,10 +78,13 @@ def main(edgefile, args=None):
             else:
                 n2_map = n2
  #           print("\t".join([taxid, hint, n1, n1_map, n2, n2_map]))
-            chksum = line[0]
+            chksum = line[0] #line chksum
             et_map = line[9]
             weight = line[10]
-            t_chksum = line[11]
+            t_chksum = line[11] #raw edge chksum
+            hasher = hashlib.md5()
+            hasher.update('\t'.join([n1_map, n2_map, et_map]).encode())
+            e_chksum = hasher.hexdigest()
             if 'unmapped' in n1_map:
                 status = 'unmapped'
                 status_desc = n1_map
@@ -90,16 +93,15 @@ def main(edgefile, args=None):
                 status_desc = n2_map
             else:
                 status = 'production'
-                status_desc = ''
-                hasher = hashlib.md5()
-                hasher.update('\t'.join([n1_map, n2_map, et_map]).encode())
-                e_chksum = hasher.hexdigest()
-                writer.writerow([n1_map, n2_map, et_map, weight, e_chksum, chksum])
-            s_writer.writerow([t_chksum, n1_map, n2_map, et_map, status,
-                            status_desc, chksum])
+                status_desc = 'mapped'
+                writer.writerow([n1_map, n2_map, et_map, weight, e_chksum, \
+                    chksum])
+            s_writer.writerow([n1_map, n2_map, et_map, weight, e_chksum, \
+                chksum, t_chksum, status, status_desc])
     tu.csu(conv_file, uc_file, [1, 2, 3, 4, 5])
     tu.csu(conv_file, ue2l_file, [5, 6])
-    iu.import_edge(uc_file, args)
+    #iu.import_edge(uc_file, args)
+    iu.import_status(status_file, args)
 
 def map_list(namefile, args=None):
     """Maps the nodes for the provided namefile.
