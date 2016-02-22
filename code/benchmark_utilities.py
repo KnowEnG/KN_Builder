@@ -2,7 +2,7 @@
 
 Class Description:
 
-Used to benchmark database function
+Used to benchmark database functionalities
 
 """
 
@@ -16,10 +16,10 @@ import threading
 import logging
 from time import time, sleep
 from random import randrange
-
+import math
+import sys
 
 class MySQLBenchmark:
-    
     """
     Attributes:
         host (str): the MySQL db hostname
@@ -55,8 +55,8 @@ class MySQLBenchmark:
                                     db=self.database,
                                     client_flags=[sql.ClientFlag.LOCAL_FILES])
         self.cursor = self.conn.cursor()
-        
-
+    
+    
     """
     Description: The database has to be configured to be able to generate the
     statistics for queries that we use. This is as per the following document: 
@@ -70,14 +70,13 @@ class MySQLBenchmark:
         check_query = "SELECT * FROM performance_schema.setup_consumers where name = 'events_statements_history_long';"
         self.cursor.execute(config_query1)
         
-    
     def config_db_for_profiling(self):
-     
+            
         #This enables the stage* performance tables"
         config_query1 = "update performance_schema.setup_instruments set enabled='YES', timed='YES';"    
         #This enables the events_statements_history* and events_stages_history* performance  tables
         config_query2 = "update performance_schema.setup_consumers set enabled='YES';"
-        
+
         #Need to check if permissions are allowed for the user to make this adjustment
         self.cursor.execute(config_query1)
         self.cursor.execute(config_query2)
@@ -92,13 +91,64 @@ class MySQLBenchmark:
         end = time()
         print("Time taken to execute connections: %d is %f", stress_level, (end-start))
         
-    def multithreaded_stress_test(self):
+    def multithreaded_stress_test(self, table, key):
         """
         Description:
         
         Benchmarks lock performance a series of multithreaded inserts into database
+        Implements a huerisitic to generate equal partition bins of size 10 of the data.
         """
-        pass
+        heuristic_indexes = [0,1,2,3,4,5,6,7,8,9]
+        selected_heuristic = -1
+        
+        for heuristic in heuristic_indexes:
+            heuristic_query = "select CAST(substring(tmp."+key+",char_length(tmp."+key+")-"+str(heuristic)+",1) AS UNSIGNED) as bin, count(*) from (select * from "+table+") as tmp group by bin;"
+            
+            selected_heuristic = heuristic
+            total = 0
+            tmp_list = []
+            
+            for result in self.cursor.execute(heuristic_query,multi=True):
+                res = result.fetchall()
+                
+                for step in res:
+                    total = total + int(step[1])
+                    tmp_list.append(int(step[1]))
+                    
+            print("Temp List: "+str(tmp_list))
+            print("Total: "+str(total))
+            if(self.__checkequalbins(tmp_list, total, 0.05)):
+                print("The huerisitic value is "+str(selected_heuristic))
+                break
+    
+        threads = []
+        for i in heuristic_indexes:
+            multithreaded_query = "select * from (select CAST(substring(tmp."+key+",char_length(tmp."+key+")-"+str(selected_heuristic)+",1) AS UNSIGNED) as bin, tmp.* from (select * from "+table+") as tmp) as data where data.bin="+str(i)+"";
+            threads.append(BenchmarkWorker(self.host,self.port,self.user,self.passw,self.database, multithreaded_query))
+
+        for th in threads:
+            # This causes the thread to run()
+            th.start() 
+            
+        for th in threads:
+            # This waits until the thread has completed
+            th.join() 
+            
+
+    def __checkequalbins(self, bin_list, total, percentallowance):
+        '''
+        Private method used to determine if the bins are at least percentallowance * total
+        This is a test to see if the bins are mostly reasonably sized bins
+        '''
+        allowance = int(percentallowance*total)
+        print("The allowance is "+str(allowance))
+        
+        for bin_size in bin_list:
+            if(bin_size < allowance):
+                return False
+        
+        return True
+        
         
     def overlapping_multithreaded_select_test(self):
         """
@@ -106,7 +156,7 @@ class MySQLBenchmark:
         done by multiple connections. Identifies lock bottlenecks.
         """
         pass
-
+    
     def query_execution_time(self, query):
         start = time()
         self.cursor.execute(query)
@@ -131,7 +181,6 @@ class MySQLBenchmark:
         query_breakdown_query ="SELECT event_name AS Stage, TRUNCATE(TIMER_WAIT/1000000000000,6) AS Duration FROM performance_schema.events_stages_history_long WHERE NESTING_EVENT_ID="+id+";"
         for result in self.cursor.execute(query_breakdown_query,multi=True):
             print(result.fetchall())
-            
     
     def query_execution_plan(self, query):
         explain_query = "EXPLAIN EXTENDED  "+str(query)+""
@@ -172,35 +221,38 @@ class MySQLBenchmark:
         print(table_desc)
         return table_desc
 
-    class BenchmarkWorker(threading.Thread):
-        def __init__(self, id_min, id_max, database,conn):
-            super(Worker, self).__init__()
-            self._stop = threading.Event()
-            self.id_min = id_min
-            self.id_max = id_max
-            self.database = database
-            self.conn = conn
-
-            def stop(self):
-                #logging.debug('Stopping...')
-                self._stop.set()
-
-            def stopped(self):
-                return self._stop.isSet()
-
-            def run(self):
-                #logging.debug('Starting...')
-                while not self.stopped():
-                    start = time()
-                    conn = self.conn
-                    cur = conn.cursor()
-                    for i in xrange(settings.SELECT_ROW_COUNT):
-                        cur.execute('SELECT * FROM ' + self.database + ' WHERE id = %s', (randrange(self.id_min, self.id_max),))
-                    conn.commit()
-                    cur.close()
-                    conn.close()
-                    end = time()
-                    #logging.info('Selecting %s rows from indexes between [%s, %s] took %.2f seconds...' % (settings.SELECT_ROW_COUNT, self.id_min, self.id_max, (end - start),))
-
-
-
+class BenchmarkWorker(threading.Thread):
+    def __init__(self, host, port, user, password, database, query):
+        threading.Thread.__init__(self)
+        self._stop = threading.Event()
+        self.query = query
+        self.database = database
+        self.conn = sql.connect(host=host, port=port,
+                                user=user, password=password,
+                                db=database,
+                                client_flags=[sql.ClientFlag.LOCAL_FILES])
+        
+    def stop(self):
+        print("Stoppping...")
+        self._stop.set()
+        
+    def stopped(self):
+        return self._stop.isSet()
+            
+    def run(self):
+        print("Starting with query: "+self.query)
+        #while not self.stopped():                
+        cur = self.conn.cursor()
+        start = time()
+        try:
+            a = cur.execute(self.query)
+            res = a.fetchall()
+            #self.conn.commit()
+        except Exception as e:
+            print("Thread terminating with "+str(e))
+            sys.exit(0)
+        end = time()
+        cur.close()
+        self.conn.close()
+        print("The total time taken to run query: "+self.query+" is "+str(end-start))
+        #logging.info('Selecting %s rows from indexes between [%s, %s] took %.2f seconds...' % (settings.SELECT_ROW_COUNT, self.id_min, self.id_max, (end - start),))    
