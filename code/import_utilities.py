@@ -143,6 +143,9 @@ def import_edge(edgefile, args=None):
             filename = edgefile
         else:
             filename = edgefile.replace('conv', table)
+        ufile = filename.replace(table, 'unique_' + table)
+        if os.path.isfile(ufile):
+            filename = ufile
         if not os.path.isfile(filename):
             continue
         import_file(filename, table, ld_cmd, dup_cmd, args)
@@ -171,7 +174,10 @@ def import_status(statusfile, args=None):
         if table == 'status':
             filename = statusfile
         else:
-            filename = statusfile.replace('conv', table)
+            filename = statusfile.replace('status', table)
+        ufile = filename.replace(table, 'unique_' + table)
+        if os.path.isfile(ufile):
+            filename = ufile
         if not os.path.isfile(filename):
             continue
         import_file(filename, table, ld_cmd, dup_cmd, args)
