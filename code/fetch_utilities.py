@@ -13,7 +13,6 @@ Contains module functions::
 
 Attributes:
     ARCHIVES (list): list of supported archive formats.
-    CHUNK_SZ (int): the max size (number of lines) for file chunks
     DIR (str): the relative path to data/source/alias/ from location of
         script execution
     MAX_CHUNKS (int): maximum number of chunks to split file into
@@ -46,7 +45,6 @@ import import_utilities as iu
 from argparse import ArgumentParser
 
 ARCHIVES = ['.zip', '.tar', '.gz']
-CHUNK_SZ = float(500000)
 MAX_CHUNKS = 500
 DIR = "."
 
