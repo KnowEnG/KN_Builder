@@ -125,7 +125,7 @@ class SrcClass(object):
         f_dir = os.path.join(self.args.local_dir, self.args.data_path, self.name)
         f_dir = os.path.join(f_dir, alias)
         url = self.get_remote_url(alias)
-        filename = os.path.basename(url)
+        filename = os.path.basename(url).replace('%20', '_')
         file = os.path.join(f_dir, filename)
         local_dict = dict()
         local_dict['local_file_name'] = filename
