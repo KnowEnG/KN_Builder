@@ -47,11 +47,13 @@ edge
     'n1name' (str):         node1 name to map from original source
     'n1hint' (str):         suggestion of node1 name type to aid mapping
     'n1type' (str):         type of node1: 'gene', 'property'
-    'n1spec' (int):         taxon id of node1 species, 0 if property
+    'n1spec' (int):         taxon id of node1 species, 0 if property, 
+                            'unknown' otherwise
     'n2name' (str):         node2 name to map from original source
     'n2hint' (str):         suggestion of node2 name type to aid mapping
     'n2type' (str):         type of node2: 'gene', 'property'
-    'n2spec' (int):         taxon id of node2 species, 0 if property
+    'n2spec' (int):         taxon id of node2 species, 0 if property, 
+                            'unknown' otherwise
     'et_hint' (str):        name / hint of edge type
     'score' (float):        score for edge
     'edge_chksum' (int):    checksum of raw edge generated from source line
