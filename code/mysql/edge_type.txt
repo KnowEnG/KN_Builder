@@ -59,3 +59,17 @@ LINCS_perturbagen	2	2	0	Perturbagen from LINCS experiment	binary value	1	1
 LINCS_perturbagen_time	2	2	0	Perturbagen time from LINCS experiment	binary value	1	1
 LINCS_perturbagen_dose	2	2	0	Perturbagen dose from LINCS experiment	binary value	1	1
 LINCS_perturbagen_type	2	2	0	Perturbagen type from LINCS experiment	binary value	1	1
+pathcom_controls-state-change-of	1	1	0	First protein controls a reaction that changes the state of the second protein	binary value	1	1
+pathcom_controls-transport-of	1	1	0	First protein controls a reaction that changes the cellular location of the second protein	binary value	1	1
+pathcom_controls-phosphorylation-of	1	1	0	First protein controls a reaction that changes the phosphorylation status of the second protein	binary value	1	1
+pathcom_controls-expression-of	1	1	0	First protein controls a conversion or a template reaction that changes expression of the second protein	binary value	1	1
+pathcom_catalysis-precedes	1	1	0	First protein controls a reaction whose output molecule is input to another reaction controled by the second protein	binary value	1	1
+pathcom_in-complex-with	1	1	1	Proteins are participants of the same molecular interaction	binary value	1	1
+pathcom_neighbor-of	1	1	1	Proteins are participants or controlers of the same interaction	binary value	1	1
+pathcom_consumption-controled-by	3	1	0	The small molecule is consumed by a reaction that is controled by a protein	binary value	1	1
+pathcom_controls-production-of	1	3	0	The protein controls a reaction of which the small molecule is an output	binary value	1	1
+pathcom_controls-transport-of-chemical	1	3	0	The protein controls a reaction that changes cellular location of the small molecule	binary value	1	1
+pathcom_chemical-affects	3	1	0	A small molecule has an effect on the protein state	binary value	1	1
+pathcom_reacts-with	3	3	1	Small molecules are input to a biochemical reaction	binary value	1	1
+pathcom_used-to-produce	3	3	0	A reaction consumes a small molecule to produce another small molecule	binary value	1	1
+pathcom_pathway	2	1	0	Membership of gene in a pathway	binary value	1	1
