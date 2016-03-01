@@ -30,8 +30,11 @@ import table_utilities as tu
 import import_utilities as iu
 from argparse import ArgumentParser
 import csv
+import sys
 import hashlib
 import os
+
+csv.field_size_limit(sys.maxsize)
 
 DEFAULT_HINT = ''
 DEFAULT_TAXON = 9606
@@ -60,6 +63,7 @@ def main(edgefile, args=None):
     status_file = edgefile.replace('edge', 'status')
     uc_file = edgefile.replace('edge', 'unique_conv')
     ue2l_file = edgefile.replace('edge', 'unique_edge2line')
+    us_file = edgefile.replace('edge', 'unique_status')
     with open(edgefile, 'r') as infile, \
         open(conv_file, 'w') as e_map, \
         open(status_file, 'w') as e_stat:
@@ -100,6 +104,7 @@ def main(edgefile, args=None):
                 chksum, t_chksum, status, status_desc])
     tu.csu(conv_file, uc_file, [1, 2, 3, 4, 5])
     tu.csu(conv_file, ue2l_file, [5, 6])
+    tu.csu(status_file, us_file)
     #iu.import_edge(uc_file, args)
     iu.import_status(status_file, args)
 
