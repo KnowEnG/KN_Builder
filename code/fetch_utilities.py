@@ -119,7 +119,7 @@ def chunk(filename, total_lines, args):
     ceiling(num_lines/args.chunk_size) lines each.
 
     This takes the path to a file and reads through the file, splitting it
-    into equal chunks with each of size ceiling(num_lines/CHUNK_SZ). It
+    into equal chunks with each of size ceiling(num_lines/args.chunk_size). It
     then returns the number of chunks and sets up the raw_lines table in the
     format: (file, line num, line_chksum, rawline)
 
@@ -315,8 +315,6 @@ def main_parse_args():
     parser = ArgumentParser()
     parser.add_argument('metadata_json', help='json file produced from check, \
                         e.g. file_metadata.json')
-    parser.add_argument('-cs', '--chunk_size', help='lines per chunk',
-                        default=CHUNK_SZ)
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
     return args

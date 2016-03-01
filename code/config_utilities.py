@@ -20,7 +20,8 @@ Attributes:
 
     DEFAULT_REDIS_URL (str): location of Redis db
     DEFAULT_REDIS_PORT (int): port for Redis db
-    DEFAULT_REDIS_PASS (str): password for Redis db   
+    DEFAULT_REDIS_PASS (str): password for Redis db
+    DEFAULT_CHUNK_SZ (int): the max size (number of lines) for file chunks
 """
 from argparse import ArgumentParser
 import os
@@ -45,6 +46,9 @@ DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
 DEFAULT_REDIS_PORT = '6379'
 DEFAULT_REDIS_PASS = 'KnowEnG'
 
+DEFAULT_CHUNK_SZ = float(500000)
+
+
 def add_config_args(parser):
     """Add global configuation options to command line arguments.
 
@@ -53,7 +57,7 @@ def add_config_args(parser):
     Args:
         parser (argparse.ArgumentParser): a parser to add global config opts to
 
-    Returns: 
+    Returns:
         argparse.ArgumentParser: parser with appended global options
     """
     parser.add_argument('-i', '--image', help='docker image name for \
@@ -84,13 +88,15 @@ def add_config_args(parser):
                         default=DEFAULT_REDIS_PORT)
     parser.add_argument('-rps', '--redis_pass', help='password for Redis db',
                         default=DEFAULT_REDIS_PASS)
+    parser.add_argument('-cs', '--chunk_size', help='lines per chunk',
+                        default=DEFAULT_CHUNK_SZ)
     return parser
 
 
 def config_args():
     """Create a default parser with option defaults
 
-    Returns: 
+    Returns:
         Namespace: args as populated namespace
     """
     parser = ArgumentParser()
@@ -107,7 +113,7 @@ def cloud_config_opts(args, config_opts):
         args (Namespace): args as populated namespace
         config_opts (list): list of command line arguments
 
-    Returns: 
+    Returns:
         str: string for command line arguments on cloud
     """
     if '-ld' not in config_opts:
@@ -122,7 +128,7 @@ def cloud_template_subs(args, job_str):
         args (Namespace): args as populated namespace
         job_str (str): json job as string with tmp placeholder values
 
-    Returns: 
+    Returns:
         str: json job as string with cloud tmp values replaced
     """
 
@@ -142,7 +148,7 @@ def pretty_name(orig_name, endlen=35):
         orig_name (str): name string before conversion
         endlen (int): max length of final pretty string
 
-    Returns: 
+    Returns:
         str: string after formatting changes
     """
     orig_name = re.sub('[^a-zA-Z0-9]', '_', orig_name)
