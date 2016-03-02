@@ -68,13 +68,23 @@ class MySQLBenchmark:
     def check_db_set_for_profiling(self):
         
         check_query = "SELECT * FROM performance_schema.setup_consumers where name = 'events_statements_history_long';"
-        self.cursor.execute(config_query1)
+        self.cursor.execute(check_query)
+        result = self.cursor.fetchall()
+        if(len(result) != 1):
+            print("Error executing check query or unexpected output.")
+            return False
+        else:
+            if(result[0][1] != 'YES'):
+                return False
+            else:
+                return True
+            
         
     def config_db_for_profiling(self):
             
         #This enables the stage* performance tables"
         config_query1 = "update performance_schema.setup_instruments set enabled='YES', timed='YES';"    
-        #This enables the events_statements_history* and events_stages_history* performance  tables
+        ata#This enables the events_statements_history* and events_stages_history* performance  tables
         config_query2 = "update performance_schema.setup_consumers set enabled='YES';"
 
         #Need to check if permissions are allowed for the user to make this adjustment
@@ -116,11 +126,11 @@ class MySQLBenchmark:
 
         heuristic_indexes = [0,1,2,3,4,5,6,7,8,9]
         selected_heuristic = -1
+        minbinproportion = 0.05
         
         for heuristic in heuristic_indexes:
             heuristic_query = "select CAST(substring(tmp."+key+",char_length(tmp."+key+")-"+str(heuristic)+",1) AS UNSIGNED) as bin, count(*) from (select * from "+table+") as tmp group by bin;"
             
-            selected_heuristic = heuristic
             total = 0
             tmp_list = []
             
@@ -132,8 +142,14 @@ class MySQLBenchmark:
                     tmp_list.append(int(step[1]))
                     
             if(self.__checkequalbins(tmp_list, total, 0.05)):
+                selected_heuristic = heuristic
                 print("The huerisitic value is "+str(selected_heuristic))
                 break
+        
+        #Check to determine if there is a selected heuristic value that meets the checkequalbins requirement
+        if(selected_heuristic == -1):
+            print("The heuristics provided are unable to select a proportionately-sized bin samples where each bin contains at least "+str(minbinproportion*100.0)+"% of the dataset.")
+            sys.exit(0)
     
         threads = []
         thread_data = {'num_threads':len(heuristic_indexes),'total_time':0.0,'thread_timings':[]}
@@ -173,11 +189,11 @@ class MySQLBenchmark:
         """
         heuristic_indexes = [0,1,2,3,4,5,6,7,8,9]
         selected_heuristic = -1
+        minbinproportion = 0.05
         
         for heuristic in heuristic_indexes:
             heuristic_query = "select CAST(substring(tmp."+key+",char_length(tmp."+key+")-"+str(heuristic)+",1) AS UNSIGNED) as bin, count(*) from (select * from "+table+") as tmp group by bin;"
             
-            selected_heuristic = heuristic
             total = 0
             tmp_list = []
             
@@ -188,9 +204,16 @@ class MySQLBenchmark:
                     total = total + int(step[1])
                     tmp_list.append(int(step[1]))
                     
-            if(self.__checkequalbins(tmp_list, total, 0.05)):
+            if(self.__checkequalbins(tmp_list, total, minbinproportion)):
+                selected_heuristic = heuristic
                 print("The huerisitic value is "+str(selected_heuristic))
                 break
+        
+        #Check to determine if there is a selected heuristic value that meets the checkequalbins requirement
+        if(selected_heuristic == -1):
+            print("The heuristics provided are unable to select a proportionately-sized bin samples where each bin contains at least "+str(minbinproportion*100.0)+"% of the dataset.")
+            sys.exit(0)
+                    
     
         threads = []
         thread_data = {'num_threads':len(heuristic_indexes),'total_time':0.0,'thread_timings':[]}
@@ -216,18 +239,30 @@ class MySQLBenchmark:
         
     
     def query_execution_time(self, query):
+        '''
+        Description: Obtains the query execution time for the given query string
+        '''
         start = time()
         self.cursor.execute(query)
         end = time()
         print("Time taken to execute QUERY:"+query+", is "+str(end-start))
         
     def get_query_id(self, query):
-        get_id_query = "SELECT EVENT_ID, TRUNCATE(TIMER_WAIT/1000000000000,6) as Duration, SQL_TEXT FROM performance_schema.events_statements_history_long WHERE SQL_TEXT like '%"+str(query)+"%';"
-        print(get_id_query)
-        for result in self.cursor.execute(get_id_query,multi=True):
-            data = result.fetchall()
-            print(data)
-            return data[0][0]
+        '''
+        Gets the unique query ID for the latest query that is of the query string provided.
+        Obtains the latest query ID by ordering the data by END_EVENT_ID and limiting the resultset to 1
+        '''
+        get_id_query = "SELECT EVENT_ID, TRUNCATE(TIMER_WAIT/1000000000000,6) as Duration, SQL_TEXT FROM performance_schema.events_statements_history_long WHERE SQL_TEXT = '"+str(query)+"' order by END_EVENT_ID desc limit 1;"
+        #print(get_id_query)
+        
+        #Extracting query_id for the provided query string
+        self.cursor.execute(get_id_query)
+        qids = self.cursor.fetchall()
+        if(qids == None):
+            print("Query does not exist in history or performance schema not enabled.")
+        else:
+            print(qids)
+            return qids[0][0]
         
     """
     Obtains the breakdown of generating the MySQL query in terms of seconds
