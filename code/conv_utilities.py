@@ -59,16 +59,13 @@ def main(edgefile, args=None):
         iu.import_edge(edgefile, args)
         return
     rdb = ru.get_database(args)
-    conv_file = edgefile.replace('edge', 'conv')
     status_file = edgefile.replace('edge', 'status')
     uc_file = edgefile.replace('edge', 'unique_conv')
     ue2l_file = edgefile.replace('edge', 'unique_edge2line')
     us_file = edgefile.replace('edge', 'unique_status')
     with open(edgefile, 'r') as infile, \
-        open(conv_file, 'w') as e_map, \
         open(status_file, 'w') as e_stat:
         reader = csv.reader(infile, delimiter = '\t')
-        writer = csv.writer(e_map, delimiter = '\t', lineterminator='\n')
         s_writer = csv.writer(e_stat, delimiter = '\t', lineterminator='\n')
         for line in reader:
             (n1, hint, ntype, taxid) = line[1:5]
@@ -81,7 +78,6 @@ def main(edgefile, args=None):
                 n2_map = ru.conv_gene(rdb, n2, hint, taxid)
             else:
                 n2_map = n2
- #           print("\t".join([taxid, hint, n1, n1_map, n2, n2_map]))
             chksum = line[0] #line chksum
             et_map = line[9]
             weight = line[10]
@@ -98,14 +94,10 @@ def main(edgefile, args=None):
             else:
                 status = 'production'
                 status_desc = 'mapped'
-                writer.writerow([n1_map, n2_map, et_map, weight, e_chksum, \
-                    chksum])
             s_writer.writerow([n1_map, n2_map, et_map, weight, e_chksum, \
                 chksum, t_chksum, status, status_desc])
-    tu.csu(conv_file, uc_file, [1, 2, 3, 4, 5])
-    tu.csu(conv_file, ue2l_file, [5, 6])
     tu.csu(status_file, us_file)
-    #iu.import_edge(uc_file, args)
+    tu.csu(us_file, ue2l_file, [5, 6])
     iu.import_status(status_file, args)
 
 def map_list(namefile, args=None):
