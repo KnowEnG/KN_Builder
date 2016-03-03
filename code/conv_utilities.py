@@ -103,8 +103,9 @@ def main(edgefile, args=None):
             s_writer.writerow([n1_map, n2_map, et_map, weight, e_chksum, \
                 chksum, t_chksum, status, status_desc])
     tu.csu(conv_file, uc_file, [1, 2, 3, 4, 5])
-    tu.csu(conv_file, ue2l_file, [5, 6])
+    #tu.csu(conv_file, ue2l_file, [5, 6])
     tu.csu(status_file, us_file)
+    tu.csu(us_file, ue2l_file, [5, 6])
     #iu.import_edge(uc_file, args)
     iu.import_status(status_file, args)
 
