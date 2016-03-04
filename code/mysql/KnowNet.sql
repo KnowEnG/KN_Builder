@@ -102,7 +102,8 @@ CREATE TABLE IF NOT EXISTS `status` (
   `raw_edge_hash` varchar(40) NOT NULL,
   `status` varchar(80) NOT NULL,
   `status_desc` varchar(255) NOT NULL,
-  PRIMARY KEY (`edge_hash`),
+  PRIMARY KEY (`edge_hash`, `line_hash`, `raw_edge_hash`),
+  KEY (`edge_hash`),
   KEY `n1_id` (`n1_id`),
   KEY `n2_id` (`n2_id`),
   KEY `et_name` (`et_name`)
