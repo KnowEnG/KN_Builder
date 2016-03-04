@@ -2,7 +2,7 @@
 # Dockerfile to build p1_cloud9
 ############################################################
 
-# Set the base image to python v3
+# Set the base image 
 FROM stefand/cloud9-latest
 
 # File Author / Maintainer
@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y time \
     man \
     git \
     lxc \
+    libsystemd-journal0\
     sshfs \
     vim \
     mysql-client \
