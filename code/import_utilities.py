@@ -35,12 +35,14 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
     if args is None:
         args=cf.config_args()
     table_cmds = {'node_meta': 'node_meta.node_id = node_meta.node_id',
+                'node': 'node.node_id = node.node_id',
                 'raw_line' : 'raw_line.file_id = raw_line.file_id',
                 'edge2line': 'edge2line.edge_hash = edge2line.edge_hash',
                 'edge_meta': 'edge_meta.edge_hash = edge_meta.edge_hash',
                 'edge': ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
                     '{0}.weight)'),
-                'status': 'status.edge_hash = status.edge_hash'}
+                'status': ('status.weight = IF(status.weight > {0}.weight, status.weight, '
+                    '{0}.weight)')}
     if not dup_cmd and table in table_cmds:
         dup_cmd = table_cmds[table]
     db = mu.get_database('KnowNet', args)
@@ -133,7 +135,7 @@ def import_edge(edgefile, args=None):
     """
     if args is None:
         args=cf.config_args()
-    imports = ['node_meta', 'edge2line', 'edge', 'edge_meta']
+    imports = ['node', 'node_meta', 'edge2line', 'edge', 'edge_meta']
     #uedge_cmd  = ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
     #                '{0}.weight)')
     for table in imports:
@@ -165,9 +167,7 @@ def import_status(statusfile, args=None):
     """
     if args is None:
         args=cf.config_args()
-    imports = ['node_meta', 'edge2line', 'status', 'edge_meta']
-    #uedge_cmd  = ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
-    #                '{0}.weight)')
+    imports = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta']
     for table in imports:
         ld_cmd = ''
         dup_cmd = ''
