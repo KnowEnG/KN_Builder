@@ -238,7 +238,7 @@ class Fake_src(SrcClass):
                 e_meta_writer.writerow([chksm, info_type, info])
                 n_meta_writer.writerow([n1id, info_type, info])
                 n_meta_writer.writerow([n2id, info_type, info])
-                node_writer.writerow([n1id, 'fake_'+n1id])
+                node_writer.writerow([n1id, 'fake_'+n1id, '2'])
         outfile = e_meta_file.replace('edge_meta', 'unique_edge_meta')
         tu.csu(e_meta_file, outfile, [1, 2, 3])
         outfile = n_file.replace('node', 'unique_node')
