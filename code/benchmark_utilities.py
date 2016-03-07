@@ -4,6 +4,8 @@ Class Description:
 
 Used to benchmark database functionalities
 
+Utilizes performane queries described in https://fromdual.com/mysql-performance-schema-hints
+
 """
 
 import config_utilities as cf
@@ -29,6 +31,7 @@ class MySQLBenchmark:
         database (str): the MySQL database to connect to
         conn (object): connection object for the database
         cursor (object): cursor object for the database
+    
     """
 
     def __init__(self, database=None, args=cf.config_args()):
@@ -83,6 +86,8 @@ class MySQLBenchmark:
     def config_db_for_profiling(self):
         '''
         Description:
+        
+        Function that is used to activate the MySQL performance monitoring components and performance schemas
         
         '''
         #This enables the stage* performance tables"
@@ -160,10 +165,12 @@ class MySQLBenchmark:
         else:
             print("Absolute Time taken to execute QUERY: "+query+", is "+str(total_time)+" and real time is "+str(timing_data[0][0]))
         
-            return total_time, timing_data[0][0]
+            return total_time, float(timing_data[0][0])
         
     def get_query_id(self, query):
         '''
+        Description:
+        
         Gets the unique query ID for the latest query that is of the query string provided.
         Obtains the latest query ID by ordering the data by END_EVENT_ID and limiting the resultset to 1
         '''
@@ -194,11 +201,44 @@ class MySQLBenchmark:
             print("Query does not exist in history or performance schema not enabled.")
         else:
             return type_data[0][0]
+    
+    def schema_storage_info(self, database):
+        """
+        Description:
         
-    """
-    Obtains the breakdown of generating the MySQL query in terms of seconds
-    """
+        Produces storage capacity information for database schema specified.
+        If 'ALL' is the specified database, it will return database information of all
+        database except those that are in a MySQL server by default
+        
+        """
+        
+        if(database == "ALL"):
+            storage_info_query = "SELECT table_schema AS `schema`, engine, COUNT(*) AS `tables`, ROUND(SUM(data_length)/1024/1024, 0) AS data_mb, ROUND(SUM(index_length)/1024/1024, 0) index_mb FROM information_schema.tables WHERE table_schema NOT IN ('mysql', 'information_schema', 'performance_schema') AND engine IS NOT NULL GROUP BY table_schema, engine;"
+        else:
+            storage_info_query = "SELECT table_schema AS `schema`, engine, COUNT(*) AS `tables`, ROUND(SUM(data_length)/1024/1024, 0) AS data_mb, ROUND(SUM(index_length)/1024/1024, 0) index_mb FROM information_schema.tables WHERE table_schema ='"+str(database)+"' AND engine IS NOT NULL GROUP BY table_schema, engine;"
+        #print(get_id_query)
+        #Extracting query_id for the provided query string
+        storage_desc = []
+        for result in self.cursor.execute(storage_info_query,multi=True):
+            res = result.fetchall()
+            for field in res:
+                data = {}
+                data['schema'] = field[0]
+                data['engine'] = field[1]
+                data['tables'] = field[2]
+                data['data_mb'] = float(field[3])
+                data['index_mb'] = float(field[4])
+                storage_desc.append(data)
+
+        return storage_desc
+        
+        
     def query_time_breakdown(self,query):
+        """
+        Description: 
+        
+        Obtains the breakdown of generating the MySQL query in terms of seconds
+        """
         #self.cursor.execute(query)
         #self.cursor.fetchall()
         id = self.get_query_id(query)
