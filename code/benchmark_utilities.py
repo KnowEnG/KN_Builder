@@ -54,7 +54,7 @@ class MySQLBenchmark:
                                     user=self.user, password=self.passw,
                                     db=self.database,
                                     client_flags=[sql.ClientFlag.LOCAL_FILES])
-        self.cursor = self.conn.cursor()
+        self.cursor = self.conn.cursor(buffered=True)
     
     
     """
@@ -67,24 +67,27 @@ class MySQLBenchmark:
     """
     def check_db_set_for_profiling(self):
         
-        check_query = "SELECT * FROM performance_schema.setup_consumers where name = 'events_statements_history_long';"
+        check_query = "SELECT * FROM performance_schema.setup_consumers where name = 'events_statements_history_long' OR name = 'events_stages_history_long';"
         self.cursor.execute(check_query)
         result = self.cursor.fetchall()
-        if(len(result) != 1):
+        if(len(result) != 2):
             print("Error executing check query or unexpected output.")
             return False
         else:
-            if(result[0][1] != 'YES'):
+            if(result[0][1] != 'YES' or result[1][1] != 'YES'):
                 return False
             else:
                 return True
             
         
     def config_db_for_profiling(self):
-            
+        '''
+        Description:
+        
+        '''
         #This enables the stage* performance tables"
         config_query1 = "update performance_schema.setup_instruments set enabled='YES', timed='YES';"    
-        ata#This enables the events_statements_history* and events_stages_history* performance  tables
+        #This enables the events_statements_history* and events_stages_history* performance  tables
         config_query2 = "update performance_schema.setup_consumers set enabled='YES';"
 
         #Need to check if permissions are allowed for the user to make this adjustment
@@ -92,18 +95,11 @@ class MySQLBenchmark:
         self.cursor.execute(config_query2)
         print("The database has been configured for performance statisics and analysis.")
 
-    def connection_stress_test(self, stress_level):            
-        start = time()
-        for i in range(stress_level):
-            conn = sql.connect(host=self.host, port=self.port, user=self.user, password=self.passw, client_flags=[sql.ClientFlag.LOCAL_FILES])
-            conn.close();
-
-        end = time()
-        print("Time taken to execute connections: %d is %f", stress_level, (end-start))
-                
             
     def __checkequalbins(self, bin_list, total, percentallowance):
         '''
+        Description:
+        
         Private method used to determine if the bins are at least percentallowance * total
         This is a test to see if the bins are mostly reasonably sized bins
         '''
@@ -115,6 +111,139 @@ class MySQLBenchmark:
                 return False
    
         return True
+    
+    def gettabledetails(self, tablename):
+        '''
+        Description:
+        
+        Uses the MySQL 'DESCRIBE' keyword to extract the Table metadata
+
+        '''
+        desc_query = "DESCRIBE "+str(tablename)
+        table_desc = []
+        for result in self.cursor.execute(desc_query,multi=True):
+            res = result.fetchall()
+            for field in res:
+                data = {}
+                data['Field'] = field[0]
+                data['Type'] = field[1]
+                data['Null'] = field[2]
+                data['Key'] = field[3]
+                data['Default'] = field[4]
+                data['Extra'] = field[5]
+                table_desc.append(data)
+
+        return table_desc
+        
+    def query_execution_time(self, query):
+        '''
+        Description: Obtains the total query execution time ("time taken for connection to server and exporting resultset from database) for the given query string and the dabtabase time (amount of time spent generating the query at the database level)
+        '''
+        db_execution_time = -1
+        db_execution_query = "SELECT TRUNCATE(TIMER_WAIT/1000000000000,6) as Duration FROM performance_schema.events_statements_history_long WHERE SQL_TEXT = '"+str(query)+"' order by END_EVENT_ID desc limit 1"
+        
+        start = time()
+        self.cursor.execute(query)
+        self.cursor.fetchall()
+        end = time()
+        
+        self.cursor.execute(db_execution_query)
+        timing_data = self.cursor.fetchall()
+        total_time = end-start;
+        
+        if(len(timing_data) == 0):
+            print("Database not configured for query statistics so we will not generate database time for query execution.")
+            print("The total time taken to execute QUERY: "+query+ " is "+str(total_time))
+
+            return total_time, None
+
+        else:
+            print("Absolute Time taken to execute QUERY: "+query+", is "+str(total_time)+" and real time is "+str(timing_data[0][0]))
+        
+            return total_time, timing_data[0][0]
+        
+    def get_query_id(self, query):
+        '''
+        Gets the unique query ID for the latest query that is of the query string provided.
+        Obtains the latest query ID by ordering the data by END_EVENT_ID and limiting the resultset to 1
+        '''
+        get_id_query = "SELECT END_EVENT_ID, TRUNCATE(TIMER_WAIT/1000000000000,6) as Duration, SQL_TEXT FROM performance_schema.events_statements_history_long WHERE SQL_TEXT = '"+str(query)+"' order by END_EVENT_ID desc limit 1;"
+        #print(get_id_query)
+        
+        #Extracting query_id for the provided query string
+        self.cursor.execute(get_id_query)
+        qids = self.cursor.fetchall()
+        if(qids == None or len(qids) == 0):
+            print("Query does not exist in history or performance schema not enabled.")
+        else:
+            return qids[0][0]
+    
+    def get_query_type(self, query):
+        '''
+        Description:
+        
+        Used to determine the query type for a past query (E.g. statement/sql/select)
+        '''
+        get_type_query = "SELECT EVENT_NAME FROM performance_schema.events_statements_history_long WHERE SQL_TEXT = '"+str(query)+"' order by END_EVENT_ID desc limit 1;"
+        #print(get_id_query)
+        
+        #Extracting query_id for the provided query string
+        self.cursor.execute(get_type_query)
+        type_data = self.cursor.fetchall()
+        if(type_data == None or len(type_data) == 0):
+            print("Query does not exist in history or performance schema not enabled.")
+        else:
+            return type_data[0][0]
+        
+    """
+    Obtains the breakdown of generating the MySQL query in terms of seconds
+    """
+    def query_time_breakdown(self,query):
+        #self.cursor.execute(query)
+        #self.cursor.fetchall()
+        id = self.get_query_id(query)
+        print(id)
+        query_breakdown_query ="SELECT event_name AS Stage, TRUNCATE(TIMER_WAIT/1000000000000,6) AS Duration FROM performance_schema.events_stages_history_long WHERE END_EVENT_ID="+str(id)+";"
+        self.cursor.execute(query_breakdown_query)
+        print(self.cursor.fetchall())
+    
+    def query_execution_plan(self, query):
+        explain_query = "EXPLAIN EXTENDED  "+str(query)+""
+        execution_plan = []
+        for result in self.cursor.execute(explain_query,multi=True):
+            res = result.fetchall()
+            for step in res:
+                data = {}
+                data['id'] = step[0]
+                data['select_type'] = step[1]
+                data['table'] = step[2]
+                data['type'] = step[3]
+                data['possible_keys'] = step[4]
+                data['key'] = step[5]
+                data['key_len'] = step[6]
+                data['ref'] = step[7]
+                data['rows'] = step[8]
+                data['filtered'] = step[9]
+                data['Extra'] = step[10]
+                execution_plan.insert(0,data)
+        print(execution_plan)
+        return execution_plan
+
+        
+    def connection_stress_test(self, stress_level):
+        '''
+        Description: 
+
+        Stress Test to test for average connection time to database over a given stress level
+        '''
+        start = time()
+        for i in range(stress_level):
+            conn = sql.connect(host=self.host, port=self.port, user=self.user, password=self.passw, client_flags=[sql.ClientFlag.LOCAL_FILES])
+            conn.close();
+
+        end = time()
+        print("Time taken to execute connections: %d is %f", stress_level, (end-start))
+                
     
     def multithreaded_stress_test(self, table, key, set_serialized):
         """
@@ -184,6 +313,8 @@ class MySQLBenchmark:
         
     def overlapping_multithreaded_select_test(self, table, key, percentoverlap):
         """
+        Description:
+        
         Used to benchmark database functions when there are overlapping selects being
         done by multiple connections. Identifies lock bottlenecks.
         """
@@ -237,82 +368,6 @@ class MySQLBenchmark:
             thread_data['thread_timings'].append(th.execution_time)
         print(thread_data)
         
-    
-    def query_execution_time(self, query):
-        '''
-        Description: Obtains the query execution time for the given query string
-        '''
-        start = time()
-        self.cursor.execute(query)
-        end = time()
-        print("Time taken to execute QUERY:"+query+", is "+str(end-start))
-        
-    def get_query_id(self, query):
-        '''
-        Gets the unique query ID for the latest query that is of the query string provided.
-        Obtains the latest query ID by ordering the data by END_EVENT_ID and limiting the resultset to 1
-        '''
-        get_id_query = "SELECT EVENT_ID, TRUNCATE(TIMER_WAIT/1000000000000,6) as Duration, SQL_TEXT FROM performance_schema.events_statements_history_long WHERE SQL_TEXT = '"+str(query)+"' order by END_EVENT_ID desc limit 1;"
-        #print(get_id_query)
-        
-        #Extracting query_id for the provided query string
-        self.cursor.execute(get_id_query)
-        qids = self.cursor.fetchall()
-        if(qids == None):
-            print("Query does not exist in history or performance schema not enabled.")
-        else:
-            print(qids)
-            return qids[0][0]
-        
-    """
-    Obtains the breakdown of generating the MySQL query in terms of seconds
-    """
-    def query_time_breakdown(self,query):
-        self.cursor.execute(query)
-        id = self.get_query_id(query)
-        print(id)
-        query_breakdown_query ="SELECT event_name AS Stage, TRUNCATE(TIMER_WAIT/1000000000000,6) AS Duration FROM performance_schema.events_stages_history_long WHERE NESTING_EVENT_ID="+id+";"
-        for result in self.cursor.execute(query_breakdown_query,multi=True):
-            print(result.fetchall())
-    
-    def query_execution_plan(self, query):
-        explain_query = "EXPLAIN EXTENDED  "+str(query)+""
-        execution_plan = []
-        for result in self.cursor.execute(explain_query,multi=True):
-            res = result.fetchall()
-            for step in res:
-                data = {}
-                data['id'] = step[0]
-                data['select_type'] = step[1]
-                data['table'] = step[2]
-                data['type'] = step[3]
-                data['possible_keys'] = step[4]
-                data['key'] = step[5]
-                data['key_len'] = step[6]
-                data['ref'] = step[7]
-                data['rows'] = step[8]
-                data['filtered'] = step[9]
-                data['Extra'] = step[10]
-                execution_plan.insert(0,data)
-        print(execution_plan)
-        return execution_plan
-
-    def gettabledetails(self, tablename):
-        desc_query = "DESCRIBE "+str(tablename)
-        table_desc = []
-        for result in self.cursor.execute(desc_query,multi=True):
-            res = result.fetchall()
-            for field in res:
-                data = {}
-                data['Field'] = field[0]
-                data['Type'] = field[1]
-                data['Null'] = field[2]
-                data['Key'] = field[3]
-                data['Default'] = field[4]
-                data['Extra'] = field[5]
-                table_desc.append(data)
-        print(table_desc)
-        return table_desc
 
 class BenchmarkWorker(threading.Thread):
     def __init__(self, host, port, user, password, database, query):
