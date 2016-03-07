@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `node_type` (
 CREATE TABLE IF NOT EXISTS `node` (
   `node_id` varchar(128) NOT NULL,
   `n_alias` varchar(512) DEFAULT NULL,
-  `n_type_id` int(11) DEFAULT NULL,
+  `n_type_id` int(11) NOT NULL,
   PRIMARY KEY (`node_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
