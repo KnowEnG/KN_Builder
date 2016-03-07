@@ -13,6 +13,7 @@ import mysql.connector as sql
 import os
 import json
 import subprocess
+import elasticsearch
 from time import time
 import threading
 import logging
@@ -94,6 +95,7 @@ class MySQLBenchmark:
         config_query1 = "update performance_schema.setup_instruments set enabled='YES', timed='YES';"    
         #This enables the events_statements_history* and events_stages_history* performance  tables
         config_query2 = "update performance_schema.setup_consumers set enabled='YES';"
+
 
         #Need to check if permissions are allowed for the user to make this adjustment
         self.cursor.execute(config_query1)
@@ -269,6 +271,16 @@ class MySQLBenchmark:
         print(execution_plan)
         return execution_plan
 
+    def send_data_to_ES(self, data):
+        '''
+        Description:
+        
+        Sends data to a specified elasticsearch instance
+        
+        Needs work to parametrize the ES host, port and index of access.
+        '''
+        es = elasticsearch.Elasticsearch()  # use default of localhost, port 9200
+        es.index(index='database_perf', doc_type='benchmark_data', body=data)
         
     def connection_stress_test(self, stress_level):
         '''
