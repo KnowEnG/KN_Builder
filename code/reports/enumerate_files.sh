@@ -13,6 +13,8 @@ VERBOSE='COUNTS'
 # command line parameters
 KNP_DATA_PATH=$1
 VERBOSE=$2
+KNP_MYSQL_HOST=$3
+KNP_REDIS_HOST=$4
 
 FILE_CTR=0
 echo -e "tnum\ttype\tsnum\tsource\tfile\tempty\ttime\tlines"
@@ -74,6 +76,7 @@ CMD="redis-cli -h $KNP_REDIS_HOST -a KnowEnG  info | grep keys= | cut -f1 -d',' 
     eval "$CMD"
 CMD='mysql -h '$KNP_MYSQL_HOST' -uroot -pKnowEnG --execute "
     SELECT \"all_mappings\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.all_mappings UNION
+    SELECT \"status\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.status UNION
     SELECT \"edge\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge UNION
     SELECT \"edge2line\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge2line UNION
     SELECT \"edge_meta\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge_meta UNION

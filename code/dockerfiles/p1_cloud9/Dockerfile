@@ -2,8 +2,8 @@
 # Dockerfile to build p1_cloud9
 ############################################################
 
-# Set the base image to python v3
-FROM stefand/cloud9-latest
+# Set the base image 
+FROM sapk/cloud9
 
 # File Author / Maintainer
 MAINTAINER Charles Blatti
@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y time \
     man \
     git \
     lxc \
+    libsystemd-journal0 \
+    bash-completion \
     sshfs \
     vim \
     mysql-client \
@@ -28,7 +30,7 @@ RUN apt-get update && apt-get install -y time \
     r-base-dev
 
 # pip3 install for db connectors
-RUN pip3 install --allow-external mysql-connector-python mysql-connector-python
+RUN pip3 install https://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.0.4.tar.gz
 RUN pip3 install redis \
     pylint
 

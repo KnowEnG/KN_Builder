@@ -1,21 +1,22 @@
 """Extension of utilities.py to provide functions required to check the
-version information of fake_src and determine if it needs to be updated.
+version information of pathcom and determine if it needs to be updated.
 
 Classes:
-    Fake_src: Extends the SrcClass class and provides the static variables and
-        fake_src specific functions required to perform a check on fake_src.
+    Pathcom: Extends the SrcClass class and provides the static variables and
+        pathcom specific functions required to perform a check on pathcom.
 
 Functions:
-    main: runs compare_versions (see utilities.py) on a Fake_src object
+    get_SrcClass: returns a Pathcom object
+    main: runs compare_versions (see utilities.py) on a Pathcom object
 """
 from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
 import hashlib
 import csv
+import sys
 import config_utilities as cf
 import table_utilities as tu
-import config_utilities as cf
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -28,32 +29,30 @@ def get_SrcClass(args):
     Returns:
         class: a source class object
     """
-    return Fake_src(args)
+    return Pathcom(args)
 
-class Fake_src(SrcClass):
-    """Extends SrcClass to provide fake_src specific check functions.
+class Pathcom(SrcClass):
+    """Extends SrcClass to provide pathcom specific check functions.
 
-    This Fake_src class provides source-specific functions that check the
-    fake_src version information and determine if it differs from the current
+    This Pathcom class provides source-specific functions that check the
+    pathcom version information and determine if it differs from the current
     version in the Knowledge Network (KN).
 
     Attributes:
         see utilities.SrcClass
     """
     def __init__(self, args=cf.config_args()):
-        """Init a Fake_src with the staticly defined parameters.
+        """Init a Pathcom with the staticly defined parameters.
 
         This calls the SrcClass constructor (see utilities.SrcClass)
         """
-        name = 'fake_src'
-        url_base = ('http://knowcloud.cse.illinois.edu/index.php/s/'
-            'ACsxJbpDaMPOhz3/download')
-        aliases = {"fake_alias": "fake_alias"}
-        super(Fake_src, self).__init__(name, url_base, aliases, args)
-        self.year = ''
+        name = 'pathcom'
+        url_base = 'http://www.pathwaycommons.org/pc2/downloads/'
+        aliases = {"all":""}
+        super(Pathcom, self).__init__(name, url_base, aliases, args)
 
     def get_source_version(self, alias):
-        """Return the release version of the remote fake_src:alias.
+        """Return the release version of the remote pathcom:alias.
 
         This returns the release version of the remote source for a specific
         alias. This value will be the same for every alias. This value is
@@ -65,7 +64,22 @@ class Fake_src(SrcClass):
         Returns:
             str: The remote version of the source.
         """
-        return super(Fake_src, self).get_source_version(alias)
+        version = super(Pathcom, self).get_source_version(alias)
+        if version == 'unknown':
+            response = urllib.request.urlopen(self.url_base + 'datasources.txt')
+            the_page = response.readlines()
+            for line in the_page:
+                d_line = line.decode()
+                match = re.search('Pathway Commons version ([^ ]*)', d_line)
+                if match is not None:
+                    response.close()
+                    self.version[alias] = match.group(1)
+                    break
+            for alias_name in self.aliases:
+                self.version[alias_name] = match.group(1)
+            return self.version[alias]
+        else:
+            return version
 
     def get_local_file_info(self, alias):
         """Return a dictionary with the local file information for the alias.
@@ -78,7 +92,7 @@ class Fake_src(SrcClass):
         Returns:
             dict: The local file information for a given source alias.
         """
-        return super(Fake_src, self).get_local_file_info(alias)
+        return super(Pathcom, self).get_local_file_info(alias)
 
     def get_remote_file_size(self, alias):
         """Return the remote file size.
@@ -94,7 +108,7 @@ class Fake_src(SrcClass):
             int: The remote file size in bytes.
         """
         url = self.get_remote_url(alias)
-        return super(Fake_src, self).get_remote_file_size(url)
+        return super(Pathcom, self).get_remote_file_size(url)
 
     def get_remote_file_modified(self, alias):
         """Return the remote file date modified.
@@ -111,15 +125,15 @@ class Fake_src(SrcClass):
                 since the epoch
         """
         url = self.get_remote_url(alias)
-        return super(Fake_src, self).get_remote_file_modified(url)
+        return super(Pathcom, self).get_remote_file_modified(url)
 
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the
         alias.
 
         This returns the url needed to fetch the file corresponding to the
-        alias. The url is constructed using the base_url, source version
-        information, and year source was last updated.
+        alias. The url is constructed using the base_url, alias, and source
+        version information.
 
         Args:
             alias (str): An alias defined in self.aliases.
@@ -127,7 +141,10 @@ class Fake_src(SrcClass):
         Returns:
             str: The url needed to fetch the file corresponding to the alias.
         """
-        return super(Fake_src, self).get_remote_url(alias)
+        url = self.url_base
+        url += 'Pathway%20Commons.{0}.All.EXTENDED_BINARY_SIF.hgnc.sif.gz'
+        url = url.format(self.get_source_version(alias))
+        return url
 
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
@@ -143,7 +160,7 @@ class Fake_src(SrcClass):
         Returns:
             bool: Whether or not the alias is used for mapping.
         """
-        return super(Fake_src, self).is_map(alias)
+        return super(Pathcom, self).is_map(alias)
 
     def get_dependencies(self, alias):
         """Return a list of other aliases that the provided alias depends on.
@@ -158,7 +175,7 @@ class Fake_src(SrcClass):
             list: The other aliases defined in self.aliases that the provided
                 alias depends on.
         """
-        return super(Fake_src, self).get_dependencies(alias)
+        return super(Pathcom, self).get_dependencies(alias)
 
     def create_mapping_dict(self, filename):
         """Return a mapping dictionary for the provided file.
@@ -175,87 +192,99 @@ class Fake_src(SrcClass):
         Returns:
             dict: A dictionary for use in mapping nodes or edge types.
         """
-        return super(Fake_src, self).create_mapping_dict(filename)
+        return super(Pathcom, self).create_mapping_dict(filename)
 
     def table(self, rawline, version_dict):
-        """Uses the provided raw_lines file to produce a 2table_edge file, an
+        """Uses the provided rawline file to produce a 2table_edge file, an
         edge_meta file, and a node_meta file (only for property nodes).
 
         This returns noting but produces the 2table formatted files from the
-        provided raw_lines file:
-            raw_lines table (file, line num, line_chksum, rawline)
+        provided rawline file:
+            rawline table (file, line num, line_chksum, rawline)
             2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
             node_meta (line_cksum, node_num (1 or 2),
                        info_type (evidence, relationship, experiment, or link),
                        info_desc (text))
-        By default this function does nothing (must be overridden)
 
         Args:
-            rawline(str): The path to the raw_lines file
+            rawline(str): The path to the rawline file
             version_dict (dict): A dictionary describing the attributes of the
                 alias for a source.
 
         Returns:
         """
-               #outfiles
+
+        #outfiles
         table_file = rawline.replace('rawline', 'edge')
         n_meta_file = rawline.replace('rawline', 'node_meta')
-        n_file = rawline.replace('rawline', 'node')
         e_meta_file = rawline.replace('rawline', 'edge_meta')
 
         #static column values
+        n1type = 'gene' #ignoring chemicals
+        n1hint = 'UNIPROT_GN'
+        n1spec = 'unknown'
+        n2type = n1type #ignoring chemicals
+        n2hint = n1hint
+        n2spec = n1spec
+        n3_type = 'property'
+        n3hint = 'unknown'
+        n3spec = 'unknown'
+        score = 1
 
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
-            open(e_meta_file, 'w') as e_meta, \
-            open(n_meta_file, 'w') as n_meta, \
-            open(n_file, 'w') as nodes:
+            open(e_meta_file, 'w') as e_meta:
             edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
-            node_writer = csv.writer(nodes, delimiter='\t', lineterminator='\n')
-            e_meta_writer = csv.writer(e_meta, delimiter='\t', \
-                lineterminator='\n')
-            n_meta_writer = csv.writer(n_meta, delimiter='\t', \
-                lineterminator='\n')
+            e_meta_writer = csv.writer(e_meta, delimiter='\t', lineterminator='\n')
             for line in infile:
                 line = line.replace('"', '').strip().split('\t')
-                if line[1] == '1':
+                if 'PARTICIPANT' in line[0]: #skip header
                     continue
                 chksm = line[2]
-
-                (n1id, n1hint, n1type, n1spec, n2id, n2hint, n2type, n2spec, \
-                    et_hint, score, info) = line[3:]
-                info_type = 'fake_info'
-                info_desc = 'fake information'
+                raw = line[3:]
+                if len(raw) !=6: #extended information
+                    continue
+                (n1id, et_hint, n2id, src, publist, n3id) = raw
+                et_hint = 'pathcom_' + et_hint
+                #n1-n2 edge
                 hasher = hashlib.md5()
-                hasher.update('\t'.join([chksm, n1id, n1hint, n1type, n1spec,\
-                    n2id, n2hint, n2type, n2spec, et_hint, \
-                    str(score)]).encode())
+                hasher.update('\t'.join([chksm, n1id, n1hint, n1type, n1spec,
+                                         n2id, n2hint, n2type, n2spec, et_hint,
+                                         str(score)]).encode())
                 t_chksum = hasher.hexdigest()
-                edge_writer.writerow([chksm, n1id, n1hint, n1type, n1spec, \
-                        n2id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
-                e_meta_writer.writerow([chksm, info_type, info])
-                n_meta_writer.writerow([n1id, info_type, info])
-                n_meta_writer.writerow([n2id, info_type, info])
-                node_writer.writerow([n1id, 'fake_'+n1id, '2'])
+                edge_writer.writerow([chksm, n1id, n1hint, n1type, n1spec,
+                                      n2id, n2hint, n2type, n2spec, et_hint,
+                                      score, t_chksum])
+                e_meta_writer.writerow([chksm, 'original_source', src])
+                if publist:
+                    e_meta_writer.writerow([chksm, 'reference', publist])
+                #n1-pathway edge
+                if n3id:
+                    for node in [n1id, n2id]:
+                        hasher = hashlib.md5()
+                        hasher.update('\t'.join([chksm, n3id, n3hint, n3_type,
+                                    n3spec,node, n1hint, n1type, n1spec,
+                                    'pathcom_pathway', '1']).encode())
+                        t_chksum = hasher.hexdigest()
+                        edge_writer.writerow([chksm, n3id, n3hint, n3_type,
+                                    n3spec, node, n1hint, n1type, n1spec,
+                                    'pathcom_pathway', '1', t_chksum])
         outfile = e_meta_file.replace('edge_meta', 'unique_edge_meta')
         tu.csu(e_meta_file, outfile, [1, 2, 3])
-        outfile = n_file.replace('node', 'unique_node')
-        tu.csu(n_file, outfile)
-        outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
-        tu.csu(n_meta_file, outfile)
+
 
 if __name__ == "__main__":
-    """Runs compare_versions (see utilities.compare_versions) on a fake_src
+    """Runs compare_versions (see utilities.compare_versions) on a Pathcom
     object
 
-    This runs the compare_versions function on a fake_src object to find the
+    This runs the compare_versions function on a Pathcom object to find the
     version information of the source and determine if a fetch is needed. The
     version information is also printed.
 
     Returns:
         dict: A nested dictionary describing the version information for each
-            alias described in fake_src.
+            alias described in Pathcom.
     """
-    compare_versions(Fake_src())
+    compare_versions(Pathcom())

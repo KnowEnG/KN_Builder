@@ -272,8 +272,8 @@ class Stringdb(SrcClass):
                     edge_writer.writerow([chksm, n1id, n1hint, n1type, n1spec,
                                           n2id, n2hint, n2type, n2spec, et_hint,
                                           score, t_chksum])
-                publist = raw[9]
-                e_meta_writer.writerow([chksm, info_type, publist])
+                c_score = raw[9]
+                e_meta_writer.writerow([chksm, info_type, c_score])
         outfile = e_meta_file.replace('edge_meta', 'unique_edge_meta')
         tu.csu(e_meta_file, outfile, [1, 2, 3])
 

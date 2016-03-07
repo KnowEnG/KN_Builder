@@ -73,7 +73,7 @@ def conv_gene(rdb, foreign_key, hint, taxid):
         rdb (redis object): redis connection to the mapping db
         foreign_key (str): the foreign gene identifer to be translated
         hint (str): a hint for conversion
-        taxid (str): the species taxid
+        taxid (str): the species taxid, 'unknown' if unknown
     
     Returns:
         str: result of seaching for gene in redis DB
