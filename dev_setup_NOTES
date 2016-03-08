@@ -60,26 +60,27 @@ git clone https://github.com/cmap/l1ktools.git /workspace/LINCS/l1ktools
 ln -s /workspace/LINCS/l1ktools/python/cmap/ /usr/local/lib/python2.7/dist-packages/cmap
 
 
-*** ON KnowCluster ***
-# mysql container
-mkdir /data/brick1/mysql
+## on KnowCluster
+### mysql container
+mkdir /mnt/knowtmp/mysql
 docker run -d --restart=always --name p1_mysql -e MYSQL_ROOT_PASSWORD=KnowEnG -p 3306:3306 \
-    -v /data/brick1/mysql:/var/lib/mysql mysql
+    -v /mnt/knowtmp/mysql:/var/lib/mysql mysql
 
-# redis container
-mkdir /data/brick1/redis
-docker run -d --name p1_redis -p 6379:6379 -v /data/brick1/redis:/data \
+### redis container
+mkdir /mnt/knowtmp/redis
+docker run -d --name p1_redis -p 6379:6379 -v /mnt/knowtmp/redis:/data \
    redis redis-server --appendonly yes --requirepass KnowEnG
 
-# cloud9 container
+### cloud9 container
 docker run -d --privileged --restart=always --name project1_c9 -h project1_c9 -p 9090:8181 \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    -v $(which docker):/bin/docker \
-    -v /mnt/fast/knoweng:/workspace \
-    -e USERNAME='project1' -e PASSWORD='knowdev249' \
-    cblatti3/p1_cloud9
+    -v /usr/bin/docker:/bin/docker \
+    -v /mnt/fast/knoweng:/workspace/fast \
+    -v /mnt/shared:/workspace/shared \
+    -v /mnt/knowtmp:/workspace/knowtmp \
+    cblatti3/p1_cloud9:0.1 --auth project1:knowdev249
 
-# kill things
+### kill all jobs
 for c in 'knowcluster01.dyndns.org:4400' ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
     for s in 'check' 'fetch' 'table' 'map'; do
@@ -92,8 +93,11 @@ for c in 'knowcluster01.dyndns.org:4400' ; do
     done;
 done;
 
-# set environment vars
-KNP_LOCAL_DIR='/workspace/apps/KnowNet_Pipeline'
+### copy pipeline code
+git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
+
+### set environment vars
+KNP_LOCAL_DIR='/workspace/knowtmp/project1/KnowNet_Pipeline'
 KNP_CLOUD_DIR='/mnt/fast/knoweng/apps/KnowNet_Pipeline/'
 KNP_DATA_PATH='data_pipe'
 KNP_MYSQL_HOST='knowcluster01.dyndns.org'
@@ -103,21 +107,21 @@ KNP_SRC='dip'
 KNP_ALIAS='PPI'
 KNP_CHUNK='1'
 
-# setup utilities
+### setup utilities
 KNP_CMD="python3 code/setup_utilities.py CHECK CLOUD PIPELINE \
     -dp $KNP_DATA_PATH -ld $KNP_LOCAL_DIR -myh $KNP_MYSQL_HOST \
     -rh $KNP_REDIS_HOST -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR"
 echo $KNP_CMD
-# crude timing: 1 hr 18 min
+#### crude timing: 1 hr 18 min
 ./code/reports/enumerate_files.sh $KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
     $KNP_REDIS_HOST > tests/KN03build.CP.setup_all
 
-# pipeline utilities with fake source
+### pipeline utilities with fake source
 KNP_CMD="python3 code/pipeline_utilities.py CHECK CLOUD PIPELINE \
     -dp $KNP_DATA_PATH -ld $KNP_LOCAL_DIR -myh $KNP_MYSQL_HOST \
     -rh $KNP_REDIS_HOST -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR \
     -sp debug_utilities/srcClass -cs 5"
 echo $KNP_CMD
-# crude timing: seconds
+#### crude timing: seconds
 ./code/reports/enumerate_files.sh $KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
     $KNP_REDIS_HOST > tests/KN03build.CP.fake_src
