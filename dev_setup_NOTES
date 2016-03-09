@@ -72,7 +72,7 @@ docker run -d --name p1_redis -p 6379:6379 -v /mnt/knowtmp/redis:/data \
    redis redis-server --appendonly yes --requirepass KnowEnG
 
 ### cloud9 container
-docker run -d --privileged --restart=always --name project1_c9 -h project1_c9 -p 9090:8181 \
+docker run -d --privileged --restart=always --name project1_c9 -h project1_c9 -p 8181:8181 \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /usr/bin/docker:/bin/docker \
     -v /mnt/fast/knoweng:/workspace/fast \
@@ -95,13 +95,13 @@ KNP_CLOUD_DIR='/mnt/fast/knoweng/apps/KnowNet_Pipeline/'
 KNP_DATA_PATH='data_pipe'
 KNP_MYSQL_HOST='knowcluster01.dyndns.org'
 KNP_REDIS_HOST='knowcluster01.dyndns.org'
-KNP_CHRONOS_URL='knowcluster01.dyndns.org:8888'
+KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
 KNP_SRC='dip'
 KNP_ALIAS='PPI'
 KNP_CHUNK='1'
 
 ### kill all jobs
-for c in 'knowcluster01.dyndns.org:8888' ; do
+for c in 'knowcluster01.dyndns.org:4400' ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
     for s in 'check' 'fetch' 'table' 'map'; do
         echo $s
@@ -161,7 +161,21 @@ python3 code/setup_utilities.py FETCH STEP \
     -dp data_docker -lp logs_docker \
     -c DOCKER \
     -cd /mnt/knowtmp/project1/KnowNet_Pipeline -ne -tm
-    
+
+python3 code/setup_utilities.py CHECK PIPELINE \
+    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
+    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
+    -dp data_local_pipe -lp logs_local_pipe \
+    -c LOCAL \
+    -cd /workspace/knowtmp/project1/KnowNet_Pipeline -ne -tm
+
+python3 code/setup_utilities.py CHECK PIPELINE \
+    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
+    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
+    -dp data_docker_pipe -lp logs_docker_pipe \
+    -c DOCKER \
+    -cd /mnt/knowtmp/project1/KnowNet_Pipeline -ne -tm
+
 # first must sync repos
 git pull
 git checkout reworkflow
@@ -169,12 +183,32 @@ python3 code/setup_utilities.py CHECK STEP \
     -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
     -ld /workspace/fast/apps/KnowNet_Pipeline \
     -dp data_chronos -lp logs_chronos \
-    -c knowcluster01.dyndns.org:8888 \
+    -c knowcluster01.dyndns.org:4400 \
     -cd /mnt/fast/knoweng/apps/KnowNet_Pipeline -tm
 
 python3 code/setup_utilities.py FETCH STEP \
     -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
     -ld /workspace/fast/apps/KnowNet_Pipeline \
     -dp data_chronos -lp logs_chronos \
-    -c knowcluster01.dyndns.org:8888 \
+    -c knowcluster01.dyndns.org:4400 \
     -cd /mnt/fast/knoweng/apps/KnowNet_Pipeline -tm
+
+python3 code/setup_utilities.py CHECK PIPELINE \
+    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
+    -ld /workspace/fast/apps/KnowNet_Pipeline \
+    -dp data_chronos_pipe -lp logs_chronos_pipe \
+    -c knowcluster01.dyndns.org:4400 \
+    -cd /mnt/fast/knoweng/apps/KnowNet_Pipeline -tm
+
+### kill all jobs
+for c in 'knowcluster01.dyndns.org:4400' ; do
+    curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
+    for s in 'check' 'fetch' 'table' 'map'; do
+        echo $s
+        for i in `grep "$s" /tmp/t.txt  `; do
+            CMD="curl -L -X DELETE $c/scheduler/job/$i";
+            echo "$CMD";
+            eval "$CMD";
+        done;
+    done;
+done;

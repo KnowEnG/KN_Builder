@@ -126,7 +126,7 @@ def run_check(args):
         if args.run_mode == "PIPELINE" and args.chronos not in SPECIAL_MODES:
             tmptype = "next_step_caller"
             tmpdict = {'TMPJOB': "-".join([jobname, "next_step"]),
-                       'TMPLAUNCH': jb.chronos_parent_str(next_step_parents),
+                       'TMPLAUNCH': jb.chronos_parent_str(setup_check_job.jobname),
                        'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
                        'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                        'TMPNEXTSTEP': "FETCH",
