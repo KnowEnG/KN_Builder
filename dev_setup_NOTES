@@ -149,9 +149,11 @@ python3 code/setup_utilities.py CHECK STEP \
     -cd /mnt/knowtmp/project1/KnowNet_Pipeline -tm
 
 # first must sync repos
+git pull
+git checkout reworkflow
 python3 code/setup_utilities.py CHECK STEP \
     -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
-    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
-    -dp data_docker -lp logs_docker \
+    -ld /workspace/fast/apps/KnowNet_Pipeline \
+    -dp data_chronos -lp logs_chronos \
     -c knowcluster01.dyndns.org:8888 \
-    -cd /mnt/knowtmp/project1/KnowNet_Pipeline -tm
+    -cd /mnt/fast/knoweng/apps/KnowNet_Pipeline -tm

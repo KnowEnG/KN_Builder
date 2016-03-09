@@ -21,6 +21,7 @@ import config_utilities as cf
 import os
 import subprocess
 import json
+import stat
 
 CURL_PREFIX = ["curl", "-i", "-L", "-H", "'Content-Type: application/json'",
                "-X", "POST"]
@@ -146,13 +147,13 @@ class Job:
         print(" ".join(curl_cmd))
         print(self.cjobstr)
         if not self.args.testmode:
-            subprocess.call(curl_cmd, shell=True)
-        #shfile = self.cjobfile.replace(".json", ".sh")
-        #with open(shfile, 'w') as outfile:
-            #outfile.write(" ".join(curl_cmd))
-        #os.chmod(shfile, stat.S_IRWXU)
-        #subprocess.call(['sh', "-c", shfile])
-        #os.remove(shfile)
+            #subprocess.call(curl_cmd, shell=True)
+            shfile = self.cjobfile.replace(".json", ".sh")
+            with open(shfile, 'w') as outfile:
+                outfile.write(" ".join(curl_cmd))
+            os.chmod(shfile, stat.S_IRWXU)
+            subprocess.call(['sh', "-c", shfile])
+            os.remove(shfile)
     def run_job(self):
         """Sends job to chronos job queue
 
