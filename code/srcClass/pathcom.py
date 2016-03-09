@@ -268,9 +268,8 @@ class Pathcom(SrcClass):
                     e_meta_writer.writerow([chksm, 'reference', publist])
                 #n1-pathway edge
                 if n3id:
-                    kn_n3id = cf.pretty_name(n3id)
-                    kn_n3name = cf.pretty_name('pathcom_' + n3id)
-                    n_writer.writerow([kn_n3id, kn_n3name])
+                    kn_n3id = cf.pretty_name(['paco_' + n3id])
+                    n_writer.writerow([kn_n3id, kn_n3id])
                     n_meta_writer.writerow([kn_n3id, info_type, n3id])
                     for node in [n1id, n2id]:
                         hasher = hashlib.md5()
