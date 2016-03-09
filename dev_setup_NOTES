@@ -148,6 +148,20 @@ python3 code/setup_utilities.py CHECK STEP \
     -c DOCKER \
     -cd /mnt/knowtmp/project1/KnowNet_Pipeline -tm
 
+python3 code/setup_utilities.py FETCH STEP \
+    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
+    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
+    -dp data_local -lp logs_local \
+    -c LOCAL \
+    -cd /workspace/knowtmp/project1/KnowNet_Pipeline -ne -tm
+
+python3 code/setup_utilities.py FETCH STEP \
+    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
+    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
+    -dp data_docker -lp logs_docker \
+    -c DOCKER \
+    -cd /mnt/knowtmp/project1/KnowNet_Pipeline -ne -tm
+    
 # first must sync repos
 git pull
 git checkout reworkflow
@@ -160,7 +174,7 @@ python3 code/setup_utilities.py CHECK STEP \
 
 python3 code/setup_utilities.py FETCH STEP \
     -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
-    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
-    -dp data_local -lp logs_local \
-    -c LOCAL \
-    -cd /workspace/knowtmp/project1/KnowNet_Pipeline -ne -tm
+    -ld /workspace/fast/apps/KnowNet_Pipeline \
+    -dp data_chronos -lp logs_chronos \
+    -c knowcluster01.dyndns.org:8888 \
+    -cd /mnt/fast/knoweng/apps/KnowNet_Pipeline -tm

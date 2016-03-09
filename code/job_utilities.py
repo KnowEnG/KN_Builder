@@ -16,8 +16,6 @@ Attributes:
     CURL_PREFIX (list): parts of the chronos curl command
 """
 
-from argparse import ArgumentParser
-import config_utilities as cf
 import os
 import subprocess
 import json
@@ -55,11 +53,13 @@ class Job:
         self.cjobfile = 'missing.json'
         # read in dummy template
         self.cjobstr = ""
-        with open(os.path.join(self.args.local_dir, "code", "template", "job_template.json"), 'r') as infile:
+        with open(os.path.join(self.args.local_dir, "code", "template",
+                               "job_template.json"), 'r') as infile:
             self.cjobstr = infile.read(10000)
         # read in job dictionaries
         jobsdesc = ""
-        with open(os.path.join(self.args.local_dir, "code", "template", "components.json"), 'r') as infile:
+        with open(os.path.join(self.args.local_dir, "code", "template",
+                               "components.json"), 'r') as infile:
             jobsdesc = json.load(infile)
         # replace global dummy values with job specific ones
         self.tmpdict = jobsdesc[jobtype]
@@ -75,7 +75,7 @@ class Job:
 
         Returns:
         """
-        envstr = str(self.tmpdict.get("TMPENV","[]"))
+        envstr = str(self.tmpdict.get("TMPENV", "[]"))
         for key in tmpdict:
         #    print(key + " " +  str(tmpdict[key]) )
             if key == 'TMPJOB':
@@ -127,7 +127,7 @@ class Job:
                       "-v", self.args.cloud_dir+":"+self.args.cloud_dir,
                       self.tmpdict["TMPIMG"],
                       jobjson["command"]
-                      ]
+                     ]
         print("\n"+" ".join(docker_cmd))
         if not self.args.testmode:
             subprocess.call(' '.join(docker_cmd), shell=True)
@@ -181,12 +181,12 @@ def queue_starter_job(args, jobname='starter-jobname', dummy=1):
 
     Returns: Job object
     """
+    myjob = Job('starter', args)
     if args.chronos == "LOCAL":
         return myjob
     elif args.chronos == "DOCKER":
         return myjob
 
-    myjob = Job('starter', args)
     tmpdict = {'TMPLAUNCH': '"schedule": "R1\/\/P3M"',
                'TMPMSG': 'date | sed \\"s#^#TMPJOB begun #g\\"'}
     if dummy == 1:

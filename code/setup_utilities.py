@@ -14,6 +14,7 @@ Attributes:
     DEFAULT_RUN_MODE (str): how to run setup
     POSSIBLE_STEPS (list): list of all steps
     SETUP_FILES (list): list of setup SrcClasses
+    SPECIAL_MODES (list): list of modes that run breadth first
 
 Examples:
     To view all optional arguments that can be specified::
@@ -33,19 +34,18 @@ Examples:
         $ python3 code/setup_utilities.py CHECK PIPELINE
 """
 
+import os
+import sys
 from argparse import ArgumentParser
 import config_utilities as cf
 import mysql_utilities as db
 import job_utilities as jb
-import os
-import sys
-import subprocess
-import json
 
 DEFAULT_START_STEP = 'CHECK'
 DEFAULT_RUN_MODE = 'STEP'
 POSSIBLE_STEPS = ['CHECK', 'FETCH']
 SETUP_FILES = ['species', 'ppi', 'ensembl']
+SPECIAL_MODES = ['LOCAL', 'DOCKER']
 
 def main_parse_args():
     """Processes command line arguments.
@@ -73,12 +73,13 @@ def main_parse_args():
 
     config_opts = sys.argv[1:]
     for opt in [args.start_step, args.run_mode, '-ne', '--no_ensembl', '-tm',
-               '--testmode', '-p', '--step_parameters', args.step_parameters]:
+                '--testmode', '-p', '--step_parameters', args.step_parameters]:
         if opt in config_opts:
             config_opts.remove(opt)
     args.config_opts = " ".join(config_opts)
+    args.cloud_config_opts = args.config_opts
     if args.chronos != 'LOCAL':
-        args.config_opts = cf.cloud_config_opts(args, config_opts)
+        args.cloud_config_opts = cf.cloud_config_opts(args, config_opts)
     return args
 
 def run_check(args):
@@ -93,34 +94,63 @@ def run_check(args):
         args (Namespace): args as populated namespace from parse_args
     """
     ctr = 0
+    next_step_list = []
+    next_step_parents = []
+
     for module in SETUP_FILES:
 
         if module is 'ensembl' and args.no_ensembl:
             continue
 
-        jobname = "-".join(["check", module])
-        jobname = jobname.replace(".", "-")
-        pipeline_cmd = ""
-        if args.run_mode == "PIPELINE":
-            arg_str = " ".join([args.run_mode, args.config_opts])
-            pipeline_cmd = "python3 /{0}/setup_utilities.py FETCH {1} -p {2}\
-                            ;".format(os.path.join(args.cloud_dir, args.code_path),
-                                      arg_str, module)
+        if args.step_parameters != '' and module != args.step_parameters:
+            continue
 
         ctr += 1
         print(str(ctr) + "\t" + module)
 
+        jobname = "-".join(["check", module])
+        jobname = jobname.replace(".", "-")
         tmptype = "setup_check"
         tmpdict = {'TMPJOB': jobname,
-               'TMPLAUNCH': '"schedule": "R1\/\/P3M"',
-               'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
-               'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
-               'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
-               'TMPPIPECMD': pipeline_cmd,
-               'TMPSRC': module,
-               'TMPOPTS': args.config_opts
-               }
+                   'TMPLAUNCH': '"schedule": "R1\/\/P3M"',
+                   'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
+                   'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
+                   'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
+                   'TMPSRC': module,
+                   'TMPOPTS': args.cloud_config_opts
+                  }
         setup_check_job = jb.run_job_step(args, tmptype, tmpdict)
+        next_step_list.extend([module])
+        next_step_parents.extend([setup_check_job.jobname])
+
+        if args.run_mode == "PIPELINE" and args.chronos not in SPECIAL_MODES:
+            tmptype = "next_step_caller"
+            tmpdict = {'TMPJOB': "-".join([jobname, "next_step"]),
+                       'TMPLAUNCH': jb.chronos_parent_str(next_step_parents),
+                       'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
+                       'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
+                       'TMPNEXTSTEP': "FETCH",
+                       'TMPSTART': module,
+                       'TMPOPTS': " ".join([args.run_mode, args.cloud_config_opts])
+                      }
+            jb.run_job_step(args, tmptype, tmpdict)
+
+    if args.run_mode == "PIPELINE" and args.chronos in SPECIAL_MODES and next_step_list:
+        next_step_str = ",,".join(next_step_list)
+        tmptype = "next_step_caller"
+        tmpdict = {'TMPJOB': "-".join(["check", "next_step"]),
+                   'TMPLAUNCH': jb.chronos_parent_str([setup_check_job.jobname]),
+                   'TMPCODEDIR': os.path.join(args.local_dir, args.code_path),
+                   'TMPLOGSDIR': os.path.join(args.local_dir, args.logs_path),
+                   'TMPNEXTSTEP': "FETCH",
+                   'TMPSTART': next_step_str,
+                   'TMPOPTS': " ".join([args.run_mode, args.config_opts])
+                  }
+        tmpargs = args
+        tmpargs.chronos = "LOCAL"
+        jb.run_job_step(tmpargs, tmptype, tmpdict)
+
+    return 0
 
 def run_fetch(args):
     """Runs fetches for all aliases of a single source.
@@ -134,50 +164,46 @@ def run_fetch(args):
         args (Namespace): args as populated namespace from parse_args, must
             specify --step_parameters(-p) as single source
     """
-    src = args.step_parameters
-    if src is '':  # call fetch for all srcs
+    src_list = []
+    if args.step_parameters is '':  # call fetch for all srcs
         for src_name in SETUP_FILES:
             if src_name is 'ensembl' and args.no_ensembl:
                 continue
-            args.step_parameters=src_name
-            run_fetch(args)
-        return 0
+            src_list.extend([src_name])
+    else:
+        src_list = args.step_parameters.split(",,")
 
-    print("'source' specified with --step_parameters (-p): {0}".format(src))
-    local_src_dir = os.path.join(args.local_dir, args.data_path, src)
-    if not os.path.exists(local_src_dir):
-        print("ERROR: source specified with --step_parameters (-p) option, \
-            {0}, does not have data directory: {1}".format(src, local_src_dir))
-        return -1
+    for src in sorted(src_list):
+        local_src_dir = os.path.join(args.local_dir, args.data_path, src)
+        if not os.path.exists(local_src_dir):
+            print("ERROR: source specified with --step_parameters (-p) option, \
+                {0}, does not have data directory: {1}".format(src, local_src_dir))
+            return -1
 
-    ctr = 0
-    for alias in sorted(os.listdir(local_src_dir)):
+        alias_ctr = 0
+        next_step_list = []
+        next_step_parents = []
+        for alias in sorted(os.listdir(local_src_dir)):
 
-        alias_path = os.path.join(src, alias)
-        jobname = "-".join(["fetch", src, alias])
-        jobname = jobname.replace(".", "-")
-        pipeline_cmd = ""
-        #if src == 'ensembl':
-        #    pipeline_cmd = "/usr/bin/time -v python3 /{0}/import_utilities.py \
-        #                    file_metadata.json {1};".format(args.code_path,
-        #                                                    args.config_opts)
-        if args.run_mode == "PIPELINE":
-            pass
+            alias_path = os.path.join(src, alias)
+            alias_ctr += 1
+            print("\t".join([src, str(alias_ctr), alias]))
 
-        ctr += 1
-        print("\t".join([str(ctr), src, alias]))
+            jobname = "-".join(["fetch", src, alias])
+            jobname = jobname.replace(".", "-")
+            tmptype = "setup_fetch"
+            tmpdict = {'TMPJOB': jobname,
+                       'TMPLAUNCH': '"schedule": "R1\/\/P3M"',
+                       'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
+                       'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
+                       'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
+                       'TMPALIASDIR': alias_path,
+                       'TMPOPTS': args.config_opts
+                      }
+            setup_fetch_job = jb.run_job_step(args, tmptype, tmpdict)
+            next_step_list.extend([",".join([src, alias])])
+            next_step_parents.extend([setup_fetch_job.jobname])
 
-        tmptype = "setup_fetch"
-        tmpdict = {'TMPJOB': jobname,
-               'TMPLAUNCH': '"schedule": "R1\/\/P3M"',
-               'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
-               'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
-               'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
-               'TMPPIPECMD': pipeline_cmd,
-               'TMPALIASDIR': alias_path,
-               'TMPOPTS': args.config_opts
-               }
-        setup_fetch_job = jb.run_job_step(args, tmptype, tmpdict)
     return 0
 
 def main():
@@ -199,8 +225,8 @@ def main():
                'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
                'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
                'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path)
-               }
-    filesetup_job = jb.run_job_step(args, tmptype, tmpdict)
+              }
+    jb.run_job_step(args, tmptype, tmpdict)
 
     knownet = db.MySQL(None, args)
     knownet.init_knownet()
