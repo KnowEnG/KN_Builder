@@ -36,14 +36,14 @@ CREATE TABLE IF NOT EXISTS `node_type` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `node` (
-  `node_id` varchar(128) NOT NULL,
+  `node_id` varchar(64) NOT NULL,
   `n_alias` varchar(512) DEFAULT NULL,
   `n_type_id` int(11) DEFAULT 2,
   PRIMARY KEY (`node_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `node_meta` (
-  `node_id` varchar(128) NOT NULL,
+  `node_id` varchar(64) NOT NULL,
   `info_type` varchar(80) NOT NULL,
   `info_desc` varchar(255) NOT NULL,
   PRIMARY KEY `idx_node_meta_key` (`node_id`,`info_type`,`info_desc`)
@@ -81,8 +81,8 @@ CREATE TABLE IF NOT EXISTS `edge2line`(
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge` (
-  `n1_id` varchar(128) NOT NULL,
-  `n2_id` varchar(128) NOT NULL,
+  `n1_id` varchar(64) NOT NULL,
+  `n2_id` varchar(64) NOT NULL,
   `et_name` varchar(80) NOT NULL,
   `weight` float NOT NULL,
   `edge_hash` varchar(40) NOT NULL,
@@ -93,8 +93,8 @@ CREATE TABLE IF NOT EXISTS `edge` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `status` (
-  `n1_id` varchar(128) NOT NULL,
-  `n2_id` varchar(128) NOT NULL,
+  `n1_id` varchar(64) NOT NULL,
+  `n2_id` varchar(64) NOT NULL,
   `et_name` varchar(80) NOT NULL,
   `weight` float NOT NULL,
   `edge_hash` varchar(40) NOT NULL,
