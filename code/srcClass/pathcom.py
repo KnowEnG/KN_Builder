@@ -10,11 +10,11 @@ Functions:
     main: runs compare_versions (see utilities.py) on a Pathcom object
 """
 from check_utilities import SrcClass, compare_versions
+import config_utilities as cf
 import urllib.request
 import re
 import hashlib
 import csv
-import sys
 import config_utilities as cf
 import table_utilities as tu
 
@@ -219,6 +219,7 @@ class Pathcom(SrcClass):
         #outfiles
         table_file = rawline.replace('rawline', 'edge')
         n_meta_file = rawline.replace('rawline', 'node_meta')
+        node_file = rawline.replace('rawline', 'node')
         e_meta_file = rawline.replace('rawline', 'edge_meta')
 
         #static column values
@@ -232,12 +233,17 @@ class Pathcom(SrcClass):
         n3hint = 'unknown'
         n3spec = 'unknown'
         score = 1
+        info_type = 'alt_alias'
 
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
-            open(e_meta_file, 'w') as e_meta:
+            open(e_meta_file, 'w') as e_meta, \
+            open(n_meta_file, 'w') as n_meta, \
+            open(node_file, 'w') as nfile:
             edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
             e_meta_writer = csv.writer(e_meta, delimiter='\t', lineterminator='\n')
+            n_meta_writer = csv.writer(n_meta, delimiter='\t', lineterminator='\n')
+            n_writer = csv.writer(nfile, delimiter='\t', lineterminator='\n')
             for line in infile:
                 line = line.replace('"', '').strip().split('\t')
                 if 'PARTICIPANT' in line[0]: #skip header
@@ -247,7 +253,7 @@ class Pathcom(SrcClass):
                 if len(raw) !=6: #extended information
                     continue
                 (n1id, et_hint, n2id, src, publist, n3id) = raw
-                et_hint = 'pathcom_' + et_hint
+                et_hint = 'pathcom_' + et_hint.replace('-', '_')
                 #n1-n2 edge
                 hasher = hashlib.md5()
                 hasher.update('\t'.join([chksm, n1id, n1hint, n1type, n1spec,
@@ -262,17 +268,25 @@ class Pathcom(SrcClass):
                     e_meta_writer.writerow([chksm, 'reference', publist])
                 #n1-pathway edge
                 if n3id:
+                    kn_n3id = cf.pretty_name(n3id)
+                    kn_n3name = cf.pretty_name('pathcom_' + n3id)
+                    n_writer.writerow([kn_n3id, kn_n3name])
+                    n_meta_writer.writerow([kn_n3id, info_type, n3id])
                     for node in [n1id, n2id]:
                         hasher = hashlib.md5()
-                        hasher.update('\t'.join([chksm, n3id, n3hint, n3_type,
+                        hasher.update('\t'.join([chksm, kn_n3id, n3hint, n3_type,
                                     n3spec,node, n1hint, n1type, n1spec,
                                     'pathcom_pathway', '1']).encode())
                         t_chksum = hasher.hexdigest()
-                        edge_writer.writerow([chksm, n3id, n3hint, n3_type,
+                        edge_writer.writerow([chksm, kn_n3id, n3hint, n3_type,
                                     n3spec, node, n1hint, n1type, n1spec,
                                     'pathcom_pathway', '1', t_chksum])
         outfile = e_meta_file.replace('edge_meta', 'unique_edge_meta')
         tu.csu(e_meta_file, outfile, [1, 2, 3])
+        outfile = node_file.replace('node', 'unique_node')
+        tu.csu(node_file, outfile)
+        outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
+        tu.csu(n_meta_file, outfile)
 
 
 if __name__ == "__main__":
