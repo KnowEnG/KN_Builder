@@ -208,6 +208,25 @@ def get_database(db=None, args=None):
         args=cf.config_args()
     return MySQL(db, args)
 
+def create_KnowNet(args=None):
+    """Returns an object of the MySQL class with KnowNet db.
+
+    This returns an object of the MySQL class to allow access to its functions
+    if the module is imported.
+
+    Args:
+        db (str): optional db to connect to
+        args (Namespace): args as populated namespace or 'None' for defaults
+
+    Returns:
+        MySQL: a source class object
+    """
+    if args is None:
+        args=cf.config_args()
+    db = MySQL(None, args)
+    db.init_knownet()
+    return db
+
 def get_insert_cmd(step):
     """Returns the command to be used with an insert for the provided step.
 

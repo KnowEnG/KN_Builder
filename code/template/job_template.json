@@ -1,0 +1,16 @@
+{
+    TMPLAUNCH,
+    "name": "TMPJOB",
+    "container": {
+        "type": "DOCKER",
+        "image": "TMPIMG",
+        "volumes": [{"containerPath": "TMPDATADIR", "hostPath":"TMPDATADIR", "mode":"RW"},
+                    {"containerPath": "TMPCODEDIR", "hostPath":"TMPCODEDIR", "mode":"RW"},
+                    {"containerPath": "TMPLOGSDIR", "hostPath":"TMPLOGSDIR", "mode":"RW"}
+                    ]
+    },
+    "cpus": "TMPCPUS",
+    "retries": "1",
+    "mem": "TMPMEM",
+    "command": "TMPCMD"
+}

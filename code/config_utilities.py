@@ -27,13 +27,13 @@ from argparse import ArgumentParser
 import os
 import re
 
-DEFAULT_DOCKER_IMG = 'cblatti3/py3_redis_mysql:0.1'
-DEFAULT_CURL_URL = 'mmaster01.cse.illinois.edu:4400'
+DEFAULT_CHRONOS_URL = 'knowcluster01.dyndns.org:8888'
 DEFAULT_LOCAL_BASE = '/workspace/prototype/KnowNet_Pipeline'
 DEFAULT_CLOUD_BASE = '/storage-pool/blatti/KnowNet_Pipeline'
 
 DEFAULT_CODE_PATH = 'code'
 DEFAULT_DATA_PATH = 'data'
+DEFAULT_LOGS_PATH = 'logs'
 DEFAULT_SRC_PATH = 'srcClass'
 DEFAULT_MAP_PATH = 'id_map'
 
@@ -60,36 +60,37 @@ def add_config_args(parser):
     Returns:
         argparse.ArgumentParser: parser with appended global options
     """
-    parser.add_argument('-i', '--image', help='docker image name for \
-        pipeline', default=DEFAULT_DOCKER_IMG)
-    parser.add_argument('-c', '--chronos', help='url of chronos scheduler',
-                        default=DEFAULT_CURL_URL)
-    parser.add_argument('-ld', '--local_dir', help='name of toplevel directory \
-        on local machine', default=DEFAULT_LOCAL_BASE)
-    parser.add_argument('-cd', '--cloud_dir', help='name of toplevel directory \
-        on cloud storage', default=DEFAULT_CLOUD_BASE)
-    parser.add_argument('-cp', '--code_path', help='relative path of code \
-        directory from toplevel ', default=DEFAULT_CODE_PATH)
-    parser.add_argument('-dp', '--data_path', help='relative path of data \
-        directory from toplevel', default=DEFAULT_DATA_PATH)
-    parser.add_argument('-sp', '--src_path', help='relative path of source \
-        code directory from code directory', default=DEFAULT_SRC_PATH)
-    parser.add_argument('-myh', '--mysql_host', help='url of mySQL db',
-                        default=DEFAULT_MYSQL_URL)
-    parser.add_argument('-myp', '--mysql_port', help='port for mySQL db',
-                        default=DEFAULT_MYSQL_PORT)
-    parser.add_argument('-myu', '--mysql_user', help='user for mySQL db',
-                        default=DEFAULT_MYSQL_USER)
-    parser.add_argument('-myps', '--mysql_pass', help='password for mySQL db',
-                        default=DEFAULT_MYSQL_PASS)
-    parser.add_argument('-rh', '--redis_host', help='url of Redis db',
-                        default=DEFAULT_REDIS_URL)
-    parser.add_argument('-rp', '--redis_port', help='port for Redis db',
-                        default=DEFAULT_REDIS_PORT)
-    parser.add_argument('-rps', '--redis_pass', help='password for Redis db',
-                        default=DEFAULT_REDIS_PASS)
-    parser.add_argument('-cs', '--chunk_size', help='lines per chunk',
-                        default=DEFAULT_CHUNK_SZ)
+    parser.add_argument('-c', '--chronos', default=DEFAULT_CHRONOS_URL,
+                        help='url of chronos scheduler or LOCAL or DOCKER')
+    parser.add_argument('-ld', '--local_dir', default=DEFAULT_LOCAL_BASE,
+                        help='name of toplevel directory on local machine')
+    parser.add_argument('-cd', '--cloud_dir', default=DEFAULT_CLOUD_BASE,
+                        help='name of toplevel directory on cloud storage')
+    parser.add_argument('-cp', '--code_path', default=DEFAULT_CODE_PATH,
+                        help='relative path of code directory from toplevel')
+    parser.add_argument('-dp', '--data_path', default=DEFAULT_DATA_PATH,
+                        help='relative path of data directory from toplevel')
+    parser.add_argument('-lp', '--logs_path', default=DEFAULT_LOGS_PATH,
+                        help='relative path of data directory from toplevel')
+    parser.add_argument('-sp', '--src_path', default=DEFAULT_SRC_PATH,
+                        help=('relative path of source code directory from code'
+                              ' directory'))
+    parser.add_argument('-myh', '--mysql_host', default=DEFAULT_MYSQL_URL,
+                        help='url of mySQL db')
+    parser.add_argument('-myp', '--mysql_port', default=DEFAULT_MYSQL_PORT,
+                        help='port for mySQL db')
+    parser.add_argument('-myu', '--mysql_user', default=DEFAULT_MYSQL_USER,
+                        help='user for mySQL db')
+    parser.add_argument('-myps', '--mysql_pass', default=DEFAULT_MYSQL_PASS,
+                        help='password for mySQL db')
+    parser.add_argument('-rh', '--redis_host', default=DEFAULT_REDIS_URL,
+                        help='url of Redis db')
+    parser.add_argument('-rp', '--redis_port', default=DEFAULT_REDIS_PORT,
+                        help='port for Redis db')
+    parser.add_argument('-rps', '--redis_pass', default=DEFAULT_REDIS_PASS,
+                        help='password for Redis db')
+    parser.add_argument('-cs', '--chunk_size', default=DEFAULT_CHUNK_SZ,
+                        help='lines per chunk')
     return parser
 
 
@@ -117,8 +118,8 @@ def cloud_config_opts(args, config_opts):
         str: string for command line arguments on cloud
     """
     if '-ld' not in config_opts:
-        config_opts.extend(['-ld', os.sep])
-    new_config_opts = [opt.replace(args.local_dir, os.sep) for opt in config_opts]
+        config_opts.extend(['-ld', args.cloud_dir])
+    new_config_opts = [opt.replace(args.local_dir, args.cloud_dir) for opt in config_opts]
     return " ".join(new_config_opts)
 
 def cloud_template_subs(args, job_str):

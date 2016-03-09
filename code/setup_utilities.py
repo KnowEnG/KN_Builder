@@ -1,72 +1,56 @@
+#!/usr/bin/env python3
 """Utiliites for running single or multiple steps of the supermaster pipeline
         either locally or on the cloud.
 
 Contains module functions::
 
-    run_local_check(args)
-    run_local_fetch(args)
-    curl_handler(args, jobname, job_str)
-    list_parents(args, dependencies, response_str, parent_string)
-    run_cloud_check(args)
-    run_cloud_fetch(args)
-    main_parse_args() 
+    run_check(args)
+    run_fetch(args)
+    main_parse_args()
     main()
-    
+
 Attributes:
     DEFAULT_START_STEP (str): first step of setup
-    DEFAULT_DEPLOY_LOC (str): where to run setup
     DEFAULT_RUN_MODE (str): how to run setup
     POSSIBLE_STEPS (list): list of all steps
     SETUP_FILES (list): list of setup SrcClasses
-    CHECK_PY (str): check module name
-    FETCH_PY (str): fetch module name
-    IMPORT_PY (str): import module name
-    CURL_PREFIX (list): parts of the chronos curl command
-    
+
 Examples:
     To view all optional arguments that can be specified::
 
         $ python3 code/setup_utilities.py -h
-        
+
     To run just check step of setup locally::
 
-        $ python3 code/setup_utilities.py CHECK LOCAL STEP
+        $ python3 code/setup_utilities.py CHECK STEP -c LOCAL
 
     To run just fetch step of setup locally after completed check::
 
-        $ python3 code/setup_utilities.py FETCH LOCAL STEP
+        $ python3 code/setup_utilities.py FETCH STEP -c LOCAL
 
     To run all steps of setup on cloud::
 
-        $ python3 code/setup_utilities.py CHECK CLOUD PIPELINE
+        $ python3 code/setup_utilities.py CHECK PIPELINE
 """
 
 from argparse import ArgumentParser
 import config_utilities as cf
 import mysql_utilities as db
+import job_utilities as jb
 import os
-import traceback
 import sys
-import re
 import subprocess
 import json
 
 DEFAULT_START_STEP = 'CHECK'
-DEFAULT_DEPLOY_LOC = 'LOCAL'
 DEFAULT_RUN_MODE = 'STEP'
 POSSIBLE_STEPS = ['CHECK', 'FETCH']
 SETUP_FILES = ['species', 'ppi', 'ensembl']
-CHECK_PY = "check_utilities"
-FETCH_PY = "fetch_utilities"
-IMPORT_PY = "import_utilities"
-CURL_PREFIX = ["curl", "-i", "-L", "-H", "'Content-Type: application/json'",
-               "-X", "POST"]
-#HEADERS = {"Content-type": "application/json"}
 
 def main_parse_args():
     """Processes command line arguments.
 
-    Expects three positional arguments(start_step, deploy_loc, run_mode) and
+    Expects two positional arguments(start_step, run_mode) and
     a number of optional arguments. If argument is missing, supplies default
     value.
 
@@ -74,217 +58,31 @@ def main_parse_args():
         Namespace: args as populated namespace
     """
     parser = ArgumentParser()
-    parser.add_argument('start_step', help='select start step, must be CHECK, \
-        FETCH ', default=DEFAULT_START_STEP)
-    parser.add_argument('deploy_loc', help='select deployment type, must be \
-        LOCAL or CLOUD ', default=DEFAULT_DEPLOY_LOC)
-    parser.add_argument('run_mode', help='select run mode, must be STEP or \
-        PIPELINE', default=DEFAULT_RUN_MODE)
-    parser.add_argument('-p', '--step_parameters', help='parameters needed \
-        for single call of step in pipeline', default='')
-    parser.add_argument('-ne', '--no_ensembl', dest='no_ensembl', help='do not \
- 	    run ensembl in pipeline', action='store_true', default=False)
+    parser.add_argument('start_step', default=DEFAULT_START_STEP,
+                        help='select start step, must be CHECK or FETCH')
+    parser.add_argument('run_mode', default=DEFAULT_RUN_MODE,
+                        help='select run mode, must be STEP or PIPELINE')
+    parser.add_argument('-p', '--step_parameters', default='',
+                        help='parameters needed for single call of step in pipeline')
+    parser.add_argument('-ne', '--no_ensembl', action='store_true', default=False,
+                        help='do not run ensembl in pipeline', )
+    parser.add_argument('-tm', '--testmode', action='store_true', default=False,
+                        help='specifies to run things in testmode')
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
 
     config_opts = sys.argv[1:]
-    config_opts.remove(args.start_step)
-    config_opts.remove(args.deploy_loc)
-    config_opts.remove(args.run_mode)
-    if '-p' in config_opts:
-        config_opts.remove('-p')
-        config_opts.remove(args.step_parameters)
+    for opt in [args.start_step, args.run_mode, '-ne', '--no_ensembl', '-tm',
+               '--testmode', '-p', '--step_parameters', args.step_parameters]:
+        if opt in config_opts:
+            config_opts.remove(opt)
     args.config_opts = " ".join(config_opts)
-    args.cloud_config_opts = cf.cloud_config_opts(args, config_opts)
-
+    if args.chronos != 'LOCAL':
+        args.config_opts = cf.cloud_config_opts(args, config_opts)
     return args
 
-def run_local_check(args):
-    """Runs checks for all sources on local machine.
-
-    This loops through all sources in the code directory and calls
-    check_utilities clean() function on each source.
-
-    Args:
-        args (Namespace): args as populated namespace from parse_args
-    """
-    local_code_dir = os.path.join(args.local_dir, args.code_path)
-    os.chdir(local_code_dir)
-    checker = __import__(CHECK_PY)
-
-    ctr = 0
-    successful = 0
-    failed = 0
-    for module in SETUP_FILES:
-
-        if module is 'ensembl' and args.no_ensembl:
-            continue
-
-        ctr += 1
-        print(str(ctr) + "\t" + module)
-
-        try:
-            checker.check(module, args)
-            successful += 1
-        except Exception as err:
-            print("ERROR: " + module + " could not be run")
-            print("Message: " + str(err))
-            print(traceback.format_exc())
-            failed += 1
-
-    print("CHECK FINISHED. Successful: {0}, Failed: {1}".format(successful, failed))
-    if args.run_mode == "PIPELINE":
-        run_local_fetch(args)
-
-def run_local_fetch(args):
-    """Runs fetches for all aliases on local machine.
-
-    This loops through all aliases in the data directory and calls
-    fetch_utilities main() function on each alias passing the
-    file_metadata.json.
-
-    Args:
-        args (Namespace): args as populated namespace from parse_args
-    """
-
-    local_code_dir = os.path.join(args.local_dir, args.code_path)
-    os.chdir(local_code_dir)
-    fetcher = __import__(FETCH_PY)
-    #importer = __import__(IMPORT_PY)  # not need since ensembl fetch calls import
-    local_data_dir = os.path.join(args.local_dir, args.data_path)
-    os.chdir(local_data_dir)
-    ctr = 0
-    successful = 0
-    failed = 0
-    for src_name in SETUP_FILES:
-        print(src_name)
-        
-        if src_name is 'ensembl' and args.no_ensembl:
-            continue
-        
-        for alias_name in sorted(os.listdir(os.path.join(local_data_dir, src_name))):
-            alias_dir = os.path.join(local_data_dir, src_name, alias_name)
-            if not os.path.isfile(os.path.join(alias_dir, "file_metadata.json")):
-                continue
-
-            os.chdir(alias_dir)
-            ctr += 1
-            print(str(ctr) + "\t" + alias_name)
-
-            try:
-                fetcher.main("file_metadata.json", args)
-                #if src_name == 'ensembl':
-                #    importer.db_import("file_metadata.json", args)
-                successful += 1
-            except Exception as err:
-                print("ERROR: " + alias_name + " could not be fetched")
-                print("Message: " + str(err))
-                print(traceback.format_exc())
-                failed += 1
-
-    print("FETCH FINISHED. Successful: {0}, Failed: {1}".format(successful, failed))
-    if args.run_mode == "PIPELINE":
-        pass
-
-
-def curl_handler(args, jobname, job_str):
-    """handles creating and sending jobs to the cloud.
-
-    Creates a json object in the code/chron_jobs directory using the job_str.
-    Curls the json object to chronos specified in the input arguments.
-
-    Args:
-        args (Namespace): args as populated namespace from parse_args
-        jobname (str): name for job on queue
-        job_str (str): string description of json to submit to run job
-    """
-    local_code_dir = os.path.join(args.local_dir, args.code_path)
-    jobs_dir = os.path.join(local_code_dir, "chron_jobs")
-    if not os.path.exists(jobs_dir):
-        os.makedirs(jobs_dir)
-    jobfile = jobs_dir + os.sep + jobname + ".json"
-
-    with open(jobfile, 'w') as outfile:
-        outfile.write(job_str)
-
-    curl_cmd = list(CURL_PREFIX)
-    curl_cmd.extend(["-d@" + jobfile])
-    curl_cmd.extend([args.chronos + "/scheduler/iso8601"])
-    print(" ".join(curl_cmd))
-    #json.dumps(job_str)
-    #connection.request("POST", "/scheduler/iso8601", "-d@"+jobfile, HEADERS)
-    #connection.request("POST", "/scheduler/iso8601", json.dumps(job_str), HEADERS)
-    #connection.getresponse().read()
-    #subprocess.call(curl_cmd) #does not work
-
-    #annoying workaround
-    shfile = jobs_dir + os.sep + jobname + ".sh"
-    with open(shfile, 'w') as outfile:
-        outfile.write(" ".join(curl_cmd))
-    os.chmod(shfile, 777)
-    subprocess.call(['sh', "-c", shfile])
-    os.remove(shfile)
-    #connection.close()
-
-def list_parents(args, dependencies, response_str, parent_string):
-    """given a list of dependencies, creates and tracks the parents required
-    for the job sent to the cloud
-
-    For each dependency, checks if that parent is on the queue, if not, curls
-    dummy job and adds to parent list.  If so, checks to see that the parent's
-    last update was not a success and adds to parent list.  Returns list of
-    parents to be added to json job description.
-
-    Args:
-        args (Namespace): args as populated namespace from parse_args
-        dependencies (list): list of jobs dependencies
-        response_str (str): array of json job descriptions on queue
-        parent_string (str): string to map dependencies to parent job names
-
-    Returns:
-        list: list of parents to be added to json job description.
-    """
-    parents = []
-    jobs = json.loads(response_str)
-    for depend in dependencies:
-        dep_jobname = "-".join([parent_string, depend])
-        jname = -1
-        jsucc = -1
-        jerr = -1
-        for job in jobs:
-            if dep_jobname == job["name"]:
-                jname = job["name"]
-                if job["lastSuccess"] is not '':
-                    jsucc = job["lastSuccess"]
-                if job["lastError"] is not '':
-                    jerr = job["lastError"]
-        # end loop through jobs
-        print("\t".join([dep_jobname, str(jname), str(jsucc), str(jerr)]))
-        if jname == -1: # no parent on queue
-            # schedule dummy parent add dependancy
-            dummy_str = ""
-            with open(os.path.join(args.local_dir, args.code_path, 'template',
-                                   "dummy_template.json"), 'r') as infile:
-                dummy_str = infile.read(10000)
-
-            dummy_str = cf.cloud_template_subs(args, dummy_str)
-            dummy_str = dummy_str.replace("TMPJOB", dep_jobname)
-            curl_handler(args, dep_jobname, dummy_str)
-            parents.append(dep_jobname)
-
-        elif jsucc == -1: # parent on queue but not succeeded
-            # add dependency
-            parents.append(dep_jobname)
-        elif not jerr == -1: # parent on queue, succeed, has error
-            if jsucc > jerr: # error happened before success
-                # add dependency
-                parents.append(dep_jobname)
-    # end dependencies loop
-    return parents
-
-
-def run_cloud_check(args):
-    """Runs checks for all sources on the cloud.
+def run_check(args):
+    """Runs checks for all sources.
 
     This loops through all sources in the code directory, creates a
     json chronos jobs for each source that calls check_utilities
@@ -294,40 +92,38 @@ def run_cloud_check(args):
     Args:
         args (Namespace): args as populated namespace from parse_args
     """
-    local_code_dir = os.path.join(args.local_dir, args.code_path)
-    os.chdir(local_code_dir)
-    template_file = os.path.join("template", "check_template.json")
-
     ctr = 0
-    #connection = http.client.HTTPConnection(args.chronos)
     for module in SETUP_FILES:
-        
+
         if module is 'ensembl' and args.no_ensembl:
             continue
+
         jobname = "-".join(["check", module])
         jobname = jobname.replace(".", "-")
         pipeline_cmd = ""
         if args.run_mode == "PIPELINE":
-            arg_str = " ".join([args.deploy_loc, args.run_mode, args.cloud_config_opts])
+            arg_str = " ".join([args.run_mode, args.config_opts])
             pipeline_cmd = "python3 /{0}/setup_utilities.py FETCH {1} -p {2}\
-                            ;".format(args.code_path, arg_str, module)
+                            ;".format(os.path.join(args.cloud_dir, args.code_path),
+                                      arg_str, module)
+
         ctr += 1
         print(str(ctr) + "\t" + module)
 
-        job_str = ""
-        with open(template_file, 'r') as infile:
-            job_str = infile.read(10000)
+        tmptype = "setup_check"
+        tmpdict = {'TMPJOB': jobname,
+               'TMPLAUNCH': '"schedule": "R1\/\/P3M"',
+               'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
+               'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
+               'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
+               'TMPPIPECMD': pipeline_cmd,
+               'TMPSRC': module,
+               'TMPOPTS': args.config_opts
+               }
+        setup_check_job = jb.run_job_step(args, tmptype, tmpdict)
 
-        job_str = cf.cloud_template_subs(args, job_str)
-        job_str = job_str.replace("TMPJOB", jobname)
-        job_str = job_str.replace("TMPSRC", module)
-        job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
-
-        curl_handler(args, jobname, job_str)
-
-def run_cloud_fetch(args):
-    """Runs fetches for all aliases of a single source on
-    the cloud.
+def run_fetch(args):
+    """Runs fetches for all aliases of a single source.
 
     For a single source, this loops through all aliases in the data directory,
     creates a json chronos jobs for each alias that calls fetch_utilities
@@ -335,18 +131,18 @@ def run_cloud_fetch(args):
     and curls json to chronos.
 
     Args:
-        args (Namespace): args as populated namespace from parse_args, must 
-            specify --step_paramters(-p) as single source
+        args (Namespace): args as populated namespace from parse_args, must
+            specify --step_parameters(-p) as single source
     """
     src = args.step_parameters
-    if src is '':
-        print("ERROR: 'source' must be specified with --step_parameters (-p)")
-        return -1
-    print("'source' specified with --step_parameters (-p): {0}".format(src))
-    local_code_dir = os.path.join(args.local_dir, args.code_path)
-    os.chdir(local_code_dir)
-    template_file = os.path.join("template", "fetch_template.json")
+    if src is '':  # call fetch for all srcs
+        for src_name in SETUP_FILES:
+            if src_name is 'ensembl' and args.no_ensembl:
+                continue
+            args.step_parameters=src_name
+            run_fetch(args)
 
+    print("'source' specified with --step_parameters (-p): {0}".format(src))
     local_src_dir = os.path.join(args.local_dir, args.data_path, src)
     if not os.path.exists(local_src_dir):
         print("ERROR: source specified with --step_parameters (-p) option, \
@@ -363,26 +159,27 @@ def run_cloud_fetch(args):
         #if src == 'ensembl':
         #    pipeline_cmd = "/usr/bin/time -v python3 /{0}/import_utilities.py \
         #                    file_metadata.json {1};".format(args.code_path,
-        #                                                    args.cloud_config_opts)
+        #                                                    args.config_opts)
         if args.run_mode == "PIPELINE":
             pass
 
         ctr += 1
         print("\t".join([str(ctr), src, alias]))
 
-        job_str = ""
-        with open(template_file, 'r') as infile:
-            job_str = infile.read(10000)
-
-        job_str = cf.cloud_template_subs(args, job_str)
-        job_str = job_str.replace("TMPJOB", jobname)
-        job_str = job_str.replace("TMPALIASPATH", alias_path)
-        job_str = job_str.replace("TMPPIPECMD", pipeline_cmd)
-
-        curl_handler(args, jobname, job_str)
+        tmptype = "setup_fetch"
+        tmpdict = {'TMPJOB': jobname,
+               'TMPLAUNCH': '"schedule": "R1\/\/P3M"',
+               'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
+               'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
+               'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
+               'TMPPIPECMD': pipeline_cmd,
+               'TMPALIASPATH': alias_path,
+               'TMPOPTS': args.config_opts
+               }
+        setup_fetch_job = jb.run_job_step(args, tmptype, tmpdict)
 
 def main():
-    """Runs the 'start_step' step of the pipeline on the 'deploy_loc' local or
+    """Runs the 'start_step' step of the pipeline on the local or
     cloud location, and all subsequent steps if PIPELINE 'run_mode'
 
     Parses the arguments and runs the specified part of the pipeline using the
@@ -394,40 +191,29 @@ def main():
         print(args.run_mode + ' is an unacceptable run_mode.  Must be STEP or PIPELINE')
         return
 
-    local_data_dir = os.path.join(args.local_dir, args.data_path)
-    if not os.path.exists(local_data_dir):
-        os.makedirs(local_data_dir)
+    tmptype = "file_setup"
+    tmpdict = {'TMPJOB': "file_setup_job",
+               'TMPLAUNCH': '"schedule": "R1\/\/P3M"',
+               'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
+               'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
+               'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path)
+               }
+    filesetup_job = jb.run_job_step(args, tmptype, tmpdict)
 
     knownet = db.MySQL(None, args)
     knownet.init_knownet()
 
-    if args.deploy_loc == 'LOCAL':
-        if args.start_step == 'CHECK':
-            run_local_check(args)
-        elif args.start_step == 'FETCH':
-            run_local_fetch(args)
-        else:
-            print(args.start_step + ' is an unacceptable start_step.  Must be \
-                ' + str(POSSIBLE_STEPS))
-            return
-
-    elif args.deploy_loc == 'CLOUD':
-        if args.start_step == 'CHECK':
-            run_cloud_check(args)
-        elif args.start_step == 'FETCH':
-            run_cloud_fetch(args)
-        else:
-            print(args.start_step + ' is an unacceptable start_step.  Must be \
-                ' + str(POSSIBLE_STEPS))
-            return
-
+    if args.start_step == 'CHECK':
+        run_check(args)
+    elif args.start_step == 'FETCH':
+        run_fetch(args)
     else:
-        print(args.deploy_loc + ' is an unacceptable deploy_loc.  Must be LOCAL or CLOUD')
+        print(args.start_step + ' is an unacceptable start_step.  Must be \
+            ' + str(POSSIBLE_STEPS))
         return
 
     return
 
 
 if __name__ == "__main__":
-    sys.argv[len(sys.argv)-1] = re.sub(r';$', '', sys.argv[len(sys.argv)-1])
     main()

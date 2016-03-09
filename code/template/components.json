@@ -1,0 +1,49 @@
+{
+    "starter": {
+        "TMPIMG": "cblatti3/perl:0.1",
+        "TMPMEM": "500",
+        "TMPCMD": "sh -c 'TMPMSG >> TMPLOGSDIR/ERROR.txt'"
+    },
+    "file_setup": {
+        "TMPIMG": "alpine",
+        "TMPMEM": "512",
+        "TMPCPUS": "1",
+        "TMPCMD": "sh -c 'mkdir -m 777 -p /TMPLOGSDIR/; { set -e; ls -l /TMPCODEDIR/*py; mkdir -m 777 -p /TMPDATADIR/; cd /TMPCODEDIR/; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+    },
+    "setup_check": {
+        "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
+        "TMPMEM": "512",
+        "TMPCPUS": "1",
+        "TMPCMD": "sh -c '{ set -e; cd /TMPCODEDIR/; /usr/bin/time -v python3 /TMPCODEDIR/check_utilities.py TMPSRC TMPOPTS; TMPPIPECMD } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+    },
+    "setup_fetch": {
+        "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
+        "TMPMEM": "2500",
+        "TMPCPUS": "4",
+        "TMPCMD": "sh -c '{ set -e; cd /TMPDATADIR/TMPALIASDIR; ls -l file_metadata.json; /usr/bin/time -v python3 /TMPCODEDIR/fetch_utilities.py file_metadata.json TMPOPTS; TMPPIPECMD } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+    },
+    "pipeline_check": {
+        "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
+        "TMPMEM": "512",
+        "TMPCPUS": "1",
+        "TMPCMD": "sh -c '{ set -e; cd /TMPCODEDIR/; /usr/bin/time -v python3 /TMPCODEDIR/check_utilities.py TMPSRC TMPOPTS; TMPPIPECMD } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+    },
+    "pipeline_fetch": {
+        "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
+        "TMPMEM": "2500",
+        "TMPCPUS": "4",
+        "TMPCMD": "sh -c '{ set -e; cd /TMPDATADIR/TMPALIASDIR; /usr/bin/time -v python3 /TMPCODEDIR/fetch_utilities.py file_metadata.json TMPOPTS; TMPPIPECMD } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+    },
+    "pipeline_table": {
+        "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
+        "TMPMEM": "2500",
+        "TMPCPUS": "4",
+        "TMPCMD": "sh -c '{ set -e; cd /TMPDATADIR/TMPALIASDIR; /usr/bin/time -v python3 /TMPCODEDIR/table_utilities.py TMPCHUNK file_metadata.json TMPOPTS; TMPPIPECMD } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+    },
+    "pipeline_conv": {
+        "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
+        "TMPMEM": "2500",
+        "TMPCPUS": "4",
+        "TMPCMD": "sh -c '{ set -e; /usr/bin/time -v python3 /TMPCODEDIR/conv_utilities.py /TMPDATADIR/TMPEDGEDIR TMPOPTS; TMPPIPECMD } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+    }
+}
