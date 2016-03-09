@@ -101,7 +101,7 @@ KNP_ALIAS='PPI'
 KNP_CHUNK='1'
 
 ### kill all jobs
-for c in 'knowcluster01.dyndns.org:4400' ; do
+for c in 'knowcluster01.dyndns.org:8888' ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
     for s in 'check' 'fetch' 'table' 'map'; do
         echo $s
@@ -139,7 +139,7 @@ python3 code/setup_utilities.py CHECK STEP \
     -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
     -dp data_local -lp logs_local \
     -c LOCAL \
-    -cd /mnt/knowtmp/project1/KnowNet_Pipeline -tm
+    -cd /workspace/knowtmp/project1/KnowNet_Pipeline -tm
 
 python3 code/setup_utilities.py CHECK STEP \
     -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
@@ -157,3 +157,10 @@ python3 code/setup_utilities.py CHECK STEP \
     -dp data_chronos -lp logs_chronos \
     -c knowcluster01.dyndns.org:8888 \
     -cd /mnt/fast/knoweng/apps/KnowNet_Pipeline -tm
+
+python3 code/setup_utilities.py FETCH STEP \
+    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
+    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
+    -dp data_local -lp logs_local \
+    -c LOCAL \
+    -cd /workspace/knowtmp/project1/KnowNet_Pipeline -ne -tm

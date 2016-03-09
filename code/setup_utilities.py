@@ -141,6 +141,7 @@ def run_fetch(args):
                 continue
             args.step_parameters=src_name
             run_fetch(args)
+        return 0
 
     print("'source' specified with --step_parameters (-p): {0}".format(src))
     local_src_dir = os.path.join(args.local_dir, args.data_path, src)
@@ -173,10 +174,11 @@ def run_fetch(args):
                'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
                'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                'TMPPIPECMD': pipeline_cmd,
-               'TMPALIASPATH': alias_path,
+               'TMPALIASDIR': alias_path,
                'TMPOPTS': args.config_opts
                }
         setup_fetch_job = jb.run_job_step(args, tmptype, tmpdict)
+    return 0
 
 def main():
     """Runs the 'start_step' step of the pipeline on the local or
