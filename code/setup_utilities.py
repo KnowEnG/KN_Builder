@@ -69,13 +69,13 @@ def main_parse_args():
     parser.add_argument('-tm', '--testmode', action='store_true', default=False,
                         help='specifies to run things in testmode')
     parser.add_argument('-d', '--dependencies', default='',
-                        help='names of job parents')                        
+                        help='names of job parents')
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
 
     config_opts = sys.argv[1:]
     for opt in [args.start_step, args.run_mode, '-ne', '--no_ensembl', '-tm',
-                '--testmode', '-p', '--step_parameters', args.step_parameters, 
+                '--testmode', '-p', '--step_parameters', args.step_parameters,
                 '-d', '--dependencies', args.dependencies]:
         if opt in config_opts:
             config_opts.remove(opt)
@@ -139,7 +139,7 @@ def run_check(args):
                        'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                        'TMPNEXTSTEP': "FETCH",
                        'TMPSTART': module,
-                       'TMPOPTS': " ".join([args.run_mode, args.cloud_config_opts, 
+                       'TMPOPTS': " ".join([args.run_mode, args.cloud_config_opts,
                                             '-d', ns_jobname])
                       }
             jb.run_job_step(args, tmptype, tmpdict)
@@ -181,7 +181,7 @@ def run_fetch(args):
             src_list.extend([src_name])
     else:
         src_list = args.step_parameters.split(",,")
-        
+
     launchstr = '"schedule": "R1\/\/P3M"'
     if args.dependencies is not "":
         launchstr = jb.chronos_parent_str(args.dependencies.split(",,"))
@@ -232,8 +232,12 @@ def main():
         print(args.run_mode + ' is an unacceptable run_mode.  Must be STEP or PIPELINE')
         return
 
-    
+
     if args.dependencies is "":
+        
+        knownet = db.MySQL(None, args)
+        knownet.init_knownet()
+        
         tmptype = "file_setup"
         tmpdict = {'TMPJOB': "file_setup_job",
                    'TMPLAUNCH': '"schedule": "R1\/\/P3M"',
@@ -243,9 +247,6 @@ def main():
                   }
         file_setup_job = jb.run_job_step(args, tmptype, tmpdict)
         args.dependencies = file_setup_job.jobname
-
-        knownet = db.MySQL(None, args)
-        knownet.init_knownet()
 
     if args.start_step == 'CHECK':
         run_check(args)
