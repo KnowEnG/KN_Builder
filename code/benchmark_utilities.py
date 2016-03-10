@@ -287,7 +287,11 @@ class MySQLBenchmark:
         return execution_plan
 
     def get_table_wait_summary(self, table):
-        
+        '''
+        Description:
+
+        Extracting table wait summaries for READ, WRITE, UPDATE and DELETE operations
+        '''
         if(table == "ALL"):
             table_wait_query = "select * from performance_schema.table_io_waits_summary_by_table where count_star > 0;";
         else:
@@ -297,14 +301,14 @@ class MySQLBenchmark:
         
         #Use the dictionary cursor to generate the wait data as the data is large.
         self.set_dictionary_cursor()
+        
         for result in self.cursor.execute(table_wait_query,multi=True):
             columns = [column[0] for column in self.cursor.description]
-            print(columns)
             res = result.fetchall()
             for row in res:
                 table_wait_desc.append(dict(zip(columns, row)))
         
-        print(table_wait_desc)
+        #print(table_wait_desc)
 
         #setting back to buffered cursor
         self.set_buffered_cursor()
@@ -312,7 +316,7 @@ class MySQLBenchmark:
         return table_wait_desc
     
 
-    def send_data_to_ES(self, data, ES_host, port):
+    def send_data_to_ES(self, ES_host, port, data):
         '''
         Description:
         
@@ -327,7 +331,7 @@ class MySQLBenchmark:
         except Exception:
             print("Error connecting to server instance...")
             
-        print(res['created'])
+        #print(res['created'])
 
     def connection_stress_test(self, stress_level):
         '''

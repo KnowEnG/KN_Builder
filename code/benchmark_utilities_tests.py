@@ -64,7 +64,9 @@ class MySQLBenchmarkUtilsTestBench(unittest.TestCase):
      
     def test_send_data_to_ES(self):
         data = self.benchmark_object.schema_storage_info("ALL")
-        self.benchmark_object.send_data_to_ES(data)
+        es = "localhost"
+        port = 9200
+        self.benchmark_object.send_data_to_ES(es, port, data)
     #def test_query_DNE(self):
     #    pass
 
