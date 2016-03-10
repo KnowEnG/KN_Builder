@@ -60,7 +60,6 @@ def main(edgefile, args=None):
         return
     rdb = ru.get_database(args)
     status_file = edgefile.replace('edge', 'status')
-    uc_file = edgefile.replace('edge', 'unique_conv')
     ue2l_file = edgefile.replace('edge', 'unique_edge2line')
     us_file = edgefile.replace('edge', 'unique_status')
     with open(edgefile, 'r') as infile, \
