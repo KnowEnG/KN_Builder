@@ -8,7 +8,7 @@
         "TMPIMG": "alpine",
         "TMPMEM": "512",
         "TMPCPUS": "1",
-        "TMPCMD": "sh -c 'mkdir -m 777 -p /TMPLOGSDIR/; { ls -l /TMPCODEDIR/*py && mkdir -m 777 -p /TMPDATADIR/; && sleep 5 } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+        "TMPCMD": "sh -c 'mkdir -m 777 -p /TMPLOGSDIR/; { ls -l /TMPCODEDIR/*py && mkdir -m 777 -p /TMPDATADIR/ && sleep 3; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
     },
     "setup_check": {
         "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
@@ -50,6 +50,6 @@
         "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
         "TMPMEM": "512",
         "TMPCPUS": "1",
-        "TMPCMD": "sh -c '{ python3 /TMPCODEDIR/setup_utilities.py TMPNEXTSTEP TMPOPTS -p TMPSTART; sleep 3 } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+        "TMPCMD": "sh -c '{ python3 /TMPCODEDIR/setup_utilities.py TMPNEXTSTEP TMPOPTS -p TMPSTART && sleep 3; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
     }
 }
