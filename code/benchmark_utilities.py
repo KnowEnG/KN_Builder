@@ -61,7 +61,21 @@ class MySQLBenchmark:
                                     client_flags=[sql.ClientFlag.LOCAL_FILES])
         self.cursor = self.conn.cursor(buffered=True)
     
-    
+    def set_buffered_cursor(self):
+        """
+        Description: 
+        Sets the cursor to be a dictionary Cursor
+        """
+        self.cursor = self.conn.cursor(dictionary=True)
+        
+
+    def set_dictionary_cursor(self):
+        """
+        Description: 
+        Sets the cursor to be a dictionary Cursor
+        """
+        self.cursor = self.conn.cursor(buffered=True)
+
     """
     Description: The database has to be configured to be able to generate the
     statistics for queries that we use. This is as per the following document: 
@@ -272,7 +286,33 @@ class MySQLBenchmark:
         print(execution_plan)
         return execution_plan
 
-    def send_data_to_ES(self, data):
+    def get_table_wait_summary(self, table):
+        
+        if(table == "ALL"):
+            table_wait_query = "select * from performance_schema.table_io_waits_summary_by_table where count_star > 0;";
+        else:
+            table_wait_query = "select * from performance_schema.table_io_waits_summary_by_table where OBJECT_NAME='"+table+"' and count_star > 0;"
+            
+        table_wait_desc = []
+        
+        #Use the dictionary cursor to generate the wait data as the data is large.
+        self.set_dictionary_cursor()
+        for result in self.cursor.execute(table_wait_query,multi=True):
+            columns = [column[0] for column in self.cursor.description]
+            print(columns)
+            res = result.fetchall()
+            for row in res:
+                table_wait_desc.append(dict(zip(columns, row)))
+        
+        print(table_wait_desc)
+
+        #setting back to buffered cursor
+        self.set_buffered_cursor()
+
+        return table_wait_desc
+    
+
+    def send_data_to_ES(self, data, ES_host, port):
         '''
         Description:
         
@@ -280,9 +320,13 @@ class MySQLBenchmark:
         
         Needs work to parametrize the ES host, port and index of access.
         '''
-        es = elasticsearch.Elasticsearch([{'host': 'localhost', 'port': 9200}])  # use default of localhost, port 9200
+        es = elasticsearch.Elasticsearch([{'host': ES_host, 'port': port}])  # use default of localhost, port 9200
         data[0]['timestamp'] = datetime.now() 
-        res = es.index(index='database_perf', doc_type='benchmark_data', id=1, body=data[0])
+        try:
+            res = es.index(index='database_perf', doc_type='benchmark_data', id=1, body=data[0])
+        except Exception:
+            print("Error connecting to server instance...")
+            
         print(res['created'])
 
     def connection_stress_test(self, stress_level):
