@@ -18,8 +18,8 @@
     },
     "setup_fetch": {
         "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
-        "TMPMEM": "2500",
-        "TMPCPUS": "4",
+        "TMPMEM": "16000",
+        "TMPCPUS": "8",
         "TMPCMD": "sh -c '{ set -e; cd /TMPDATADIR/TMPALIASDIR; ls -l file_metadata.json; /usr/bin/time -v python3 /TMPCODEDIR/fetch_utilities.py file_metadata.json TMPOPTS; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
     },
     "pipeline_check": {

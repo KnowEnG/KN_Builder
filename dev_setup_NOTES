@@ -132,6 +132,14 @@ echo $KNP_CMD
 ./code/reports/enumerate_files.sh $KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
     $KNP_REDIS_HOST > tests/KN03build.CP.fake_src
 
+#### clear out mysql
+KNP_CMD="mysql -h $KNP_MYSQL_HOST --port 3306 -uroot -pKnowEnG KnowNet \
+    --execute \"drop database KnowNet;\""
+echo $KNP_CMD
+
+#### clear out redis
+KNP_CMD="redis-cli -h $KNP_REDIS_HOST -a KnowEnG FLUSHDB"
+echo $KNP_CMD
 
 ### setup utilities testing
 python3 code/setup_utilities.py CHECK STEP \
@@ -203,7 +211,7 @@ python3 code/setup_utilities.py CHECK PIPELINE \
 ### kill all jobs
 for c in 'knowcluster01.dyndns.org:4400' ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
-    for s in 'check' 'fetch' 'table' 'map'; do
+    for s in 'setup' 'check' 'fetch' 'table' 'map'; do
         echo $s
         for i in `grep "$s" /tmp/t.txt  `; do
             CMD="curl -L -X DELETE $c/scheduler/job/$i";
