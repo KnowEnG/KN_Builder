@@ -8,6 +8,7 @@ Utilizes performane queries described in https://fromdual.com/mysql-performance-
 
 """
 
+from datetime import datetime
 import config_utilities as cf
 import mysql.connector as sql
 import os
@@ -279,9 +280,11 @@ class MySQLBenchmark:
         
         Needs work to parametrize the ES host, port and index of access.
         '''
-        es = elasticsearch.Elasticsearch()  # use default of localhost, port 9200
-        es.index(index='database_perf', doc_type='benchmark_data', body=data)
-        
+        es = elasticsearch.Elasticsearch([{'host': 'localhost', 'port': 9200}])  # use default of localhost, port 9200
+        data[0]['timestamp'] = datetime.now() 
+        res = es.index(index='database_perf', doc_type='benchmark_data', id=1, body=data[0])
+        print(res['created'])
+
     def connection_stress_test(self, stress_level):
         '''
         Description: 
