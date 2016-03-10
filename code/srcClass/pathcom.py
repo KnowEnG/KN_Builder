@@ -266,9 +266,9 @@ class Pathcom(SrcClass):
                 e_meta_writer.writerow([chksm, 'original_source', src])
                 if publist:
                     e_meta_writer.writerow([chksm, 'reference', publist])
-                #n1-pathway edge
+                #pathway edge
                 if n3id:
-                    kn_n3id = cf.pretty_name(['paco_' + n3id])
+                    kn_n3id = cf.pretty_name('paco_' + n3id)
                     n_writer.writerow([kn_n3id, kn_n3id])
                     n_meta_writer.writerow([kn_n3id, info_type, n3id])
                     for node in [n1id, n2id]:
