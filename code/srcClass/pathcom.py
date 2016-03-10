@@ -232,8 +232,9 @@ class Pathcom(SrcClass):
         n3_type = 'property'
         n3hint = 'unknown'
         n3spec = 'unknown'
-        score = 1
+        score = '1'
         info_type = 'alt_alias'
+        n_type_id = '2'
 
         with open(rawline, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
@@ -258,7 +259,7 @@ class Pathcom(SrcClass):
                 hasher = hashlib.md5()
                 hasher.update('\t'.join([chksm, n1id, n1hint, n1type, n1spec,
                                          n2id, n2hint, n2type, n2spec, et_hint,
-                                         str(score)]).encode())
+                                         score]).encode())
                 t_chksum = hasher.hexdigest()
                 edge_writer.writerow([chksm, n1id, n1hint, n1type, n1spec,
                                       n2id, n2hint, n2type, n2spec, et_hint,
@@ -269,17 +270,17 @@ class Pathcom(SrcClass):
                 #pathway edge
                 if n3id:
                     kn_n3id = cf.pretty_name('paco_' + n3id)
-                    n_writer.writerow([kn_n3id, kn_n3id])
+                    n_writer.writerow([kn_n3id, kn_n3id, n_type_id])
                     n_meta_writer.writerow([kn_n3id, info_type, n3id])
                     for node in [n1id, n2id]:
                         hasher = hashlib.md5()
                         hasher.update('\t'.join([chksm, kn_n3id, n3hint, n3_type,
                                     n3spec,node, n1hint, n1type, n1spec,
-                                    'pathcom_pathway', '1']).encode())
+                                    'pathcom_pathway', score]).encode())
                         t_chksum = hasher.hexdigest()
                         edge_writer.writerow([chksm, kn_n3id, n3hint, n3_type,
                                     n3spec, node, n1hint, n1type, n1spec,
-                                    'pathcom_pathway', '1', t_chksum])
+                                    'pathcom_pathway', score, t_chksum])
         outfile = e_meta_file.replace('edge_meta', 'unique_edge_meta')
         tu.csu(e_meta_file, outfile, [1, 2, 3])
         outfile = node_file.replace('node', 'unique_node')

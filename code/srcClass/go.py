@@ -208,6 +208,7 @@ class Go(SrcClass):
         """
         term_map = dict()
         info_type = "alt_alias"
+        n_type_id = '2'
         n_meta_file = filename.replace('rawline', 'node_meta')
         node_file = filename.replace('rawline', 'node')
         orig_id, kn_id, orig_name, kn_name = ['', '', '', '']
@@ -237,7 +238,7 @@ class Go(SrcClass):
                     orig_name = raw[6:].strip()
                     kn_name = cf.pretty_name('go_' + orig_name)
                     term_map[orig_id] = kn_id + '::' + kn_name
-                    n_writer.writerow([kn_id, kn_name])
+                    n_writer.writerow([kn_id, kn_name, n_type_id])
                     n_meta_writer.writerow([kn_id, info_type, orig_name])
                     n_meta_writer.writerow([kn_id, info_type, orig_id])
                 if raw.startswith('alt_id: '):
