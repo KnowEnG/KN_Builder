@@ -639,7 +639,7 @@ class MySQL(object):
         """
         cmd = ['mysqlimport', '-u', self.user, '-h', self.host, '--port',
                self.port, '--password='+self.passw, import_flags,
-               '--fields_escaped_by=\\\\', database, '-L', tablefile]
+               database, '-L', tablefile, '-v']
         subprocess.call(' '.join(cmd), shell=True)
 
     def close(self):

@@ -141,7 +141,7 @@ def cloud_template_subs(args, job_str):
 
     return job_str
 
-def pretty_name(orig_name, endlen=35):
+def pretty_name(orig_name, endlen=63):
     """Shortens names strs and removes problematic characters
 
     Args:
