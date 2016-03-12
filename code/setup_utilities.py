@@ -168,21 +168,21 @@ def run_check(args):
 
         ns_parameters.extend([module])
         ns_jobname = "-".join([jobname, "next_step"])
-        ns_dict = {'TMPJOB': ns_jobname,
-                   'TMPLAUNCH': jb.chronos_parent_str([check_job.jobname]),
-                   'TMPNEXTSTEP': "FETCH",
-                   'TMPSTART': module,
-                   'TMPOPTS': " ".join([args.run_mode, args.pipeline_stage,
-                                        args.cloud_config_opts, '-d', ns_jobname])
-                  }
+        ns_dict.update({'TMPJOB': ns_jobname,
+                        'TMPLAUNCH': jb.chronos_parent_str([check_job.jobname]),
+                        'TMPNEXTSTEP': "FETCH",
+                        'TMPSTART': module,
+                        'TMPOPTS': " ".join([args.run_mode, args.pipeline_stage,
+                                            args.cloud_config_opts, '-d', ns_jobname])
+                       })
 
         if args.run_mode == "PIPELINE" and args.chronos not in SPECIAL_MODES:
             jb.run_job_step(args, "next_step_caller", ns_dict)
 
     if args.run_mode == "PIPELINE" and args.chronos in SPECIAL_MODES and ns_parameters:
-        ns_dict = {'TMPJOB': "-".join([args.pipeline_stage, "check", "next_step"]),
-                   'TMPSTART': ",,".join(ns_parameters)
-                  }
+        ns_dict.update({'TMPJOB': "-".join([args.pipeline_stage, "check", "next_step"]),
+                        'TMPSTART': ",,".join(ns_parameters)
+                       })
         tmpargs = args
         tmpargs.chronos = "LOCAL"
         jb.run_job_step(tmpargs, "next_step_caller", ns_dict)
@@ -265,13 +265,13 @@ def run_fetch(args):
 
             ns_parameters.extend([",".join([src, alias])])
             ns_jobname = "-".join([jobname, "next_step"])
-            ns_dict = {'TMPJOB': ns_jobname,
-                       'TMPLAUNCH': jb.chronos_parent_str([fetch_job.jobname]),
-                       'TMPNEXTSTEP': "TABLE",
-                       'TMPSTART': ",".join([src, alias]),
-                       'TMPOPTS': " ".join([args.run_mode, args.pipeline_stage,
-                                            args.cloud_config_opts, '-d', ns_jobname])
-                      }
+            ns_dict.update({'TMPJOB': ns_jobname,
+                            'TMPLAUNCH': jb.chronos_parent_str([fetch_job.jobname]),
+                            'TMPNEXTSTEP': "TABLE",
+                            'TMPSTART': ",".join([src, alias]),
+                            'TMPOPTS': " ".join([args.run_mode, args.pipeline_stage,
+                                                 args.cloud_config_opts, '-d', ns_jobname])
+                           })
 
             if args.pipeline_stage == 'PIPELINE' and args.run_mode == "PIPELINE" and \
                 args.chronos not in SPECIAL_MODES:
@@ -279,9 +279,9 @@ def run_fetch(args):
 
     if args.pipeline_stage == 'PIPELINE' and args.run_mode == "PIPELINE" and \
         args.chronos in SPECIAL_MODES and ns_parameters:
-        ns_dict = {'TMPJOB': "-".join([args.pipeline_stage, "fetch", "next_step"]),
-                   'TMPSTART': ",,".join(ns_parameters)
-                  }
+        ns_dict.update({'TMPJOB': "-".join([args.pipeline_stage, "fetch", "next_step"]),
+                        'TMPSTART': ",,".join(ns_parameters)
+                       })
         tmpargs = args
         tmpargs.chronos = "LOCAL"
         jb.run_job_step(tmpargs, "next_step_caller", ns_dict)
@@ -303,8 +303,9 @@ def main():
 
     if args.dependencies is "":
 
-        knownet = db.MySQL(None, args)
-        knownet.init_knownet()
+        if args.pipeline_stage == 'SETUP':
+            knownet = db.MySQL(None, args)
+            knownet.init_knownet()
 
         jobdict = {'TMPJOB': "file_setup_job",
                    'TMPLAUNCH': '"schedule": "R1\/\/P3M"',
