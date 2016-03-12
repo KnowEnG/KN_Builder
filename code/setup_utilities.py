@@ -223,6 +223,8 @@ def run_fetch(args):
                 jobname = jobname.replace(".", "-")
                 jobdict = {'TMPJOB': jobname,
                            'TMPLAUNCH': '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"',
+                           'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
+                           'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
                            'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                           }
                 fetch_job = jb.run_job_step(args, "placeholder", jobdict)
@@ -230,16 +232,22 @@ def run_fetch(args):
         for alias in sorted(os.listdir(local_src_dir)):
 
             alias_path = os.path.join(src, alias)
+            local_alias_dir = os.path.join(local_src_dir, alias)
             alias_ctr += 1
             print("\t".join([src, str(alias_ctr), alias]))
 
+            metadata_file = os.path.join(local_alias_dir, "file_metadata.json")
+            if not os.path.isfile(metadata_file):
+                print("ERROR: Missing {0}".format(metadata_file))
+                return -1
 
             ## check for dependencies
             parents = []
             if args.dependencies is not "":
                 parents = args.dependencies.split(",,")
+
             version_dict = {}
-            with open("file_metadata.json", 'r') as infile:
+            with open(metadata_file, 'r') as infile:
                 version_dict = json.load(infile)
             dependencies = version_dict["dependencies"]
             if len(dependencies) > 0:
