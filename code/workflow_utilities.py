@@ -13,9 +13,7 @@ Contains module functions::
     main()
 
 Attributes:
-    DEFAULT_PIPELINE_STAGE (str): run setup or srcs pipeline
     DEFAULT_START_STEP (str): first step of setup
-    DEFAULT_RUN_MODE (str): how to run setup
     POSSIBLE_STEPS (list): list of all steps
     SETUP_FILES (list): list of setup SrcClasses
     SPECIAL_MODES (list): list of modes that run breadth first
@@ -23,19 +21,20 @@ Attributes:
 Examples:
     To view all optional arguments that can be specified::
 
-        $ python3 code/setup_utilities.py -h
+        $ python3 code/workflow_utilities.py -h
 
-    To run just check step of setup locally::
+    To run just check step of one setup src (e.g. ppi) locally::
 
-        $ python3 code/setup_utilities.py CHECK STEP SETUP -c LOCAL
-
-    To run just fetch step of setup locally after completed check::
-
-        $ python3 code/setup_utilities.py FETCH STEP SETUP -c LOCAL
+        $ python3 code/workflow_utilities.py CHECK -su -os -c LOCAL -p ppi
 
     To run all steps of setup on cloud::
 
-        $ python3 code/setup_utilities.py CHECK PIPELINE SETUP
+        $ python3 code/workflow_utilities.py CHECK -su
+
+    To run all steps one pipeline src (e.g. kegg) locally::
+
+        $ python3 code/workflow_utilities.py CHECK -os -c LOCAL -p kegg
+
 """
 
 import os
@@ -46,9 +45,7 @@ import config_utilities as cf
 import mysql_utilities as db
 import job_utilities as jb
 
-DEFAULT_PIPELINE_STAGE = 'SETUP'
 DEFAULT_START_STEP = 'CHECK'
-DEFAULT_RUN_MODE = 'STEP'
 POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE', 'MAP']
 SETUP_FILES = ['species', 'ppi', 'ensembl']
 SPECIAL_MODES = ['LOCAL', 'DOCKER']
@@ -56,34 +53,46 @@ SPECIAL_MODES = ['LOCAL', 'DOCKER']
 def main_parse_args():
     """Processes command line arguments.
 
-    Expects three positional arguments(start_step, run_mode, pipeline_stage) and
-    a number of optional arguments. If argument is missing, supplies default
-    value.
+    Expects one argument (start_step) and a number of optional arguments. If
+    argument is missing, supplies default value.
+
+.. csv-table::
+    :header: name,flag,type,description
+    :widths: 5,20,5,10,30,40
+    :delim: |
+
+    start_step          |       |
+    --setup             |-su    |run database initializations instead of source specific pipelines
+    --one_step          |-os    |run for a single step instead of pipeline
+    --step_parameters   |-p     |parameters to specify calls of a single step in pipeline
+    --no_ensembl        |-ne    |do not run ensembl in setup pipeline
+    --test_mode         |-tm    |run in test mode by only printing commands
+    --dependencies      |-d     |names of parent jobs that must finish
 
     Returns:
         Namespace: args as populated namespace
     """
     parser = ArgumentParser()
     parser.add_argument('start_step', default=DEFAULT_START_STEP,
-                        help='select start step, must be CHECK or FETCH')
-    parser.add_argument('run_mode', default=DEFAULT_RUN_MODE,
-                        help='select run mode, must be STEP or PIPELINE')
-    parser.add_argument('pipeline_stage', default=DEFAULT_PIPELINE_STAGE,
-                        help='select pipeline stage, must be SETUP or PIPELINE')
+                        help=('start step, must be ' + str(POSSIBLE_STEPS))
+    parser.add_argument('-su', '--setup', default=False, action = 'store_true',
+                        help=('run database initializations instead of source '
+                              'specific pipelines')
+    parser.add_argument('-os', '--one_step', default=False, action='store_true',
+                        help='run for a single step instead of pipeline')
     parser.add_argument('-p', '--step_parameters', default='',
-                        help='parameters needed for single call of step in pipeline')
+                        help='parameters to specify calls of a single step in pipeline')
     parser.add_argument('-ne', '--no_ensembl', action='store_true', default=False,
-                        help='do not run ensembl in pipeline', )
-    parser.add_argument('-tm', '--testmode', action='store_true', default=False,
-                        help='specifies to run things in testmode')
+                        help='do not run ensembl in setup pipeline', )
+    parser.add_argument('-tm', '--test_mode', action='store_true', default=False,
+                        help='run in test mode by only printing commands')
     parser.add_argument('-d', '--dependencies', default='',
-                        help='names of job parents')
+                        help='names of parent jobs that must finish')
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
 
     config_opts = sys.argv[1:]
-    for opt in [args.pipeline_stage, args.start_step, args.run_mode, '-ne', '--no_ensembl', '-tm',
-                '--testmode', '-p', '--step_parameters', args.step_parameters,
+    for opt in [args.start_step, '-p', '--step_parameters', args.step_parameters,
                 '-d', '--dependencies', args.dependencies]:
         if opt in config_opts:
             config_opts.remove(opt)
@@ -97,7 +106,7 @@ def main_parse_args():
 def list_sources(args):
     """ creates a list of all sources for step to process
 
-    Depending on args.pipeline_stage, loops through all sources in the srccode
+    Depending on args.setup, loops through all sources in the srccode
     directory pulling out valid names or return SETUP_FILES
 
     Args:
@@ -105,12 +114,16 @@ def list_sources(args):
     """
     src_list = []
     if args.step_parameters is "":
-        if args.pipeline_stage == 'PIPELINE':
+        if args.setup:
+            for srcstr in SETUP_FILES:
+                if srcstr is 'ensembl' and args.no_ensembl:
+                    continue
+                src_list.extend([srcstr])
+        else:
             local_src_code_dir = os.path.join(args.local_dir, args.code_path,
                                               args.src_path)
             if not os.path.exists(local_src_code_dir):
-                print("ERROR: cannot find {0}!".format(local_src_code_dir))
-                return -1
+                raise IOError("ERROR: cannot find {0}!".format(local_src_code_dir))
             src_pys_list = sorted(os.listdir(local_src_code_dir))
             for filename in src_pys_list:
                 if not filename.endswith(".py"):
@@ -121,11 +134,7 @@ def list_sources(args):
                 if srcstr in SETUP_FILES:
                     continue
                 src_list.extend([srcstr])
-        else: ## args.pipeline_stage == 'SETUP'
-            for srcstr in SETUP_FILES:
-                if srcstr is 'ensembl' and args.no_ensembl:
-                    continue
-                src_list.extend([srcstr])
+
     else:
         src_list = args.step_parameters.split(",,")
     return sorted(src_list)
@@ -134,10 +143,9 @@ def list_sources(args):
 def run_check(args):
     """Runs checks for all sources.
 
-    This loops through all sources in the code directory, creates a
-    json chronos jobs for each source that calls check_utilities
-    clean() (and if run_mode 'PIPELINE', the call to
-    setup_utilities FETCH) and curls json to chronos.
+    This loops through args.parameters sources, creates a job for each that calls
+    check_utilities clean() (and if not args.one_step, calls workflow_utilities
+    FETCH), and runs job in args.chronos location.
 
     Args:
         args (Namespace): args as populated namespace from parse_args
@@ -158,7 +166,7 @@ def run_check(args):
         ctr += 1
         print(str(ctr) + "\t" + module)
 
-        jobname = "-".join([args.pipeline_stage, "check", module])
+        jobname = "-".join(["check", module])
         jobname = jobname.replace(".", "-")
         jobdict = {'TMPJOB': jobname,
                    'TMPLAUNCH': launchstr,
@@ -166,7 +174,7 @@ def run_check(args):
                    'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
                    'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                    'TMPSRC': module,
-                   'TMPOPTS': args.cloud_config_opts
+                   'TMPOPTS': args.config_opts
                   }
         check_job = jb.run_job_step(args, "checker", jobdict)
 
@@ -176,15 +184,14 @@ def run_check(args):
                         'TMPLAUNCH': jb.chronos_parent_str([check_job.jobname]),
                         'TMPNEXTSTEP': "FETCH",
                         'TMPSTART': module,
-                        'TMPOPTS': " ".join([args.run_mode, args.pipeline_stage,
-                                             args.cloud_config_opts, '-d', ns_jobname])
+                        'TMPOPTS': " ".join([args.cloud_config_opts, '-d', ns_jobname])
                        })
 
-        if args.run_mode == "PIPELINE" and args.chronos not in SPECIAL_MODES:
+        if not args.one_step and args.chronos not in SPECIAL_MODES:
             jb.run_job_step(args, "next_step_caller", ns_dict)
 
-    if args.run_mode == "PIPELINE" and args.chronos in SPECIAL_MODES and ns_parameters:
-        ns_dict.update({'TMPJOB': "-".join([args.pipeline_stage, "check", "next_step"]),
+    if not args.one_step and args.chronos in SPECIAL_MODES and ns_parameters:
+        ns_dict.update({'TMPJOB': "-".join(["check", "next_step"]),
                         'TMPSTART': ",,".join(ns_parameters)
                        })
         tmpargs = args
@@ -197,10 +204,9 @@ def run_check(args):
 def run_fetch(args):
     """Runs fetches for all aliases of a single source.
 
-    For a single source, this loops through all aliases in the data directory,
-    creates a json chronos jobs for each alias that calls fetch_utilities
-    main() (and if run_mode 'PIPELINE', the call to setup_utilities TABLE)
-    and curls json to chronos.
+    This loops through aliases of args.parameters sources, creates a job for
+    each that calls fetch_utilities main() (and if not args.one_step, calls
+    workflow_utilities TABLE), and runs job in args.chronos location.
 
     Args:
         args (Namespace): args as populated namespace from parse_args, must
@@ -216,15 +222,13 @@ def run_fetch(args):
     for src in src_list:
         local_src_dir = os.path.join(args.local_dir, args.data_path, src)
         if not os.path.exists(local_src_dir):
-            print("ERROR: source specified with --step_parameters (-p) option, \
+            raise IOError("ERROR: source specified with --step_parameters (-p) option, \
                 {0}, does not have data directory: {1}".format(src, local_src_dir))
-            return -1
 
         alias_ctr = 0
-
         if args.chronos not in SPECIAL_MODES:
             for alias in sorted(os.listdir(local_src_dir)):
-                jobname = "-".join([args.pipeline_stage, "fetch", src, alias])
+                jobname = "-".join(["fetch", src, alias])
                 jobname = jobname.replace(".", "-")
                 jobdict = {'TMPJOB': jobname,
                            'TMPLAUNCH': '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"',
@@ -241,15 +245,14 @@ def run_fetch(args):
             alias_ctr += 1
             print("\t".join([src, str(alias_ctr), alias]))
 
-            metadata_file = os.path.join(local_alias_dir, "file_metadata.json")
-            if not os.path.isfile(metadata_file):
-                print("ERROR: Missing {0}".format(metadata_file))
-                return -1
-
             ## check for dependencies
             parents = []
             if args.dependencies is not "":
                 parents = args.dependencies.split(",,")
+
+            metadata_file = os.path.join(local_alias_dir, "file_metadata.json")
+            if not os.path.isfile(metadata_file):
+                raise IOError("ERROR: Missing {0}".format(metadata_file))
 
             version_dict = {}
             with open(metadata_file, 'r') as infile:
@@ -257,14 +260,14 @@ def run_fetch(args):
             dependencies = version_dict["dependencies"]
             if len(dependencies) > 0:
                 for dep in dependencies:
-                    parent_string = "-".join([args.pipeline_stage, "fetch", src, dep])
+                    parent_string = "-".join(["fetch", src, dep])
                     parents.extend([parent_string])
 
             launchstr = '"schedule": "R1\/\/P3M"'
             if len(parents) > 0:
                 launchstr = jb.chronos_parent_str(parents)
 
-            jobname = "-".join([args.pipeline_stage, "fetch", src, alias])
+            jobname = "-".join("fetch", src, alias])
             jobname = jobname.replace(".", "-")
             jobdict = {'TMPJOB': jobname,
                        'TMPLAUNCH': launchstr,
@@ -282,17 +285,15 @@ def run_fetch(args):
                             'TMPLAUNCH': jb.chronos_parent_str([fetch_job.jobname]),
                             'TMPNEXTSTEP': "TABLE",
                             'TMPSTART': ",".join([src, alias]),
-                            'TMPOPTS': " ".join([args.run_mode, args.pipeline_stage,
-                                                 args.cloud_config_opts, '-d', ns_jobname])
+                            'TMPOPTS': " ".join([args.cloud_config_opts, '-d', ns_jobname])
                            })
 
-            if args.pipeline_stage == 'PIPELINE' and args.run_mode == "PIPELINE" and \
-                args.chronos not in SPECIAL_MODES:
+            if not args.setup and not args.one_step and args.chronos not in SPECIAL_MODES:
                 jb.run_job_step(args, "next_step_caller", ns_dict)
 
-    if args.pipeline_stage == 'PIPELINE' and args.run_mode == "PIPELINE" and \
+    if not args.setup and not args.one_step and \
         args.chronos in SPECIAL_MODES and ns_parameters:
-        ns_dict.update({'TMPJOB': "-".join([args.pipeline_stage, "fetch", "next_step"]),
+        ns_dict.update({'TMPJOB': "-".join(["fetch", "next_step"]),
                         'TMPSTART': ",,".join(ns_parameters)
                        })
         tmpargs = args
@@ -305,10 +306,9 @@ def run_fetch(args):
 def run_table(args):
     """Runs tables for all chunks of a single source alias.
 
-    For a single alias, this loops through all chunks in the data directory,
-    creates a json chronos jobs for each alias that calls table_utilities
-    main() (and if run_mode 'PIPELINE', the call to setup_utilities MAP)
-    and curls json to chronos.
+    This loops through chunks of args.parameters aliases, creates a job for
+    each that calls table_utilities main() (and if not args.one_step, calls
+    workflow_utilities MAP), and runs job in args.chronos location.
 
     Args:
         args (Namespace): args as populated namespace from parse_args, must
@@ -317,8 +317,7 @@ def run_table(args):
     """
     alias_list = args.step_parameters.split(",,")
     if args.step_parameters is "":
-        print("ERROR: 'source,alias' must be specified with --step_parameters (-p)")
-        return -1
+        raise ValueError("ERROR: 'source,alias' must be specified with --step_parameters (-p)")
 
     ns_parameters = []
     ns_dict = {'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
@@ -336,9 +335,8 @@ def run_table(args):
         alias_path = os.path.join(src, alias)
         local_chunk_dir = os.path.join(args.local_dir, args.data_path, alias_path, "chunks")
         if not os.path.exists(local_chunk_dir):
-            print("ERROR: 'source,alias' specified with --step_parameters (-p) "
+            raise IOError("ERROR: 'source,alias' specified with --step_parameters (-p) "
                   "option, {0}, does not have chunk directory: {1}".format(pair, local_chunk_dir))
-            return -1
 
         chunk_ctr = 0
         for chunk_name in sorted(os.listdir(local_chunk_dir)):
@@ -348,7 +346,7 @@ def run_table(args):
             chunk_ctr += 1
             print("\t".join([str(chunk_ctr), chunk_name]))
 
-            jobname = "-".join([args.pipeline_stage, "table", chunk_name])
+            jobname = "-".join(["table", chunk_name])
             jobname = jobname.replace(".", "-")
             jobname = jobname.replace(".txt", "")
             jobdict = {'TMPJOB': jobname,
@@ -357,7 +355,7 @@ def run_table(args):
                        'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
                        'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                        'TMPALIASDIR': alias_path,
-                       'TMPCHUNK': chunk_name,
+                       'TMPCHUNK': os.path.join("chunks", chunk_name),
                        'TMPOPTS': args.config_opts
                       }
             table_job = jb.run_job_step(args, "tabler", jobdict)
@@ -368,17 +366,16 @@ def run_table(args):
                             'TMPLAUNCH': jb.chronos_parent_str([table_job.jobname]),
                             'TMPNEXTSTEP': "MAP",
                             'TMPSTART': chunk_name.replace('.rawline.', '.edge.'),
-                            'TMPOPTS': " ".join([args.run_mode, args.pipeline_stage,
-                                                 args.cloud_config_opts, '-d', ns_jobname])
+                            'TMPOPTS': " ".join([args.cloud_config_opts, '-d', ns_jobname])
                            })
 
-            if args.pipeline_stage == 'PIPELINE' and args.run_mode == "PIPELINE" and \
+            if not args.setup and not args.one_step and \
                 args.chronos not in SPECIAL_MODES:
                 jb.run_job_step(args, "next_step_caller", ns_dict)
 
-    if args.pipeline_stage == 'PIPELINE' and args.run_mode == "PIPELINE" and \
+    if not args.setup and not args.one_step and \
         args.chronos in SPECIAL_MODES and ns_parameters:
-        ns_dict.update({'TMPJOB': "-".join([args.pipeline_stage, "table", "next_step"]),
+        ns_dict.update({'TMPJOB': "-".join(["table", "next_step"]),
                         'TMPSTART': ",,".join(ns_parameters)
                        })
         tmpargs = args
@@ -391,8 +388,8 @@ def run_table(args):
 def run_map(args):
     """Runs id conversion for a single .edge. file on the cloud.
 
-    For a single .edge. file, creates a json chronos jobs that calls conv_utilities
-    main() and curls json to chronos.
+    This loops through args.parameters edgefiles, creates a job for each that
+    calls conv_utilities main(), and runs job in args.chronos location.
 
     Args:
         args (Namespace): args as populated namespace from parse_args, must
@@ -401,8 +398,7 @@ def run_map(args):
     """
     edgefile_list = args.step_parameters.split(",,")
     if args.step_parameters is "":
-        print("ERROR: 'edgefile' must be specified with --step_parameters (-p)")
-        return -1
+        raise ValueError("ERROR: 'edgefile' must be specified with --step_parameters (-p)")
 
     launchstr = '"schedule": "R1\/\/P3M"'
     if args.dependencies is not "":
@@ -419,14 +415,13 @@ def run_map(args):
         local_chunk_dir = os.path.join(args.local_dir, args.data_path, chunk_path)
         local_edgefile = os.path.join(local_chunk_dir, edgefile)
         if not os.path.exists(local_edgefile):
-            print("ERROR: 'edgefile' specified with --step_parameters (-p) "
+            raise IOError("ERROR: 'edgefile' specified with --step_parameters (-p) "
                   "option, {0}, does not exist: {1}".format(filestr, local_edgefile))
-            return -1
 
         ctr += 1
         print("\t".join([str(ctr), edgefile]))
 
-        jobname = "-".join([args.pipeline_stage, "map", edgefile])
+        jobname = "-".join(["map", edgefile])
         jobname = jobname.replace(".", "-")
         jobname = jobname.replace(".txt", "")
         jobdict = {'TMPJOB': jobname,
@@ -443,21 +438,17 @@ def run_map(args):
 
 
 def main():
-    """Runs the 'start_step' step of the pipeline on the local or
-    cloud location, and all subsequent steps if PIPELINE 'run_mode'
+    """Runs the 'start_step' step of the main or args.setup pipeline on the
+    args.chronos location, and all subsequent steps if not args.one_step
 
     Parses the arguments and runs the specified part of the pipeline using the
     specified local or cloud resources.
     """
 
     args = main_parse_args()
-    if not args.run_mode == 'PIPELINE' and not args.run_mode == 'STEP':
-        print(args.run_mode + ' is an unacceptable run_mode.  Must be STEP or PIPELINE')
-        return
-
     if args.dependencies is "":
 
-        if args.pipeline_stage == 'SETUP':
+        if args.setup:
             knownet = db.MySQL(None, args)
             knownet.init_knownet()
 
@@ -470,32 +461,23 @@ def main():
         file_setup_job = jb.run_job_step(args, "file_setup", jobdict)
         args.dependencies = file_setup_job.jobname
 
-    if args.pipeline_stage == 'SETUP':
+    if args.setup:
         if args.start_step == 'CHECK':
-            run_check(args)
+            return run_check(args)
         elif args.start_step == 'FETCH':
-            run_fetch(args)
-        else:
-            print(args.start_step + ' is an unacceptable start_step.  Must be \
-                ' + str(POSSIBLE_STEPS))
-            return
-    elif args.pipeline_stage == 'PIPELINE':
-        if args.start_step == 'CHECK':
-            run_check(args)
-        elif args.start_step == 'FETCH':
-            run_fetch(args)
-        elif args.start_step == 'TABLE':
-            run_table(args)
-        elif args.start_step == 'MAP':
-            run_map(args)
-        else:
-            print(args.start_step + ' is an unacceptable start_step.  Must be \
-                ' + str(POSSIBLE_STEPS))
-            return
+            return run_fetch(args)
     else:
-        print(args.pipeline_stage + ' is an unacceptable pipeline_stage. ' +
-              ' Must be SETUP or PIPELINE')
-        return
+        if args.start_step == 'CHECK':
+            return run_check(args)
+        elif args.start_step == 'FETCH':
+            return run_fetch(args)
+        elif args.start_step == 'TABLE':
+            return run_table(args)
+        elif args.start_step == 'MAP':
+            return run_map(args)
+
+    print(args.start_step + ' is an unacceptable start_step.  Must be ' +
+          str(POSSIBLE_STEPS))
     return
 
 
