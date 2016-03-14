@@ -15,30 +15,30 @@
         "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
         "TMPMEM": "512",
         "TMPCPUS": "1",
-        "TMPCMD": "sh -c '{ cd /TMPCODEDIR/ && /usr/bin/time -v python3 /TMPCODEDIR/check_utilities.py TMPSRC TMPOPTS; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+        "TMPCMD": "sh -c '{ cd /TMPCODEDIR/ && python3 /TMPCODEDIR/check_utilities.py TMPSRC TMPOPTS; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
     },
     "fetcher": {
         "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
         "TMPMEM": "2500",
         "TMPCPUS": "4",
-        "TMPCMD": "sh -c '{ cd /TMPDATADIR/TMPALIASDIR && ls -l file_metadata.json && /usr/bin/time -v python3 /TMPCODEDIR/fetch_utilities.py file_metadata.json TMPOPTS; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+        "TMPCMD": "sh -c '{ cd /TMPDATADIR/TMPALIASDIR && ls -l file_metadata.json && python3 /TMPCODEDIR/fetch_utilities.py file_metadata.json TMPOPTS; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
     },
     "tabler": {
         "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
         "TMPMEM": "2500",
         "TMPCPUS": "4",
-        "TMPCMD": "sh -c '{ cd /TMPDATADIR/TMPALIASDIR && /usr/bin/time -v python3 /TMPCODEDIR/table_utilities.py TMPCHUNK file_metadata.json TMPOPTS; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+        "TMPCMD": "sh -c '{cd /TMPDATADIR/TMPALIASDIR && python3 /TMPCODEDIR/table_utilities.py TMPCHUNK file_metadata.json TMPOPTS; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
     },
     "mapper": {
         "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
         "TMPMEM": "2500",
         "TMPCPUS": "4",
-        "TMPCMD": "sh -c '{ /usr/bin/time -v python3 /TMPCODEDIR/conv_utilities.py /TMPDATADIR/TMPEDGEPATH TMPOPTS; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+        "TMPCMD": "sh -c '{python3 /TMPCODEDIR/conv_utilities.py /TMPDATADIR/TMPEDGEPATH TMPOPTS; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
     },
     "next_step_caller": {
         "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
         "TMPMEM": "512",
         "TMPCPUS": "1",
-        "TMPCMD": "sh -c '{ python3 /TMPCODEDIR/setup_utilities.py TMPNEXTSTEP TMPOPTS -p TMPSTART && sleep 3; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
+        "TMPCMD": "sh -c '{python3 /TMPCODEDIR/setup_utilities.py TMPNEXTSTEP TMPOPTS -p TMPSTART && sleep 3; } 2>&1 | tee TMPLOGSDIR/TMPJOB.log; '"
     }
 }
