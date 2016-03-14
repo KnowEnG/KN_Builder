@@ -62,7 +62,7 @@ def main_parse_args():
     :delim: |
 
     start_step          |       |
-    --setup             |-su    |run database initializations instead of source specific pipelines
+    --setup             |-su    |run db inits instead of source specific pipelines
     --one_step          |-os    |run for a single step instead of pipeline
     --step_parameters   |-p     |parameters to specify calls of a single step in pipeline
     --no_ensembl        |-ne    |do not run ensembl in setup pipeline
@@ -74,10 +74,9 @@ def main_parse_args():
     """
     parser = ArgumentParser()
     parser.add_argument('start_step', default=DEFAULT_START_STEP,
-                        help=('start step, must be ' + str(POSSIBLE_STEPS))
-    parser.add_argument('-su', '--setup', default=False, action = 'store_true',
-                        help=('run database initializations instead of source '
-                              'specific pipelines')
+                        help='start step, must be ' + str(POSSIBLE_STEPS))
+    parser.add_argument('-su', '--setup', default=False, action='store_true',
+                        help='run db inits instead of source specific pipelines')
     parser.add_argument('-os', '--one_step', default=False, action='store_true',
                         help='run for a single step instead of pipeline')
     parser.add_argument('-p', '--step_parameters', default='',
@@ -267,7 +266,7 @@ def run_fetch(args):
             if len(parents) > 0:
                 launchstr = jb.chronos_parent_str(parents)
 
-            jobname = "-".join("fetch", src, alias])
+            jobname = "-".join(["fetch", src, alias])
             jobname = jobname.replace(".", "-")
             jobdict = {'TMPJOB': jobname,
                        'TMPLAUNCH': launchstr,
@@ -335,8 +334,9 @@ def run_table(args):
         alias_path = os.path.join(src, alias)
         local_chunk_dir = os.path.join(args.local_dir, args.data_path, alias_path, "chunks")
         if not os.path.exists(local_chunk_dir):
-            raise IOError("ERROR: 'source,alias' specified with --step_parameters (-p) "
-                  "option, {0}, does not have chunk directory: {1}".format(pair, local_chunk_dir))
+            raise IOError('ERROR: "source,alias" specified with --step_parameters '
+                          '(-p) option, ' + pair + ' does not have chunk directory:'
+                          + local_chunk_dir)
 
         chunk_ctr = 0
         for chunk_name in sorted(os.listdir(local_chunk_dir)):
@@ -415,8 +415,8 @@ def run_map(args):
         local_chunk_dir = os.path.join(args.local_dir, args.data_path, chunk_path)
         local_edgefile = os.path.join(local_chunk_dir, edgefile)
         if not os.path.exists(local_edgefile):
-            raise IOError("ERROR: 'edgefile' specified with --step_parameters (-p) "
-                  "option, {0}, does not exist: {1}".format(filestr, local_edgefile))
+            raise IOError('ERROR: "edgefile" specified with --step_parameters (-p) '
+                          'option, ' + filestr + ' does not exist: ' + local_edgefile)
 
         ctr += 1
         print("\t".join([str(ctr), edgefile]))
@@ -478,7 +478,6 @@ def main():
 
     print(args.start_step + ' is an unacceptable start_step.  Must be ' +
           str(POSSIBLE_STEPS))
-    return
 
 
 if __name__ == "__main__":

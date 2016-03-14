@@ -217,7 +217,7 @@ python3 code/setup_utilities.py CHECK PIPELINE \
 ### kill all jobs
 for c in 'knowcluster01.dyndns.org:4400' ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
-    for s in 'setup' 'check' 'fetch' 'table' 'map'; do
+    for s in 'map' 'table' 'fetch' 'check' 'setup' ; do
         echo $s
         for i in `grep "$s" /tmp/t.txt  `; do
             CMD="curl -L -X DELETE $c/scheduler/job/$i";
@@ -236,9 +236,9 @@ echo $KNP_CMD
 KNP_CMD="redis-cli -h $KNP_REDIS_HOST -a KnowEnG FLUSHDB"
 echo $KNP_CMD
 
-python3 code/setup_utilities.py CHECK PIPELINE PIPELINE \
+python3 code/workflow_utilities.py CHECK \
     -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
     -ld /workspace/fast/apps/KnowNet_Pipeline \
     -dp data_chronos_pipe -lp logs_chronos_pipe \
     -c knowcluster01.dyndns.org:4400 \
-    -cd /mnt/fast/knoweng/apps/KnowNet_Pipeline -p kegg -tm
+    -cd /mnt/fast/knoweng/apps/KnowNet_Pipeline -p kegg
