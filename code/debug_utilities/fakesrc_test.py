@@ -77,7 +77,6 @@ def main_parse_args():
         outputs and tesing files', action='store_true', default=False)
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
-    args.run_mode = 'LOCAL'
     args.step_parameters = SRC
     args.chunk_size = 5
 
