@@ -304,9 +304,11 @@ def run_fetch(args):
                            })
             step_job = ju.run_job_step(args, "fetcher", jobdict)
 
+            ns_parameters.extend([",".join([src, alias])])
+
             if not args.setup and not args.one_step and not ismap and \
                 args.chronos not in SPECIAL_MODES:
-                ns_parameters.extend([",".join([src, alias])])
+
                 ns_jobname = "-".join([jobname, "next_step"])
                 ns_dict = generic_dict(args, step_job.jobname)
                 ns_dict.update({'TMPJOB': ns_jobname,
@@ -381,6 +383,7 @@ def run_table(args):
             step_job = ju.run_job_step(args, "tabler", jobdict)
 
             ns_parameters.extend([chunk_name.replace('.rawline.', '.edge.')])
+            
             if not args.setup and not args.one_step and args.chronos not in SPECIAL_MODES:
                 ns_jobname = "-".join([jobname, "next_step"])
                 ns_dict = generic_dict(args, step_job.jobname)
