@@ -114,8 +114,8 @@ class Job:
 #           subprocess.call(command, shell=True)
             try:
                 subprocess.check_output(command, shell=True)
-            except subprocess.CalledProcessError as e:
-                print e.output
+            except subprocess.CalledProcessError as ex1:
+                print(ex1.output)
     def run_docker_job(self):
         """runs the job locally using docker
 
@@ -137,8 +137,8 @@ class Job:
 #           subprocess.call(' '.join(docker_cmd), shell=True)
             try:
                 subprocess.check_output(' '.join(docker_cmd), shell=True)
-            except subprocess.CalledProcessError as e:
-                print e.output
+            except subprocess.CalledProcessError as ex1:
+                print(ex1.output)
     def queue_chronos_job(self):
         """puts the job on the chronos queue
 
