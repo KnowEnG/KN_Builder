@@ -1,65 +1,3 @@
-## Project 1
-# dind container
-mkdir /mnt/storage/project1
-mkdir /mnt/publish/project1
-docker run -it --privileged --restart=always --name project1 -h project1 \
-    -p 3306:3306 -p 8484:80 -p 7474:7474 -p 7422:22 \
-    -v /mnt/storage/project1:/mnt/storage/project1 \
-    -v /mnt/publish/project1:/mnt/publish/project1 \
-    dind_ssh wrapdocker
-
-# mysql container
-docker run -d --restart=always --name p1_mysql -e MYSQL_ROOT_PASSWORD=KnowEnG -p 3306:3306 \
-    -v /mnt/storage/project1/KnowNet_0.2/project1/p1mysql:/var/lib/mysql mysql
-
-# neo4j containers
-docker run -t --restart=always --name hdfs sequenceiq/hadoop-docker:latest /etc/bootstrap.sh -bash #ctrl+C to detach
-docker run -d --restart=always --name mazerunner --link hdfs:hdfs kbastani/neo4j-graph-analytics:latest
-docker run -t --restart=always --name p1_neo4j -p 7474:7474 \
-    --link mazerunner:mazerunner --link hdfs:hdfs \
-    -v /mnt/storage/project1/KnowNet_0.2/project1/p1neo4j/data:/opt/data \
-    -v /mnt/storage/project1/KnowNet_0.2:/shared \
-    kbastani/docker-neo4j #ctrl+C to detach
-
-# cloud9 container
-docker run -d --privileged --restart=always --name p1_cloud9 -h project1_c9 -p 80:8181 \
-    --link p1_mysql:mysql \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v $(which docker):/bin/docker \
-    -v /mnt/storage/project1:/workspace \
-    -v /mnt/publish/project1:/workspace/publish \
-    -e USERNAME='project1' -e PASSWORD='knowdev249' \
-    stefand/cloud9-latest
-
-# install necessary tools
-apt-get update && apt-get install -y time git sshfs vim mysql-client \
-    python3 python3-pip python-pip python-dev r-base r-base-dev
-
-# pip installs
-pip3 install --allow-external mysql-connector-python mysql-connector-python
-pip3 install pylint
-pip3 install redis
-pip install s3cmd
-
-# create a key and add to git interface
-ssh-keygen -t rsa -C "project1@knowice.cs.illinois.edu"
-cat ~/.ssh/id_rsa.pub
-
-
-# config git
-git config --global user.name project1
-git config --global user.email project1@illinois.com
-
-# l1ktools
-pip install numpy
-pip install pandas
-pip install requests
-pip install blessings
-apt-get update && apt-get install -y python-tables
-git clone https://github.com/cmap/l1ktools.git /workspace/LINCS/l1ktools
-ln -s /workspace/LINCS/l1ktools/python/cmap/ /usr/local/lib/python2.7/dist-packages/cmap
-
-
 ## on KnowCluster
 ### mysql container
 mkdir /mnt/knowtmp/mysql
@@ -89,49 +27,69 @@ git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
 cd /workspace/fast/apps/
 git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
 
+
+
+
+### Test local mode
 ### set environment vars
-KNP_LOCAL_DIR='/workspace/fast/project1/KnowNet_Pipeline'
-KNP_CLOUD_DIR='/mnt/fast/knoweng/apps/KnowNet_Pipeline/'
-KNP_DATA_PATH='data_chronos_pipe'
-KNP_MYSQL_HOST='knowcluster01.dyndns.org'
-KNP_REDIS_HOST='knowcluster01.dyndns.org'
-KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
-KNP_SRC='dip'
-KNP_ALIAS='PPI'
-KNP_CHUNK='1'
+KNP_LOCAL_DIR='/workspace/apps/KnowNet_Pipeline'
+KNP_CLOUD_DIR='/workspace/apps/KnowNet_Pipeline'
+KNP_DATA_PATH='data_local_pipe'
+KNP_LOGS_PATH='logs_local_pipe'
+KNP_MYSQL_HOST='knowcharles.dyndns.org'
+KNP_REDIS_HOST='knowcharles.dyndns.org'
+KNP_CHRONOS_URL='LOCAL'
 
-### kill all jobs
-for c in 'knowcluster01.dyndns.org:4400' ; do
-    curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
-    for s in 'check' 'fetch' 'table' 'map'; do
-        echo $s
-        for i in `grep "$s" /tmp/t.txt  `; do
-            CMD="curl -L -X DELETE $c/scheduler/job/$i";
-            echo "$CMD";
-            eval "$CMD";
-        done;
-    done;
-done;
+### reset everything
+#### clear out mysql
+KNP_CMD="mysql -h $KNP_MYSQL_HOST --port 3306 -uroot -pKnowEnG KnowNet \
+    --execute \"drop database KnowNet;\""
+echo $KNP_CMD
 
-### setup utilities
-KNP_CMD="python3 code/setup_utilities.py CHECK CLOUD PIPELINE \
-    -dp $KNP_DATA_PATH -ld $KNP_LOCAL_DIR -myh $KNP_MYSQL_HOST \
-    -rh $KNP_REDIS_HOST -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR"
+#### clear out redis
+KNP_CMD="redis-cli -h $KNP_REDIS_HOST -a KnowEnG FLUSHDB"
+echo $KNP_CMD
+
+#### clear files
+rm -r $KNP_LOGS_PATH/
+rm -r $KNP_DATA_PATH/kegg
+rm -r $KNP_DATA_PATH/dip
+
+### run pipeline
+#### setup utilities
+KNP_CMD="python3 code/workflow_utilities.py CHECK -su \
+    -myh $KNP_MYSQL_HOST -rh $KNP_REDIS_HOST \
+    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR"
 echo $KNP_CMD
 #### crude timing: 1 hr 18 min
 ./code/reports/enumerate_files.sh $KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
-    $KNP_REDIS_HOST > tests/KN03build.CP.setup_all
+    $KNP_REDIS_HOST > tests/KN03build.pipe.local.setup
 
-### pipeline utilities with fake source
-KNP_CMD="python3 code/pipeline_utilities.py CHECK CLOUD PIPELINE \
-    -dp $KNP_DATA_PATH -ld $KNP_LOCAL_DIR -myh $KNP_MYSQL_HOST \
-    -rh $KNP_REDIS_HOST -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR \
-    -sp debug_utilities/srcClass -cs 5"
+#### pipeline utilities with small sources
+KNP_CMD="python3 code/workflow_utilities.py CHECK \
+    -myh $KNP_MYSQL_HOST -rh $KNP_REDIS_HOST \
+    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR -p kegg,,dip"
 echo $KNP_CMD
 #### crude timing: seconds
 ./code/reports/enumerate_files.sh $KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
-    $KNP_REDIS_HOST > tests/KN03build.CP.fake_src
+    $KNP_REDIS_HOST > tests/KN03build.pipe.local.2small
 
+
+
+
+### Test docker mode
+### set environment vars
+KNP_LOCAL_DIR='/workspace/knowtmp/project1/KnowNet_Pipeline'
+KNP_CLOUD_DIR='/mnt/knowtmp/project1/KnowNet_Pipeline/'
+KNP_DATA_PATH='data_docker_pipe'
+KNP_LOGS_PATH='logs_docker_pipe'
+KNP_MYSQL_HOST='knowcorey.dyndns.org'
+KNP_REDIS_HOST='knowcorey.dyndns.org'
+KNP_CHRONOS_URL='DOCKER'
+
+### reset everything
 #### clear out mysql
 KNP_CMD="mysql -h $KNP_MYSQL_HOST --port 3306 -uroot -pKnowEnG KnowNet \
     --execute \"drop database KnowNet;\""
@@ -141,82 +99,46 @@ echo $KNP_CMD
 KNP_CMD="redis-cli -h $KNP_REDIS_HOST -a KnowEnG FLUSHDB"
 echo $KNP_CMD
 
-### setup utilities testing
-python3 code/setup_utilities.py CHECK STEP \
-    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
-    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
-    -dp data_local -lp logs_local \
-    -c LOCAL \
-    -cd /workspace/knowtmp/project1/KnowNet_Pipeline -tm
+#### clear files
+rm -r $KNP_LOGS_PATH/
+rm -r $KNP_DATA_PATH/kegg
+rm -r $KNP_DATA_PATH/dip
 
-python3 code/setup_utilities.py CHECK STEP \
-    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
-    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
-    -dp data_docker -lp logs_docker \
-    -c DOCKER \
-    -cd /mnt/knowtmp/project1/KnowNet_Pipeline -tm
-
-python3 code/setup_utilities.py FETCH STEP \
-    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
-    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
-    -dp data_local -lp logs_local \
-    -c LOCAL \
-    -cd /workspace/knowtmp/project1/KnowNet_Pipeline -ne -tm
-
-python3 code/setup_utilities.py FETCH STEP \
-    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
-    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
-    -dp data_docker -lp logs_docker \
-    -c DOCKER \
-    -cd /mnt/knowtmp/project1/KnowNet_Pipeline -ne -tm
-
-python3 code/setup_utilities.py CHECK PIPELINE \
-    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
-    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
-    -dp data_local_pipe -lp logs_local_pipe \
-    -c LOCAL \
-    -cd /workspace/knowtmp/project1/KnowNet_Pipeline -ne -tm
-
-python3 code/setup_utilities.py CHECK PIPELINE \
-    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
-    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
-    -dp data_docker_pipe -lp logs_docker_pipe \
-    -c DOCKER \
-    -cd /mnt/knowtmp/project1/KnowNet_Pipeline -ne -tm
-
-# first must sync repos
-git pull
-git checkout reworkflow
-python3 code/setup_utilities.py CHECK STEP \
-    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
-    -ld /workspace/fast/apps/KnowNet_Pipeline \
-    -dp data_chronos -lp logs_chronos \
-    -c knowcluster01.dyndns.org:4400 \
-    -cd /mnt/fast/knoweng/apps/KnowNet_Pipeline -tm
-
-python3 code/setup_utilities.py FETCH STEP \
-    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
-    -ld /workspace/fast/apps/KnowNet_Pipeline \
-    -dp data_chronos -lp logs_chronos \
-    -c knowcluster01.dyndns.org:4400 \
-    -cd /mnt/fast/knoweng/apps/KnowNet_Pipeline -tm
-
-python3 code/setup_utilities.py CHECK PIPELINE \
-    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
-    -ld /workspace/fast/apps/KnowNet_Pipeline \
-    -dp data_chronos_pipe -lp logs_chronos_pipe \
-    -c knowcluster01.dyndns.org:4400 \
-    -cd /mnt/fast/knoweng/apps/KnowNet_Pipeline
-
+### run pipeline
+#### setup utilities
+KNP_CMD="python3 code/workflow_utilities.py CHECK -su \
+    -myh $KNP_MYSQL_HOST -rh $KNP_REDIS_HOST \
+    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR"
+echo $KNP_CMD
+#### crude timing: 1 hr 18 min
 ./code/reports/enumerate_files.sh $KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
-    $KNP_REDIS_HOST > tests/KN03build.CB.setup_pipe
+    $KNP_REDIS_HOST > tests/KN03build.pipe.docker.setup
 
-2016-03-10T16:10:48-0600
-2016-03-10T14:51:33-0600
+#### pipeline utilities with small sources
+KNP_CMD="python3 code/workflow_utilities.py CHECK \
+    -myh $KNP_MYSQL_HOST -rh $KNP_REDIS_HOST \
+    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR -p kegg,,dip"
+echo $KNP_CMD
+#### crude timing: seconds
+./code/reports/enumerate_files.sh $KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
+    $KNP_REDIS_HOST > tests/KN03build.pipe.docker.2small
 
-### kill all jobs
 
 
+
+### Test chronos mode
+### set environment vars
+KNP_LOCAL_DIR='/workspace/fast/apps/KnowNet_Pipeline'
+KNP_CLOUD_DIR='/mnt/fast/knoweng/apps/KnowNet_Pipeline/'
+KNP_DATA_PATH='data_chronos_pipe'
+KNP_LOGS_PATH='logs_chronos_pipe'
+KNP_MYSQL_HOST='knowcluster01.dyndns.org'
+KNP_REDIS_HOST='knowcluster01.dyndns.org'
+KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
+
+### reset everything
 #### clear out mysql
 KNP_CMD="mysql -h $KNP_MYSQL_HOST --port 3306 -uroot -pKnowEnG KnowNet \
     --execute \"drop database KnowNet;\""
@@ -226,9 +148,12 @@ echo $KNP_CMD
 KNP_CMD="redis-cli -h $KNP_REDIS_HOST -a KnowEnG FLUSHDB"
 echo $KNP_CMD
 
-git pull
-rm -r logs_chronos_pipe/
-rm -r data_chronos_pipe/kegg
+#### clear files
+rm -r $KNP_LOGS_PATH/
+rm -r $KNP_DATA_PATH/kegg
+rm -r $KNP_DATA_PATH/dip
+
+#### clear chronos queue
 for c in 'knowcluster01.dyndns.org:4400' ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
     for s in 'map-' 'table-' 'check-' 'fetch-' 'setup-' ; do
@@ -240,13 +165,57 @@ for c in 'knowcluster01.dyndns.org:4400' ; do
         done;
     done;
 done;
-python3 code/workflow_utilities.py CHECK \
-    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
-    -ld /workspace/fast/apps/KnowNet_Pipeline \
-    -dp data_chronos_pipe -lp logs_chronos_pipe \
-    -c knowcluster01.dyndns.org:4400 \
-    -cd /mnt/fast/knoweng/apps/KnowNet_Pipeline -p kegg
 
-
+### run pipeline
+#### setup utilities
+KNP_CMD="python3 code/workflow_utilities.py CHECK -su \
+    -myh $KNP_MYSQL_HOST -rh $KNP_REDIS_HOST \
+    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR"
+echo $KNP_CMD
+#### crude timing: mins
 ./code/reports/enumerate_files.sh $KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
-    $KNP_REDIS_HOST > tests/KN03build.pipe.chronos.kegg
+    $KNP_REDIS_HOST > tests/KN03build.pipe.chronos.setup
+
+#### pipeline utilities with small sources
+KNP_CMD="python3 code/workflow_utilities.py CHECK \
+    -myh $KNP_MYSQL_HOST -rh $KNP_REDIS_HOST \
+    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR -p kegg,,dip"
+echo $KNP_CMD
+#### crude timing: seconds
+./code/reports/enumerate_files.sh $KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
+    $KNP_REDIS_HOST > tests/KN03build.pipe.chronos.2small
+
+
+
+
+
+
+
+python3 code/setup_utilities.py CHECK --su \
+    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
+    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
+    -dp data_docker_pipe -lp logs_docker_pipe \
+    -c DOCKER \
+    -cd /mnt/knowtmp/project1/KnowNet_Pipeline
+
+python3 code/setup_utilities.py CHECK \
+    -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
+    -ld /workspace/knowtmp/project1/KnowNet_Pipeline \
+    -dp data_docker_pipe -lp logs_docker_pipe \
+    -c DOCKER \
+    -cd /mnt/knowtmp/project1/KnowNet_Pipeline
+    
+    
+    
+    
+    
+    # neo4j containers
+docker run -t --restart=always --name hdfs sequenceiq/hadoop-docker:latest /etc/bootstrap.sh -bash #ctrl+C to detach
+docker run -d --restart=always --name mazerunner --link hdfs:hdfs kbastani/neo4j-graph-analytics:latest
+docker run -t --restart=always --name p1_neo4j -p 7474:7474 \
+    --link mazerunner:mazerunner --link hdfs:hdfs \
+    -v /mnt/storage/project1/KnowNet_0.2/project1/p1neo4j/data:/opt/data \
+    -v /mnt/storage/project1/KnowNet_0.2:/shared \
+    kbastani/docker-neo4j #ctrl+C to detach
