@@ -225,7 +225,7 @@ def run_check(args):
                         'TMPSTART': ",,".join(ns_parameters),
                         'TMPNEXTSTEP': "FETCH",
                         'TMPOPTS': " ".join([args.config_opts, args.workflow_opts,
-                                             '-d', ns_jobname])
+                                             '-d', "-".join(["check", "next_step"])])
                        })
         tmpargs = args
         tmpargs.chronos = "LOCAL"
@@ -324,7 +324,7 @@ def run_fetch(args):
                         'TMPNEXTSTEP': "TABLE",
                         'TMPSTART': ",,".join(ns_parameters),
                         'TMPOPTS': " ".join([args.config_opts, args.workflow_opts,
-                                             '-d', ns_jobname])
+                                             '-d', "-".join(["fetch", "next_step"])])
                        })
         tmpargs = args
         tmpargs.chronos = "LOCAL"
@@ -399,7 +399,7 @@ def run_table(args):
                         'TMPNEXTSTEP': "MAP",
                         'TMPSTART': ",,".join(ns_parameters),
                         'TMPOPTS': " ".join([args.config_opts, args.workflow_opts,
-                                             '-d', ns_jobname])
+                                             '-d', "-".join(["table", "next_step"])])
                        })
         tmpargs = args
         tmpargs.chronos = "LOCAL"
