@@ -215,6 +215,20 @@ python3 code/setup_utilities.py CHECK PIPELINE \
 2016-03-10T14:51:33-0600
 
 ### kill all jobs
+
+
+#### clear out mysql
+KNP_CMD="mysql -h $KNP_MYSQL_HOST --port 3306 -uroot -pKnowEnG KnowNet \
+    --execute \"drop database KnowNet;\""
+echo $KNP_CMD
+
+#### clear out redis
+KNP_CMD="redis-cli -h $KNP_REDIS_HOST -a KnowEnG FLUSHDB"
+echo $KNP_CMD
+
+git pull
+rm -r logs_chronos_pipe/
+rm -r data_chronos_pipe/kegg
 for c in 'knowcluster01.dyndns.org:4400' ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
     for s in 'map' 'table' 'fetch' 'check' 'setup' ; do
@@ -226,19 +240,13 @@ for c in 'knowcluster01.dyndns.org:4400' ; do
         done;
     done;
 done;
-
-#### clear out mysql
-KNP_CMD="mysql -h $KNP_MYSQL_HOST --port 3306 -uroot -pKnowEnG KnowNet \
-    --execute \"drop database KnowNet;\""
-echo $KNP_CMD
-
-#### clear out redis
-KNP_CMD="redis-cli -h $KNP_REDIS_HOST -a KnowEnG FLUSHDB"
-echo $KNP_CMD
-
 python3 code/workflow_utilities.py CHECK \
     -myh knowcluster01.dyndns.org -rh knowcluster01.dyndns.org \
     -ld /workspace/fast/apps/KnowNet_Pipeline \
     -dp data_chronos_pipe -lp logs_chronos_pipe \
     -c knowcluster01.dyndns.org:4400 \
     -cd /mnt/fast/knoweng/apps/KnowNet_Pipeline -p kegg
+    
+    
+./code/reports/enumerate_files.sh $KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
+    $KNP_REDIS_HOST > tests/KN03build.pipe.chronos.kegg

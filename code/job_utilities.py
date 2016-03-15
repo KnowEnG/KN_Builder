@@ -111,7 +111,11 @@ class Job:
         command = jobjson["command"]
         print(command)
         if not self.args.test_mode:
-            subprocess.call(command, shell=True)
+#           subprocess.call(command, shell=True)
+            try:
+                subprocess.check_output(command, shell=True)
+            except subprocess.CalledProcessError as e:
+                print e.output
     def run_docker_job(self):
         """runs the job locally using docker
 
@@ -130,7 +134,11 @@ class Job:
                      ]
         print("\n"+" ".join(docker_cmd))
         if not self.args.test_mode:
-            subprocess.call(' '.join(docker_cmd), shell=True)
+#           subprocess.call(' '.join(docker_cmd), shell=True)
+            try:
+                subprocess.check_output(' '.join(docker_cmd), shell=True)
+            except subprocess.CalledProcessError as e:
+                print e.output
     def queue_chronos_job(self):
         """puts the job on the chronos queue
 

@@ -254,6 +254,7 @@ def run_fetch(args):
             with open(metadata_file, 'r') as infile:
                 version_dict = json.load(infile)
             dependencies = version_dict["dependencies"]
+            ismap = version_dict["is_map"]
             if len(dependencies) > 0:
                 for dep in dependencies:
                     parent_string = "-".join(["fetch", src, dep])
@@ -284,11 +285,12 @@ def run_fetch(args):
                             'TMPOPTS': " ".join([args.cloud_config_opts, '-d', ns_jobname])
                            })
 
-            if not args.setup and not args.one_step and args.chronos not in SPECIAL_MODES:
+            if not args.setup and not args.one_step and not ismap and \
+                args.chronos not in SPECIAL_MODES:
                 jb.run_job_step(args, "next_step_caller", ns_dict)
 
-    if not args.setup and not args.one_step and \
-        args.chronos in SPECIAL_MODES and ns_parameters:
+    if not args.setup and not args.one_step and args.chronos in SPECIAL_MODES \
+        and ns_parameters:
         ns_dict.update({'TMPJOB': "-".join(["fetch", "next_step"]),
                         'TMPSTART': ",,".join(ns_parameters)
                        })
@@ -366,12 +368,11 @@ def run_table(args):
                             'TMPOPTS': " ".join([args.cloud_config_opts, '-d', ns_jobname])
                            })
 
-            if not args.setup and not args.one_step and \
-                args.chronos not in SPECIAL_MODES:
+            if not args.setup and not args.one_step and args.chronos not in SPECIAL_MODES:
                 jb.run_job_step(args, "next_step_caller", ns_dict)
 
-    if not args.setup and not args.one_step and \
-        args.chronos in SPECIAL_MODES and ns_parameters:
+    if not args.setup and not args.one_step and args.chronos in SPECIAL_MODES and \
+        ns_parameters:
         ns_dict.update({'TMPJOB': "-".join(["table", "next_step"]),
                         'TMPSTART': ",,".join(ns_parameters)
                        })
