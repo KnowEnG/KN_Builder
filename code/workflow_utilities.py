@@ -57,7 +57,7 @@ def main_parse_args():
     argument is missing, supplies default value.
 
 .. csv-table::
-    :header: parameter,argument,flag,description
+    :header: parameter,argument type,flag,description
     :widths: 4,2,2,12
     :delim: |
 
@@ -115,10 +115,10 @@ def list_sources(args):
         args (Namespace): args as populated namespace from parse_args
     """
     src_list = []
-    if args.step_parameters is "":
+    if args.step_parameters == "":
         if args.setup:
             for srcstr in SETUP_FILES:
-                if srcstr is 'ensembl' and args.no_ensembl:
+                if srcstr == 'ensembl' and args.no_ensembl:
                     continue
                 src_list.extend([srcstr])
         else:
@@ -142,6 +142,42 @@ def list_sources(args):
     return sorted(src_list)
 
 
+def generic_dict(args, ns_parent=None):
+    """ Creates a dictionary to specify variables for a job
+
+    Creates a dictionary used to substitute temporary job variables in the specification
+    of the command line call. ns_parent should be defined for only a next step caller
+    job.
+
+    Args:
+        args (Namespace): args as populated namespace from parse_args
+
+    Returns:
+        dict: tmp substitution dictionary with appropriate values depending on args
+    """
+    launchstr = r'"schedule": "R1\/\/P3M"'
+    jobopts = args.cloud_config_opts
+    jobdir = args.cloud_dir
+    if ns_parent is None: # regular job
+        if args.dependencies != "": # continuation job
+            launchstr = jb.chronos_parent_str(args.dependencies.split(",,"))
+        if args.chronos == 'LOCAL':
+            jobopts = args.config_opts
+            jobdir = args.local_dir
+    else: # next step caller job
+        launchstr = jb.chronos_parent_str([ns_parent])
+        if args.chronos in SPECIAL_MODES:
+            jobopts = args.config_opts
+            jobdir = args.local_dir
+
+    job_dict = {'TMPLAUNCH': launchstr,
+                'TMPDATADIR': os.path.join(jobdir, args.data_path),
+                'TMPCODEDIR': os.path.join(jobdir, args.code_path),
+                'TMPLOGSDIR': os.path.join(jobdir, args.logs_path),
+                'TMPOPTS': jobopts
+               }
+    return job_dict
+
 def run_check(args):
     """Runs checks for all sources.
 
@@ -155,17 +191,7 @@ def run_check(args):
     ctr = 0
     src_list = list_sources(args)
     ns_parameters = []
-    ns_dict = {'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
-               'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
-               'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path)
-              }
-    launchstr = '"schedule": "R1\/\/P3M"'
-    if args.dependencies is not "":
-        launchstr = jb.chronos_parent_str(args.dependencies.split(",,"))
-
-    jobopts = args.cloud_config_opts
-    if args.chronos in SPECIAL_MODES:
-        jobopts = args.config_opts
+    ns_dict = generic_dict(args, 'next_step_caller')
 
     for module in src_list:
 
@@ -174,32 +200,30 @@ def run_check(args):
 
         jobname = "-".join(["check", module])
         jobname = jobname.replace(".", "-")
-        jobdict = {'TMPJOB': jobname,
-                   'TMPLAUNCH': launchstr,
-                   'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
-                   'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
-                   'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
-                   'TMPSRC': module,
-                   'TMPOPTS': jobopts
-                  }
-        check_job = jb.run_job_step(args, "checker", jobdict)
+        jobdict = generic_dict(args, None)
+        jobdict.update({'TMPJOB': jobname,
+                        'TMPSRC': module
+                       })
+        jb.run_job_step(args, "checker", jobdict)
 
         ns_parameters.extend([module])
-        ns_jobname = "-".join([jobname, "next_step"])
-        ns_dict.update({'TMPJOB': ns_jobname,
-                        'TMPLAUNCH': jb.chronos_parent_str([check_job.jobname]),
-                        'TMPNEXTSTEP': "FETCH",
-                        'TMPSTART': module,
-                        'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
-                                             '-d', ns_jobname])
-                       })
 
         if not args.one_step and args.chronos not in SPECIAL_MODES:
+            ns_jobname = "-".join([jobname, "next_step"])
+            ns_dict.update({'TMPJOB': ns_jobname,
+                            'TMPNEXTSTEP': "FETCH",
+                            'TMPSTART': module,
+                            'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
+                                                 '-d', ns_jobname])
+                           })
             jb.run_job_step(args, "next_step_caller", ns_dict)
 
     if not args.one_step and args.chronos in SPECIAL_MODES and ns_parameters:
         ns_dict.update({'TMPJOB': "-".join(["check", "next_step"]),
-                        'TMPSTART': ",,".join(ns_parameters)
+                        'TMPSTART': ",,".join(ns_parameters),
+                        'TMPNEXTSTEP': "FETCH",
+                        'TMPOPTS': " ".join([args.config_opts, args.workflow_opts,
+                                             '-d', ns_jobname])
                        })
         tmpargs = args
         tmpargs.chronos = "LOCAL"
@@ -221,14 +245,7 @@ def run_fetch(args):
     """
     src_list = list_sources(args)
     ns_parameters = []
-    ns_dict = {'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
-               'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
-               'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path)
-              }
-
-    jobopts = args.cloud_config_opts
-    if args.chronos in SPECIAL_MODES:
-        jobopts = args.config_opts
+    ns_dict = generic_dict(args, 'next_step_caller')
 
     for src in src_list:
         local_src_dir = os.path.join(args.local_dir, args.data_path, src)
@@ -241,13 +258,11 @@ def run_fetch(args):
             for alias in sorted(os.listdir(local_src_dir)):
                 jobname = "-".join(["fetch", src, alias])
                 jobname = jobname.replace(".", "-")
-                jobdict = {'TMPJOB': jobname,
-                           'TMPLAUNCH': '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"',
-                           'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
-                           'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
-                           'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
-                          }
-                fetch_job = jb.run_job_step(args, "placeholder", jobdict)
+                jobdict = generic_dict(args, None)
+                jobdict.update({'TMPJOB': jobname,
+                                'TMPLAUNCH': '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
+                               })
+                jb.run_job_step(args, "placeholder", jobdict)
 
         for alias in sorted(os.listdir(local_src_dir)):
             alias_path = os.path.join(src, alias)
@@ -257,7 +272,7 @@ def run_fetch(args):
 
             ## check for dependencies
             parents = []
-            if args.dependencies is not "":
+            if args.dependencies != "":
                 parents = args.dependencies.split(",,")
 
             metadata_file = os.path.join(local_alias_dir, "file_metadata.json")
@@ -280,34 +295,32 @@ def run_fetch(args):
 
             jobname = "-".join(["fetch", src, alias])
             jobname = jobname.replace(".", "-")
-            jobdict = {'TMPJOB': jobname,
-                       'TMPLAUNCH': launchstr,
-                       'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
-                       'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
-                       'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
-                       'TMPALIASDIR': alias_path,
-                       'TMPOPTS': jobopts
-                      }
-            fetch_job = jb.run_job_step(args, "fetcher", jobdict)
-
-            ns_parameters.extend([",".join([src, alias])])
-            ns_jobname = "-".join([jobname, "next_step"])
-            ns_dict.update({'TMPJOB': ns_jobname,
-                            'TMPLAUNCH': jb.chronos_parent_str([fetch_job.jobname]),
-                            'TMPNEXTSTEP': "TABLE",
-                            'TMPSTART': ",".join([src, alias]),
-                            'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
-                                                 '-d', ns_jobname])
+            jobdict = generic_dict(args, None)
+            jobdict.update({'TMPJOB': jobname,
+                            'TMPLAUNCH': launchstr,
+                            'TMPALIASDIR': alias_path
                            })
+            jb.run_job_step(args, "fetcher", jobdict)
 
             if not args.setup and not args.one_step and not ismap and \
                 args.chronos not in SPECIAL_MODES:
+                ns_parameters.extend([",".join([src, alias])])
+                ns_jobname = "-".join([jobname, "next_step"])
+                ns_dict.update({'TMPJOB': ns_jobname,
+                                'TMPNEXTSTEP': "TABLE",
+                                'TMPSTART': ",".join([src, alias]),
+                                'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
+                                                     '-d', ns_jobname])
+                               })
                 jb.run_job_step(args, "next_step_caller", ns_dict)
 
     if not args.setup and not args.one_step and args.chronos in SPECIAL_MODES \
         and ns_parameters:
         ns_dict.update({'TMPJOB': "-".join(["fetch", "next_step"]),
-                        'TMPSTART': ",,".join(ns_parameters)
+                        'TMPNEXTSTEP': "TABLE",
+                        'TMPSTART': ",,".join(ns_parameters),
+                        'TMPOPTS': " ".join([args.config_opts, args.workflow_opts,
+                                             '-d', ns_jobname])
                        })
         tmpargs = args
         tmpargs.chronos = "LOCAL"
@@ -329,21 +342,11 @@ def run_table(args):
             'source,alias'
     """
     alias_list = args.step_parameters.split(",,")
-    if args.step_parameters is "":
+    if args.step_parameters == "":
         raise ValueError("ERROR: 'source,alias' must be specified with --step_parameters (-p)")
 
     ns_parameters = []
-    ns_dict = {'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
-               'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
-               'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path)
-              }
-    jobopts = args.cloud_config_opts
-    if args.chronos in SPECIAL_MODES:
-        jobopts = args.config_opts
-
-    launchstr = '"schedule": "R1\/\/P3M"'
-    if args.dependencies is not "":
-        launchstr = jb.chronos_parent_str(args.dependencies.split(",,"))
+    ns_dict = generic_dict(args, 'next_step_caller')
 
     for pair in alias_list:
         src, alias = pair.split(",")
@@ -366,34 +369,31 @@ def run_table(args):
             jobname = "-".join(["table", chunk_name])
             jobname = jobname.replace(".", "-")
             jobname = jobname.replace(".txt", "")
-            jobdict = {'TMPJOB': jobname,
-                       'TMPLAUNCH': launchstr,
-                       'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
-                       'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
-                       'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
-                       'TMPALIASDIR': alias_path,
-                       'TMPCHUNK': os.path.join("chunks", chunk_name),
-                       'TMPOPTS': jobopts
-                      }
-            table_job = jb.run_job_step(args, "tabler", jobdict)
+            jobdict = generic_dict(args, None)
+            jobdict.update({'TMPJOB': jobname,
+                            'TMPALIASDIR': alias_path,
+                            'TMPCHUNK': os.path.join("chunks", chunk_name)
+                           })
+            jb.run_job_step(args, "tabler", jobdict)
 
             ns_parameters.extend([chunk_name.replace('.rawline.', '.edge.')])
-            ns_jobname = "-".join([jobname, "next_step"])
-            ns_dict.update({'TMPJOB': ns_jobname,
-                            'TMPLAUNCH': jb.chronos_parent_str([table_job.jobname]),
-                            'TMPNEXTSTEP': "MAP",
-                            'TMPSTART': chunk_name.replace('.rawline.', '.edge.'),
-                            'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
-                                                 '-d', ns_jobname])
-                           })
-
             if not args.setup and not args.one_step and args.chronos not in SPECIAL_MODES:
+                ns_jobname = "-".join([jobname, "next_step"])
+                ns_dict.update({'TMPJOB': ns_jobname,
+                                'TMPNEXTSTEP': "MAP",
+                                'TMPSTART': chunk_name.replace('.rawline.', '.edge.'),
+                                'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
+                                                     '-d', ns_jobname])
+                               })
                 jb.run_job_step(args, "next_step_caller", ns_dict)
 
     if not args.setup and not args.one_step and args.chronos in SPECIAL_MODES and \
         ns_parameters:
         ns_dict.update({'TMPJOB': "-".join(["table", "next_step"]),
-                        'TMPSTART': ",,".join(ns_parameters)
+                        'TMPNEXTSTEP': "MAP",
+                        'TMPSTART': ",,".join(ns_parameters),
+                        'TMPOPTS': " ".join([args.config_opts, args.workflow_opts,
+                                             '-d', ns_jobname])
                        })
         tmpargs = args
         tmpargs.chronos = "LOCAL"
@@ -414,16 +414,8 @@ def run_map(args):
             'source.alias.chunk.edge.txt' file names
     """
     edgefile_list = args.step_parameters.split(",,")
-    if args.step_parameters is "":
+    if args.step_parameters == "":
         raise ValueError("ERROR: 'edgefile' must be specified with --step_parameters (-p)")
-
-    jobopts = args.cloud_config_opts
-    if args.chronos in SPECIAL_MODES:
-        jobopts = args.config_opts
-
-    launchstr = '"schedule": "R1\/\/P3M"'
-    if args.dependencies is not "":
-        launchstr = jb.chronos_parent_str(args.dependencies.split(",,"))
 
     ctr = 0
     for filestr in edgefile_list:
@@ -445,14 +437,10 @@ def run_map(args):
         jobname = "-".join(["map", edgefile])
         jobname = jobname.replace(".", "-")
         jobname = jobname.replace(".txt", "")
-        jobdict = {'TMPJOB': jobname,
-                   'TMPLAUNCH': launchstr,
-                   'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
-                   'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
-                   'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
-                   'TMPEDGEPATH': os.path.join(chunk_path, edgefile),
-                   'TMPOPTS': jobopts
-                  }
+        jobdict = generic_dict(args, None)
+        jobdict.update({'TMPJOB': jobname,
+                        'TMPEDGEPATH': os.path.join(chunk_path, edgefile)
+                       })
         jb.run_job_step(args, "mapper", jobdict)
 
     return 0
@@ -467,7 +455,7 @@ def main():
     """
 
     args = main_parse_args()
-    if args.dependencies is "":
+    if args.dependencies == "":
 
         if args.setup:
             knownet = db.MySQL(None, args)
