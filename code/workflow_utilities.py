@@ -92,7 +92,13 @@ def main_parse_args():
                 '-d', '--dependencies', args.dependencies]:
         if opt in config_opts:
             config_opts.remove(opt)
+    workflow_opts = []
+    for opt in ['-su', '--setup' '-os', '--one_step', '-ne', '--no_ensembl']:
+        if opt in config_opts:
+            config_opts.remove(opt)
+            workflow_opts.extend([opt])
     args.config_opts = " ".join(config_opts)
+    args.workflow_opts = " ".join(workflow_opts)
     args.cloud_config_opts = args.config_opts
     if args.chronos != 'LOCAL':
         args.cloud_config_opts = cf.cloud_config_opts(args, config_opts)
@@ -157,6 +163,10 @@ def run_check(args):
     if args.dependencies is not "":
         launchstr = jb.chronos_parent_str(args.dependencies.split(",,"))
 
+    jobopts = args.cloud_config_opts
+    if args.chronos in SPECIAL_MODES:
+        jobopts = args.config_opts
+
     for module in src_list:
 
         ctr += 1
@@ -170,7 +180,7 @@ def run_check(args):
                    'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
                    'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                    'TMPSRC': module,
-                   'TMPOPTS': args.cloud_config_opts
+                   'TMPOPTS': jobopts
                   }
         check_job = jb.run_job_step(args, "checker", jobdict)
 
@@ -180,7 +190,8 @@ def run_check(args):
                         'TMPLAUNCH': jb.chronos_parent_str([check_job.jobname]),
                         'TMPNEXTSTEP': "FETCH",
                         'TMPSTART': module,
-                        'TMPOPTS': " ".join([args.cloud_config_opts, '-d', ns_jobname])
+                        'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts, 
+                                             '-d', ns_jobname])
                        })
 
         if not args.one_step and args.chronos not in SPECIAL_MODES:
@@ -215,6 +226,10 @@ def run_fetch(args):
                'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path)
               }
 
+    jobopts = args.cloud_config_opts
+    if args.chronos in SPECIAL_MODES:
+        jobopts = args.config_opts
+
     for src in src_list:
         local_src_dir = os.path.join(args.local_dir, args.data_path, src)
         if not os.path.exists(local_src_dir):
@@ -235,7 +250,6 @@ def run_fetch(args):
                 fetch_job = jb.run_job_step(args, "placeholder", jobdict)
 
         for alias in sorted(os.listdir(local_src_dir)):
-
             alias_path = os.path.join(src, alias)
             local_alias_dir = os.path.join(local_src_dir, alias)
             alias_ctr += 1
@@ -266,13 +280,17 @@ def run_fetch(args):
 
             jobname = "-".join(["fetch", src, alias])
             jobname = jobname.replace(".", "-")
+                jobopts = args.config_opts
+                if args.chronos in SPECIAL_MODES:
+                    jobopts = args.cloud_config_opts
+
             jobdict = {'TMPJOB': jobname,
                        'TMPLAUNCH': launchstr,
                        'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
                        'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
                        'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                        'TMPALIASDIR': alias_path,
-                       'TMPOPTS': args.cloud_config_opts
+                       'TMPOPTS': jobopts
                       }
             fetch_job = jb.run_job_step(args, "fetcher", jobdict)
 
@@ -282,7 +300,8 @@ def run_fetch(args):
                             'TMPLAUNCH': jb.chronos_parent_str([fetch_job.jobname]),
                             'TMPNEXTSTEP': "TABLE",
                             'TMPSTART': ",".join([src, alias]),
-                            'TMPOPTS': " ".join([args.cloud_config_opts, '-d', ns_jobname])
+                            'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts, 
+                                                 '-d', ns_jobname])
                            })
 
             if not args.setup and not args.one_step and not ismap and \
@@ -322,6 +341,9 @@ def run_table(args):
                'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
                'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path)
               }
+    jobopts = args.cloud_config_opts
+    if args.chronos in SPECIAL_MODES:
+        jobopts = args.config_opts
 
     launchstr = '"schedule": "R1\/\/P3M"'
     if args.dependencies is not "":
@@ -355,7 +377,7 @@ def run_table(args):
                        'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                        'TMPALIASDIR': alias_path,
                        'TMPCHUNK': os.path.join("chunks", chunk_name),
-                       'TMPOPTS': args.cloud_config_opts
+                       'TMPOPTS': jobopts
                       }
             table_job = jb.run_job_step(args, "tabler", jobdict)
 
@@ -365,7 +387,8 @@ def run_table(args):
                             'TMPLAUNCH': jb.chronos_parent_str([table_job.jobname]),
                             'TMPNEXTSTEP': "MAP",
                             'TMPSTART': chunk_name.replace('.rawline.', '.edge.'),
-                            'TMPOPTS': " ".join([args.cloud_config_opts, '-d', ns_jobname])
+                            'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
+                                                 '-d', ns_jobname])
                            })
 
             if not args.setup and not args.one_step and args.chronos not in SPECIAL_MODES:
@@ -398,6 +421,10 @@ def run_map(args):
     if args.step_parameters is "":
         raise ValueError("ERROR: 'edgefile' must be specified with --step_parameters (-p)")
 
+    jobopts = args.cloud_config_opts
+    if args.chronos in SPECIAL_MODES:
+        jobopts = args.config_opts
+
     launchstr = '"schedule": "R1\/\/P3M"'
     if args.dependencies is not "":
         launchstr = jb.chronos_parent_str(args.dependencies.split(",,"))
@@ -428,7 +455,7 @@ def run_map(args):
                    'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
                    'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                    'TMPEDGEPATH': os.path.join(chunk_path, edgefile),
-                   'TMPOPTS': args.cloud_config_opts
+                   'TMPOPTS': jobopts
                   }
         jb.run_job_step(args, "mapper", jobdict)
 
