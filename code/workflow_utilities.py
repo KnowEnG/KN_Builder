@@ -190,7 +190,7 @@ def run_check(args):
                         'TMPLAUNCH': jb.chronos_parent_str([check_job.jobname]),
                         'TMPNEXTSTEP': "FETCH",
                         'TMPSTART': module,
-                        'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts, 
+                        'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
                                              '-d', ns_jobname])
                        })
 
@@ -280,10 +280,6 @@ def run_fetch(args):
 
             jobname = "-".join(["fetch", src, alias])
             jobname = jobname.replace(".", "-")
-                jobopts = args.config_opts
-                if args.chronos in SPECIAL_MODES:
-                    jobopts = args.cloud_config_opts
-
             jobdict = {'TMPJOB': jobname,
                        'TMPLAUNCH': launchstr,
                        'TMPDATADIR': os.path.join(args.cloud_dir, args.data_path),
@@ -300,7 +296,7 @@ def run_fetch(args):
                             'TMPLAUNCH': jb.chronos_parent_str([fetch_job.jobname]),
                             'TMPNEXTSTEP': "TABLE",
                             'TMPSTART': ",".join([src, alias]),
-                            'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts, 
+                            'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
                                                  '-d', ns_jobname])
                            })
 
