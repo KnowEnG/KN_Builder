@@ -39,6 +39,6 @@
         "TMPIMG": "cblatti3/py3_redis_mysql:0.1",
         "TMPMEM": "512",
         "TMPCPUS": "1",
-        "TMPCMD": "sh -c '{ python3 /TMPCODEDIR/setup_utilities.py TMPNEXTSTEP TMPOPTS -p TMPSTART && sleep 3; } >TMPLOGSDIR/TMPJOB.log 2>&1 '"
+        "TMPCMD": "sh -c '{ python3 /TMPCODEDIR/workflow_utilities.py TMPNEXTSTEP TMPOPTS -p TMPSTART && sleep 3; } >TMPLOGSDIR/TMPJOB.log 2>&1 '"
     }
 }
