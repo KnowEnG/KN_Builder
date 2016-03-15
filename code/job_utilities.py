@@ -110,7 +110,7 @@ class Job:
         jobjson = json.loads(self.cjobstr)
         command = jobjson["command"]
         print(command)
-        if not self.args.testmode:
+        if not self.args.test_mode:
             subprocess.call(command, shell=True)
     def run_docker_job(self):
         """runs the job locally using docker
@@ -129,7 +129,7 @@ class Job:
                       jobjson["command"]
                      ]
         print("\n"+" ".join(docker_cmd))
-        if not self.args.testmode:
+        if not self.args.test_mode:
             subprocess.call(' '.join(docker_cmd), shell=True)
     def queue_chronos_job(self):
         """puts the job on the chronos queue
@@ -146,7 +146,7 @@ class Job:
             curl_cmd.extend([self.args.chronos + "/scheduler/dependency"])
         print(" ".join(curl_cmd))
         print(self.cjobstr)
-        if not self.args.testmode:
+        if not self.args.test_mode:
             #subprocess.call(curl_cmd, shell=True)
             shfile = self.cjobfile.replace(".json", ".sh")
             with open(shfile, 'w') as outfile:

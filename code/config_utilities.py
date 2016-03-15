@@ -54,6 +54,29 @@ def add_config_args(parser):
 
     If global arguments are not specified, supplies their default values.
 
+.. csv-table::
+    :header: parameter,argument,flag,description
+    :widths: 4,2,2,12
+    :delim: |
+
+    --chronos  	    |str	|-c	    |url of chronos scheduler or LOCAL or DOCKER
+    --local_dir	    |str	|-ld	|name of toplevel directory on local machine
+    --cloud_dir	    |str	|-cd	|name of toplevel directory on cloud storage
+    --code_path	    |str	|-cp	|relative path of code directory from toplevel
+    --data_path	    |str	|-dp	|relative path of data directory from toplevel
+    --logs_path	    |str	|-lp	|relative path of data directory from toplevel
+    --src_path 	    |str	|-sp	|relative path of source code directory from code directory
+    --mysql_host	|str	|-myh	|url of mySQL db
+    --mysql_port	|int	|-myp	|port for mySQL db
+    --mysql_user	|str	|-myu	|user for mySQL db
+    --mysql_pass	|str	|-myps	|password for mySQL db
+    --redis_host	|str	|-rh 	|url of Redis db
+    --redis_port	|int	|-rp 	|port for Redis db
+    --redis_pass	|str	|-rps	|password for Redis db
+    --chunk_size	|int	|-cs	|lines per chunk
+    --test_mode	    |   	|-tm	|run in test mode by only printing command, defaults to False
+
+
     Args:
         parser (argparse.ArgumentParser): a parser to add global config opts to
 
@@ -91,6 +114,9 @@ def add_config_args(parser):
                         help='password for Redis db')
     parser.add_argument('-cs', '--chunk_size', default=DEFAULT_CHUNK_SZ,
                         help='lines per chunk')
+    parser.add_argument('-tm', '--test_mode', action='store_true', default=False,
+                        help='run in test mode by only printing commands')
+
     return parser
 
 

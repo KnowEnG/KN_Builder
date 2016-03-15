@@ -57,17 +57,16 @@ def main_parse_args():
     argument is missing, supplies default value.
 
 .. csv-table::
-    :header: name,flag,type,description
-    :widths: 5,20,5,10,30,40
+    :header: parameter,argument,flag,description
+    :widths: 4,2,2,12
     :delim: |
 
-    start_step          |       |
-    --setup             |-su    |run db inits instead of source specific pipelines
-    --one_step          |-os    |run for a single step instead of pipeline
-    --step_parameters   |-p     |parameters to specify calls of a single step in pipeline
-    --no_ensembl        |-ne    |do not run ensembl in setup pipeline
-    --test_mode         |-tm    |run in test mode by only printing commands
-    --dependencies      |-d     |names of parent jobs that must finish
+    [start_step]    	|	    |	    |string indicating which pipeline stage to start with
+    --setup	            |	    |-su	|run db inits instead of source specific pipelines
+    --one_step      	|	    |-os	|run for a single step instead of rest of pipeline
+    --step_parameters	|str	|-p	    |parameters to specify calls of a single step in pipeline
+    --no_ensembl	    |	    |-ne	|do not run ensembl in setup pipeline
+    --dependencies	    |str	|-d	    |names of parent jobs that must finish
 
     Returns:
         Namespace: args as populated namespace
@@ -83,8 +82,6 @@ def main_parse_args():
                         help='parameters to specify calls of a single step in pipeline')
     parser.add_argument('-ne', '--no_ensembl', action='store_true', default=False,
                         help='do not run ensembl in setup pipeline', )
-    parser.add_argument('-tm', '--test_mode', action='store_true', default=False,
-                        help='run in test mode by only printing commands')
     parser.add_argument('-d', '--dependencies', default='',
                         help='names of parent jobs that must finish')
     parser = cf.add_config_args(parser)
