@@ -81,22 +81,24 @@ echo $KNP_CMD
 
 ### Test docker mode
 ### set environment vars
-KNP_LOCAL_DIR='/workspace/knowtmp/project1/KnowNet_Pipeline'
-KNP_CLOUD_DIR='/mnt/knowtmp/project1/KnowNet_Pipeline/'
+KNP_LOCAL_DIR='/workspace/apps/KnowNet_Pipeline'
+KNP_CLOUD_DIR='/mnt/backup/post3/apps/KnowNet_Pipeline/'
 KNP_DATA_PATH='data_docker_pipe'
 KNP_LOGS_PATH='logs_docker_pipe'
 KNP_MYSQL_HOST='knowcorey.dyndns.org'
+KNP_MYSQL_PORT='3307'
 KNP_REDIS_HOST='knowcorey.dyndns.org'
+KNP_REDIS_PORT='6380'
 KNP_CHRONOS_URL='DOCKER'
 
 ### reset everything
 #### clear out mysql
-KNP_CMD="mysql -h $KNP_MYSQL_HOST --port 3306 -uroot -pKnowEnG KnowNet \
+KNP_CMD="mysql -h $KNP_MYSQL_HOST --port $KNP_MYSQL_PORT -uroot -pKnowEnG KnowNet \
     --execute \"drop database KnowNet;\""
 echo $KNP_CMD
 
 #### clear out redis
-KNP_CMD="redis-cli -h $KNP_REDIS_HOST -a KnowEnG FLUSHDB"
+KNP_CMD="redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a KnowEnG FLUSHDB"
 echo $KNP_CMD
 
 #### clear files
@@ -107,23 +109,23 @@ rm -r $KNP_DATA_PATH/dip
 ### run pipeline
 #### setup utilities
 KNP_CMD="python3 code/workflow_utilities.py CHECK -su \
-    -myh $KNP_MYSQL_HOST -rh $KNP_REDIS_HOST \
-    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR"
+    -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT -rh $KNP_REDIS_HOST \
+    -rp $KNP_REDIS_PORT -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH \
+    -lp $KNP_LOGS_PATH -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR"
 echo $KNP_CMD
 #### crude timing: 1 hr 18 min
 ./code/reports/enumerate_files.sh $KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
-    $KNP_REDIS_HOST > tests/KN03build.pipe.docker.setup
+    $KNP_REDIS_HOST $KNP_MYSQL_PORT $KNP_REDIS_PORT > tests/KN03build.pipe.docker.setup
 
 #### pipeline utilities with small sources
 KNP_CMD="python3 code/workflow_utilities.py CHECK \
-    -myh $KNP_MYSQL_HOST -rh $KNP_REDIS_HOST \
-    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR -p kegg,,dip"
+    -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT -rh $KNP_REDIS_HOST \
+    -rp $KNP_REDIS_PORT -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH \
+    -lp $KNP_LOGS_PATH -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR -p kegg,,dip"
 echo $KNP_CMD
 #### crude timing: seconds
 ./code/reports/enumerate_files.sh $KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
-    $KNP_REDIS_HOST > tests/KN03build.pipe.docker.2small
+    $KNP_REDIS_HOST $KNP_MYSQL_PORT $KNP_REDIS_PORT > tests/KN03build.pipe.docker.2small
 
 
 
@@ -206,11 +208,11 @@ python3 code/setup_utilities.py CHECK \
     -dp data_docker_pipe -lp logs_docker_pipe \
     -c DOCKER \
     -cd /mnt/knowtmp/project1/KnowNet_Pipeline
-    
-    
-    
-    
-    
+
+
+
+
+
     # neo4j containers
 docker run -t --restart=always --name hdfs sequenceiq/hadoop-docker:latest /etc/bootstrap.sh -bash #ctrl+C to detach
 docker run -d --restart=always --name mazerunner --link hdfs:hdfs kbastani/neo4j-graph-analytics:latest
