@@ -263,7 +263,7 @@ class Ensembl(SrcClass):
         Returns:
             bool: Whether or not the alias is used for mapping.
         """
-        return True
+        return False
 
 if __name__ == "__main__":
     compare_versions(Ensembl())
