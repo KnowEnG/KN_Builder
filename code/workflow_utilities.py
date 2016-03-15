@@ -170,7 +170,7 @@ def run_check(args):
                    'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
                    'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                    'TMPSRC': module,
-                   'TMPOPTS': args.config_opts
+                   'TMPOPTS': args.cloud_config_opts
                   }
         check_job = jb.run_job_step(args, "checker", jobdict)
 
@@ -271,7 +271,7 @@ def run_fetch(args):
                        'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
                        'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                        'TMPALIASDIR': alias_path,
-                       'TMPOPTS': args.config_opts
+                       'TMPOPTS': args.cloud_config_opts
                       }
             fetch_job = jb.run_job_step(args, "fetcher", jobdict)
 
@@ -353,7 +353,7 @@ def run_table(args):
                        'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                        'TMPALIASDIR': alias_path,
                        'TMPCHUNK': os.path.join("chunks", chunk_name),
-                       'TMPOPTS': args.config_opts
+                       'TMPOPTS': args.cloud_config_opts
                       }
             table_job = jb.run_job_step(args, "tabler", jobdict)
 
@@ -427,7 +427,7 @@ def run_map(args):
                    'TMPCODEDIR': os.path.join(args.cloud_dir, args.code_path),
                    'TMPLOGSDIR': os.path.join(args.cloud_dir, args.logs_path),
                    'TMPEDGEPATH': os.path.join(chunk_path, edgefile),
-                   'TMPOPTS': args.config_opts
+                   'TMPOPTS': args.cloud_config_opts
                   }
         jb.run_job_step(args, "mapper", jobdict)
 
