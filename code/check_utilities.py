@@ -227,6 +227,8 @@ class SrcClass(object):
                 alias depends on.
         """
         depends = list()
+        if self.is_map(alias):
+            return depends
         for alias_name in self.aliases:
             if alias_name == alias:
                 continue
