@@ -469,7 +469,7 @@ def main():
             knownet.init_knownet()
 
         jobdict = generic_dict(args, None)
-        jobdict['TMPJOB'] = "file_setup_job"
+        jobdict['TMPJOB'] = "directory_setup_" + str(args.setup)
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
         args.dependencies = file_setup_job.jobname
 
