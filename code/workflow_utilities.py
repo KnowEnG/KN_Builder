@@ -172,10 +172,16 @@ def generic_dict(args, ns_parent=None):
 
     job_dict = {'TMPLAUNCH': launchstr,
                 'TMPDATADIR': os.path.join(jobdir, args.data_path),
+                'TMPDATAPATH': args.data_path,
                 'TMPCODEDIR': os.path.join(jobdir, args.code_path),
                 'TMPLOGSDIR': os.path.join(jobdir, args.logs_path),
-                'TMPOPTS': jobopts
+                'TMPLOGSPATH': args.logs_path,
+                'TMPOPTS': jobopts,
+                'TMPSHAREDIR': args.shared_dir,
+                'TMPSHAREBOOL': 'false'
                }
+    if args.shared_dir:
+        job_dict['TMPSHAREBOOL'] = 'true'
     return job_dict
 
 def run_check(args):
@@ -369,7 +375,7 @@ def run_table(args):
         for chunk_name in sorted(os.listdir(local_chunk_dir)):
             if "rawline" not in chunk_name:
                 continue
-
+            output_files = chunk_name.replace('.rawline.', '.*.')
             chunk_ctr += 1
             print("\t".join([str(chunk_ctr), chunk_name]))
 
@@ -379,7 +385,8 @@ def run_table(args):
             jobdict = generic_dict(args, None)
             jobdict.update({'TMPJOB': jobname,
                             'TMPALIASDIR': alias_path,
-                            'TMPCHUNK': os.path.join("chunks", chunk_name)
+                            'TMPCHUNK': os.path.join("chunks", chunk_name),
+                            'TMPFILES': os.path.join("chunks", output_files)
                            })
             step_job = ju.run_job_step(args, "tabler", jobdict)
 
@@ -432,6 +439,7 @@ def run_map(args):
     for filestr in edgefile_list:
 
         edgefile = os.path.basename(filestr)
+        output_files = edgefile.replace('.edge.', '.*.')
         src = edgefile.split('.')[0]
         alias = edgefile.split('.edge.')[0].split(src+'.')[1]
 
@@ -450,7 +458,8 @@ def run_map(args):
         jobname = jobname.replace(".txt", "")
         jobdict = generic_dict(args, None)
         jobdict.update({'TMPJOB': jobname,
-                        'TMPEDGEPATH': os.path.join(chunk_path, edgefile)
+                        'TMPEDGEPATH': os.path.join(chunk_path, edgefile),
+                        'TMPFILES': os.path.join(chunk_path, output_files)
                        })
         ju.run_job_step(args, "mapper", jobdict)
 
