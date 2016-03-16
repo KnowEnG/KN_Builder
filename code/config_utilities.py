@@ -89,6 +89,8 @@ def add_config_args(parser):
                         help='name of toplevel directory on local machine')
     parser.add_argument('-cd', '--cloud_dir', default=DEFAULT_CLOUD_BASE,
                         help='name of toplevel directory on cloud storage')
+    parser.add_argument('-sd', '--shared_dir', default='', 
+                        help='name of toplevel directory on shared storage')
     parser.add_argument('-cp', '--code_path', default=DEFAULT_CODE_PATH,
                         help='relative path of code directory from toplevel')
     parser.add_argument('-dp', '--data_path', default=DEFAULT_DATA_PATH,
