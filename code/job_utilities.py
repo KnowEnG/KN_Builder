@@ -129,6 +129,7 @@ class Job:
             envstr += ' -e ' + env['variable'] + '=' + env['value']
         docker_cmd = ["docker", "run", "--name", jobjson["name"], "--rm=true",
                       "-v", self.args.cloud_dir+":"+self.args.cloud_dir,
+                      "-v", self.args.shared_dir+":"+self.args.shared_dir,
                       self.tmpdict["TMPIMG"],
                       jobjson["command"]
                      ]
