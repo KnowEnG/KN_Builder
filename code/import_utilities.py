@@ -17,6 +17,7 @@ import mysql_utilities as mu
 import json
 import os
 
+@profile
 def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
     """Imports the provided  file into the KnowEnG MySQL database.
 
