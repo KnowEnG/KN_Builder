@@ -293,7 +293,7 @@ def main(version_json, args=None):
         ru.import_mapping(map_dict, args)
     else:
         #rawline = raw_line(newfile)
-        num_chunks = chunk(newfile, line_count, args, mySrc.chunk)
+        num_chunks = chunk(newfile, line_count, args, mySrc.chunk_size)
     #update version_dict
     version_dict['checksum'] = md5hash
     version_dict['line_count'] = line_count
