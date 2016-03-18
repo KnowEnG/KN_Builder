@@ -78,6 +78,7 @@ class SrcClass(object):
         self.remote_file = ''
         self.version = dict()
         self.args = args
+        self.chunk_size = 500000
 
     def get_source_version(self, alias):
         """Return the release version of the remote source:alias.

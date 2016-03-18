@@ -112,12 +112,12 @@ def download(version_dict):
     shutil.copy2(filename, ret_file)
     return os.path.relpath(ret_file)
 
-def chunk(filename, total_lines, args):
+def chunk(filename, total_lines, args, chunksize=500000):
     """Splits the provided file into equal chunks with
-    ceiling(num_lines/args.chunk_size) lines each.
+    ceiling(num_lines/chunksize) lines each.
 
     This takes the path to a file and reads through the file, splitting it
-    into equal chunks with each of size ceiling(num_lines/args.chunk_size). It
+    into equal chunks with each of size ceiling(num_lines/chunksize). It
     then returns the number of chunks and sets up the raw_lines table in the
     format: (file, line num, line_chksum, rawline)
 
@@ -125,6 +125,7 @@ def chunk(filename, total_lines, args):
         filename (str): the file to split into chunks
         total_lines (int): the number of lines in the file at filename
         args (Namespace): args as populated namespace or 'None' for defaults
+        chunksize (int): max size of a single chunk.  Defaults to 500000.
 
     Returns:
         int: the number of chunks filename was split into
@@ -133,7 +134,7 @@ def chunk(filename, total_lines, args):
     if 'lincs.level4' in filename:
         num_chunks = MAX_CHUNKS
     else:
-        num_chunks = math.ceil(total_lines/int(args.chunk_size))
+        num_chunks = math.ceil(total_lines/int(chunksize))
     num_lines = int(total_lines/num_chunks)
 
     #determine file output information
@@ -273,13 +274,13 @@ def main(version_json, args=None):
     else:
         newfile = download(version_dict)
     md5hash, line_count = get_md5_hash(newfile)
-    SrcClass = src_module.get_SrcClass(args)
+    mySrc = src_module.get_SrcClass(args)
     if version_dict['is_map'] and version_dict['source'] == 'lincs':
         num_chunks = 0
     elif version_dict['is_map']:
         num_chunks = 0
         rawline = raw_line(newfile)
-        map_dict = SrcClass.create_mapping_dict(rawline)
+        map_dict = mySrc.create_mapping_dict(rawline)
         nodefile = rawline.replace('rawline', 'unique_node')
         if os.path.isfile(nodefile):
             iu.import_pnode(nodefile, args)
@@ -292,7 +293,7 @@ def main(version_json, args=None):
         ru.import_mapping(map_dict, args)
     else:
         #rawline = raw_line(newfile)
-        num_chunks = chunk(newfile, line_count, args)
+        num_chunks = chunk(newfile, line_count, args, mySrc.chunk)
     #update version_dict
     version_dict['checksum'] = md5hash
     version_dict['line_count'] = line_count

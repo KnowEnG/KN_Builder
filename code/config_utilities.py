@@ -46,7 +46,7 @@ DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
 DEFAULT_REDIS_PORT = '6379'
 DEFAULT_REDIS_PASS = 'KnowEnG'
 
-DEFAULT_CHUNK_SZ = float(500000)
+
 
 
 def add_config_args(parser):
@@ -114,8 +114,6 @@ def add_config_args(parser):
                         help='port for Redis db')
     parser.add_argument('-rps', '--redis_pass', default=DEFAULT_REDIS_PASS,
                         help='password for Redis db')
-    parser.add_argument('-cs', '--chunk_size', default=DEFAULT_CHUNK_SZ,
-                        help='lines per chunk')
     parser.add_argument('-tm', '--test_mode', action='store_true', default=False,
                         help='run in test mode by only printing commands')
 

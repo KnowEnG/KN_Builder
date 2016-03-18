@@ -60,6 +60,7 @@ class Go(SrcClass):
             "wb": "Caenorhabditis elegans"
         }
         super(Go, self).__init__(name, url_base, aliases, args)
+        self.chunk_size = 250000
 
     def get_source_version(self, alias):
         """Return the release version of the remote go:alias.
