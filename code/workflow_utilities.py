@@ -302,7 +302,7 @@ def run_fetch(args):
             jobdict = generic_dict(args, None)
             jobdict.update({'TMPJOB': jobname,
                             'TMPLAUNCH': launchstr,
-                            'TMPALIASDIR': alias_path
+                            'TMPALIASPATH': alias_path
                            })
             step_job = ju.run_job_step(args, "fetcher", jobdict)
 
@@ -380,7 +380,7 @@ def run_table(args):
             jobname = jobname.replace(".txt", "")
             jobdict = generic_dict(args, None)
             jobdict.update({'TMPJOB': jobname,
-                            'TMPALIASDIR': alias_path,
+                            'TMPALIASPATH': alias_path,
                             'TMPCHUNK': os.path.join("chunks", chunk_name),
                             'TMPFILES': os.path.join("chunks", output_files)
                            })
