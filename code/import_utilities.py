@@ -46,23 +46,24 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
                     '{0}.weight)')}
     if not dup_cmd and table in table_cmds:
         dup_cmd = table_cmds[table]
-    db = mu.get_database('KnowNet', args)
+#    db = mu.get_database('KnowNet', args)
     tmptable = os.path.splitext(os.path.basename(file_name))[0].replace('.', '_')
     print('Creating temporary table ' + tmptable)
-    db.create_temp_table(tmptable, 'LIKE ' + table)
+#    db.create_temp_table(tmptable, 'LIKE ' + table)
     print('Loading data into temporary table ' + tmptable)
-    db.load_data(file_name, tmptable, ld_cmd)
+#    db.load_data(file_name, tmptable, ld_cmd)
     print('Inserting data from ' + tmptable + ' into ' + table)
     cmd = 'SELECT * FROM ' + tmptable
     if dup_cmd:
         cmd += ' ON DUPLICATE KEY UPDATE ' + dup_cmd.format(tmptable)
-        db.start_transaction(level='READ COMMITTED')
-        db.insert(table, cmd)
+#        db.start_transaction(level='READ COMMITTED')
+#        db.insert(table, cmd)
     else:
-        db.start_transaction(level='READ COMMITTED')
-        db.replace(table, cmd)
-    db.drop_table(tmptable)
-    db.close()
+        pass
+#        db.start_transaction(level='READ COMMITTED')
+#        db.replace(table, cmd)
+#    db.drop_table(tmptable)
+#    db.close()
 
 def import_filemeta(version_dict, args=None):
     """Imports the provided version_dict into the KnowEnG MySQL database.
@@ -91,6 +92,7 @@ def import_filemeta(version_dict, args=None):
     values = [str(i) for i in values]
     cmd = 'VALUES( ' + ','.join(values) + ')'
     db.replace('raw_file', cmd)
+    db.close()
 
 def update_filemeta(version_dict, args=None):
     """Updates the provided filemeta into the KnowEnG MySQL database.
@@ -120,6 +122,7 @@ def update_filemeta(version_dict, args=None):
     values = [str(i) for i in values]
     cmd = 'VALUES( ' + ','.join(values) + ')'
     db.replace('raw_file', cmd)
+    db.close()
 
 def import_edge(edgefile, args=None):
     """Imports the provided edge file and any corresponding meta files into

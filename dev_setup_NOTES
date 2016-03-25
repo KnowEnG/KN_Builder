@@ -65,12 +65,13 @@ KNP_REDIS_HOST='knowcorey.dyndns.org'
 KNP_REDIS_PORT='6380'
 
 #### Test chronos mode
+ln -s /workspace/shared /mnt
 KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
 KNP_LOCAL_DIR='/workspace/fast/apps/KnowNet_Pipeline'
 KNP_CLOUD_DIR='/mnt/fast/knoweng/apps/KnowNet_Pipeline/'
 KNP_SHARE_DIR='/mnt/shared/KnowNet_Pipeline/shared/'
-KNP_DATA_PATH='data_chronos_pipe'
-KNP_LOGS_PATH='logs_chronos_pipe'
+KNP_DATA_PATH='data_chronos_pipe2'
+KNP_LOGS_PATH='logs_chronos_pipe2'
 KNP_MYSQL_HOST='knowcluster01.dyndns.org'
 KNP_MYSQL_PORT='3306'
 KNP_REDIS_HOST='knowcluster01.dyndns.org'
@@ -92,11 +93,13 @@ echo $KNP_CMD
 for i in ensembl ppi species; do
     rm -r $KNP_LOGS_PATH/*$i*
     rm -r $KNP_DATA_PATH/*$i*
+    rm -r $KNP_SHARE_DIR/$KNP_LOGS_PATH/*$i*
+    rm -r $KNP_SHARE_DIR/$KNP_DATA_PATH/*$i*
 done;
 
 #### clear chronos queue
 for c in 'knowcluster01.dyndns.org:4400' ; do
-    curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
+    curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | grep -v command | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
     for s in 'map-' 'table-' 'check-' 'fetch-' 'setup' ; do
         echo $s
         for i in `grep "$s" /tmp/t.txt  `; do
@@ -131,7 +134,7 @@ done;
 
 #### clear chronos queue
 for c in 'knowcluster01.dyndns.org:4400' ; do
-    curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
+    curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | grep -v command | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
     for s in 'map-' 'table-' 'check-' 'fetch-' 'setup' ; do
         echo $s
         for i in `grep "$s" /tmp/t.txt  `; do
