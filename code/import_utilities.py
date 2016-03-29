@@ -33,6 +33,7 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
         dup_cmd (str): command for handling duplicates
         args (Namespace): args as populated namespace or 'None' for defaults
     """
+    return 1  ## remove this later (and potentially everything after)
     if args is None:
         args=cf.config_args()
     table_cmds = {'node_meta': 'node_meta.node_id = node_meta.node_id',
@@ -40,30 +41,38 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
                 'raw_line' : 'raw_line.file_id = raw_line.file_id',
                 'edge2line': 'edge2line.edge_hash = edge2line.edge_hash',
                 'edge_meta': 'edge_meta.edge_hash = edge_meta.edge_hash',
-                'edge': ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
-                    '{0}.weight)'),
-                'status': ('status.weight = IF(status.weight > {0}.weight, status.weight, '
-                    '{0}.weight)')}
+                #'edge': ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
+                #    '{0}.weight)'),
+                #'status': ('status.weight = IF(status.weight > {0}.weight, status.weight, '
+                #    '{0}.weight)')}
+                'status': 'status.edge_hash = status.edge_hash'}
     if not dup_cmd and table in table_cmds:
         dup_cmd = table_cmds[table]
-#    db = mu.get_database('KnowNet', args)
+    db = mu.get_database('KnowNet', args)
     tmptable = os.path.splitext(os.path.basename(file_name))[0].replace('.', '_')
     print('Creating temporary table ' + tmptable)
-#    db.create_temp_table(tmptable, 'LIKE ' + table)
+    db.create_temp_table(tmptable, 'LIKE ' + table)
     print('Loading data into temporary table ' + tmptable)
-#    db.load_data(file_name, tmptable, ld_cmd)
+    db.load_data(file_name, tmptable, ld_cmd)
     print('Inserting data from ' + tmptable + ' into ' + table)
     cmd = 'SELECT * FROM ' + tmptable
+    ### revise after this point
+    return 1  ## remove this later (and potentially everything after)
+    db.start_transaction(level='READ UNCOMMITTED')
+    db.insert_ignore(table, cmd) #change later to duplicate
+    db.drop_table(tmptable)
+    db.close()
+    return 1  ## remove this later (and potentially everything after)
     if dup_cmd:
         cmd += ' ON DUPLICATE KEY UPDATE ' + dup_cmd.format(tmptable)
-#        db.start_transaction(level='READ COMMITTED')
-#        db.insert(table, cmd)
+        db.start_transaction(level='READ COMMITTED')
+        db.insert(table, cmd)
     else:
         pass
-#        db.start_transaction(level='READ COMMITTED')
-#        db.replace(table, cmd)
-#    db.drop_table(tmptable)
-#    db.close()
+        db.start_transaction(level='READ COMMITTED')
+        db.replace(table, cmd)
+    db.drop_table(tmptable)
+    db.close()
 
 def import_filemeta(version_dict, args=None):
     """Imports the provided version_dict into the KnowEnG MySQL database.
