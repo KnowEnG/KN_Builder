@@ -3,10 +3,10 @@
 Contains module functions::
 
     get_database(args=None)
-    import_ensembl(alias, args=None) 
+    import_ensembl(alias, args=None)
     conv_gene(rdb, foreign_key, hint, taxid)
     import_mapping(map_dict, args=None)
-    
+
 """
 
 import config_utilities as cf
@@ -55,7 +55,8 @@ def import_ensembl(alias, args=None):
     for key in map_dict:
         (taxid, hint, foreign_key) = key.split('::')
         hint = hint.upper()
-        ens_id = map_dict[key].encode()
+        ens_id = map_dict[key].encode().upper()
+        foreign_key = foreign_key.upper()
         rkey = rdb.getset('unique::' + foreign_key, ens_id)
         if rkey is not None and rkey != ens_id:
             rdb.set('unique::' + foreign_key, 'unmapped-many')
@@ -74,11 +75,12 @@ def conv_gene(rdb, foreign_key, hint, taxid):
         foreign_key (str): the foreign gene identifer to be translated
         hint (str): a hint for conversion
         taxid (str): the species taxid, 'unknown' if unknown
-    
+
     Returns:
         str: result of seaching for gene in redis DB
     """
     hint = hint.upper()
+    foreign_key = foreign_key.upper()
     unique = rdb.get('unique::' + foreign_key)
     if unique is None:
         return 'unmapped-none'
