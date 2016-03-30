@@ -54,6 +54,7 @@ class Stringdb(SrcClass):
                    "7227": "Dmel",
                    "9606": "Hsap"}
         super(Stringdb, self).__init__(name, url_base, aliases, args)
+        self.chunk_size = 250000
 
     def get_source_version(self, alias):
         """Return the release version of the remote stringdb:alias.

@@ -5,6 +5,7 @@
 Contains module functions::
 
     list_sources(args)
+    generic_dict(args, ns_parent=None)
     run_check(args)
     run_fetch(args)
     run_table(args)
@@ -155,31 +156,27 @@ def generic_dict(args, ns_parent=None):
     Returns:
         dict: tmp substitution dictionary with appropriate values depending on args
     """
-    launchstr = r'"schedule": "R1\/\/P3M"'
-    jobopts = args.cloud_config_opts
-    jobdir = args.cloud_dir
-    if ns_parent is None: # regular job
-        if args.dependencies != "": # continuation job
-            launchstr = ju.chronos_parent_str(args.dependencies.split(",,"))
-        if args.chronos == 'LOCAL':
-            jobopts = args.config_opts
-            jobdir = args.local_dir
-    else: # next step caller job
-        launchstr = ju.chronos_parent_str([ns_parent])
-        if args.chronos in SPECIAL_MODES:
-            jobopts = args.config_opts
-            jobdir = args.local_dir
 
-    job_dict = {'TMPLAUNCH': launchstr,
-                'TMPDATADIR': os.path.join(jobdir, args.data_path),
+    job_dict = {'TMPLAUNCH': r'"schedule": "R1\/\/P3M"',
+                'TMPWORKDIR': args.cloud_dir,
                 'TMPDATAPATH': args.data_path,
-                'TMPCODEDIR': os.path.join(jobdir, args.code_path),
-                'TMPLOGSDIR': os.path.join(jobdir, args.logs_path),
+                'TMPCODEPATH': args.code_path,
                 'TMPLOGSPATH': args.logs_path,
-                'TMPOPTS': jobopts,
+                'TMPOPTS': args.cloud_config_opts,
                 'TMPSHAREDIR': args.shared_dir,
                 'TMPSHAREBOOL': 'false'
                }
+    if ns_parent is None: # regular job
+        if args.dependencies != "": # continuation job
+            job_dict['TMPLAUNCH'] = ju.chronos_parent_str(args.dependencies.split(",,"))
+        if args.chronos == 'LOCAL':
+            job_dict['TMPOPTS'] = args.config_opts
+            job_dict['TMPWORKDIR'] = args.local_dir
+    else: # next step caller job
+        job_dict['TMPLAUNCH'] = ju.chronos_parent_str([ns_parent])
+        if args.chronos in SPECIAL_MODES:
+            job_dict['TMPOPTS'] = args.config_opts
+            job_dict['TMPWORKDIR'] = args.local_dir
     if args.shared_dir:
         job_dict['TMPSHAREBOOL'] = 'true'
     return job_dict
@@ -306,7 +303,7 @@ def run_fetch(args):
             jobdict = generic_dict(args, None)
             jobdict.update({'TMPJOB': jobname,
                             'TMPLAUNCH': launchstr,
-                            'TMPALIASDIR': alias_path
+                            'TMPALIASPATH': alias_path
                            })
             step_job = ju.run_job_step(args, "fetcher", jobdict)
 
@@ -384,7 +381,7 @@ def run_table(args):
             jobname = jobname.replace(".txt", "")
             jobdict = generic_dict(args, None)
             jobdict.update({'TMPJOB': jobname,
-                            'TMPALIASDIR': alias_path,
+                            'TMPALIASPATH': alias_path,
                             'TMPCHUNK': os.path.join("chunks", chunk_name),
                             'TMPFILES': os.path.join("chunks", output_files)
                            })
