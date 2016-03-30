@@ -5,6 +5,7 @@
 Contains module functions::
 
     list_sources(args)
+    generic_dict(args, ns_parent=None)
     run_check(args)
     run_fetch(args)
     run_table(args)
