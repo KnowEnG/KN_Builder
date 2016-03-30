@@ -10,7 +10,7 @@ docker run -d --name p1_redis -p 6379:6379 -v /mnt/knowtmp/redis:/data \
    redis redis-server --appendonly yes --requirepass KnowEnG
 
 ### cloud9 container
-docker run -d --privileged --restart=always --name project1_c9 -h project1_c9 -p 8181:8181 \
+docker run -d --privileged --restart=always --name project_c9 -h project1_c9 -p 8181:8181 \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /usr/bin/docker:/bin/docker \
     -v /mnt/fast/knoweng:/workspace/fast \
@@ -70,7 +70,7 @@ KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
 KNP_LOCAL_DIR='/workspace/fast/apps/KnowNet_Pipeline'
 KNP_CLOUD_DIR='/mnt/fast/knoweng/apps/KnowNet_Pipeline/'
 KNP_SHARE_DIR='/mnt/shared/KnowNet_Pipeline/shared/'
-KNP_DATA_PATH='data_chronos_pipe2'
+KNP_DATA_PATH='data_chronos_pipe'
 KNP_LOGS_PATH='logs_chronos_pipe2'
 KNP_MYSQL_HOST='knowcluster01.dyndns.org'
 KNP_MYSQL_PORT='3306'
@@ -90,7 +90,8 @@ KNP_CMD="redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a KnowEnG FLUSHDB"
 echo $KNP_CMD
 
 #### clear files
-for i in ensembl ppi species; do
+for i in directory_setup ensembl ppi species kegg dip; do
+for i in biogrid  blast  dip   go  humannet  intact  kegg  msigdb  pathcom  pfam   reactome   stringdb; do
     rm -r $KNP_LOGS_PATH/*$i*
     rm -r $KNP_DATA_PATH/*$i*
     rm -r $KNP_SHARE_DIR/$KNP_LOGS_PATH/*$i*
