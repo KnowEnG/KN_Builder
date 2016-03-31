@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS KnowNet;
 USE KnowNet;
 
 CREATE TABLE IF NOT EXISTS `raw_file` (
-  `file_id` varchar(40) NOT NULL,
+  `file_id` varchar(80) NOT NULL,
   `remote_url` varchar(255) NOT NULL,
   `remote_date` varchar(40) DEFAULT NULL,
   `remote_version` varchar(40) DEFAULT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `raw_file` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `raw_line` (
-  `file_id` varchar(40) NOT NULL,
+  `file_id` varchar(80) NOT NULL,
   `line_num` int(11) NOT NULL,
   `line_hash` varchar(40) NOT NULL,
   `line_str` text NOT NULL,
