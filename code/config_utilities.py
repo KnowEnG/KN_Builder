@@ -4,13 +4,13 @@ This module establishes default values and argument parsers for commonly
 used variables
 
 Attributes:
-    DEFAULT_DOCKER_IMG (str): docker image to run pipeline steps
-    DEFAULT_CURL_URL (str): address of chronos scheduler
+    DEFAULT_CHRONOS_URL (str): address of chronos scheduler
     DEFAULT_LOCAL_BASE (str): toplevel directory on local machine
     DEFAULT_CLOUD_BASE (str): toplevel directory on shared cloud storage
 
     DEFAULT_CODE_PATH (str): relative path of code dir from toplevel
     DEFAULT_DATA_PATH (str): relative path of data dir from toplevel
+    DEFAULT_LOGS_PATH (str): relative path of logs dir from toplevel
     DEFAULT_MAP_PATH (str): relative path of id_map dir from toplevel
 
     DEFAULT_MYSQL_URL (str): location of MySQL db
@@ -21,7 +21,6 @@ Attributes:
     DEFAULT_REDIS_URL (str): location of Redis db
     DEFAULT_REDIS_PORT (int): port for Redis db
     DEFAULT_REDIS_PASS (str): password for Redis db
-    DEFAULT_CHUNK_SZ (int): the max size (number of lines) for file chunks
 """
 from argparse import ArgumentParser
 import os
@@ -46,9 +45,6 @@ DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
 DEFAULT_REDIS_PORT = '6379'
 DEFAULT_REDIS_PASS = 'KnowEnG'
 
-
-
-
 def add_config_args(parser):
     """Add global configuation options to command line arguments.
 
@@ -62,6 +58,7 @@ def add_config_args(parser):
     --chronos  	    |str	|-c	    |url of chronos scheduler or LOCAL or DOCKER
     --local_dir	    |str	|-ld	|name of toplevel directory on local machine
     --cloud_dir	    |str	|-cd	|name of toplevel directory on cloud storage
+    --shared_dir    |str	|-sd	|name of toplevel directory of shared storage
     --code_path	    |str	|-cp	|relative path of code directory from toplevel
     --data_path	    |str	|-dp	|relative path of data directory from toplevel
     --logs_path	    |str	|-lp	|relative path of data directory from toplevel

@@ -50,6 +50,7 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
         dup_cmd = table_cmds[table]
     db = mu.get_database('KnowNet', args)
     tmptable = os.path.splitext(os.path.basename(file_name))[0].replace('.', '_')
+    tmptable = cf.pretty_name(tmptable, len(tmptable)).replace('-', '_')[:64]
     print('Creating temporary table ' + tmptable)
     db.create_temp_table(tmptable, 'LIKE ' + table)
     print('Loading data into temporary table ' + tmptable)
