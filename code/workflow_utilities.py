@@ -483,7 +483,7 @@ def run_import(args):
     for filestr in statusfile_list:
 
         statusfile = os.path.basename(filestr)
-        output_files = statusfile.replace('.edge.', '.*.')
+        output_files = statusfile.replace('.status.', '.*.')
         src = statusfile.split('.')[0]
         alias = statusfile.split('.status.')[0].split(src+'.')[1]
 
@@ -497,7 +497,7 @@ def run_import(args):
         ctr += 1
         print("\t".join([str(ctr), statusfile]))
 
-        jobname = "-".join(["map", statusfile])
+        jobname = "-".join(["import", statusfile])
         jobname = jobname.replace(".", "-")
         jobname = jobname.replace(".txt", "")
         jobdict = generic_dict(args, None)
