@@ -6,7 +6,7 @@
         "image": "TMPIMG",
         "volumes": [{"containerPath": "TMPWORKDIR", "hostPath":"TMPWORKDIR", "mode":"RW"},
                     {"containerPath": "TMPSHAREDIR", "hostPath":"TMPSHAREDIR", "mode":"RW"},
-                    {"containerPath": "/etc/", "hostPath":"/etc/", "mode":"RW"},
+                    {"containerPath": "/etc/", "hostPath":"/etc/", "mode":"RW"}
                    ]
     },
     "cpus": "TMPCPUS",
