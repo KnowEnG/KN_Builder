@@ -485,7 +485,7 @@ def run_import(args):
         statusfile = os.path.basename(filestr)
         output_files = statusfile.replace('.edge.', '.*.')
         src = statusfile.split('.')[0]
-        alias = statusfile.split('.edge.')[0].split(src+'.')[1]
+        alias = statusfile.split('.status.')[0].split(src+'.')[1]
 
         chunk_path = os.path.join(src, alias, "chunks")
         local_chunk_dir = os.path.join(args.local_dir, args.data_path, chunk_path)
