@@ -463,6 +463,52 @@ def run_map(args):
     return 0
 
 
+def run_import(args):
+    """Runs import_status on a single .status. file on the cloud.
+
+    This loops through args.parameters statusfiles, creates a job for each that
+    calls import_utilities main(), and runs job in args.chronos location.
+
+    Args:
+        args (Namespace): args as populated namespace from parse_args, must
+            specify --step_parameters(-p) as ',,' separated list of
+            'source.alias.status.chunk.txt' file names
+    """
+    statusfile_list = args.step_parameters.split(",,")
+    if args.step_parameters == "":
+        raise ValueError("ERROR: 'statusfile' must be specified with --step_parameters (-p)")
+    ju.Job("importer", args)
+
+    ctr = 0
+    for filestr in statusfile_list:
+
+        statusfile = os.path.basename(filestr)
+        output_files = statusfile.replace('.edge.', '.*.')
+        src = statusfile.split('.')[0]
+        alias = statusfile.split('.edge.')[0].split(src+'.')[1]
+
+        chunk_path = os.path.join(src, alias, "chunks")
+        local_chunk_dir = os.path.join(args.local_dir, args.data_path, chunk_path)
+        local_statusfile = os.path.join(local_chunk_dir, statusfile)
+        if not os.path.exists(local_statusfile):
+            raise IOError('ERROR: "statusfile" specified with --step_parameters (-p) '
+                          'option, ' + filestr + ' does not exist: ' + local_statusfile)
+
+        ctr += 1
+        print("\t".join([str(ctr), statusfile]))
+
+        jobname = "-".join(["map", statusfile])
+        jobname = jobname.replace(".", "-")
+        jobname = jobname.replace(".txt", "")
+        jobdict = generic_dict(args, None)
+        jobdict.update({'TMPJOB': jobname,
+                        'TMPSTATUSPATH': os.path.join(chunk_path, statusfile),
+                        'TMPFILES': os.path.join(chunk_path, output_files)
+                       })
+        ju.run_job_step(args, "importer", jobdict)
+
+    return 0
+
 def main():
     """Runs the 'start_step' step of the main or args.setup pipeline on the
     args.chronos location, and all subsequent steps if not args.one_step
@@ -497,6 +543,8 @@ def main():
             return run_table(args)
         elif args.start_step == 'MAP':
             return run_map(args)
+        elif args.start_step == 'IMPORT':
+            return run_import(args)
 
     print(args.start_step + ' is an unacceptable start_step.  Must be ' +
           str(POSSIBLE_STEPS))

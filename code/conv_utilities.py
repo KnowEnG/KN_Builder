@@ -98,7 +98,7 @@ def main(edgefile, args=None):
                 chksum, t_chksum, status, status_desc])
     tu.csu(status_file, us_file)
     tu.csu(us_file, ue2l_file, [5, 6])
-    iu.import_status(status_file, args)
+#    iu.import_status(status_file, args)  #### change after import testing
 
 def map_list(namefile, args=None):
     """Maps the nodes for the provided namefile.

@@ -33,7 +33,6 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
         dup_cmd (str): command for handling duplicates
         args (Namespace): args as populated namespace or 'None' for defaults
     """
-    return 1  ## remove this later (and potentially everything after)
     if args is None:
         args=cf.config_args()
     table_cmds = {'node_meta': 'node_meta.node_id = node_meta.node_id',
@@ -57,8 +56,6 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
     db.load_data(file_name, tmptable, ld_cmd)
     print('Inserting data from ' + tmptable + ' into ' + table)
     cmd = 'SELECT * FROM ' + tmptable
-    ### revise after this point
-    return 1  ## remove this later (and potentially everything after)
     db.start_transaction(level='READ UNCOMMITTED')
     db.insert_ignore(table, cmd) #change later to duplicate
     db.drop_table(tmptable)
@@ -234,3 +231,23 @@ def import_pnode(filename, args=None):
     dup_cmd = 'node.node_id = node.node_id'
     table = 'node'
     import_file(filename, table, ld_cmd, dup_cmd, args)
+
+def main_parse_args():
+    """Processes command line arguments.
+
+    Expects one positional argument (status_file) and number of optional
+    arguments. If arguments are missing, supplies default values.
+
+    Returns:
+        Namespace: args as populated namespace
+    """
+    parser = ArgumentParser()
+    parser.add_argument('status_file', help='status file produced from map step, \
+                        e.g. kegg/ath/kegg.ath.status.1.txt')
+    parser = cf.add_config_args(parser)
+    args = parser.parse_args()
+    return args
+
+if __name__ == "__main__":
+    args = main_parse_args()
+    import_status(args.status_file, args)
