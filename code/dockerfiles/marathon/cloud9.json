@@ -1,0 +1,24 @@
+{
+    "id": "TMPID-c9",
+    "args": ["--auth", "TMPID:knowdev249"],
+    "cpus": 2.0,
+    "mem": 2500,
+    "instances": 1,
+    "env": {"PORT": "8181"},
+    "constraints": [["hostname", "CLUSTER", "192.17.176.156"]],    
+    "container": {
+        "type": "DOCKER",
+        "volumes": [
+                    {"containerPath": "/var/run/docker.sock", "hostPath": "/var/run/docker.sock", "mode": "RW"},
+                    {"containerPath": "/bin/docker", "hostPath": "/usr/bin/docker", "mode": "RW"},
+                    {"containerPath": "/workspace/fast", "hostPath": "/mnt/fast/knoweng", "mode": "RW"},
+                    {"containerPath": "/workspace/shared", "hostPath": "/mnt/shared", "mode": "RW"},
+                    {"containerPath": "/workspace/knowtmp", "hostPath": "/mnt/knowtmp", "mode": "RW"}
+            ],
+        "docker": {
+            "image": "cblatti3/p1_cloud9:0.1",
+            "network": "BRIDGE",
+            "portMappings": [{"containerPort": 8181, "hostPort": TMPPORT}]
+        }
+    }
+}

@@ -1,0 +1,18 @@
+{
+    "id": "p1redis",
+    "cmd": "cp /shared/appendonly.aof /data/ && redis-server --appendonly yes --requirepass KnowEnG",
+    "cpus": 1.0,
+    "mem": 4000,
+    "instances": TMPNUM,
+    "constraints": [["hostname", "UNIQUE"]],
+    "container": {
+        "type": "DOCKER",
+        "volumes": [{"containerPath": "/data", "hostPath": "/mnt/fast/redis/", "mode": "RW"},
+                    {"containerPath": "/shared", "hostPath": "/mnt/fast/knoweng/redis/", "mode": "RW"}],
+        "docker": {
+            "image": "redis",
+            "network": "BRIDGE",
+            "portMappings": [{"containerPort": 6379, "hostPort": 6379}]
+        }
+    }
+}
