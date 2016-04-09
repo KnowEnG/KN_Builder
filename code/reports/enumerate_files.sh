@@ -24,11 +24,10 @@ FILE_CTR=0
 echo -e "tnum\ttype\tsnum\tsource\tfile\tempty\ttime\tlines"
 
 for KNP_FILE_TYPE in "*/file_metadata.json" "*/*.*.txt" "*json" "*/*json" \
-    "*/*rawline*" "*/*.node_meta.*" "*/chunks/*rawline*" \
-    "*/chunks/*.node_meta.*" "*/chunks/*.edge_meta.*" \
-    "*/chunks/*unique_edge_meta*" "*/chunks/*.edge.*" "*/chunks/*status*" \
-    "*/chunks/*.conv.*" "*/chunks/*unique_conv*" \
-    "*/chunks/*unique_edge2line*"; do
+    "*/*rawline*" "*/*.node_meta.*" "*/chunks/*.rawline.*" \
+    "*/chunks/*.node_meta.*" "*/chunks/*unique_node_meta*" "*/chunks/*.edge_meta.*" \
+    "*/chunks/*unique_edge_meta*" "*/chunks/*.edge.*" "*/chunks/*.status.*" \
+    "*/chunks/*.unique_status.*" "*/chunks/*unique_edge2line*"; do
     FILE_CTR=$(($FILE_CTR + 1))
     files='-'
     zeros='-'
@@ -50,8 +49,8 @@ for KNP_FILE_TYPE in "*/file_metadata.json" "*/*.*.txt" "*json" "*/*json" \
     SRC_CTR=0
     echo -e "$FILE_CTR\t$KNP_FILE_TYPE\t$SRC_CTR\tALL\t$files\t$zeros\t$mins\t$lines"
 
-    for KNP_SRC in ensembl id_map ppi species biogrid blast dip go humannet \
-        intact kegg msigdb pfam reactome stringdb; do
+    for KNP_SRC in ensembl id_map ppi species biogrid blast dip enrichr go \
+        humannet intact kegg msigdb pathcom pfam reactome stringdb; do
         SRC_CTR=$(($SRC_CTR + 1))
         files='-'
         zeros='-'
