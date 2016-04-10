@@ -72,6 +72,7 @@ def add_config_args(parser):
     --redis_pass	|str	|-rps	|password for Redis db
     --chunk_size	|int	|-cs	|lines per chunk
     --test_mode	    |   	|-tm	|run in test mode by only printing command, defaults to False
+    --ens_species   |str    |-es    |',,' separated ensembl species to run in setup pipeline
 
 
     Args:
@@ -86,7 +87,7 @@ def add_config_args(parser):
                         help='name of toplevel directory on local machine')
     parser.add_argument('-cd', '--cloud_dir', default=DEFAULT_CLOUD_BASE,
                         help='name of toplevel directory on cloud storage')
-    parser.add_argument('-sd', '--shared_dir', default='', 
+    parser.add_argument('-sd', '--shared_dir', default='',
                         help='name of toplevel directory on shared storage')
     parser.add_argument('-cp', '--code_path', default=DEFAULT_CODE_PATH,
                         help='relative path of code directory from toplevel')
@@ -113,6 +114,8 @@ def add_config_args(parser):
                         help='password for Redis db')
     parser.add_argument('-tm', '--test_mode', action='store_true', default=False,
                         help='run in test mode by only printing commands')
+    parser.add_argument('-es', '--ens_species', default='REPRESENTATIVE',
+                        help=',, separated list of ensembl species to run in setup pipeline' )
 
     return parser
 
