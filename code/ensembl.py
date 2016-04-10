@@ -98,14 +98,85 @@ class Ensembl(SrcClass):
         """
         name = 'ensembl'
         url_base = 'ftp.ensembl.org'
-        aliases = {"mus_musculus": "10090",
-                   "arabidopsis_thaliana": "3702",
-                   "saccharomyces_cerevisiae": "4932",
-                   "caenorhabditis_elegans": "6239",
-                   "drosophila_melanogaster": "7227",
-                   "homo_sapiens": "9606"}
+        aliases = self.get_aliases(args.ens_species)
         super(Ensembl, self).__init__(name, url_base, aliases, args)
-        self.url_base_plants = 'ftp.ensemblgenomes.org'
+        rem_aliases = list()
+        for alias in aliases:
+            if not self.get_remote_url(alias):
+                print('Ensembl does not have a core SQL db for ' + alias)
+                rem_aliases.append(alias)
+        for alias in rem_aliases:
+            self.aliases.pop(alias)
+
+
+    def get_aliases(self, alias_list):
+        """Return the alias dictionary for ensembl based on the provided alias_list.
+
+        This returns a dictionary where species names are keys and a tuple of
+        taxid and ensembl division are values. The species name serves as the
+        alias and the tuple serves as the alias information.
+
+        Args:
+            alias_list (str): ',,' separated list of species or keywords
+
+        Returns:
+            dict: A dictionary of species:(taxid, division) values
+        """
+        #replace all special keywords
+        all_species = 'REPRESENTATIVE,,BACTERIA,,FUNGI,,METAZOA,,PLANTS,,' +\
+                      'PROTISTS,,VERTEBRATES'
+        representative = 'mus_musculus,,arabidopsis_thaliana,,' +\
+                         'saccharomyces_cerevisiae,,caenorhabditis_elegans,,' +\
+                         'drosophila_melanogaster,,homo_sapiens'
+        keywords = {'ALL':all_species,
+                    'REPRESENTATIVE':representative,
+                    'BACTERIA':'EnsemblBacteria',
+                    'FUNGI':'EnsemblFungi',
+                    'METAZOA':'EnsemblMetazoa',
+                    'PLANTS':'EnsemblPlants',
+                    'PROTISTS':'EnsemblProtists',
+                    'VERTEBRATES':'Ensembl'}
+        alias_list = alias_list.replace('ALL', all_species)
+        alias_list = alias_list.replace('REPRESENTATIVE', representative)
+        species_list = alias_list.split(',,')
+        alias_dict = dict()
+        for species in species_list:
+            if species.upper() in keywords:
+                division = keywords[species.upper()]
+                if division == 'Ensembl':
+                    rest_url = 'http://rest.ensembl.org'
+                elif division == 'EnsemblBacteria':
+                    print('Bacterial species are unsupported')
+                    continue
+                else:
+                    rest_url = 'http://rest.ensemblgenomes.org'
+                query = '/info/species?content-type=application/json;division='
+                query += division
+                response = urllib.request.urlopen(rest_url + query)
+                json_obj = json.loads(response.read().decode())
+                sp_list = json_obj['species']
+                for sp in sp_list:
+                    species_name = sp['name']
+                    taxid = sp['taxon_id']
+                    url_base = rest_url.replace('rest', 'ftp').replace('http://', '')
+                    alias_dict[species_name] = '::'.join([taxid, url_base, division])
+            else:
+                rest_url = 'http://rest.ensemblgenomes.org'
+                query = '/info/genomes/{0}?content-type=application/json'
+                query = query.format(species)
+                response = urllib.request.urlopen(rest_url + query)
+                json_obj = json.loads(response.read().decode())
+                division = json_obj['division']
+                if division == 'Ensembl':
+                    url_base = 'ftp.ensembl.org'
+                elif division == 'EnsemblBacteria':
+                    print('Bacterial species are unsupported')
+                    continue
+                else:
+                    url_base = 'ftp.ensemblgenomes.org'
+                taxid = json_obj['taxonomy_id']
+                alias_dict[species] = '::'.join([taxid, url_base, division])
+        return alias_dict
 
     def get_source_version(self, alias):
         """Return the release version of the remote ensembl:alias.
@@ -119,7 +190,8 @@ class Ensembl(SrcClass):
         Returns:
             str: The remote version of the source.
         """
-        if alias == 'arabidopsis_thaliana':
+        url_base = self.aliases[alias].split('::')[1]
+        if 'ensemblgenomes' in url_base:
             rest_url = 'http://rest.ensemblgenomes.org'
             query = '/info/eg_version/?content-type=application/json'
             key = 'version'
@@ -127,7 +199,6 @@ class Ensembl(SrcClass):
             rest_url = 'http://rest.ensembl.org'
             query = '/info/data/?content-type=application/json'
             key = 'releases'
-        #print('\t'.join([rest_url, query, key]))
         response = urllib.request.urlopen(rest_url + query)
         json_obj = json.loads(response.read().decode())
         version = str(json_obj[key])
@@ -161,11 +232,11 @@ class Ensembl(SrcClass):
         Returns:
             int: The remote file size in bytes.
         """
-        if alias == 'arabidopsis_thaliana':
-            url = self.url_base_plants
-            chdir = '/pub/current/plants/mysql/'
+        (taxid, url, division) = self.aliases[alias].split('::')
+        division = division.replace('Ensembl', '').lower()
+        if division:
+            chdir = '/pub/current/{0}/mysql/'.format(division)
         else:
-            url = self.url_base
             chdir = '/pub/current_mysql/'
         ftp = ftplib.FTP(url)
         ftp.login()
@@ -197,11 +268,11 @@ class Ensembl(SrcClass):
             float: time of last modification time of remote file in seconds
                 since the epoch
         """
-        if alias == 'arabidopsis_thaliana':
-            url = self.url_base_plants
-            chdir = '/pub/current/plants/mysql/'
+        (taxid, url, division) = self.aliases[alias].split('::')
+        division = division.replace('Ensembl', '').lower()
+        if division:
+            chdir = '/pub/current/{0}/mysql/'.format(division)
         else:
-            url = self.url_base
             chdir = '/pub/current_mysql/'
         chk_file = '/CHECKSUMS'
         ftp = ftplib.FTP(url)
@@ -230,11 +301,11 @@ class Ensembl(SrcClass):
         Returns:
             str: The url needed to fetch the file corresponding to the alias.
         """
-        if alias == 'arabidopsis_thaliana':
-            url = self.url_base_plants
-            chdir = '/pub/current/plants/mysql/'
+        (taxid, url, division) = self.aliases[alias].split('::')
+        division = division.replace('Ensembl', '').lower()
+        if division:
+            chdir = '/pub/current/{0}/mysql/'.format(division)
         else:
-            url = self.url_base
             chdir = '/pub/current_mysql/'
         ftp = ftplib.FTP(url)
         ftp.login()
@@ -248,6 +319,7 @@ class Ensembl(SrcClass):
         for file in ftp.nlst(file_dir):
             if 'sql.gz' in file:
                 return 'ftp://' + url + chdir + file
+        return ''
 
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
