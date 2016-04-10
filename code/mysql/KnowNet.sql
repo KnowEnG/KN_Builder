@@ -53,9 +53,7 @@ CREATE TABLE IF NOT EXISTS `node_species` (
   `node_id` varchar(128) NOT NULL,
   `taxon` int(11) NOT NULL,
   UNIQUE KEY `node_species_key` (`node_id`,`taxon`),
-  KEY `taxon` (`taxon`),
-  CONSTRAINT `node_species_ibfk_1` FOREIGN KEY (`node_id`) REFERENCES `node` (`node_id`) ON DELETE CASCADE,
-  CONSTRAINT `node_species_ibfk_2` FOREIGN KEY (`taxon`) REFERENCES `species` (`taxon`) ON DELETE CASCADE
+  KEY `taxon` (`taxon`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge_type` (
@@ -69,9 +67,7 @@ CREATE TABLE IF NOT EXISTS `edge_type` (
   `sc_worst` float DEFAULT NULL,
   PRIMARY KEY (`et_name`),
   KEY `n1_type` (`n1_type`),
-  KEY `n2_type` (`n2_type`),
-  CONSTRAINT `edge_type_ibfk_1` FOREIGN KEY (`n1_type`) REFERENCES `node_type` (`n_type_id`) ON DELETE CASCADE,
-  CONSTRAINT `edge_type_ibfk_2` FOREIGN KEY (`n2_type`) REFERENCES `node_type` (`n_type_id`) ON DELETE CASCADE
+  KEY `n2_type` (`n2_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge2line`(
