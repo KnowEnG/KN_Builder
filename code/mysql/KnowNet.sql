@@ -106,10 +106,10 @@ CREATE TABLE IF NOT EXISTS `status` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge_meta` (
-  `edge_hash` varchar(40) NOT NULL,
+  `line_hash` varchar(40) NOT NULL,
   `info_type` varchar(80) NOT NULL,
   `info_desc` varchar(255) NOT NULL,
-  PRIMARY KEY `idx_edge_meta_key` (`edge_hash`,`info_type`,`info_desc`)
+  PRIMARY KEY `idx_edge_meta_key` (`line_hash`,`info_type`,`info_desc`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `all_mappings` (
