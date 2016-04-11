@@ -157,32 +157,38 @@ class MySQLBenchmark:
 
         return table_desc
         
-    def query_execution_time(self, query):
+    def query_execution_time(self, query, query_type):
         '''
         Description: Obtains the total query execution time ("time taken for connection to server and exporting resultset from database) for the given query string and the dabtabase time (amount of time spent generating the query at the database level)
         '''
         db_execution_time = -1
         db_execution_query = "SELECT TRUNCATE(TIMER_WAIT/1000000000000,6) as Duration FROM performance_schema.events_statements_history_long WHERE SQL_TEXT = '"+str(query)+"' order by END_EVENT_ID desc limit 1"
         
+        result = None
+        
         start = time()
         self.cursor.execute(query)
-        self.cursor.fetchall()
+        if(query_type == 1):
+            result = self.cursor.fetchall()
+            self.conn.commit()
+        elif(query_type == 2):
+            self.conn.commit()
         end = time()
         
         self.cursor.execute(db_execution_query)
         timing_data = self.cursor.fetchall()
         total_time = end-start;
-        
+
         if(len(timing_data) == 0):
             print("Database not configured for query statistics so we will not generate database time for query execution.")
             print("The total time taken to execute QUERY: "+query+ " is "+str(total_time))
 
-            return total_time, None
+            return result, total_time, None
 
         else:
             print("Absolute Time taken to execute QUERY: "+query+", is "+str(total_time)+" and real time is "+str(timing_data[0][0]))
         
-            return total_time, float(timing_data[0][0])
+            return result, total_time, float(timing_data[0][0])
         
     def get_query_id(self, query):
         '''

@@ -16,6 +16,7 @@ Contains module functions::
 """
 
 import config_utilities as cf
+import benchmark_utilities as mysqlb
 import mysql.connector as sql
 import os
 import json
@@ -310,7 +311,7 @@ def import_ensembl(alias, args=None):
     db.import_table(database, '*.txt')
     db.close()
 
-class MySQL(object):
+class MySQL(Database):
     """Class providing functionality for interacting with the MySQL database.
 
     This class serves as a wrapper for interacting with the KnowEnG MySQL
@@ -341,7 +342,9 @@ class MySQL(object):
         self.port = args.mysql_port
         self.passw = args.mysql_pass
         self.database = database
+        self.benchmarking_util = mysqlb.MySQLBenchmark()
         self.args = args
+        self.debug_mode = args.debug_mode
         if self.database is None:
             self.conn = sql.connect(host=self.host, port=self.port,
                                     user=self.user, password=self.passw,
@@ -361,8 +364,14 @@ class MySQL(object):
         Args:
             database (str): name of the database to remove from the MySQL server
         """
-        self.cursor.execute('DROP DATABASE IF EXISTS ' + database + ';')
-        self.conn.commit()
+
+        query = 'DROP DATABASE IF EXISTS ' + database + ';'
+
+        if(self.debug_mode):
+            result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+        else:
+            self.cursor.execute('DROP DATABASE IF EXISTS ' + database + ';')
+            self.conn.commit()
 
     def init_knownet(self):
         """Inits the Knowledge Network MySQL DB.
@@ -392,8 +401,13 @@ class MySQL(object):
         Args:
             database (str): name of the database to add to the MySQL server
         """
-        self.cursor.execute('CREATE DATABASE IF NOT EXISTS ' + database + ';')
-        self.conn.commit()
+        query = 'CREATE DATABASE IF NOT EXISTS ' + database + ';'
+
+        if(self.debug_mode):
+            result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+        else:
+            self.cursor.execute(query)
+            self.conn.commit()
 
     def use_db(self, database):
         """Use a database from the MySQL server
@@ -416,9 +430,14 @@ class MySQL(object):
             tablename (str): name of the table to add to the MySQL database
             cmd (str): optional string to overwrite default create table
         """
-        self.cursor.execute('CREATE TABLE IF NOT EXISTS ' + tablename + ' ' +
-                            cmd + ';')
-        self.conn.commit()
+        
+        query = 'CREATE TABLE IF NOT EXISTS ' + tablename + ' ' + cmd + ';';
+
+        if(self.debug_mode):
+            result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+        else:
+            self.cursor.execute(query)
+            self.conn.commit()
 
     def create_temp_table(self, tablename, cmd=''):
         """Add a table to the MySQL database.
@@ -430,9 +449,14 @@ class MySQL(object):
             tablename (str): name of the table to add to the MySQL database
             cmd (str): optional additional command
         """
-        self.cursor.execute('CREATE TEMPORARY TABLE IF NOT EXISTS ' + \
-                            tablename + ' ' + cmd + ';')
-        self.conn.commit()
+        query = 'CREATE TEMPORARY TABLE IF NOT EXISTS ' + tablename + ' ' + cmd + ';';
+        
+        
+        if(self.debug_mode):
+            result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+        else:
+            self.cursor.execute(query)
+            self.conn.commit()
 
     def load_data(self, filename, tablename, cmd='', sep='\\t', enc='"'):
         """Import data into table in the MySQL database.
@@ -447,13 +471,15 @@ class MySQL(object):
             enc (str): enclosing character for fields in file
             cmd (str): optional additional command
         """
-        self.cursor.execute("LOAD DATA LOCAL INFILE '" + filename +
-                            "' INTO TABLE " + tablename +
-                            " FIELDS TERMINATED BY '" + sep + "'" +
-                            " OPTIONALLY ENCLOSED BY '" + enc + "' " +
-                            cmd + ";")
-        self.conn.commit()
+        
+        query = "LOAD DATA LOCAL INFILE '" + filename + "' INTO TABLE " + tablename + " FIELDS TERMINATED BY '" + sep + "'" + " OPTIONALLY ENCLOSED BY '" + enc + "' " + cmd + ";";
 
+        if(self.debug_mode):
+            result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+        else:
+            self.cursor.execute(query)
+            self.conn.commit()
+            
     def drop_temp_table(self, tablename):
         """Remove a temporary table from the MySQL database
 
@@ -462,8 +488,13 @@ class MySQL(object):
         Args:
             tablename (str): name of the table to remove from the MySQL database
         """
-        self.cursor.execute('DROP TEMPORARY TABLE IF EXISTS ' + tablename + ';')
-        self.conn.commit()
+        query = "DROP TEMPORARY TABLE IF EXISTS " + tablename + ";";
+
+        if(self.debug_mode):
+            result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+        else:
+            self.cursor.execute(query)
+            self.conn.commit()
 
     def drop_table(self, tablename):
         """Remove a table from the MySQL database
@@ -473,8 +504,13 @@ class MySQL(object):
         Args:
             tablename (str): name of the table to remove from the MySQL database
         """
-        self.cursor.execute('DROP TABLE IF EXISTS ' + tablename + ';')
-        self.conn.commit()
+        query = "DROP TABLE IF EXISTS " + tablename + ";";
+
+        if(self.debug_mode):
+            result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+        else:
+            self.cursor.execute(query)
+            self.conn.commit()
 
     def move_table(self, old_database, old_table, new_database, new_table):
         """Move a table in the MySQL database
@@ -487,9 +523,14 @@ class MySQL(object):
             new_database (str): name of the database to move to
             new_table (str): name of the table to move to
         """
-        self.cursor.execute('ALTER TABLE ' + old_database + '.' + old_table +
-                            ' RENAME ' + new_database + '.' + new_table + ';')
-        self.conn.commit()
+        
+        query = "ALTER TABLE "+ old_database + "." + old_table + " RENAME " + new_database + "." + new_table + ";";
+        
+        if(self.debug_mode):
+            result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+        else:
+            self.cursor.execute(query)
+            self.conn.commit()
 
     def copy_table(self, old_database, old_table, new_database, new_table):
         """Copy a table in the MySQL database
@@ -504,10 +545,16 @@ class MySQL(object):
         """
         table1 = old_database + '.' + old_table
         table2 = new_database + '.' + new_table
+        
         self.create_table(table2, ' LIKE ' + table1)
+        
         cmd = 'INSERT INTO ' + table2 + ' SELECT * FROM ' + table1
-        self.cursor.execute(cmd)
-        self.conn.commit()
+        
+        if(self.debug_mode):
+            result, total_time, db_time = self.benchmarking_util.query_execution_time(cmd,2)
+        else:
+            self.cursor.execute(cmd)
+            self.conn.commit()
 
     def insert(self, tablename, cmd):
         """Insert into tablename using cmd.
@@ -516,8 +563,13 @@ class MySQL(object):
             tablename (str): name of the table to add to the MySQL database
             cmd (str): a valid SQL command to use for inserting into tablename
         """
-        self.cursor.execute('INSERT INTO ' + tablename + ' ' + cmd + ';')
-        self.conn.commit()
+        query = "INSERT INTO " + tablename + " " + cmd + ";";
+        
+        if(self.debug_mode):
+            result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+        else:
+            self.cursor.execute(query)
+            self.conn.commit()
 
     def set_isolation(self, duration='', level='REPEATABLE READ'):
         """Sets the transaction isolation level.
@@ -556,8 +608,13 @@ class MySQL(object):
             tablename (str): name of the table to add to the MySQL database
             cmd (str): a valid SQL command to use for inserting into tablename
         """
-        self.cursor.execute('REPLACE INTO ' + tablename + ' ' + cmd + ';')
-        self.conn.commit()
+        query = "REPLACE INTO " + tablename + " " + cmd + ";";
+
+        if(self.debug_mode):
+            result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+        else:
+            self.cursor.execute(query)
+            self.conn.commit()
 
     def insert_ignore(self, tablename, cmd=''):
         """Insert ignore into tablename using cmd.
@@ -566,8 +623,13 @@ class MySQL(object):
             tablename (str): name of the table to add to the MySQL database
             cmd (str): a valid SQL command to use for inserting into tablename
         """
-        self.cursor.execute('INSERT IGNORE INTO ' + tablename + ' ' + cmd + ';')
-        self.conn.commit()
+        query = "INSERT IGNORE INTO " + tablename + " " + cmd + ";";
+        
+        if(self.debug_mode):
+            result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+        else:
+            self.cursor.execute(query)
+            self.conn.commit()
 
     def run(self, cmd):
         """Run the provided command in MySQL.
@@ -581,12 +643,21 @@ class MySQL(object):
         Returns:
             list: the fetched results
         """
-        self.cursor.execute(cmd + ';')
-        try:
-            results = self.cursor.fetchall()
-        except:
-            results = list()
-        self.conn.commit()
+        
+        query = cmd + ";";
+        
+        
+        
+        if(self.debug_mode):
+            results, total_time, db_time = self.benchmarking_util.query_execution_time(query,1)
+        else:
+            self.cursor.execute(query)
+            try:
+                results = self.cursor.fetchall()
+            except:
+                results = list()
+                self.conn.commit()
+
         return results
 
     def query_distinct(self, query, table, cmd=''):
@@ -605,9 +676,14 @@ class MySQL(object):
         Returns:
             list: the fetched results
         """
-        cmd = 'SELECT DISTINCT ' + query + ' FROM ' + table + ' ' + cmd + ';'
-        self.cursor.execute(cmd)
-        return self.cursor.fetchall()
+        query = 'SELECT DISTINCT ' + query + ' FROM ' + table + ' ' + cmd + ';'
+        
+        if(self.debug_mode):
+            result, total_time, db_time = self.benchmarking_util.query_execution_time(query,1)
+            return result
+        else:
+            self.cursor.execute(query)
+            return self.cursor.fetchall()
 
     def import_schema(self, database, sqlfile):
         """Import the schema for the provided database from sqlfile.
