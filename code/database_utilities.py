@@ -295,3 +295,4 @@ class Database(object):
     
     def flush_perf_json(self):
         print(self.json_base)
+        self.json_base = None

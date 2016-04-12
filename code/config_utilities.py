@@ -26,9 +26,9 @@ from argparse import ArgumentParser
 import os
 import re
 
-DEFAULT_CHRONOS_URL = 'knowcluster01.dyndns.org:8888'
-DEFAULT_LOCAL_BASE = '/workspace/prototype/KnowNet_Pipeline'
-DEFAULT_CLOUD_BASE = '/storage-pool/blatti/KnowNet_Pipeline'
+DEFAULT_CHRONOS_URL = 'knowcluster01.dyndns.org:4400'
+DEFAULT_LOCAL_BASE = '/workspace/project1/KnowNet_Pipeline'
+DEFAULT_CLOUD_BASE = '/mnt/knowtmp/KnowNet_Pipeline'
 
 DEFAULT_CODE_PATH = 'code'
 DEFAULT_DATA_PATH = 'data'
@@ -72,6 +72,7 @@ def add_config_args(parser):
     --redis_pass	|str	|-rps	|password for Redis db
     --chunk_size	|int	|-cs	|lines per chunk
     --test_mode	    |   	|-tm	|run in test mode by only printing command, defaults to False
+    --debug_mode	|   	|-dm	|run database debug mode and generate perf json, defaults to False
     --ens_species   |str    |-es    |',,' separated ensembl species to run in setup pipeline
 
 
@@ -114,6 +115,8 @@ def add_config_args(parser):
                         help='password for Redis db')
     parser.add_argument('-tm', '--test_mode', action='store_true', default=False,
                         help='run in test mode by only printing commands')
+    parser.add_argument('-dm', '--debug_mode', action='store_true', default=False,
+                        help='run database debug mode and generate perf jsons')                        
     parser.add_argument('-es', '--ens_species', default='REPRESENTATIVE',
                         help=',, separated list of ensembl species to run in setup pipeline' )
 

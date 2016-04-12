@@ -42,12 +42,13 @@ class MySQLBenchmark:
         Args:
         database (str): the MySQL database to connect to (optional)
         """
-        self.user = cf.DEFAULT_MYSQL_USER
-        self.host = cf.DEFAULT_MYSQL_URL
+        self.user = args.mysql_user
+        self.host = args.mysql_host
         #print(self.host)
-        self.port = cf.DEFAULT_MYSQL_PORT
-        self.passw = cf.DEFAULT_MYSQL_PASS
+        self.port = args.mysql_port
+        self.passw = args.mysql_pass
         #print(self.passw)
+        print(args)
         self.database = "KnowNet"
         self.args = args
         if self.database is None:
@@ -163,7 +164,7 @@ class MySQLBenchmark:
         '''
         
         db_execution_time = -1
-        db_execution_query = "SELECT TRUNCATE(TIMER_WAIT/1000000000000,6) as Duration FROM performance_schema.events_statements_history_long WHERE SQL_TEXT = '"+str(query[:-1] if(query[-1] == ';') else query)+"' order by END_EVENT_ID desc limit 1"
+        db_execution_query = "SELECT TRUNCATE(TIMER_WAIT/1000000000000,6) as Duration FROM performance_schema.events_statements_history_long WHERE SQL_TEXT = '"+str(query[:-1] if(query[-1] == ';') else query)+"' order by END_EVENT_ID desc limit 1;"
         
         result = None
         
@@ -176,6 +177,7 @@ class MySQLBenchmark:
             self.conn.commit()
         end = time()
         
+        print(db_execution_query)
         self.cursor.execute(db_execution_query)
         timing_data = self.cursor.fetchall()
         self.conn.commit()

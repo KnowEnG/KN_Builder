@@ -47,7 +47,7 @@ import mysql_utilities as db
 import job_utilities as ju
 
 DEFAULT_START_STEP = 'CHECK'
-POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE', 'MAP']
+POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE', 'MAP', "IMPORT"]
 SETUP_FILES = ['species', 'ppi', 'ensembl']
 SPECIAL_MODES = ['LOCAL', 'DOCKER']
 
