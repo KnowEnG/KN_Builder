@@ -161,12 +161,12 @@ class MySQLBenchmark:
         '''
         Description: Obtains the total query execution time ("time taken for connection to server and exporting resultset from database) for the given query string and the dabtabase time (amount of time spent generating the query at the database level)
         '''
+        
         db_execution_time = -1
-        db_execution_query = "SELECT TRUNCATE(TIMER_WAIT/1000000000000,6) as Duration FROM performance_schema.events_statements_history_long WHERE SQL_TEXT = '"+str(query)+"' order by END_EVENT_ID desc limit 1"
+        db_execution_query = "SELECT TRUNCATE(TIMER_WAIT/1000000000000,6) as Duration FROM performance_schema.events_statements_history_long WHERE SQL_TEXT = '"+str(query[:-1] if(query[-1] == ';') else query)+"' order by END_EVENT_ID desc limit 1"
         
         result = None
         
-        print(query)
         start = time()
         self.cursor.execute(query)
         if(query_type == 1):
@@ -179,7 +179,7 @@ class MySQLBenchmark:
         self.cursor.execute(db_execution_query)
         timing_data = self.cursor.fetchall()
         self.conn.commit()
-        print(timing_data)
+        #print(timing_data)
         total_time = end-start;
 
         if(len(timing_data) == 0):
@@ -268,7 +268,7 @@ class MySQLBenchmark:
         #self.cursor.execute(query)
         #self.cursor.fetchall()
         id = self.get_query_id(query)
-        print(id)
+        #print(id)
         query_breakdown_query ="SELECT event_name AS Stage, TRUNCATE(TIMER_WAIT/1000000000000,6) AS Duration FROM performance_schema.events_stages_history_long WHERE END_EVENT_ID="+str(id)+";"
         self.cursor.execute(query_breakdown_query)
         print(self.cursor.fetchall())
@@ -292,7 +292,7 @@ class MySQLBenchmark:
                 data['filtered'] = step[9]
                 data['Extra'] = step[10]
                 execution_plan.insert(0,data)
-        print(execution_plan)
+        #print(execution_plan)
         return execution_plan
 
     def get_table_wait_summary(self, table):
@@ -410,7 +410,7 @@ class MySQLBenchmark:
                 #thread_data['total_time'] += th.execution_time
                 thread_data['thread_timings'].append(th.execution_time)
             thread_data['total_time'] =  time() - startt 
-            print(thread_data)
+            #print(thread_data)
         else:
             for th in threads:
                 # This causes the thread to run()
@@ -419,9 +419,9 @@ class MySQLBenchmark:
                 #thread_data['total_time'] += th.execution_time
                 thread_data['thread_timings'].append(th.execution_time)
             thread_data['total_time'] =  time() - startt
-            print(thread_data)
+            #print(thread_data)
             
-
+        return thread_data
         
     def overlapping_multithreaded_select_test(self, table, key, percentoverlap):
         """
@@ -478,8 +478,9 @@ class MySQLBenchmark:
             th.join() 
             thread_data['total_time'] += th.execution_time
             thread_data['thread_timings'].append(th.execution_time)
-        print(thread_data)
+        #print(thread_data)
         
+        return thread_data
 
 class BenchmarkWorker(threading.Thread):
     def __init__(self, host, port, user, password, database, query):

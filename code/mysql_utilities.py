@@ -386,7 +386,7 @@ class MySQL(Database):
                                     {"query": query, "real_time": total_time, "db_time": db_time})
             
         else:
-            self.cursor.execute('DROP DATABASE IF EXISTS ' + database + ';')
+            self.cursor.execute(query)
             self.conn.commit()
 
     def init_knownet(self):
@@ -493,7 +493,6 @@ class MySQL(Database):
             cmd (str): optional additional command
         """
         query = 'CREATE TEMPORARY TABLE IF NOT EXISTS ' + tablename + ' ' + cmd + ';';
-        
         
         if(self.debug_mode):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
@@ -744,7 +743,7 @@ class MySQL(Database):
             list: the fetched results
         """
         
-        query = cmd;
+        query = cmd + ";"
         
         if(self.debug_mode):
             results, total_time, db_time = self.benchmarking_util.query_execution_time(query,1)
@@ -756,7 +755,7 @@ class MySQL(Database):
                                     {"query": query, "real_time": total_time, "db_time": db_time})
 
         else:
-            self.cursor.execute(query + ";")
+            self.cursor.execute(query)
             try:
                 results = self.cursor.fetchall()
             except:
@@ -840,3 +839,8 @@ class MySQL(Database):
         self.flush_perf_json()
         self.conn.commit()
         self.conn.close()
+
+    def testinit(self):
+        self.use_db("KnowNet")
+        self.set_debug_mode(True)
+        
