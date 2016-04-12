@@ -29,7 +29,7 @@ curl -X POST knowcluster01.dyndns.org:8080/v2/apps/p1mysql/restart
 ### delete
 curl -X DELETE knowcluster01.dyndns.org:8080/v2/apps/p1mysql
 
-### check running
+### check loaded
 mysql -hknowcluster01.dyndns.org -uroot -pKnowEnG --port 3306 --execute "show databases";
 
 ## For cloud9
@@ -54,6 +54,5 @@ done;
 ### delete
 for USER in blatti,8484 post3,8585; do
     TMPID=`echo $USER | cut -f1 -d,`
-    echo $TMPID
-    curl -X DELETE knowcluster01.dyndns.org:8080/v2/apps/"$TMPID"-c9
+    curl -X DELETE knowcluster01.dyndns.org:8080/v2/apps/"$TMPID"-c9/restart
 done;

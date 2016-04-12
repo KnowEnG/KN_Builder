@@ -24,10 +24,12 @@ FILE_CTR=0
 echo -e "tnum\ttype\tsnum\tsource\tfile\tempty\ttime\tlines"
 
 for KNP_FILE_TYPE in "*/file_metadata.json" "*/*.*.txt" "*json" "*/*json" \
-    "*/*rawline*" "*/*.node_meta.*" "*/chunks/*.rawline.*" \
-    "*/chunks/*.node_meta.*" "*/chunks/*unique_node_meta*" "*/chunks/*.edge_meta.*" \
-    "*/chunks/*unique_edge_meta*" "*/chunks/*.edge.*" "*/chunks/*.status.*" \
-    "*/chunks/*.unique_status.*" "*/chunks/*unique_edge2line*"; do
+    "*/*.rawline.*" "*/*.node.*" "*/*.unique_node.*" "*/*.node_meta.*" \
+    "*/*.unique_node_meta.*" "*/chunks/*.rawline.*" "*/chunks/*.edge.*" \
+    "*/chunks/*.edge_meta.*" "*/chunks/*.unique_edge_meta.*" "*/chunks/*.node.*" \
+    "*/chunks/*.unique_node.*" "*/chunks/*.node_meta.*" \
+    "*/chunks/*.unique_node_meta.*" "*/chunks/*.status.*" \
+    "*/chunks/*.unique_status.*" "*/chunks/*.unique_edge2line.*"; do
     FILE_CTR=$(($FILE_CTR + 1))
     files='-'
     zeros='-'
@@ -78,19 +80,20 @@ CMD="redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a KnowEnG  info | grep key
     echo -n Redis Keys$'\t'
     eval "$CMD"
 CMD='mysql -h '$KNP_MYSQL_HOST' --port '$KNP_MYSQL_PORT'  -uroot -pKnowEnG --execute "
-    SELECT \"all_mappings\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.all_mappings UNION
-    SELECT \"status\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.status UNION
-    SELECT \"edge\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge UNION
-    SELECT \"edge2line\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge2line UNION
-    SELECT \"edge_meta\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge_meta UNION
+    SELECT \"species\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.species ;
     SELECT \"edge_type\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge_type UNION
-    SELECT \"node\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.node UNION
-    SELECT \"node_meta\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.node_meta UNION
-    SELECT \"node_species\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.node_species UNION
     SELECT \"node_type\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.node_type UNION
+    SELECT \"all_mappings\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.all_mappings UNION
+    SELECT \"node\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.node UNION
     SELECT \"raw_file\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.raw_file UNION
     SELECT \"raw_line\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.raw_line UNION
-    SELECT \"species\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.species ;
+    SELECT \"node_meta\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.node_meta UNION
+    SELECT \"node_species\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.node_species UNION
+    SELECT \"status\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.status UNION
+    SELECT \"edge2line\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge2line UNION
+    SELECT \"edge\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge UNION
+    SELECT \"edge_meta\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge_meta UNION
 "'
     echo MySQL Tables
     eval "$CMD"
+    
