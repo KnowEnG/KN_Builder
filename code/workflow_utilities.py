@@ -66,6 +66,7 @@ def main_parse_args():
     --setup	            |	    |-su	|run db inits instead of source specific pipelines
     --one_step      	|	    |-os	|run for a single step instead of rest of pipeline
     --step_parameters	|str	|-p	    |parameters to specify calls of a single step in pipeline
+    --no_ensembl	    |	    |-ne	|do not run ensembl in setup pipeline
     --dependencies	    |str	|-d	    |names of parent jobs that must finish
 
     Returns:
@@ -80,6 +81,8 @@ def main_parse_args():
                         help='run for a single step instead of pipeline')
     parser.add_argument('-p', '--step_parameters', default='',
                         help='parameters to specify calls of a single step in pipeline')
+    parser.add_argument('-ne', '--no_ensembl', action='store_true', default=False,
+                        help='do not run ensembl in setup pipeline', )
     parser.add_argument('-d', '--dependencies', default='',
                         help='names of parent jobs that must finish')
     parser = cf.add_config_args(parser)
@@ -116,6 +119,8 @@ def list_sources(args):
     if args.step_parameters == "":
         if args.setup:
             for srcstr in SETUP_FILES:
+                if srcstr == 'ensembl' and args.no_ensembl:
+                    continue
                 src_list.extend([srcstr])
         else:
             local_src_code_dir = os.path.join(args.local_dir, args.code_path,
@@ -458,6 +463,52 @@ def run_map(args):
     return 0
 
 
+def run_import(args):
+    """Runs import_status on a single .status. file on the cloud.
+
+    This loops through args.parameters statusfiles, creates a job for each that
+    calls import_utilities main(), and runs job in args.chronos location.
+
+    Args:
+        args (Namespace): args as populated namespace from parse_args, must
+            specify --step_parameters(-p) as ',,' separated list of
+            'source.alias.status.chunk.txt' file names
+    """
+    statusfile_list = args.step_parameters.split(",,")
+    if args.step_parameters == "":
+        raise ValueError("ERROR: 'statusfile' must be specified with --step_parameters (-p)")
+    ju.Job("importer", args)
+
+    ctr = 0
+    for filestr in statusfile_list:
+
+        statusfile = os.path.basename(filestr)
+        output_files = statusfile.replace('.status.', '.*.')
+        src = statusfile.split('.')[0]
+        alias = statusfile.split('.status.')[0].split(src+'.')[1]
+
+        chunk_path = os.path.join(src, alias, "chunks")
+        local_chunk_dir = os.path.join(args.local_dir, args.data_path, chunk_path)
+        local_statusfile = os.path.join(local_chunk_dir, statusfile)
+        if not os.path.exists(local_statusfile):
+            raise IOError('ERROR: "statusfile" specified with --step_parameters (-p) '
+                          'option, ' + filestr + ' does not exist: ' + local_statusfile)
+
+        ctr += 1
+        print("\t".join([str(ctr), statusfile]))
+
+        jobname = "-".join(["import", statusfile])
+        jobname = jobname.replace(".", "-")
+        jobname = jobname.replace(".txt", "")
+        jobdict = generic_dict(args, None)
+        jobdict.update({'TMPJOB': jobname,
+                        'TMPSTATUSPATH': os.path.join(chunk_path, statusfile),
+                        'TMPFILES': os.path.join(chunk_path, output_files)
+                       })
+        ju.run_job_step(args, "importer", jobdict)
+
+    return 0
+
 def main():
     """Runs the 'start_step' step of the main or args.setup pipeline on the
     args.chronos location, and all subsequent steps if not args.one_step
@@ -492,6 +543,8 @@ def main():
             return run_table(args)
         elif args.start_step == 'MAP':
             return run_map(args)
+        elif args.start_step == 'IMPORT':
+            return run_import(args)
 
     print(args.start_step + ' is an unacceptable start_step.  Must be ' +
           str(POSSIBLE_STEPS))
