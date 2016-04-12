@@ -66,7 +66,6 @@ def main_parse_args():
     --setup	            |	    |-su	|run db inits instead of source specific pipelines
     --one_step      	|	    |-os	|run for a single step instead of rest of pipeline
     --step_parameters	|str	|-p	    |parameters to specify calls of a single step in pipeline
-    --no_ensembl	    |	    |-ne	|do not run ensembl in setup pipeline
     --dependencies	    |str	|-d	    |names of parent jobs that must finish
 
     Returns:
@@ -81,8 +80,6 @@ def main_parse_args():
                         help='run for a single step instead of pipeline')
     parser.add_argument('-p', '--step_parameters', default='',
                         help='parameters to specify calls of a single step in pipeline')
-    parser.add_argument('-ne', '--no_ensembl', action='store_true', default=False,
-                        help='do not run ensembl in setup pipeline', )
     parser.add_argument('-d', '--dependencies', default='',
                         help='names of parent jobs that must finish')
     parser = cf.add_config_args(parser)
@@ -119,8 +116,6 @@ def list_sources(args):
     if args.step_parameters == "":
         if args.setup:
             for srcstr in SETUP_FILES:
-                if srcstr == 'ensembl' and args.no_ensembl:
-                    continue
                 src_list.extend([srcstr])
         else:
             local_src_code_dir = os.path.join(args.local_dir, args.code_path,

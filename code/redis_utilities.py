@@ -53,7 +53,7 @@ def import_ensembl(alias, args=None):
     with open(os.path.join(map_dir, alias + '_all.json')) as infile:
         map_dict = json.load(infile)
     for key in map_dict:
-        (taxid, hint, foreign_key) = key.split('::')
+        (taxid, _, _, hint, foreign_key) = key.split('::')
         hint = hint.upper()
         ens_id = map_dict[key].encode().upper()
         foreign_key = foreign_key.upper()

@@ -91,17 +91,19 @@ def import_nodes(version_dict, args=None):
     if args is None:
         args=cf.config_args()
     alias = version_dict['alias']
-    taxid = version_dict['alias_info']
+    taxid = version_dict['alias_info'].split('::')[0]
     alias_db = 'ensembl_' + alias
     db = MySQL(alias_db, args)
     cmd = ("SELECT DISTINCT gene.stable_id AS node_id, "
            "SUBSTRING(gene.description, 1, 512) AS n_alias, "
            "1 AS n_type_id "
-           "FROM gene")
+           "FROM gene "
+           "ON DUPLICATE KEY UPDATE node_id=node_id")
     tablename = 'KnowNet.node'
     db.insert(tablename, cmd)
     cmd = ("SELECT DISTINCT gene.stable_id AS node_id, " + taxid + " AS taxon "
-           "FROM gene")
+           "FROM gene "
+           "ON DUPLICATE KEY UPDATE node_id=node_id")
     tablename = 'KnowNet.node_species'
     db.insert(tablename, cmd)
 
