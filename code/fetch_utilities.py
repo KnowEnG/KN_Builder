@@ -165,7 +165,7 @@ def chunk(filename, total_lines, args, chunksize=500000):
                     j += 1
                     if j == num_lines and i < num_chunks:
                         break
-            iu.import_file(chunk_file + str(i) + ext, 'raw_line', '', '', args)
+#            iu.import_file(chunk_file + str(i) + ext, 'raw_line', '', '', args)  #### change after import testing
     return num_chunks
 
 def raw_line(filename):

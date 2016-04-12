@@ -16,6 +16,7 @@ import config_utilities as cf
 import mysql_utilities as mu
 import json
 import os
+from argparse import ArgumentParser
 
 @profile
 def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
@@ -40,10 +41,11 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
                 'raw_line' : 'raw_line.file_id = raw_line.file_id',
                 'edge2line': 'edge2line.edge_hash = edge2line.edge_hash',
                 'edge_meta': 'edge_meta.edge_hash = edge_meta.edge_hash',
-                'edge': ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
-                    '{0}.weight)'),
-                'status': ('status.weight = IF(status.weight > {0}.weight, status.weight, '
-                    '{0}.weight)')}
+                #'edge': ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
+                #    '{0}.weight)'),
+                #'status': ('status.weight = IF(status.weight > {0}.weight, status.weight, '
+                #    '{0}.weight)')}
+                'status': 'status.edge_hash = status.edge_hash'}
     if not dup_cmd and table in table_cmds:
         dup_cmd = table_cmds[table]
     db = mu.get_database('KnowNet', args)
@@ -55,11 +57,17 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
     db.load_data(file_name, tmptable, ld_cmd)
     print('Inserting data from ' + tmptable + ' into ' + table)
     cmd = 'SELECT * FROM ' + tmptable
+    db.start_transaction(level='READ UNCOMMITTED')
+    db.insert_ignore(table, cmd) #change later to duplicate
+    db.drop_table(tmptable)
+    db.close()
+    return 1  ## remove this later (and potentially everything after)
     if dup_cmd:
         cmd += ' ON DUPLICATE KEY UPDATE ' + dup_cmd.format(tmptable)
         db.start_transaction(level='READ COMMITTED')
         db.insert(table, cmd)
     else:
+        pass
         db.start_transaction(level='READ COMMITTED')
         db.replace(table, cmd)
     db.drop_table(tmptable)
@@ -92,6 +100,7 @@ def import_filemeta(version_dict, args=None):
     values = [str(i) for i in values]
     cmd = 'VALUES( ' + ','.join(values) + ')'
     db.replace('raw_file', cmd)
+    db.close()
 
 def update_filemeta(version_dict, args=None):
     """Updates the provided filemeta into the KnowEnG MySQL database.
@@ -121,6 +130,7 @@ def update_filemeta(version_dict, args=None):
     values = [str(i) for i in values]
     cmd = 'VALUES( ' + ','.join(values) + ')'
     db.replace('raw_file', cmd)
+    db.close()
 
 def import_edge(edgefile, args=None):
     """Imports the provided edge file and any corresponding meta files into
@@ -222,3 +232,23 @@ def import_pnode(filename, args=None):
     dup_cmd = 'node.node_id = node.node_id'
     table = 'node'
     import_file(filename, table, ld_cmd, dup_cmd, args)
+
+def main_parse_args():
+    """Processes command line arguments.
+
+    Expects one positional argument (status_file) and number of optional
+    arguments. If arguments are missing, supplies default values.
+
+    Returns:
+        Namespace: args as populated namespace
+    """
+    parser = ArgumentParser()
+    parser.add_argument('status_file', help='status file produced from map step, \
+                        e.g. kegg/ath/kegg.ath.status.1.txt')
+    parser = cf.add_config_args(parser)
+    args = parser.parse_args()
+    return args
+
+if __name__ == "__main__":
+    args = main_parse_args()
+    import_status(args.status_file, args)
