@@ -16,6 +16,7 @@ Contains module functions::
 """
 
 import config_utilities as cf
+from database_utilities import Database
 import benchmark_utilities as mysqlb
 import mysql.connector as sql
 import os
@@ -343,8 +344,12 @@ class MySQL(Database):
         self.passw = args.mysql_pass
         self.database = database
         self.benchmarking_util = mysqlb.MySQLBenchmark()
+        if(not self.benchmarking_util.check_db_set_for_profiling()):
+            self.benchmarking_util.config_db_for_profiling()
         self.args = args
-        self.debug_mode = args.debug_mode
+        self.debug_mode = False 
+        #args.debug_mode
+        self.json_base = None
         if self.database is None:
             self.conn = sql.connect(host=self.host, port=self.port,
                                     user=self.user, password=self.passw,
@@ -369,6 +374,13 @@ class MySQL(Database):
 
         if(self.debug_mode):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+            
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("drop_db")
+        
+                self.add_perf_component_json(self.json_base, "drop_db", 
+                                    {"query": query, "real_time": total_time, "db_time": db_time})
+            
         else:
             self.cursor.execute('DROP DATABASE IF EXISTS ' + database + ';')
             self.conn.commit()
@@ -381,17 +393,29 @@ class MySQL(Database):
         files, but ignores any lines that have the same unique key as those
         already in the tables.
         """
+        
         import_tables = ['node_type.txt', 'edge_type.txt', 'species.txt']
         mysql_dir = os.sep + os.path.join(self.args.code_path, 'mysql')
         if os.path.isdir(self.args.local_dir):
             mysql_dir = self.args.local_dir + mysql_dir
         self.import_schema('KnowNet', os.path.join(mysql_dir, 'KnowNet.sql'))
-        for table in import_tables:
-            tablefile = os.path.join(mysql_dir, table)
-            self.import_table('KnowNet', tablefile, '--ignore')
-        self.cursor.execute("SET @@GLOBAL.SQL_MODE = REPLACE(@@SQL_MODE, " + \
+        
+        if(self.debug_mode):
+            '''if(self.json_base == None):
+                self.json_base = generate_perf_data("init_knownet")
+            else:
+                for table in import_tables:
+                    tablefile = os.path.join(mysql_dir, table)
+                    self.import_table('KnowNet', tablefile, '--ignore')'''
+            #yet to be adjusted
+            pass
+        else:
+            for table in import_tables:
+                tablefile = os.path.join(mysql_dir, table)
+                self.import_table('KnowNet', tablefile, '--ignore')
+            self.cursor.execute("SET @@GLOBAL.SQL_MODE = REPLACE(@@SQL_MODE, " + \
                             "'NO_ZERO_DATE', '')")
-        self.conn.commit()
+            self.conn.commit()
 
     def create_db(self, database):
         """Add a database to the MySQL server
@@ -405,6 +429,13 @@ class MySQL(Database):
 
         if(self.debug_mode):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+            
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("create_db")
+        
+            self.add_perf_component_json(self.json_base, "create_db", 
+                                    {"query": query, "real_time": total_time, "db_time": db_time})
+
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -434,7 +465,15 @@ class MySQL(Database):
         query = 'CREATE TABLE IF NOT EXISTS ' + tablename + ' ' + cmd + ';';
 
         if(self.debug_mode):
+            
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("create_table")
+        
+            self.add_perf_component_json(self.json_base, "create_table", 
+                                    {"query": query, "real_time": total_time, "db_time": db_time})
+
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -454,6 +493,12 @@ class MySQL(Database):
         
         if(self.debug_mode):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("create_temp_table")
+        
+            self.add_perf_component_json(self.json_base, "create_temp_table", 
+                                    {"query": query, "real_time": total_time, "db_time": db_time})
+
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -476,6 +521,12 @@ class MySQL(Database):
 
         if(self.debug_mode):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("loade_data")
+        
+            self.add_perf_component_json(self.json_base, "load_data", 
+                                    {"query": query, "real_time": total_time, "db_time": db_time})
+
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -492,6 +543,12 @@ class MySQL(Database):
 
         if(self.debug_mode):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("drop_temp_table")
+                
+            self.add_perf_component_json(self.json_base, "drop_temp_table", 
+                                    {"query": query, "real_time": total_time, "db_time": db_time})
+
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -508,6 +565,12 @@ class MySQL(Database):
 
         if(self.debug_mode):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("drop_table")
+        
+            self.add_perf_component_json(self.json_base, "drop_table", 
+                                    {"query": query, "real_time": total_time, "db_time": db_time})
+
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -528,6 +591,13 @@ class MySQL(Database):
         
         if(self.debug_mode):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("move_table")
+        
+            self.add_perf_component_json(self.json_base, "move_table", 
+                                    {"query": query, "real_time": total_time, "db_time": db_time})
+            
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -552,6 +622,12 @@ class MySQL(Database):
         
         if(self.debug_mode):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(cmd,2)
+            
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("copy_table")
+        
+            self.add_perf_component_json(self.json_base, "copy_table", 
+                                    {"query": cmd, "real_time": total_time, "db_time": db_time})
         else:
             self.cursor.execute(cmd)
             self.conn.commit()
@@ -567,6 +643,13 @@ class MySQL(Database):
         
         if(self.debug_mode):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+            
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("insert")
+        
+            self.add_perf_component_json(self.json_base, "insert", 
+                                    {"query": query, "real_time": total_time, "db_time": db_time})
+            
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -612,6 +695,13 @@ class MySQL(Database):
 
         if(self.debug_mode):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+            
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("replace")
+        
+            self.add_perf_component_json(self.json_base, "replace", 
+                                    {"query": query, "real_time": total_time, "db_time": db_time})
+
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -627,6 +717,13 @@ class MySQL(Database):
         
         if(self.debug_mode):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
+
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("insert_ignore")
+        
+            self.add_perf_component_json(self.json_base, "insert_ignore", 
+                                    {"query": query, "real_time": total_time, "db_time": db_time})
+
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -646,10 +743,15 @@ class MySQL(Database):
         
         query = cmd + ";";
         
-        
-        
         if(self.debug_mode):
             results, total_time, db_time = self.benchmarking_util.query_execution_time(query,1)
+            
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("run")
+        
+            self.add_perf_component_json(self.json_base, "run", 
+                                    {"query": query, "real_time": total_time, "db_time": db_time})
+
         else:
             self.cursor.execute(query)
             try:
@@ -658,6 +760,7 @@ class MySQL(Database):
                 results = list()
                 self.conn.commit()
 
+        print(self.json_base)
         return results
 
     def query_distinct(self, query, table, cmd=''):
@@ -680,6 +783,13 @@ class MySQL(Database):
         
         if(self.debug_mode):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,1)
+            
+            if(self.json_base == None):
+                self.json_base = self.generate_perf_data("query_distinct")
+        
+            self.add_perf_component_json(self.json_base, "query_distinct", 
+                                    {"query": query, "real_time": total_time, "db_time": db_time})
+
             return result
         else:
             self.cursor.execute(query)
@@ -724,5 +834,6 @@ class MySQL(Database):
         This commits any changes remaining and closes the connection to the
         MySQL server.
         """
+        self.flush_perf_json()
         self.conn.commit()
         self.conn.close()

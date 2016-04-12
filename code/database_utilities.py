@@ -53,7 +53,7 @@ class Database(object):
         self.passw = args.db_pass
         self.database = database
         self.args = args
-        self.debug_mode = args.debug_mode
+        self.debug_mode = False
         if self.database is None:
             self.conn = sql.connect(host=self.host, port=self.port,
                                     user=self.user, password=self.passw,
@@ -265,6 +265,12 @@ class Database(object):
         server.
         """
         raise NotImplementedError("Please Implement 'close' method")
+    
+    def set_debug_mode(self, trueorfalse):
+        self.debug_mode = trueorfalse
+        
+    def get_debug_mode(self):
+        return self.debug_mode
 
     def generate_perf_data(self, root_method_name):
         """
@@ -286,3 +292,6 @@ class Database(object):
         perf_data["components"].append(component)
 
         return perf_data
+    
+    def flush_perf_json(self):
+        pass

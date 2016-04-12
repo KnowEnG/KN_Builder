@@ -67,8 +67,10 @@ class MySQLBenchmarkUtilsTestBench(unittest.TestCase):
         es = "localhost"
         port = 9200
         self.benchmark_object.send_data_to_ES(es, port, data)
-    #def test_query_DNE(self):
-    #    pass
+    
+    def test_query_DNE(self):
+        pass
+    
 
 if __name__ == '__main__':
     unittest.main()
