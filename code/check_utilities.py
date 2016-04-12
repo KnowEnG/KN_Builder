@@ -78,6 +78,7 @@ class SrcClass(object):
         self.remote_file = ''
         self.version = dict()
         self.args = args
+        self.chunk_size = 500000
 
     def get_source_version(self, alias):
         """Return the release version of the remote source:alias.
@@ -227,6 +228,8 @@ class SrcClass(object):
                 alias depends on.
         """
         depends = list()
+        if self.is_map(alias):
+            return depends
         for alias_name in self.aliases:
             if alias_name == alias:
                 continue

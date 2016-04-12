@@ -47,6 +47,7 @@ class HumanNet(SrcClass):
         aliases = {"HumanNet": "HumanNet.v1.join"}
         super(HumanNet, self).__init__(name, url_base, aliases, args)
         self.remote_file = 'HumanNet.v1.join.txt'
+        self.chunk_size = 250000
 
     def get_source_version(self, alias):
         """Return the release version of the remote HumanNet:alias.

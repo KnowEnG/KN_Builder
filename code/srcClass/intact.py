@@ -48,6 +48,7 @@ class Intact(SrcClass):
         aliases = {"PPI": "PPI"}
         super(Intact, self).__init__(name, url_base, aliases, args)
         self.remote_file = 'intact.txt'
+        self.chunk_size = 50000
 
     def get_source_version(self, alias):
         """Return the release version of the remote intact:alias.

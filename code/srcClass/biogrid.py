@@ -48,6 +48,7 @@ class Biogrid(SrcClass):
         aliases = {"PPI": "PPI"}
         super(Biogrid, self).__init__(name, url_base, aliases, args)
         self.access_key = '2fe900033b39209b8f63d531fcb24790'
+        self.chunk_size = 50000
 
     def get_source_version(self, alias):
         """Return the release version of the remote biogrid:alias.
