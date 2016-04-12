@@ -230,7 +230,7 @@ class Kegg(SrcClass):
         alias = filename.split('.')[1]
         map_dict = dict()
         info_type = "alt_alias"
-        n_type_id = '2'
+        n1_type_id = '2'
         n_meta_file = filename.replace('rawline', 'node_meta')
         node_file = filename.replace('rawline', 'node')
         if not self.is_map(alias):
@@ -251,7 +251,7 @@ class Kegg(SrcClass):
                     kn_id = cf.pretty_name(mod_id)
                     kn_name = cf.pretty_name(src + '_' + orig_name)
                     map_dict[orig_id] = kn_id + '::' + kn_name
-                    n_writer.writerow([kn_id, kn_name, n_type_id])
+                    n_writer.writerow([kn_id, kn_name, n1_type_id])
                     n_meta_writer.writerow([kn_id, info_type, orig_name])
                     n_meta_writer.writerow([kn_id, info_type, orig_id])
             outfile = node_file.replace('node', 'unique_node')
