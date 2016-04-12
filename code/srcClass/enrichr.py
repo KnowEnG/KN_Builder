@@ -52,8 +52,8 @@ class Enrichr(SrcClass):
                     'geneSetLibrary?mode=text&libraryName=')
         aliases = {"Achilles_fitness_decrease": "achilles_genetic_fitness::ach_dn",
                    "Achilles_fitness_increase": "achilles_genetic_fitness::ach_up",
-                   "Aging_Perturbations_down": "enrichr_perturbation_set::aging_dn",
-                   "Aging_Perturbations_up": "enrichr_perturbation_set::aging_up",
+                   "Aging_Perturbations_from_GEO_down": "GEO_expression_set::aging_dn",
+                   "Aging_Perturbations_from_GEO_up": "GEO_expression_set::aging_up",
                    "Allen_Brain_Atlas_down": "allen_brain_atlas_signature::aba_dn",
                    "Allen_Brain_Atlas_up": "allen_brain_atlas_signature::aba_up",
                    "Cancer_Cell_Line_Encyclopedia": "enricher_cell_signature::ccle",
@@ -78,24 +78,24 @@ class Enrichr(SrcClass):
                    "Human_Phenotype_Ontology": "enrichr_phenotype_signature::HPO",
                    "KEA_2015": "KEA_kinase_signatures::KEA",
                    "Kinase_Perturbations_from_GEO": "GEO_expression_set::kinase",
-                   "Ligand_Perturbations_down": "enrichr_perturbation_set::ligand_dn",
-                   "Ligand_Perturbations_up": "enrichr_perturbation_set::ligand_up",
+                   "Ligand_Perturbations_from_GEO_down": "GEO_expression_set::ligand_dn",
+                   "Ligand_Perturbations_from_GEO_up": "GEO_expression_set::ligand_up",
                    "LINCS_L1000_Chem_Pert_down": "LINCS_down_set::LINCS_dn",
                    "LINCS_L1000_Chem_Pert_up": "LINCS_up_set::LINCS_up",
-                   "MCF7_Perturbations_down": "enrichr_perturbation_set::MCF7_dn",
-                   "MCF7_Perturbations_up": "enrichr_perturbation_set::MCF7_up",
+                   "MCF7_Perturbations_from_GEO_down": "GEO_expression_set::MCF7_dn",
+                   "MCF7_Perturbations_from_GEO_up": "GEO_expression_set::MCF7_up",
                    "MGI_Mammalian_Phenotype_2013": "enrichr_phenotype_signature::MGI",
                    "MGI_Mammalian_Phenotype_Level_3": "enrichr_phenotype_signature::MGI_L3",
                    "MGI_Mammalian_Phenotype_Level_4": "enrichr_phenotype_signature::MGI_L4",
-                   "Microbe_Perturbations_down": "enrichr_phenotype_signature::microbe_dn",
-                   "Microbe_Perturbations_up": "enrichr_phenotype_signature::microbe_up",
+                   "Microbe_Perturbations_from_GEO_down": "GEO_expression_set::microbe_dn",
+                   "Microbe_Perturbations_from_GEO_up": "GEO_expression_set::microbe_up",
                    "Mouse_Gene_Atlas": "enrichr_phenotype_signature::MGA",
                    "NCI-60_Cancer_Cell_Lines": "enricher_cell_signature::NCI",
-                   "NCI-Nature": "enrichr_pathway::NCI",
+                   "NCI-Nature_2016": "enrichr_pathway::NCI",
                    "NURSA_Human_Endogenous_Complexome": "PPI_complex::NHEC",
                    "OMIM_Disease": "enrichr_phenotype_signature::OMIM-dis",
                    "OMIM_Expanded": "enrichr_phenotype_signature::OMIM-exp",
-                   "Panther": "panther_classification::Panther",
+                   "Panther_2016": "panther_classification::Panther",
                    "PPI_Hub_Proteins": "PPI_hub::",
                    "SILAC_Phosphoproteomics": "SILAC_phosphoproteomics::SILCA",
                    "Single_Gene_Perturbations_from_GEO_down": "GEO_expression_set::gene_dn",
@@ -106,8 +106,9 @@ class Enrichr(SrcClass):
                    "Tissue_Protein_Expression_from_ProteomicsDB": "enrichr_tissue_signature::PDB",
                    "Virus_Perturbations_from_GEO_down": "GEO_expression_set::virus_dn",
                    "Virus_Perturbations_from_GEO_up": "GEO_expression_set::virus_up",
-                   "WikiPathways_2015": "enrichr_pathway::WikiPath"}
+                   "WikiPathways_2016": "enrichr_pathway::WikiPath"}
         super(Enrichr, self).__init__(name, url_base, aliases, args)
+        self.chunk_size = 1500
         self.date_modified = 'unknown'
 
     def get_source_version(self, alias):

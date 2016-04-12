@@ -3,7 +3,7 @@
     "cpus": 4.0,
     "mem": 4000,
     "instances": 1,
-    "constraints": [["hostname", "CLUSTER", "192.17.176.156"]],
+    "constraints": [["hostname", "CLUSTER", "192.17.176.156"]],    
     "container": {
         "type": "DOCKER",
         "volumes": [{"containerPath": "/var/lib/mysql", "hostPath": "/mnt/knowtmp/mysql/", "mode": "RW"}],
