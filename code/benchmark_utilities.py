@@ -166,6 +166,7 @@ class MySQLBenchmark:
         
         result = None
         
+        print(query)
         start = time()
         self.cursor.execute(query)
         if(query_type == 1):
@@ -177,6 +178,8 @@ class MySQLBenchmark:
         
         self.cursor.execute(db_execution_query)
         timing_data = self.cursor.fetchall()
+        self.conn.commit()
+        print(timing_data)
         total_time = end-start;
 
         if(len(timing_data) == 0):

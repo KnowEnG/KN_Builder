@@ -294,4 +294,4 @@ class Database(object):
         return perf_data
     
     def flush_perf_json(self):
-        pass
+        print(self.json_base)

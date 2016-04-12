@@ -22,6 +22,7 @@ import mysql.connector as sql
 import os
 import json
 import subprocess
+import inspect
 
 def combine_tables(alias, args=None):
     """Combine all of the data imported from ensembl for the provided alias
@@ -208,6 +209,9 @@ def get_database(db=None, args=None):
     """
     if args is None:
         args=cf.config_args()
+    caller = inspect.stack()[1][3]
+    print(str(caller))
+    self.json_base = self.generate_perf_data("test1")
     return MySQL(db, args)
 
 def get_insert_cmd(step):
@@ -498,7 +502,6 @@ class MySQL(Database):
         
             self.add_perf_component_json(self.json_base, "create_temp_table", 
                                     {"query": query, "real_time": total_time, "db_time": db_time})
-
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -741,7 +744,7 @@ class MySQL(Database):
             list: the fetched results
         """
         
-        query = cmd + ";";
+        query = cmd;
         
         if(self.debug_mode):
             results, total_time, db_time = self.benchmarking_util.query_execution_time(query,1)
@@ -753,7 +756,7 @@ class MySQL(Database):
                                     {"query": query, "real_time": total_time, "db_time": db_time})
 
         else:
-            self.cursor.execute(query)
+            self.cursor.execute(query + ";")
             try:
                 results = self.cursor.fetchall()
             except:
