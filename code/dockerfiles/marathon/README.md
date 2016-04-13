@@ -21,7 +21,14 @@ done
 ## For MySQL
 
 ### deploy
-curl -X POST -H "Content-type: application/json" knowcluster01.dyndns.org:8080/v2/apps -d@code/dockerfiles/marathon/mysql.json
+for INST in mysql_perf,3307; do
+    echo $INST;
+    TMPPATH=`echo $INST | cut -f1 -d,`
+    TMPPORT=`echo $INST | cut -f2 -d,`
+    JOB=`cat code/dockerfiles/marathon/mysql.json | sed -e 's/TMPPATH/'"$TMPPATH"'/g' | sed -e 's/TMPPORT/'"$TMPPORT"'/g'`
+    echo $JOB
+    curl -X POST -H "Content-type: application/json" knowcluster01.dyndns.org:8080/v2/apps -d"$JOB"
+done;
 
 ### restart
 curl -X POST knowcluster01.dyndns.org:8080/v2/apps/p1mysql/restart
