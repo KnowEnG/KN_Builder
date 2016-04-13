@@ -23,6 +23,7 @@ import json
 import urllib.request
 import re
 import time
+import os
 import shutil
 
 TABLE_LIST = ['external_db', 'gene', 'object_xref', 'transcript',
@@ -81,6 +82,37 @@ def db_import(version_dict, args=cf.config_args()):
     db.import_nodes(version_dict, args)
     ru.import_ensembl(version_dict['alias'], args)
 
+def species_import(alias_dict, args=cf.config_args()):
+    """Produces the species.txt file and imports it into the database. Also
+    creates a species.json file.
+
+    This takes the alias dictionary and creates the species table:
+    taxon   sp_abbrev   sp_sciname  representative
+    and imports the table into the database. It also produces a species.json
+    file of the form species:taxid.
+
+    Args:
+        alias_dict (dict): alias dictionary describing the source
+
+    Returns:
+    """
+    src_data_dir = os.path.join(args.local_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+    table_dir = os.path.join(src_data_dir, 'species')
+    os.makedirs(table_dir, exist_ok=True)
+    table_file = os.path.join(table_dir, 'species.txt')
+    species_dict = dict()
+    with open(table_file, 'w') as sp_file:
+        for species in alias_dict:
+            taxid = alias_dict[species].split('::')[0]
+            species_dict[species] = taxid
+            species = species.capitalize().replace('_', ' ')
+            sp_abbrev = species[0] + species.split(' ')[1][:3]
+            sp_file.write('\t'.join([taxid, sp_abbrev, species, species])+'\n')
+    db.get_database(None, args).import_table('KnowNet', table_file, '--ignore')
+    with open(table_file.replace('txt', 'json'), 'w') as outfile:
+       json.dump(species_dict, outfile, indent=4, sort_keys=True)
+
+
 class Ensembl(SrcClass):
     """Extends SrcClass to provide ensembl specific check functions.
 
@@ -101,13 +133,13 @@ class Ensembl(SrcClass):
         aliases = self.get_aliases(args.ens_species)
         super(Ensembl, self).__init__(name, url_base, aliases, args)
         rem_aliases = list()
-        for alias in aliases:
+        for alias in self.aliases:
             if not self.get_remote_url(alias):
                 print('Ensembl does not have a core SQL db for ' + alias)
                 rem_aliases.append(alias)
         for alias in rem_aliases:
             self.aliases.pop(alias)
-
+        species_import(self.aliases, args)
 
     def get_aliases(self, alias_list):
         """Return the alias dictionary for ensembl based on the provided alias_list.

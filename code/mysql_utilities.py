@@ -393,7 +393,7 @@ class MySQL(object):
         files, but ignores any lines that have the same unique key as those
         already in the tables.
         """
-        import_tables = ['node_type.txt', 'edge_type.txt', 'species.txt']
+        import_tables = ['node_type.txt', 'edge_type.txt']
         mysql_dir = os.sep + os.path.join(self.args.code_path, 'mysql')
         if os.path.isdir(self.args.local_dir):
             mysql_dir = self.args.local_dir + mysql_dir
