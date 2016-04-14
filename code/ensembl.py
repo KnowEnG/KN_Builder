@@ -130,7 +130,7 @@ class Ensembl(SrcClass):
         """
         name = 'ensembl'
         url_base = 'ftp.ensembl.org'
-        aliases = self.get_aliases(args.ens_species)
+        aliases = self.get_aliases(args)
         super(Ensembl, self).__init__(name, url_base, aliases, args)
         rem_aliases = list()
         for alias in self.aliases:
@@ -141,7 +141,7 @@ class Ensembl(SrcClass):
             self.aliases.pop(alias)
         species_import(self.aliases, args)
 
-    def get_aliases(self, alias_list):
+    def get_aliases(self, args):
         """Return the alias dictionary for ensembl based on the provided alias_list.
 
         This returns a dictionary where species names are keys and a tuple of
@@ -149,12 +149,13 @@ class Ensembl(SrcClass):
         alias and the tuple serves as the alias information.
 
         Args:
-            alias_list (str): ',,' separated list of species or keywords
+            args (Namespace): args as populated namespace or 'None' for defaults
 
         Returns:
             dict: A dictionary of species:(taxid, division) values
         """
         #replace all special keywords
+        alias_list = args.ens_species
         all_species = 'REPRESENTATIVE,,BACTERIA,,FUNGI,,METAZOA,,PLANTS,,' +\
                       'PROTISTS,,VERTEBRATES'
         representative = 'mus_musculus,,arabidopsis_thaliana,,' +\
@@ -172,7 +173,7 @@ class Ensembl(SrcClass):
         alias_list = alias_list.replace('REPRESENTATIVE', representative)
         species_list = alias_list.split(',,')
         alias_dict = dict()
-        for species in species_list:
+        for species in species_list: #replace keywords
             if species.upper() in keywords:
                 division = keywords[species.upper()]
                 if division == 'Ensembl':
@@ -189,8 +190,13 @@ class Ensembl(SrcClass):
                 sp_list = json_obj['species']
                 for sp in sp_list:
                     species_name = sp['name']
-                    taxid = sp['taxon_id']
                     url_base = rest_url.replace('rest', 'ftp').replace('http://', '')
+                    rest_url = 'http://rest.ensemblgenomes.org'
+                    query = '/info/genomes/{0}?content-type=application/json'
+                    query = query.format(species_name)
+                    response = urllib.request.urlopen(rest_url + query)
+                    json_obj = json.loads(response.read().decode())
+                    taxid = json_obj['species_taxonomy_id']
                     alias_dict[species_name] = '::'.join([taxid, url_base, division])
             else:
                 rest_url = 'http://rest.ensemblgenomes.org'
@@ -206,7 +212,7 @@ class Ensembl(SrcClass):
                     continue
                 else:
                     url_base = 'ftp.ensemblgenomes.org'
-                taxid = json_obj['taxonomy_id']
+                taxid = json_obj['species_taxonomy_id']
                 alias_dict[species] = '::'.join([taxid, url_base, division])
         return alias_dict
 
