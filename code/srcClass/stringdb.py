@@ -11,9 +11,12 @@ Functions:
 """
 from check_utilities import SrcClass, compare_versions
 import urllib.request
+import requests
 import re
+import os
 import hashlib
 import csv
+import json
 import config_utilities as cf
 import table_utilities as tu
 
@@ -47,21 +50,45 @@ class Stringdb(SrcClass):
         """
         name = 'stringdb'
         url_base = 'http://string-db.org/'
-        aliases = {"10090": "Mmus",
-                   "3702": "Atha",
-                   "4932": "Scer",
-                   "6239": "Cele",
-                   "7227": "Dmel",
-                   "9606": "Hsap"}
+        aliases = dict()
         super(Stringdb, self).__init__(name, url_base, aliases, args)
+        self.aliases = self.get_aliases(args)
         self.chunk_size = 250000
+
+    def get_aliases(self, args=cf.config_args()):
+        """Helper function for producing the alias dictionary.
+
+        This returns a dictionary where alias names are keys and alias info
+        are the values. This helper function usse the species
+        specific information for the build of the Knowledge Network, which is
+        produced by ensembl.py during setup utilities and is located at
+        cf.DEFAULT_MAP_PATH/species/species.json, in order to fetch all matching
+        species specific aliases from the source.
+
+        Args:
+            args (Namespace): args as populated namespace or 'None' for defaults
+
+        Returns:
+            dict: A dictionary of species:(taxid, division) values
+        """
+        src_data_dir = os.path.join(args.local_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+        sp_dir = os.path.join(src_data_dir, 'species', 'species.json')
+        sp_dict = json.load(open(sp_dir))
+        alias_dict = dict()
+        for species, taxid in sp_dict.items():
+            species = species.capitalize().replace('_', ' ')
+            sp_abbrev = species[0] + species.split(' ')[1][:3]
+            url = self.get_remote_url(taxid)
+            req = requests.get(url)
+            if req.status_code == 200:
+                alias_dict[taxid] = sp_abbrev
+        return alias_dict
 
     def get_source_version(self, alias):
         """Return the release version of the remote stringdb:alias.
 
         This returns the release version of the remote source for a specific
-        alias. This value will be the same for every alias. This value is
-        stored in the self.version dictionary object.
+        alias. This value will be the same for every alias.
 
         Args:
             alias (str): An alias defined in self.aliases.
@@ -69,8 +96,7 @@ class Stringdb(SrcClass):
         Returns:
             str: The remote version of the source.
         """
-        version = super(Stringdb, self).get_source_version(alias)
-        if version == 'unknown':
+        if alias not in self.version:
             response = urllib.request.urlopen(self.url_base)
             the_page = response.readlines()
             for line in the_page:
@@ -79,12 +105,7 @@ class Stringdb(SrcClass):
                 if match is not None:
                     response.close()
                     self.version[alias] = match.group(1)
-                    break
-            for alias_name in self.aliases:
-                self.version[alias_name] = match.group(1)
-            return self.version[alias]
-        else:
-            return version
+        return self.version[alias]
 
     def get_local_file_info(self, alias):
         """Return a dictionary with the local file information for the alias.
