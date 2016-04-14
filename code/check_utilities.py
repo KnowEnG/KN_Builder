@@ -80,7 +80,7 @@ class SrcClass(object):
         self.args = args
         self.chunk_size = 500000
 
-    def get_aliases(self):
+    def get_aliases(self, args=cf.config_args()):
         """Helper function for producing the alias dictionary.
 
         This returns a dictionary where alias names are keys and alias info
@@ -91,6 +91,7 @@ class SrcClass(object):
         species specific aliases from the source.
 
         Args:
+            args (Namespace): args as populated namespace or 'None' for defaults
 
         Returns:
             dict: A dictionary of species:(taxid, division) values
