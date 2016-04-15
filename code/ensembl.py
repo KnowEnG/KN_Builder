@@ -100,8 +100,12 @@ def species_import(alias_dict, args=cf.config_args()):
     table_dir = os.path.join(src_data_dir, 'species')
     os.makedirs(table_dir, exist_ok=True)
     table_file = os.path.join(table_dir, 'species.txt')
+    species_file = table_file.replace('txt', 'json')
     species_dict = dict()
-    with open(table_file, 'w') as sp_file:
+    if os.path.isfile(species_file):
+        previous_species = json.load(open(species_file))
+        species_dict.update(previous_species)
+    with open(table_file, 'a') as sp_file:
         for species in alias_dict:
             taxid = alias_dict[species].split('::')[0]
             species_dict[species] = taxid
@@ -109,7 +113,7 @@ def species_import(alias_dict, args=cf.config_args()):
             sp_abbrev = species[0] + species.split(' ')[1][:3]
             sp_file.write('\t'.join([taxid, sp_abbrev, species, species])+'\n')
     db.get_database(None, args).import_table('KnowNet', table_file, '--ignore')
-    with open(table_file.replace('txt', 'json'), 'w') as outfile:
+    with open(species_file, 'w') as outfile:
        json.dump(species_dict, outfile, indent=4, sort_keys=True)
 
 
