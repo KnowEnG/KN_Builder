@@ -18,7 +18,7 @@ import json
 import os
 from argparse import ArgumentParser
 
-@profile
+#@profile
 def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
     """Imports the provided  file into the KnowEnG MySQL database.
 

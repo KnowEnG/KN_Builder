@@ -50,17 +50,48 @@ class Go(SrcClass):
         """
         name = 'go'
         url_base = 'http://geneontology.org/gene-associations/'
-        aliases = {
-            "fb": "Drosophila melanogaster",
-            "goa_human": "Homo sapiens",
-            "mgi": "Mus musculus",
-            "obo_map": "ontology",
-            "sgd": "Saccharomyces cerevisiae",
-            "tair": "Arabidopsis thaliana",
-            "wb": "Caenorhabditis elegans"
-        }
+        aliases = dict()
         super(Go, self).__init__(name, url_base, aliases, args)
+        self.aliases = self.get_aliases(args)
         self.chunk_size = 250000
+
+    def get_aliases(self, args=cf.config_args()):
+        """Helper function for producing the alias dictionary.
+
+        This returns a dictionary where alias names are keys and alias info
+        are the values. This helper function usse the species
+        specific information for the build of the Knowledge Network, which is
+        produced by ensembl.py during setup utilities and is located at
+        cf.DEFAULT_MAP_PATH/species/species.json, in order to fetch all matching
+        species specific aliases from the source.
+
+        Args:
+            args (Namespace): args as populated namespace or 'None' for defaults
+
+        Returns:
+            dict: A dictionary of species:(taxid, division) values
+        """
+        src_data_dir = os.path.join(args.local_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+        sp_dir = os.path.join(src_data_dir, 'species', 'species.json')
+        sp_dict = json.load(open(sp_dir))
+        alias_dict = {"obo_map": "ontology"}
+        go_url = self.url_base + 'go_annotation_metadata.all.json'
+        go_resp = urllib.request.urlopen(go_url).readall().decode()
+        go_resources = json.loads(go_resp)
+        go_dict = dict()
+        for resource in go_resources['resources']:
+            label = resource['label']
+            if ' ' not in label or 'Reference' in label:
+                continue
+            if label == 'Canis lupus familiaris':
+                label = label.replace('lupus ', '')
+            label = ' '.join(label.split(' ')[:2])
+            go_dict[label] = resource['id']
+        for species in sp_dict:
+            species = species.capitalize().replace('_', ' ')
+            if species in go_dict:
+                alias_dict[go_dict[species]] = species
+        return alias_dict
 
     def get_source_version(self, alias):
         """Return the release version of the remote go:alias.

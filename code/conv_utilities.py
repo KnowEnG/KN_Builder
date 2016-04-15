@@ -39,7 +39,7 @@ csv.field_size_limit(sys.maxsize)
 DEFAULT_HINT = ''
 DEFAULT_TAXON = 9606
 
-@profile
+#@profile
 def main(edgefile, args=None):
     """Maps the nodes for the source:alias edgefile.
 

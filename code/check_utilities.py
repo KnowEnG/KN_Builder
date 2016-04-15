@@ -80,6 +80,24 @@ class SrcClass(object):
         self.args = args
         self.chunk_size = 500000
 
+    def get_aliases(self, args=cf.config_args()):
+        """Helper function for producing the alias dictionary.
+
+        This returns a dictionary where alias names are keys and alias info
+        are the values. This helper function usse the species
+        specific information for the build of the Knowledge Network, which is
+        produced by ensembl.py during setup utilities and is located at
+        cf.DEFAULT_MAP_PATH/species/species.json, in order to fetch all matching
+        species specific aliases from the source.
+
+        Args:
+            args (Namespace): args as populated namespace or 'None' for defaults
+
+        Returns:
+            dict: A dictionary of species:(taxid, division) values
+        """
+        return dict()
+
     def get_source_version(self, alias):
         """Return the release version of the remote source:alias.
 
