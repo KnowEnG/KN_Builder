@@ -80,7 +80,13 @@ class Go(SrcClass):
         go_resources = json.loads(go_resp)
         go_dict = dict()
         for resource in go_resources['resources']:
-            go_dict[resource['label']] = resource['id']
+            label = resource['label']
+            if ' ' not in label or 'Reference' in label:
+                continue
+            if label == 'Canis lupus familiaris':
+                label = label.replace('lupus ', '')
+            label = ' '.join(label.split(' ')[:2])
+            go_dict[label] = resource['id']
         for species in sp_dict:
             species = species.capitalize().replace('_', ' ')
             if species in go_dict:
