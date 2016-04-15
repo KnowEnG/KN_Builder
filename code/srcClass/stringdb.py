@@ -101,10 +101,16 @@ class Stringdb(SrcClass):
             the_page = response.readlines()
             for line in the_page:
                 d_line = line.decode()
-                match = re.search('This is version ([^ ]*) of STRING', d_line)
+                match = re.search("<li class='last'>(\d+\.?\d*)</li>", d_line)
                 if match is not None:
                     response.close()
-                    self.version[alias] = match.group(1)
+                    vs = match.group(1)
+                    if '.' in vs:
+                        vs = vs.rstrip('0')
+                    if vs[-1] == '.':
+                        vs = vs[:-1]
+                    self.version[alias] = vs
+                    return self.version[alias]
         return self.version[alias]
 
     def get_local_file_info(self, alias):
