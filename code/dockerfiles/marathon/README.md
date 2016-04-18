@@ -21,7 +21,8 @@ done
 ## For MySQL
 
 ### deploy
-for INST in mysql_perf,3307; do
+#for INST in mysql,3306 mysql_perf,3307; do
+for INST in mysql,3306; do
     echo $INST;
     TMPPATH=`echo $INST | cut -f1 -d,`
     TMPPORT=`echo $INST | cut -f2 -d,`
