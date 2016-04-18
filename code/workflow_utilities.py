@@ -549,7 +549,7 @@ def main():
         elif args.start_step == 'IMPORT':
             run_import(args)
 
-    if args.dependencies == "" and args.chronos not in SPECIAL_MODES:
+    if args.dependencies == file_setup_job.jobname and args.chronos not in SPECIAL_MODES:
         jobdict = generic_dict(args, None)
         jobdict['TMPJOB'] = "KN_directory_init_" + stage
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
