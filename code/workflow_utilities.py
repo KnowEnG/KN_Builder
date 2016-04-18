@@ -553,7 +553,7 @@ def main():
                   str(POSSIBLE_STEPS))
 
     if args.dependencies == file_setup_job.jobname and args.chronos not in SPECIAL_MODES:
-        args.dependencies == ''
+        args.dependencies = ""
         jobdict = generic_dict(args, None)
         jobdict['TMPJOB'] = "KN_directory_init_" + stage
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
