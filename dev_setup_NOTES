@@ -73,8 +73,8 @@ KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
 KNP_LOCAL_DIR='/workspace/fast/apps/KnowNet_Pipeline'
 KNP_CLOUD_DIR='/mnt/fast/knoweng/apps/KnowNet_Pipeline/'
 KNP_SHARE_DIR='/mnt/shared/KnowNet_Pipeline/shared/'
-KNP_DATA_PATH='data_chronos_pipe2'
-KNP_LOGS_PATH='logs_chronos_pipe_45'
+KNP_DATA_PATH='data_chronos_pipe3'
+KNP_LOGS_PATH='logs_chronos_pipe_418'
 KNP_MYSQL_HOST='knowcluster01.dyndns.org'
 KNP_MYSQL_PORT='3306'
 KNP_REDIS_HOST='knowcluster01.dyndns.org'
@@ -103,7 +103,7 @@ done;
 #### clear chronos queue
 for c in 'knowcluster01.dyndns.org:4400' ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | grep -v command | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
-    for s in 'map-' 'table-' 'check-' 'fetch-' 'setup' ; do
+    for s in 'map-' 'table-' 'check-' 'fetch-' 'KN_directory_init_' ; do
         echo $s
         for i in `grep "$s" /tmp/t.txt  `; do
             CMD="curl -L -X DELETE $c/scheduler/job/$i";
@@ -140,7 +140,7 @@ done;
 #### clear chronos queue
 for c in 'knowcluster01.dyndns.org:4400' ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep name | grep -v command | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
-    for s in 'map-' 'table-' 'check-' 'fetch-' 'setup' ; do
+    for s in 'map-' 'table-' 'check-' 'fetch-' 'KN_directory_init_' ; do
         echo $s
         for i in `grep "$s" /tmp/t.txt  `; do
             CMD="curl -L -X DELETE $c/scheduler/job/$i";
