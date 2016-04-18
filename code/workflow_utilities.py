@@ -548,14 +548,15 @@ def main():
             run_map(args)
         elif args.start_step == 'IMPORT':
             run_import(args)
+        else:
+            print(args.start_step + ' is an unacceptable start_step.  Must be ' +
+                  str(POSSIBLE_STEPS))
 
     if args.dependencies == file_setup_job.jobname and args.chronos not in SPECIAL_MODES:
+        args.dependencies == ''
         jobdict = generic_dict(args, None)
         jobdict['TMPJOB'] = "KN_directory_init_" + stage
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
-
-    print(args.start_step + ' is an unacceptable start_step.  Must be ' +
-          str(POSSIBLE_STEPS))
 
 if __name__ == "__main__":
     main()
