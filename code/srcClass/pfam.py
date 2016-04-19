@@ -17,6 +17,7 @@ import csv
 import hashlib
 import math
 import config_utilities as cf
+import table_utilities as tu
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -279,6 +280,12 @@ class Pfam(SrcClass):
                 edge_writer.writerow([chksm, kn_id, n1hint, n1type, n1spec, 
                                       n2orig, n2hint, n2type, n2spec, et_hint, 
                                       score, t_chksum])
+        outfile = node_file.replace('node', 'unique_node')
+        tu.csu(node_file, outfile)
+        outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
+        tu.csu(n_meta_file, outfile)
+
+                                      
 
 
 if __name__ == "__main__":
