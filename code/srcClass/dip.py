@@ -13,15 +13,17 @@ from mitab_utilities import table
 import urllib.request
 import re
 import config_utilities as cf
+import os
+import json
 
 def get_SrcClass(args):
     """Returns an object of the source class.
 
     This returns an object of the source class to allow access to its functions
     if the module is imported.
-    
+
     Args:
-    
+
     Returns:
         class: a source class object
     """
@@ -47,6 +49,10 @@ class Dip(SrcClass):
         aliases = {"PPI": "PPI"}
         super(Dip, self).__init__(name, url_base, aliases, args)
         self.year = ''
+        src_data_dir = os.path.join(args.local_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+        sp_dir = os.path.join(src_data_dir, 'species', 'species.json')
+        sp_dict = json.load(open(sp_dir))
+        self.taxid_list = sp_dict.values()
 
     def get_source_version(self, alias):
         """Return the release version of the remote dip:alias.
@@ -157,7 +163,7 @@ class Dip(SrcClass):
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
         source specific mapping of nodes or edges.
-        
+
         This returns a boolean representing if the alias corresponds to a file
         used for mapping. By default this returns True if the alias ends in
         '_map' and False otherwise.
@@ -209,10 +215,10 @@ class Dip(SrcClass):
         This returns noting but produces the 2table formatted files from the
         provided raw_lines file:
             raw_lines table (file, line num, line_chksum, rawline)
-            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec, 
+            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
-            node_meta (line_cksum, node_num (1 or 2), 
+            node_meta (line_cksum, node_num (1 or 2),
                        info_type (evidence, relationship, experiment, or link),
                        info_desc (text))
         By default this function does nothing (must be overridden)
@@ -224,7 +230,7 @@ class Dip(SrcClass):
 
         Returns:
         """
-        return table(rawline, version_dict)
+        return table(rawline, version_dict, self.taxid_list)
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a dip
