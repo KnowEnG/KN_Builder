@@ -178,6 +178,7 @@ class Ensembl(SrcClass):
         species_list = alias_list.split(',,')
         alias_dict = dict()
         for species in species_list: #replace keywords
+            print('Finding Aliases for {0}'.format(species))
             if species.upper() in keywords:
                 division = keywords[species.upper()]
                 if division == 'Ensembl':
@@ -219,6 +220,7 @@ class Ensembl(SrcClass):
                     url_base = 'ftp.ensemblgenomes.org'
                 taxid = json_obj['species_taxonomy_id']
                 alias_dict[species] = '::'.join([taxid, url_base, division])
+        print('Found {0} aliases'.format(len(alias_dict)))
         return alias_dict
 
     def get_source_version(self, alias):
