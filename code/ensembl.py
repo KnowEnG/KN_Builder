@@ -182,11 +182,13 @@ class Ensembl(SrcClass):
                 division = keywords[species.upper()]
                 if division == 'Ensembl':
                     rest_url = 'http://rest.ensembl.org'
+                    url_base = 'ftp.ensembl.org'
                 elif division == 'EnsemblBacteria':
                     print('Bacterial species are unsupported')
                     continue
                 else:
                     rest_url = 'http://rest.ensemblgenomes.org'
+                    url_base = 'ftp.ensemblgenomes.org'
                 query = '/info/species?content-type=application/json;division='
                 query += division
                 response = urllib.request.urlopen(rest_url + query)
@@ -194,7 +196,6 @@ class Ensembl(SrcClass):
                 sp_list = json_obj['species']
                 for sp in sp_list:
                     species_name = sp['name']
-                    url_base = rest_url.replace('rest', 'ftp').replace('http://', '')
                     rest_url = 'http://rest.ensemblgenomes.org'
                     query = '/info/genomes/{0}?content-type=application/json'
                     query = query.format(species_name)
