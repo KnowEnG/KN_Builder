@@ -51,7 +51,10 @@ class MySQLBenchmark:
         print(args)
         self.database = "KnowNet"
         self.args = args
-        if self.database is None:
+        self.conn = args.conn
+        self.cursor = args.cursor
+        self.set_buffered_cursor()
+        '''if self.database is None:
             self.conn = sql.connect(host=self.host, port=self.port,
                                     user=self.user, password=self.passw,
                                     client_flags=[sql.ClientFlag.LOCAL_FILES])
@@ -61,13 +64,13 @@ class MySQLBenchmark:
                                     db=self.database,
                                     client_flags=[sql.ClientFlag.LOCAL_FILES])
         self.cursor = self.conn.cursor(buffered=True)
-    
+        '''
     def set_buffered_cursor(self):
         """
         Description: 
         Sets the cursor to be a dictionary Cursor
         """
-        self.cursor = self.conn.cursor(dictionary=True)
+        self.cursor = self.conn.cursor(buffered=True)
         
 
     def set_dictionary_cursor(self):
@@ -75,7 +78,7 @@ class MySQLBenchmark:
         Description: 
         Sets the cursor to be a dictionary Cursor
         """
-        self.cursor = self.conn.cursor(buffered=True)
+        self.cursor = self.conn.cursor(dictionary=True)
 
     """
     Description: The database has to be configured to be able to generate the
@@ -181,7 +184,7 @@ class MySQLBenchmark:
         self.cursor.execute(db_execution_query)
         timing_data = self.cursor.fetchall()
         self.conn.commit()
-        #print(timing_data)
+        print(timing_data)
         total_time = end-start;
 
         if(len(timing_data) == 0):
