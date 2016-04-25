@@ -253,6 +253,7 @@ def run_fetch(args):
     step_job = ju.Job("fetcher", args)
 
     for src in src_list:
+        print(src)
         local_src_dir = os.path.join(args.local_dir, args.data_path, src)
         if not os.path.exists(local_src_dir):
             raise IOError("ERROR: source specified with --step_parameters (-p) option, \
@@ -270,6 +271,8 @@ def run_fetch(args):
                 ju.run_job_step(args, "placeholder", jobdict)
 
         for alias in sorted(os.listdir(local_src_dir)):
+            if args.setup && args.step_parameters == 'ensembl' && alias not in args.ens_species.split(',,')
+                next
             alias_path = os.path.join(src, alias)
             local_alias_dir = os.path.join(local_src_dir, alias)
             alias_ctr += 1

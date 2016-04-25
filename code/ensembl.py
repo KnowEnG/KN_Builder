@@ -135,6 +135,7 @@ class Ensembl(SrcClass):
         name = 'ensembl'
         url_base = 'ftp.ensembl.org'
         aliases = self.get_aliases(args)
+        args.ens_species = aliases.keys()
         super(Ensembl, self).__init__(name, url_base, aliases, args)
         rem_aliases = list()
         for alias in self.aliases:
