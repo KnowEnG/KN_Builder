@@ -271,7 +271,7 @@ def run_fetch(args):
                 ju.run_job_step(args, "placeholder", jobdict)
 
         for alias in sorted(os.listdir(local_src_dir)):
-            if args.setup && args.step_parameters == 'ensembl' && alias not in args.ens_species.split(',,'):
+            if args.setup and args.step_parameters == 'ensembl' and alias not in args.ens_species.split(',,'):
                 next
             alias_path = os.path.join(src, alias)
             local_alias_dir = os.path.join(local_src_dir, alias)
