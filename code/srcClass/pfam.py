@@ -17,6 +17,7 @@ import csv
 import hashlib
 import math
 import config_utilities as cf
+import table_utilities as tu
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -207,17 +208,21 @@ class Pfam(SrcClass):
 
         #outfiles
         table_file = rawline.replace('rawline', 'edge')
-        #n_meta_file = rawline.replace('rawline', 'node_meta')
+        n_meta_file = rawline.replace('rawline', 'node_meta')
+        node_file = rawline.replace('rawline', 'node')
         #e_meta_file = rawline.replace('rawline', 'edge_meta')
 
         #static column values
         n1type = 'property'
+        n1_type_id = '2'
         n2type = 'gene'
         n1hint = 'Pfam/Family'
         n2hint = 'UniProt/Ensembl_GeneID'
         et_hint = 'pfam_domains'
-
         n1spec = '0'
+        map_dict = dict()
+        info_type = "alt_alias"
+        src = self.name
 
         ###Map the file name
         species = (os.path.join('..', '..', 'species', 'species_map',\
@@ -227,9 +232,12 @@ class Pfam(SrcClass):
         n2spec = species_map.get(version_dict['alias_info'], \
                     "unmapped:unsupported-species")
 
-
         with open(rawline, encoding='utf-8') as infile, \
-            open(table_file, 'w') as edges:
+            open(table_file, 'w') as edges, \
+            open(n_meta_file, 'w') as n_meta, \
+            open(node_file, 'w') as nfile:
+            n_meta_writer = csv.writer(n_meta, delimiter='\t', lineterminator='\n')
+            n_writer = csv.writer(nfile, delimiter='\t', lineterminator='\n')
             edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
             for line in infile:
                 line = line.replace('"', '').strip().split()
@@ -243,7 +251,14 @@ class Pfam(SrcClass):
                 if comment_match is not None:
                     continue
 
-                n1orig = raw[0]
+                orig_id = raw[1].strip()
+                orig_name = raw[0].strip()
+                kn_id = cf.pretty_name(src + '_' + orig_id)
+                kn_name = cf.pretty_name(src + '_' + orig_name)
+                map_dict[orig_id] = kn_id + '::' + kn_name
+                n_writer.writerow([kn_id, kn_name, n1_type_id])
+                n_meta_writer.writerow([kn_id, info_type, orig_name])
+                n_meta_writer.writerow([kn_id, info_type, orig_id])
                 n2orig = raw[2]
                 evalue = raw[4]
                 evalue = float(evalue)
@@ -258,11 +273,19 @@ class Pfam(SrcClass):
                     score = self.sc_min
 
                 hasher = hashlib.md5()
-                hasher.update('\t'.join([chksm, n1orig, n1hint, n1type, n1spec,\
-                    n2orig, n2hint, n2type, n2spec, et_hint, str(score)]).encode())
+                hasher.update('\t'.join([chksm, kn_id, n1hint, n1type, n1spec, 
+                                         n2orig, n2hint, n2type, n2spec, et_hint, 
+                                         str(score)]).encode())
                 t_chksum = hasher.hexdigest()
-                edge_writer.writerow([chksm, n1orig, n1hint, n1type, n1spec, \
-                        n2orig, n2hint, n2type, n2spec, et_hint, score, t_chksum])
+                edge_writer.writerow([chksm, kn_id, n1hint, n1type, n1spec, 
+                                      n2orig, n2hint, n2type, n2spec, et_hint, 
+                                      score, t_chksum])
+        outfile = node_file.replace('node', 'unique_node')
+        tu.csu(node_file, outfile)
+        outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
+        tu.csu(n_meta_file, outfile)
+
+                                      
 
 
 if __name__ == "__main__":

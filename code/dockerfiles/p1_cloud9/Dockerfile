@@ -32,6 +32,8 @@ RUN apt-get update && apt-get install -y time \
 # pip3 install for db connectors
 RUN pip3 install https://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.0.4.tar.gz
 RUN pip3 install redis \
+    Sphinx \
+    elasticsearch \
     pylint
 
 # pip installs for lincs

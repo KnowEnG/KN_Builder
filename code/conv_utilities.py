@@ -39,6 +39,7 @@ csv.field_size_limit(sys.maxsize)
 DEFAULT_HINT = ''
 DEFAULT_TAXON = 9606
 
+#@profile
 def main(edgefile, args=None):
     """Maps the nodes for the source:alias edgefile.
 
@@ -60,7 +61,6 @@ def main(edgefile, args=None):
         return
     rdb = ru.get_database(args)
     status_file = edgefile.replace('edge', 'status')
-    uc_file = edgefile.replace('edge', 'unique_conv')
     ue2l_file = edgefile.replace('edge', 'unique_edge2line')
     us_file = edgefile.replace('edge', 'unique_status')
     with open(edgefile, 'r') as infile, \
@@ -111,7 +111,7 @@ def map_list(namefile, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args=main_parse_args()
     rdb = ru.get_database(args)
     with open(namefile, 'r') as infile, \
         open(os.path.splitext(namefile)[0] + '.mapped.txt', 'w') as n_map:

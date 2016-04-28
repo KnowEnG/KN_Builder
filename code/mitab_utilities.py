@@ -17,7 +17,7 @@ import re
 import hashlib
 import table_utilities as tu
 
-def table(rawline, version_dict):
+def table(rawline, version_dict, taxid_list=[]):
     """Uses the provided rawline file to produce a 2table_edge file, an
     edge_meta file, and a node_meta file (only for property nodes).
 
@@ -36,6 +36,7 @@ def table(rawline, version_dict):
         rawline(str): The path to the rawline file
         version_dict (dict): A dictionary describing the attributes of the
             alias for a source.
+        taxid_list (list): A list of taxon ids to support
 
     Returns:
     """
@@ -55,10 +56,6 @@ def table(rawline, version_dict):
     ppi = os.path.join('..', '..', 'ppi', 'obo_map', 'ppi.obo_map.json')
     with open(ppi) as infile:
         term_map = json.load(infile)
-    #species = (os.path.join('..', '..', 'species', 'species_map')
-    #            'species.species_map.json')
-    #with open(species) as infile:
-    #   species_map = json.load(species)
 
     with open(rawline, encoding='utf-8') as infile, \
         open(table_file, 'w') as edges,\
@@ -80,14 +77,17 @@ def table(rawline, version_dict):
             match = re.search('taxid:(\d+)', raw[9])
             if match is not None:
                 n1spec = match.group(1)
+                if taxid_list and n1spec not in taxid_list:
+                    continue
             else:
                 continue
             match = re.search('taxid:(\d+)', raw[10])
             if match is not None:
                 n2spec = match.group(1)
+                if taxid_list and n2spec not in taxid_list:
+                    continue
             else:
                 continue
-            n2spec = raw[10].split('|')[0][6:].split('(')[0]
             if len(raw) > 35 and raw[35].upper() == 'TRUE':
                 et_hint = 'PPI_negative'
             else:

@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS KnowNet;
 USE KnowNet;
 
 CREATE TABLE IF NOT EXISTS `raw_file` (
-  `file_id` varchar(40) NOT NULL,
+  `file_id` varchar(80) NOT NULL,
   `remote_url` varchar(255) NOT NULL,
   `remote_date` varchar(40) DEFAULT NULL,
   `remote_version` varchar(40) DEFAULT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `raw_file` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `raw_line` (
-  `file_id` varchar(40) NOT NULL,
+  `file_id` varchar(80) NOT NULL,
   `line_num` int(11) NOT NULL,
   `line_hash` varchar(40) NOT NULL,
   `line_str` text NOT NULL,
@@ -36,14 +36,14 @@ CREATE TABLE IF NOT EXISTS `node_type` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `node` (
-  `node_id` varchar(128) NOT NULL,
+  `node_id` varchar(64) NOT NULL,
   `n_alias` varchar(512) DEFAULT NULL,
-  `n_type_id` int(11) DEFAULT NULL,
+  `n_type_id` int(11) NOT NULL,
   PRIMARY KEY (`node_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `node_meta` (
-  `node_id` varchar(128) NOT NULL,
+  `node_id` varchar(64) NOT NULL,
   `info_type` varchar(80) NOT NULL,
   `info_desc` varchar(255) NOT NULL,
   PRIMARY KEY `idx_node_meta_key` (`node_id`,`info_type`,`info_desc`)
@@ -53,9 +53,7 @@ CREATE TABLE IF NOT EXISTS `node_species` (
   `node_id` varchar(128) NOT NULL,
   `taxon` int(11) NOT NULL,
   UNIQUE KEY `node_species_key` (`node_id`,`taxon`),
-  KEY `taxon` (`taxon`),
-  CONSTRAINT `node_species_ibfk_1` FOREIGN KEY (`node_id`) REFERENCES `node` (`node_id`) ON DELETE CASCADE,
-  CONSTRAINT `node_species_ibfk_2` FOREIGN KEY (`taxon`) REFERENCES `species` (`taxon`) ON DELETE CASCADE
+  KEY `taxon` (`taxon`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge_type` (
@@ -69,9 +67,7 @@ CREATE TABLE IF NOT EXISTS `edge_type` (
   `sc_worst` float DEFAULT NULL,
   PRIMARY KEY (`et_name`),
   KEY `n1_type` (`n1_type`),
-  KEY `n2_type` (`n2_type`),
-  CONSTRAINT `edge_type_ibfk_1` FOREIGN KEY (`n1_type`) REFERENCES `node_type` (`n_type_id`) ON DELETE CASCADE,
-  CONSTRAINT `edge_type_ibfk_2` FOREIGN KEY (`n2_type`) REFERENCES `node_type` (`n_type_id`) ON DELETE CASCADE
+  KEY `n2_type` (`n2_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge2line`(
@@ -81,8 +77,8 @@ CREATE TABLE IF NOT EXISTS `edge2line`(
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge` (
-  `n1_id` varchar(128) NOT NULL,
-  `n2_id` varchar(128) NOT NULL,
+  `n1_id` varchar(64) NOT NULL,
+  `n2_id` varchar(64) NOT NULL,
   `et_name` varchar(80) NOT NULL,
   `weight` float NOT NULL,
   `edge_hash` varchar(40) NOT NULL,
@@ -93,8 +89,8 @@ CREATE TABLE IF NOT EXISTS `edge` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `status` (
-  `n1_id` varchar(128) NOT NULL,
-  `n2_id` varchar(128) NOT NULL,
+  `n1_id` varchar(64) NOT NULL,
+  `n2_id` varchar(64) NOT NULL,
   `et_name` varchar(80) NOT NULL,
   `weight` float NOT NULL,
   `edge_hash` varchar(40) NOT NULL,
@@ -103,17 +99,17 @@ CREATE TABLE IF NOT EXISTS `status` (
   `status` varchar(80) NOT NULL,
   `status_desc` varchar(255) NOT NULL,
   PRIMARY KEY (`edge_hash`, `line_hash`, `raw_edge_hash`),
-  KEY (`edge_hash`),
+  KEY `edge_hash` (`edge_hash`),
   KEY `n1_id` (`n1_id`),
   KEY `n2_id` (`n2_id`),
   KEY `et_name` (`et_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge_meta` (
-  `edge_hash` varchar(40) NOT NULL,
+  `line_hash` varchar(40) NOT NULL,
   `info_type` varchar(80) NOT NULL,
   `info_desc` varchar(255) NOT NULL,
-  PRIMARY KEY `idx_edge_meta_key` (`edge_hash`,`info_type`,`info_desc`)
+  PRIMARY KEY `idx_edge_meta_key` (`line_hash`,`info_type`,`info_desc`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `all_mappings` (

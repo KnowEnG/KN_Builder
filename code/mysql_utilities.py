@@ -91,17 +91,19 @@ def import_nodes(version_dict, args=None):
     if args is None:
         args=cf.config_args()
     alias = version_dict['alias']
-    taxid = version_dict['alias_info']
+    taxid = version_dict['alias_info'].split('::')[0]
     alias_db = 'ensembl_' + alias
     db = MySQL(alias_db, args)
     cmd = ("SELECT DISTINCT gene.stable_id AS node_id, "
            "SUBSTRING(gene.description, 1, 512) AS n_alias, "
            "1 AS n_type_id "
-           "FROM gene")
+           "FROM gene "
+           "ON DUPLICATE KEY UPDATE node_id=node_id")
     tablename = 'KnowNet.node'
     db.insert(tablename, cmd)
     cmd = ("SELECT DISTINCT gene.stable_id AS node_id, " + taxid + " AS taxon "
-           "FROM gene")
+           "FROM gene "
+           "ON DUPLICATE KEY UPDATE node_id=node_id")
     tablename = 'KnowNet.node_species'
     db.insert(tablename, cmd)
 
@@ -207,6 +209,25 @@ def get_database(db=None, args=None):
     if args is None:
         args=cf.config_args()
     return MySQL(db, args)
+
+def create_KnowNet(args=None):
+    """Returns an object of the MySQL class with KnowNet db.
+
+    This returns an object of the MySQL class to allow access to its functions
+    if the module is imported.
+
+    Args:
+        db (str): optional db to connect to
+        args (Namespace): args as populated namespace or 'None' for defaults
+
+    Returns:
+        MySQL: a source class object
+    """
+    if args is None:
+        args=cf.config_args()
+    db = MySQL(None, args)
+    db.init_knownet()
+    return db
 
 def get_insert_cmd(step):
     """Returns the command to be used with an insert for the provided step.
@@ -372,7 +393,7 @@ class MySQL(object):
         files, but ignores any lines that have the same unique key as those
         already in the tables.
         """
-        import_tables = ['node_type.txt', 'edge_type.txt', 'species.txt']
+        import_tables = ['node_type.txt', 'edge_type.txt']
         mysql_dir = os.sep + os.path.join(self.args.code_path, 'mysql')
         if os.path.isdir(self.args.local_dir):
             mysql_dir = self.args.local_dir + mysql_dir
@@ -639,7 +660,7 @@ class MySQL(object):
         """
         cmd = ['mysqlimport', '-u', self.user, '-h', self.host, '--port',
                self.port, '--password='+self.passw, import_flags,
-               '--fields_escaped_by=\\\\', database, '-L', tablefile]
+               database, '-L', tablefile, '-v']
         subprocess.call(' '.join(cmd), shell=True)
 
     def close(self):

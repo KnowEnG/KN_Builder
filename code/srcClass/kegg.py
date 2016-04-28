@@ -50,21 +50,47 @@ class Kegg(SrcClass):
         """
         name = 'kegg'
         url_base = 'http://rest.kegg.jp/'
-        aliases = {"pathway": "pathways",
-                   "ath": "Arabidopsis thaliana",
-                   "ath_map": "Atha_IDmap",
-                   "cel": "Caenorhabditis elegans",
-                   "cel_map": "Cele_IDmap",
-                   "dme": "Drosophila melanogaster",
-                   "dme_map": "Dmel_IDmap",
-                   "hsa": "Homo sapiens",
-                   "hsa_map": "Hsap_IDmap",
-                   "mmu": "Mus musculus",
-                   "mmu_map": "Mmus_IDmap",
-                   "sce": "Saccharomyces cerevisiae",
-                   "sce_map": "Scer_IDmap"}
+        aliases = dict()
         super(Kegg, self).__init__(name, url_base, aliases, args)
+        self.aliases = self.get_aliases(args)
+        self.get_source_version('pathway') #update source version
         self.date_modified = 'unknown'
+
+    def get_aliases(self, args=cf.config_args()):
+        """Helper function for producing the alias dictionary.
+
+        This returns a dictionary where alias names are keys and alias info
+        are the values. This helper function usse the species
+        specific information for the build of the Knowledge Network, which is
+        produced by ensembl.py during setup utilities and is located at
+        cf.DEFAULT_MAP_PATH/species/species.json, in order to fetch all matching
+        species specific aliases from the source.
+
+        Args:
+            args (Namespace): args as populated namespace or 'None' for defaults
+
+        Returns:
+            dict: A dictionary of species:(taxid, division) values
+        """
+        src_data_dir = os.path.join(args.local_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+        sp_dir = os.path.join(src_data_dir, 'species', 'species.json')
+        sp_dict = json.load(open(sp_dir))
+        alias_dict = {"pathway": "pathways"}
+        kegg_url = self.url_base + 'list/organism'
+        kegg_resp = urllib.request.urlopen(kegg_url)
+        kegg_dict = dict()
+        for line in kegg_resp:
+            (_, org, species, _) = line.decode().split('\t')
+            species = '_'.join(species.lower().split(' ')[:2])
+            kegg_dict[species] = org
+        for species in sp_dict:
+            if species in kegg_dict:
+                org = kegg_dict[species]
+                species = species.capitalize().replace('_', ' ')
+                sp_abbrev = species[0] + species.split(' ')[1][:3]
+                alias_dict[org] = species
+                alias_dict[org + '_map'] = sp_abbrev + '_IDmap'
+        return alias_dict
 
     def get_source_version(self, alias):
         """Return the release version of the remote kegg:alias.
@@ -230,6 +256,7 @@ class Kegg(SrcClass):
         alias = filename.split('.')[1]
         map_dict = dict()
         info_type = "alt_alias"
+        n1_type_id = '2'
         n_meta_file = filename.replace('rawline', 'node_meta')
         node_file = filename.replace('rawline', 'node')
         if not self.is_map(alias):
@@ -250,7 +277,7 @@ class Kegg(SrcClass):
                     kn_id = cf.pretty_name(mod_id)
                     kn_name = cf.pretty_name(src + '_' + orig_name)
                     map_dict[orig_id] = kn_id + '::' + kn_name
-                    n_writer.writerow([kn_id, kn_name])
+                    n_writer.writerow([kn_id, kn_name, n1_type_id])
                     n_meta_writer.writerow([kn_id, info_type, orig_name])
                     n_meta_writer.writerow([kn_id, info_type, orig_id])
             outfile = node_file.replace('node', 'unique_node')

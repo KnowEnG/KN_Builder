@@ -4,13 +4,13 @@ This module establishes default values and argument parsers for commonly
 used variables
 
 Attributes:
-    DEFAULT_DOCKER_IMG (str): docker image to run pipeline steps
-    DEFAULT_CURL_URL (str): address of chronos scheduler
+    DEFAULT_CHRONOS_URL (str): address of chronos scheduler
     DEFAULT_LOCAL_BASE (str): toplevel directory on local machine
     DEFAULT_CLOUD_BASE (str): toplevel directory on shared cloud storage
 
     DEFAULT_CODE_PATH (str): relative path of code dir from toplevel
     DEFAULT_DATA_PATH (str): relative path of data dir from toplevel
+    DEFAULT_LOGS_PATH (str): relative path of logs dir from toplevel
     DEFAULT_MAP_PATH (str): relative path of id_map dir from toplevel
 
     DEFAULT_MYSQL_URL (str): location of MySQL db
@@ -21,19 +21,18 @@ Attributes:
     DEFAULT_REDIS_URL (str): location of Redis db
     DEFAULT_REDIS_PORT (int): port for Redis db
     DEFAULT_REDIS_PASS (str): password for Redis db
-    DEFAULT_CHUNK_SZ (int): the max size (number of lines) for file chunks
 """
 from argparse import ArgumentParser
 import os
 import re
 
-DEFAULT_DOCKER_IMG = 'cblatti3/py3_redis_mysql:0.1'
-DEFAULT_CURL_URL = 'mmaster01.cse.illinois.edu:4400'
+DEFAULT_CHRONOS_URL = 'knowcluster01.dyndns.org:8888'
 DEFAULT_LOCAL_BASE = '/workspace/prototype/KnowNet_Pipeline'
 DEFAULT_CLOUD_BASE = '/storage-pool/blatti/KnowNet_Pipeline'
 
 DEFAULT_CODE_PATH = 'code'
 DEFAULT_DATA_PATH = 'data'
+DEFAULT_LOGS_PATH = 'logs'
 DEFAULT_SRC_PATH = 'srcClass'
 DEFAULT_MAP_PATH = 'id_map'
 
@@ -46,13 +45,35 @@ DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
 DEFAULT_REDIS_PORT = '6379'
 DEFAULT_REDIS_PASS = 'KnowEnG'
 
-DEFAULT_CHUNK_SZ = float(500000)
-
-
 def add_config_args(parser):
     """Add global configuation options to command line arguments.
 
     If global arguments are not specified, supplies their default values.
+
+.. csv-table::
+    :header: parameter,argument,flag,description
+    :widths: 4,2,2,12
+    :delim: |
+
+    --chronos  	    |str	|-c	    |url of chronos scheduler or LOCAL or DOCKER
+    --local_dir	    |str	|-ld	|name of toplevel directory on local machine
+    --cloud_dir	    |str	|-cd	|name of toplevel directory on cloud storage
+    --shared_dir    |str	|-sd	|name of toplevel directory of shared storage
+    --code_path	    |str	|-cp	|relative path of code directory from toplevel
+    --data_path	    |str	|-dp	|relative path of data directory from toplevel
+    --logs_path	    |str	|-lp	|relative path of data directory from toplevel
+    --src_path 	    |str	|-sp	|relative path of source code directory from code directory
+    --mysql_host	|str	|-myh	|url of mySQL db
+    --mysql_port	|int	|-myp	|port for mySQL db
+    --mysql_user	|str	|-myu	|user for mySQL db
+    --mysql_pass	|str	|-myps	|password for mySQL db
+    --redis_host	|str	|-rh 	|url of Redis db
+    --redis_port	|int	|-rp 	|port for Redis db
+    --redis_pass	|str	|-rps	|password for Redis db
+    --chunk_size	|int	|-cs	|lines per chunk
+    --test_mode	    |   	|-tm	|run in test mode by only printing command, defaults to False
+    --ens_species   |str    |-es    |',,' separated ensembl species to run in setup pipeline
+
 
     Args:
         parser (argparse.ArgumentParser): a parser to add global config opts to
@@ -60,36 +81,42 @@ def add_config_args(parser):
     Returns:
         argparse.ArgumentParser: parser with appended global options
     """
-    parser.add_argument('-i', '--image', help='docker image name for \
-        pipeline', default=DEFAULT_DOCKER_IMG)
-    parser.add_argument('-c', '--chronos', help='url of chronos scheduler',
-                        default=DEFAULT_CURL_URL)
-    parser.add_argument('-ld', '--local_dir', help='name of toplevel directory \
-        on local machine', default=DEFAULT_LOCAL_BASE)
-    parser.add_argument('-cd', '--cloud_dir', help='name of toplevel directory \
-        on cloud storage', default=DEFAULT_CLOUD_BASE)
-    parser.add_argument('-cp', '--code_path', help='relative path of code \
-        directory from toplevel ', default=DEFAULT_CODE_PATH)
-    parser.add_argument('-dp', '--data_path', help='relative path of data \
-        directory from toplevel', default=DEFAULT_DATA_PATH)
-    parser.add_argument('-sp', '--src_path', help='relative path of source \
-        code directory from code directory', default=DEFAULT_SRC_PATH)
-    parser.add_argument('-myh', '--mysql_host', help='url of mySQL db',
-                        default=DEFAULT_MYSQL_URL)
-    parser.add_argument('-myp', '--mysql_port', help='port for mySQL db',
-                        default=DEFAULT_MYSQL_PORT)
-    parser.add_argument('-myu', '--mysql_user', help='user for mySQL db',
-                        default=DEFAULT_MYSQL_USER)
-    parser.add_argument('-myps', '--mysql_pass', help='password for mySQL db',
-                        default=DEFAULT_MYSQL_PASS)
-    parser.add_argument('-rh', '--redis_host', help='url of Redis db',
-                        default=DEFAULT_REDIS_URL)
-    parser.add_argument('-rp', '--redis_port', help='port for Redis db',
-                        default=DEFAULT_REDIS_PORT)
-    parser.add_argument('-rps', '--redis_pass', help='password for Redis db',
-                        default=DEFAULT_REDIS_PASS)
-    parser.add_argument('-cs', '--chunk_size', help='lines per chunk',
-                        default=DEFAULT_CHUNK_SZ)
+    parser.add_argument('-c', '--chronos', default=DEFAULT_CHRONOS_URL,
+                        help='url of chronos scheduler or LOCAL or DOCKER')
+    parser.add_argument('-ld', '--local_dir', default=DEFAULT_LOCAL_BASE,
+                        help='name of toplevel directory on local machine')
+    parser.add_argument('-cd', '--cloud_dir', default=DEFAULT_CLOUD_BASE,
+                        help='name of toplevel directory on cloud storage')
+    parser.add_argument('-sd', '--shared_dir', default='',
+                        help='name of toplevel directory on shared storage')
+    parser.add_argument('-cp', '--code_path', default=DEFAULT_CODE_PATH,
+                        help='relative path of code directory from toplevel')
+    parser.add_argument('-dp', '--data_path', default=DEFAULT_DATA_PATH,
+                        help='relative path of data directory from toplevel')
+    parser.add_argument('-lp', '--logs_path', default=DEFAULT_LOGS_PATH,
+                        help='relative path of data directory from toplevel')
+    parser.add_argument('-sp', '--src_path', default=DEFAULT_SRC_PATH,
+                        help=('relative path of source code directory from code'
+                              ' directory'))
+    parser.add_argument('-myh', '--mysql_host', default=DEFAULT_MYSQL_URL,
+                        help='url of mySQL db')
+    parser.add_argument('-myp', '--mysql_port', default=DEFAULT_MYSQL_PORT,
+                        help='port for mySQL db')
+    parser.add_argument('-myu', '--mysql_user', default=DEFAULT_MYSQL_USER,
+                        help='user for mySQL db')
+    parser.add_argument('-myps', '--mysql_pass', default=DEFAULT_MYSQL_PASS,
+                        help='password for mySQL db')
+    parser.add_argument('-rh', '--redis_host', default=DEFAULT_REDIS_URL,
+                        help='url of Redis db')
+    parser.add_argument('-rp', '--redis_port', default=DEFAULT_REDIS_PORT,
+                        help='port for Redis db')
+    parser.add_argument('-rps', '--redis_pass', default=DEFAULT_REDIS_PASS,
+                        help='password for Redis db')
+    parser.add_argument('-tm', '--test_mode', action='store_true', default=False,
+                        help='run in test mode by only printing commands')
+    parser.add_argument('-es', '--ens_species', default='REPRESENTATIVE',
+                        help=',, separated list of ensembl species to run in setup pipeline' )
+
     return parser
 
 
@@ -117,8 +144,8 @@ def cloud_config_opts(args, config_opts):
         str: string for command line arguments on cloud
     """
     if '-ld' not in config_opts:
-        config_opts.extend(['-ld', os.sep])
-    new_config_opts = [opt.replace(args.local_dir, os.sep) for opt in config_opts]
+        config_opts.extend(['-ld', args.cloud_dir])
+    new_config_opts = [opt.replace(args.local_dir, args.cloud_dir) for opt in config_opts]
     return " ".join(new_config_opts)
 
 def cloud_template_subs(args, job_str):
@@ -141,7 +168,7 @@ def cloud_template_subs(args, job_str):
 
     return job_str
 
-def pretty_name(orig_name, endlen=35):
+def pretty_name(orig_name, endlen=63):
     """Shortens names strs and removes problematic characters
 
     Args:

@@ -2,7 +2,9 @@
 KNP_LOCAL_DIR='/workspace/apps/KnowNet_Pipeline'
 KNP_DATA_PATH='local_pipe'
 KNP_MYSQL_HOST='knowcharles.dyndns.org'
+KNP_MYSQL_PORT='3306'
 KNP_REDIS_HOST='knowcharles.dyndns.org'
+KNP_REDIS_PORT='6379'
 KNP_CHRONOS_URL='mmaster01.cse.illinois.edu:4400'
 KNP_FILE_TYPE="*json"
 KNP_SRC='dip'
@@ -15,6 +17,8 @@ KNP_DATA_PATH=$1
 VERBOSE=$2
 KNP_MYSQL_HOST=$3
 KNP_REDIS_HOST=$4
+KNP_MYSQL_PORT=$5
+KNP_REDIS_PORT=$6
 
 FILE_CTR=0
 echo -e "tnum\ttype\tsnum\tsource\tfile\tempty\ttime\tlines"
@@ -71,10 +75,10 @@ for KNP_FILE_TYPE in "*/file_metadata.json" "*/*.*.txt" "*json" "*/*json" \
     echo ""
 done;
 echo ""
-CMD="redis-cli -h $KNP_REDIS_HOST -a KnowEnG  info | grep keys= | cut -f1 -d',' |  cut -f2 -d':'"
+CMD="redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a KnowEnG  info | grep keys= | cut -f1 -d',' |  cut -f2 -d':'"
     echo -n Redis Keys$'\t'
     eval "$CMD"
-CMD='mysql -h '$KNP_MYSQL_HOST' -uroot -pKnowEnG --execute "
+CMD='mysql -h '$KNP_MYSQL_HOST' --port '$KNP_MYSQL_PORT'  -uroot -pKnowEnG --execute "
     SELECT \"all_mappings\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.all_mappings UNION
     SELECT \"status\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.status UNION
     SELECT \"edge\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge UNION

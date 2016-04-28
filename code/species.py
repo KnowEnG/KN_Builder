@@ -191,7 +191,7 @@ class Species(SrcClass):
 
         with open(filename, encoding='utf-8') as infile:
             reader = csv.reader((line.replace('\t|', '') for line in infile),
-                                delimiter='\t')
+                                delimiter='\t',  quoting=csv.QUOTE_NONE)
             for full_line in reader:
                 line = full_line[3:]
                 if line[3] == 'scientific name':
