@@ -3,7 +3,6 @@ KnowEnG API for effectively fetching information from MySQL database of Project 
 Contains API method call:
     list_edge_types()
     list_edges()
-    edge_meta()
     edge_summary()
     list_nodes()
     id_conversion()
@@ -23,8 +22,8 @@ cur = db.cursor()
 
 cur.execute("SELECT * FROM edge_type")
 edge_types = cur.fetchall()
-
-"""Join edge_types, status, edge_meta, node_species into a new edge_merge
+cur.execute("SELECT * FROM edge_meta")
+"""Join edge_types, status, node_species into a new edge_merge
    Each edge contains parameters such as n1_id, n2_id, et_name, n1_type_id, n2_type_id, n1_taxon, n2_taxon
 """
 cur.execute("SELECT DISTINCT s.n1_id, s.n2_id, s.et_name, s.weight, s.edge_hash, n1.n1_type_id, n2.n2_type_id, n1.n1_taxon, n2.n2_taxon \
@@ -125,9 +124,6 @@ def list_edges():
                               "et_name": e[2],\
                               "weight": e[3],\
                     } for e in edge_set]})
-
-@app.route("/v1/edges/meta",methods=["GET"])
-def edge_meta()
 
 @app.route("/v1/edges/summary",methods=["GET"])
 def edge_summary():
@@ -247,7 +243,6 @@ def gene_summary():
         http://knowdevs.dyndns.org:8099/v1/nodes/summary?node_id=ENSG00000188157:ENSG00000276333:ENSG00000041357:ENSG00000100387
     """
     node_id = request.args.get('node_id')
-    print("x")
     node_id = node_id.split(":")
     node_list = Counter()
     for e in edges:
@@ -255,15 +250,10 @@ def gene_summary():
             node_list[e[0]] += 1
         if e[1] in node_id:
             node_list[e[1]] += 1
-    print("y")
     max_degree = node_list.most_common(1)[0][1]
-    print("a")
     node_hub = [i for i,z in node_list.most_common() if z == max_degree]
-    print("b")
     min_degree = node_list.most_common()[-1][1]
-    print("c")
     node_border = [i for i,z in node_list.most_common() if z == min_degree]
-    print("d")
     return jsonify({"max_degree": [max_degree, node_hub], \
                   "min_degree": [min_degree, node_border]})
 if __name__ == "__main__":
