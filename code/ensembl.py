@@ -135,7 +135,6 @@ class Ensembl(SrcClass):
         name = 'ensembl'
         url_base = 'ftp.ensembl.org'
         aliases = self.get_aliases(args)
-        args.ens_species = aliases.keys()
         super(Ensembl, self).__init__(name, url_base, aliases, args)
         rem_aliases = list()
         for alias in self.aliases:
@@ -144,6 +143,7 @@ class Ensembl(SrcClass):
                 rem_aliases.append(alias)
         for alias in rem_aliases:
             self.aliases.pop(alias)
+        args.ens_species = ',,'.join(aliases.keys())
         species_import(self.aliases, args)
 
     def get_aliases(self, args):
