@@ -1,14 +1,13 @@
 {
     "id": "p1redis",
-    "cmd": "cp /shared/appendonly.aof /data/ && redis-server --appendonly yes --requirepass KnowEnG",
+    "cmd": "redis-server --appendonly yes --requirepass KnowEnG",
     "cpus": 1.0,
-    "mem": 4000,
-    "instances": TMPNUM,
-    "constraints": [["hostname", "UNIQUE"]],
+    "mem": 16000,
+    "instances": 1,
+    "constraints": [["hostname", "CLUSTER", "knowcluster07.dyndns.org"]],
     "container": {
         "type": "DOCKER",
-        "volumes": [{"containerPath": "/data", "hostPath": "/mnt/fast/redis/", "mode": "RW"},
-                    {"containerPath": "/shared", "hostPath": "/mnt/fast/knoweng/redis/", "mode": "RW"}],
+        "volumes": [{"containerPath": "/data", "hostPath": "/mnt/knowtmp/project1/p1_redis/", "mode": "RW"}],
         "docker": {
             "image": "redis",
             "network": "BRIDGE",
