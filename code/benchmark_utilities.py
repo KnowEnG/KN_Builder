@@ -42,15 +42,19 @@ class MySQLBenchmark:
         Args:
         database (str): the MySQL database to connect to (optional)
         """
-        self.user = cf.DEFAULT_MYSQL_USER
-        self.host = cf.DEFAULT_MYSQL_URL
+        self.user = args.mysql_user
+        self.host = args.mysql_host
         #print(self.host)
-        self.port = cf.DEFAULT_MYSQL_PORT
-        self.passw = cf.DEFAULT_MYSQL_PASS
+        self.port = args.mysql_port
+        self.passw = args.mysql_pass
         #print(self.passw)
+        print(args)
         self.database = "KnowNet"
         self.args = args
-        if self.database is None:
+        self.conn = args.conn
+        self.cursor = args.cursor
+        self.set_buffered_cursor()
+        '''if self.database is None:
             self.conn = sql.connect(host=self.host, port=self.port,
                                     user=self.user, password=self.passw,
                                     client_flags=[sql.ClientFlag.LOCAL_FILES])
@@ -60,13 +64,13 @@ class MySQLBenchmark:
                                     db=self.database,
                                     client_flags=[sql.ClientFlag.LOCAL_FILES])
         self.cursor = self.conn.cursor(buffered=True)
-    
+        '''
     def set_buffered_cursor(self):
         """
         Description: 
         Sets the cursor to be a dictionary Cursor
         """
-        self.cursor = self.conn.cursor(dictionary=True)
+        self.cursor = self.conn.cursor(buffered=True)
         
 
     def set_dictionary_cursor(self):
@@ -74,7 +78,7 @@ class MySQLBenchmark:
         Description: 
         Sets the cursor to be a dictionary Cursor
         """
-        self.cursor = self.conn.cursor(buffered=True)
+        self.cursor = self.conn.cursor(dictionary=True)
 
     """
     Description: The database has to be configured to be able to generate the
@@ -163,7 +167,7 @@ class MySQLBenchmark:
         '''
         
         db_execution_time = -1
-        db_execution_query = "SELECT TRUNCATE(TIMER_WAIT/1000000000000,6) as Duration FROM performance_schema.events_statements_history_long WHERE SQL_TEXT = '"+str(query[:-1] if(query[-1] == ';') else query)+"' order by END_EVENT_ID desc limit 1"
+        db_execution_query = "SELECT TRUNCATE(TIMER_WAIT/1000000000000,6) as Duration FROM performance_schema.events_statements_history_long WHERE SQL_TEXT = '"+str(query[:-1] if(query[-1] == ';') else query)+"' order by END_EVENT_ID desc limit 1;"
         
         result = None
         
@@ -176,10 +180,11 @@ class MySQLBenchmark:
             self.conn.commit()
         end = time()
         
+        print(db_execution_query)
         self.cursor.execute(db_execution_query)
         timing_data = self.cursor.fetchall()
         self.conn.commit()
-        #print(timing_data)
+        print(timing_data)
         total_time = end-start;
 
         if(len(timing_data) == 0):

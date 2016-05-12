@@ -211,10 +211,10 @@ def get_database(db=None, args=None):
     """
     if args is None:
         args=cf.config_args()
+    mydb = MySQL(db, args)
     caller = inspect.stack()[1][3]
-    print(str(caller))
-    self.json_base = self.generate_perf_data("test1")
-    return MySQL(db, args)
+    mydb.json_base = mydb.generate_perf_data(caller)
+    return mydb
 
 def create_KnowNet(args=None):
     """Returns an object of the MySQL class with KnowNet db.
@@ -368,13 +368,6 @@ class MySQL(Database):
         self.port = args.mysql_port
         self.passw = args.mysql_pass
         self.database = database
-        self.benchmarking_util = mysqlb.MySQLBenchmark()
-        if(not self.benchmarking_util.check_db_set_for_profiling()):
-            self.benchmarking_util.config_db_for_profiling()
-        self.args = args
-        self.debug_mode = False 
-        #args.debug_mode
-        self.json_base = None
         if self.database is None:
             self.conn = sql.connect(host=self.host, port=self.port,
                                     user=self.user, password=self.passw,
@@ -385,6 +378,15 @@ class MySQL(Database):
                                     db=self.database,
                                     client_flags=[sql.ClientFlag.LOCAL_FILES])
         self.cursor = self.conn.cursor()
+        args.conn = self.conn
+        args.cursor = self.cursor
+        self.benchmarking_util = mysqlb.MySQLBenchmark("KnowNet", args)
+        if(not self.benchmarking_util.check_db_set_for_profiling()):
+            self.benchmarking_util.config_db_for_profiling()
+        self.args = args
+        self.debug_mode = args.debug_mode 
+        self.json_base = None
+
 
     def drop_db(self, database):
         """Remove a database from the MySQL server
@@ -522,7 +524,10 @@ class MySQL(Database):
         
             self.add_perf_component_json(self.json_base, "create_temp_table", 
                                     {"query": query, "real_time": total_time, "db_time": db_time})
+            
+            print(self.json_base)
         else:
+            print("REGULAR CREATE TEMP")
             self.cursor.execute(query)
             self.conn.commit()
 
@@ -540,17 +545,20 @@ class MySQL(Database):
             cmd (str): optional additional command
         """
         
-        query = "LOAD DATA LOCAL INFILE '" + filename + "' INTO TABLE " + tablename + " FIELDS TERMINATED BY '" + sep + "'" + " OPTIONALLY ENCLOSED BY '" + enc + "' " + cmd + ";";
+        query = "LOAD DATA LOCAL INFILE '" + filename + "' INTO TABLE " + tablename + " FIELDS TERMINATED BY '" + sep + "'" + " OPTIONALLY ENCLOSED BY '" + enc + "' " + cmd + ";"
 
-        if(self.debug_mode):
+#        if(self.debug_mode):
+        if(False):
             result, total_time, db_time = self.benchmarking_util.query_execution_time(query,2)
             if(self.json_base == None):
-                self.json_base = self.generate_perf_data("loade_data")
+                self.json_base = self.generate_perf_data("load_data")
         
             self.add_perf_component_json(self.json_base, "load_data", 
                                     {"query": query, "real_time": total_time, "db_time": db_time})
-
+                                    
+            print(self.json_base)
         else:
+            print("REGULAR LOAD DATA")
             self.cursor.execute(query)
             self.conn.commit()
             
@@ -593,7 +601,7 @@ class MySQL(Database):
         
             self.add_perf_component_json(self.json_base, "drop_table", 
                                     {"query": query, "real_time": total_time, "db_time": db_time})
-
+            print(self.json_base)
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -672,7 +680,7 @@ class MySQL(Database):
         
             self.add_perf_component_json(self.json_base, "insert", 
                                     {"query": query, "real_time": total_time, "db_time": db_time})
-            
+            print(self.json_base)
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -724,7 +732,7 @@ class MySQL(Database):
         
             self.add_perf_component_json(self.json_base, "replace", 
                                     {"query": query, "real_time": total_time, "db_time": db_time})
-
+        
         else:
             self.cursor.execute(query)
             self.conn.commit()
@@ -746,7 +754,7 @@ class MySQL(Database):
         
             self.add_perf_component_json(self.json_base, "insert_ignore", 
                                     {"query": query, "real_time": total_time, "db_time": db_time})
-
+            print(self.json_base)
         else:
             self.cursor.execute(query)
             self.conn.commit()
