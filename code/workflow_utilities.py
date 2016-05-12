@@ -261,8 +261,8 @@ def run_fetch(args):
         alias_ctr = 0
         if args.chronos not in SPECIAL_MODES:
             for alias in sorted(os.listdir(local_src_dir)):
-                if args.setup and args.step_parameters == 'ensembl' and alias not in args.ens_species.split(',,'):
-                    continue
+                #if args.setup and args.step_parameters == 'ensembl' and alias not in args.ens_species.split(',,'):
+                #    continue
                 jobname = "-".join(["fetch", src, alias])
                 jobname = jobname.replace(".", "-")
                 jobdict = generic_dict(args, None)
