@@ -9,8 +9,15 @@ class MySQLBenchmarkUtilsTestBench(unittest.TestCase):
         self.benchmark_object = MySQLBenchmark()
 
     def test_db_configured_for_profiling(self):
-        self.assertEqual(self.benchmark_object.check_db_set_for_profiling(), True)            
-            
+        self.assertEqual(self.benchmark_object.check_db_set_for_profiling(), True)           
+
+    def test_multi_threaded_select(self):
+        data = self.benchmark_object.multithreaded_stress_test("edge2line","line_hash",False)
+        #expects 10 elements in thread_timings as the default number of threads is 10.
+        self.assertEqual(len(data["thread_timings"]),data["num_threads"])
+        for timings in data["thread_timings"]:
+            self.assertTrue(timings > 0.0)
+
     def test_generate_table_details(self):
         '''
         Description:
