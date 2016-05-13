@@ -2,7 +2,7 @@
 # Dockerfile to build p1_cloud9
 ############################################################
 
-# Set the base image 
+# Set the base image
 FROM sapk/cloud9
 
 # File Author / Maintainer
@@ -35,6 +35,7 @@ RUN pip3 install https://cdn.mysql.com/Downloads/Connector-Python/mysql-connecto
 RUN pip3 install redis \
     Sphinx \
     elasticsearch \
+    pymysql \
     pylint
 
 # pip installs for lincs

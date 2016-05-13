@@ -5,7 +5,7 @@
     "cpus": 1.0,
     "mem": 1000,
     "instances": 1,
-    "constraints": [["hostname", "CLUSTER", "knowcluster01.dyndns.org"]],
+    "constraints": [["hostname", "CLUSTER", "192.17.176.156"]],
     "container": {
         "type": "DOCKER",
         "volumes": [
