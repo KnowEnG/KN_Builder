@@ -42,8 +42,7 @@ mysql -hknowcluster01.dyndns.org -uroot -pKnowEnG --port 3306 --execute "show da
 ## For cloud9
 ### deploy
 for USER in project1,8181 mparat2,8282 pvijaya2,8383; do
-
-for USER in blatti,8484 post3,8585; do
+for USER in blatti,8484; do
     echo $USER;
     TMPID=`echo $USER | cut -f1 -d,`
     TMPPORT=`echo $USER | cut -f2 -d,`
