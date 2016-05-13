@@ -51,14 +51,33 @@ redis_utilities
 .. automodule:: redis_utilities
    :members:
 
-setup_utilities
----------------
+job_utilities
+-------------
 
-.. automodule:: setup_utilities
+.. automodule:: job_utilities
    :members:
 
-pipeline_utilities
+
+workflow_utilities
 ------------------
 
-.. automodule:: pipeline_utilities
+.. automodule:: workflow_utilities
+   :members:
+
+benchmark_utilities
+-------------------
+
+.. automodule:: benchmark_utilities
+   :members:
+
+benchmark_utilities_tests
+-------------------------
+
+.. automodule:: benchmark_utilities_tests
+   :members:
+
+app
+---
+
+.. automodule:: app
    :members:
