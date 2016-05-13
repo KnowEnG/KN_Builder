@@ -143,6 +143,7 @@ class Ensembl(SrcClass):
                 rem_aliases.append(alias)
         for alias in rem_aliases:
             self.aliases.pop(alias)
+        args.ens_species = ',,'.join(aliases.keys())
         species_import(self.aliases, args)
 
     def get_aliases(self, args):
@@ -178,15 +179,18 @@ class Ensembl(SrcClass):
         species_list = alias_list.split(',,')
         alias_dict = dict()
         for species in species_list: #replace keywords
+            print('Finding Aliases for {0}'.format(species))
             if species.upper() in keywords:
                 division = keywords[species.upper()]
                 if division == 'Ensembl':
                     rest_url = 'http://rest.ensembl.org'
+                    url_base = 'ftp.ensembl.org'
                 elif division == 'EnsemblBacteria':
                     print('Bacterial species are unsupported')
                     continue
                 else:
                     rest_url = 'http://rest.ensemblgenomes.org'
+                    url_base = 'ftp.ensemblgenomes.org'
                 query = '/info/species?content-type=application/json;division='
                 query += division
                 response = urllib.request.urlopen(rest_url + query)
@@ -194,7 +198,6 @@ class Ensembl(SrcClass):
                 sp_list = json_obj['species']
                 for sp in sp_list:
                     species_name = sp['name']
-                    url_base = rest_url.replace('rest', 'ftp').replace('http://', '')
                     rest_url = 'http://rest.ensemblgenomes.org'
                     query = '/info/genomes/{0}?content-type=application/json'
                     query = query.format(species_name)
@@ -218,6 +221,7 @@ class Ensembl(SrcClass):
                     url_base = 'ftp.ensemblgenomes.org'
                 taxid = json_obj['species_taxonomy_id']
                 alias_dict[species] = '::'.join([taxid, url_base, division])
+        print('Found {0} aliases'.format(len(alias_dict)))
         return alias_dict
 
     def get_source_version(self, alias):

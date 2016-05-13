@@ -384,6 +384,7 @@ def compare_versions(src_obj):
     version_dict = dict()
     local_dict = dict()
     for alias in src_obj.aliases:
+        print('Comparing versions for {0}'.format(alias))
         local_dict[alias] = src_obj.get_local_file_info(alias)
         version_dict[alias] = dict()
         version_dict[alias]['source'] = src_obj.name

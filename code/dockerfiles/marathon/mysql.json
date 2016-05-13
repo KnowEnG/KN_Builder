@@ -1,10 +1,10 @@
 {
     "id": "p1mysql-TMPPORT",
     "cpus": 4.0,
-    "mem": 4000,
+    "mem": 16000,
     "instances": 1,
     "env": {"PORT": "3306"},    
-    "constraints": [["hostname", "CLUSTER", "192.17.176.156"]],
+    "constraints": [["hostname", "CLUSTER", "knowcluster05.dyndns.org"]],
     "container": {
         "type": "DOCKER",
         "volumes": [{"containerPath": "/var/lib/mysql", "hostPath": "/mnt/knowtmp/TMPPATH/", "mode": "RW"}],

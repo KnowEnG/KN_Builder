@@ -21,7 +21,7 @@ done
 ## For MySQL
 
 ### deploy
-for INST in mysql_perf,3307; do
+for INST in mysql,3306 mysql_lincs,3307 mysql_perf,3308; do
     echo $INST;
     TMPPATH=`echo $INST | cut -f1 -d,`
     TMPPORT=`echo $INST | cut -f2 -d,`
@@ -37,7 +37,11 @@ curl -X POST knowcluster01.dyndns.org:8080/v2/apps/p1mysql/restart
 curl -X DELETE knowcluster01.dyndns.org:8080/v2/apps/p1mysql
 
 ### check loaded
-mysql -hknowcluster01.dyndns.org -uroot -pKnowEnG --port 3306 --execute "show databases";
+for INST in mysql,3306 mysql_lincs,3307 mysql_perf,3308; do
+    echo $INST;
+    TMPPORT=`echo $INST | cut -f2 -d,`
+    mysql -hknowcluster01.dyndns.org -uroot -pKnowEnG --port $TMPPORT --execute "show databases";
+done
 
 ## For cloud9
 ### deploy

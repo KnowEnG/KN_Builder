@@ -518,37 +518,47 @@ def main():
     """
 
     args = main_parse_args()
+    stage = 'PIPELINE'
+    init_job = ''
     if args.dependencies == "":
 
         if args.setup:
             knownet = db.MySQL(None, args)
             knownet.init_knownet()
+            stage = 'SETUP'
 
         jobdict = generic_dict(args, None)
-        jobdict['TMPJOB'] = "directory_setup_" + str(args.setup)
+        jobdict['TMPJOB'] = "KN_directory_init_" + stage
+        jobdict['TMPLAUNCH'] = '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
         args.dependencies = file_setup_job.jobname
+        init_job = file_setup_job.jobname
 
     if args.setup:
         if args.start_step == 'CHECK':
-            return run_check(args)
+           run_check(args)
         elif args.start_step == 'FETCH':
-            return run_fetch(args)
+           run_fetch(args)
     else:
         if args.start_step == 'CHECK':
-            return run_check(args)
+            run_check(args)
         elif args.start_step == 'FETCH':
-            return run_fetch(args)
+            run_fetch(args)
         elif args.start_step == 'TABLE':
-            return run_table(args)
+            run_table(args)
         elif args.start_step == 'MAP':
-            return run_map(args)
+            run_map(args)
         elif args.start_step == 'IMPORT':
-            return run_import(args)
+            run_import(args)
+        else:
+            print(args.start_step + ' is an unacceptable start_step.  Must be ' +
+                  str(POSSIBLE_STEPS))
 
-    print(args.start_step + ' is an unacceptable start_step.  Must be ' +
-          str(POSSIBLE_STEPS))
-
+    if init_job != '' and args.chronos not in SPECIAL_MODES:
+        args.dependencies = ""
+        jobdict = generic_dict(args, None)
+        jobdict['TMPJOB'] = "KN_directory_init_" + stage
+        file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
 
 if __name__ == "__main__":
     main()

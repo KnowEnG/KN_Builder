@@ -14,28 +14,28 @@ go_curated_evidence	2	1	0	Curated evidence includes experimentally inferred (exp
 go_hierarchy	2	2	0	relationship between go terms	Binary value indicating relationship exists	1	1
 go_inferred_evidence	2	1	0	uncurated "IEA" evidence codes which are automatically assigned from Electronic Annotations.  This is distinct from more reliable Curated evidence includes experimentally inferred (expression pattern, mutant phenotype, direct assay, physical or genetic interaction) as well as computational analysis inferred (sequence based, analysis of hierarchy).	Binary value indicating that gene had automatically inferred from electronic annotation evidence for GO term	1	1
 HMDB_metabolite_signatures	2	1	0	Genes associated with a given metabolite	binary value	1	1
-hn_CE_CC	2	1	0	Co-citation of worm genes	log likelihood value	10	0
-hn_CE_CX	2	1	0	Co-expression among worm genes	log likelihood value	10	0
-hn_CE_GT	2	1	0	Worm genetic interactions	log likelihood value	10	0
-hn_CE_LC	2	1	0	Literature curated worm protein physical interactions	log likelihood value	10	0
-hn_CE_YH	2	1	0	High-throughput yeast 2-hybrid assays among worm genes	log likelihood value	10	0
-hn_DM_PI	2	1	0	Fly protein physical interactions	log likelihood value	10	0
-hn_HS_CC	2	1	0	Co-citation of human genes	log likelihood value	10	0
-hn_HS_CX	2	1	0	Co-expression among human genes	log likelihood value	10	0
-hn_HS_DC	2	1	0	Co-occurrence of domains among human proteins	log likelihood value	10	0
-hn_HS_GN	2	1	0	Gene neighbourhoods of bacterial and archaeal orthologs of human genes	log likelihood value	10	0
-hn_HS_LC	2	1	0	Literature curated human protein physical interactions	log likelihood value	10	0
-hn_HS_MS	2	1	0	human protein complexes from affinity purification/mass spectrometry	log likelihood value	10	0
-hn_HS_PG	2	1	0	Co-inheritance of bacterial and archaeal orthologs of human genes	log likelihood value	10	0
-hn_HS_YH	2	1	0	High-throughput yeast 2-hybrid assays among human genes	log likelihood value	10	0
-hn_IntNet	2	1	0	Integrated network (HumanNet)	log likelihood value	10	0
-hn_SC_CC	2	1	0	Co-citation of yeast genes	log likelihood value	10	0
-hn_SC_CX	2	1	0	Co-expression among yeast genes	log likelihood value	10	0
-hn_SC_GT	2	1	0	Yeast genetic interactions	log likelihood value	10	0
-hn_SC_LC	2	1	0	Literature curated yeast protein physical interactions	log likelihood value	10	0
-hn_SC_MS	2	1	0	Yeast protein complexes from affinity purification/mass spectrometry	log likelihood value	10	0
-hn_SC_TS	2	1	0	Yeast protein interactions inferred from tertiary structures of complexes	log likelihood value	10	0
-hn_SC_YH	2	1	0	High-throughput yeast 2-hybrid assays among yeast genes	log likelihood value	10	0
+hn_CE_CC	1	1	0	Co-citation of worm genes	log likelihood value	10	0
+hn_CE_CX	1	1	0	Co-expression among worm genes	log likelihood value	10	0
+hn_CE_GT	1	1	0	Worm genetic interactions	log likelihood value	10	0
+hn_CE_LC	1	1	0	Literature curated worm protein physical interactions	log likelihood value	10	0
+hn_CE_YH	1	1	0	High-throughput yeast 2-hybrid assays among worm genes	log likelihood value	10	0
+hn_DM_PI	1	1	0	Fly protein physical interactions	log likelihood value	10	0
+hn_HS_CC	1	1	0	Co-citation of human genes	log likelihood value	10	0
+hn_HS_CX	1	1	0	Co-expression among human genes	log likelihood value	10	0
+hn_HS_DC	1	1	0	Co-occurrence of domains among human proteins	log likelihood value	10	0
+hn_HS_GN	1	1	0	Gene neighbourhoods of bacterial and archaeal orthologs of human genes	log likelihood value	10	0
+hn_HS_LC	1	1	0	Literature curated human protein physical interactions	log likelihood value	10	0
+hn_HS_MS	1	1	0	human protein complexes from affinity purification/mass spectrometry	log likelihood value	10	0
+hn_HS_PG	1	1	0	Co-inheritance of bacterial and archaeal orthologs of human genes	log likelihood value	10	0
+hn_HS_YH	1	1	0	High-throughput yeast 2-hybrid assays among human genes	log likelihood value	10	0
+hn_IntNet	1	1	0	Integrated network (HumanNet)	log likelihood value	10	0
+hn_SC_CC	1	1	0	Co-citation of yeast genes	log likelihood value	10	0
+hn_SC_CX	1	1	0	Co-expression among yeast genes	log likelihood value	10	0
+hn_SC_GT	1	1	0	Yeast genetic interactions	log likelihood value	10	0
+hn_SC_LC	1	1	0	Literature curated yeast protein physical interactions	log likelihood value	10	0
+hn_SC_MS	1	1	0	Yeast protein complexes from affinity purification/mass spectrometry	log likelihood value	10	0
+hn_SC_TS	1	1	0	Yeast protein interactions inferred from tertiary structures of complexes	log likelihood value	10	0
+hn_SC_YH	1	1	0	High-throughput yeast 2-hybrid assays among yeast genes	log likelihood value	10	0
 KEA_kinase_signatures	2	1	0	Genes associated with a given kinase	binary value	1	1
 kegg_pathway	2	1	0	Each pathway map contains a network of molecular interactions and reactions and is designed to link genes in the genome to gene products (mostly proteins) in the pathway	Binary value indicating that the gene has a known role in kegg pathway	1	1
 LINCS_cell_type	2	2	0	Cell type from LINCS experiment	binary value	1	1
