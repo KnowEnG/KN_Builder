@@ -79,5 +79,3 @@ benchmark_utilities_tests
 app
 ---
 
-.. automodule:: app
-   :members:
