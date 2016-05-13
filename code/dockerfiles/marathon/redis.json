@@ -2,7 +2,7 @@
     "id": "p1redis",
     "cmd": "redis-server --appendonly yes --requirepass KnowEnG",
     "cpus": 1.0,
-    "mem": 16000,
+    "mem": 32000,
     "instances": 1,
     "constraints": [["hostname", "CLUSTER", "knowcluster07.dyndns.org"]],
     "container": {
