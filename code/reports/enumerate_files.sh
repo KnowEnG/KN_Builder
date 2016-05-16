@@ -92,7 +92,7 @@ CMD='mysql -h '$KNP_MYSQL_HOST' --port '$KNP_MYSQL_PORT'  -uroot -pKnowEnG --exe
     SELECT \"status\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.status UNION
     SELECT \"edge2line\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge2line UNION
     SELECT \"edge\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge UNION
-    SELECT \"edge_meta\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge_meta UNION
+    SELECT \"edge_meta\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge_meta
 "'
     echo MySQL Tables
     eval "$CMD"
