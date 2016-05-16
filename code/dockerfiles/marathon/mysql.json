@@ -1,7 +1,7 @@
 {
     "id": "p1mysql-TMPPORT",
     "cpus": 4.0,
-    "mem": 16000,
+    "mem": 25000,
     "instances": 1,
     "env": {"PORT": "3306"},    
     "constraints": [["hostname", "CLUSTER", "knowcluster05.dyndns.org"]],
