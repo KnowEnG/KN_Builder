@@ -47,7 +47,7 @@ class Pathcom(SrcClass):
         This calls the SrcClass constructor (see utilities.SrcClass)
         """
         name = 'pathcom'
-        url_base = 'http://www.pathwaycommons.org/pc2/downloads/'
+        url_base = 'http://www.pathwaycommons.org/archives/PC2/current/'
         aliases = {"all":""}
         super(Pathcom, self).__init__(name, url_base, aliases, args)
 
