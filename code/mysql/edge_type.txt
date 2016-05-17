@@ -1,7 +1,7 @@
 achilles_genetic_fitness	2	1	0	Genes that effect cell survival in a given cell line	binary value	1	1
 allen_brain_atlas_signature	2	1	0	Genes which were shown to be differentially regulated in a region of the brain	binary value	1	1
 blastp_homology	1	1	1	protein sequence similarity as measured by basic local alignment search tool 	negative log 10 of E-value, expected number of local alignments with a given score that would be found in random sequences of the same length as the query and database	100	2
-enricher_cell_signature	2	1	0	Genes associated with a given cancer cell line	binary value	1	1
+enrichr_cell_signature	2	1	0	Genes associated with a given cancer cell line	binary value	1	1
 enrichr_ChIP_gene_set	2	1	0	Genes assocuated with a given ChIP or histone modification experiment  	binary value	1	1
 enrichr_pathway	2	1	0	Membership of gene in a pathway	binary value	1	1
 enrichr_perturbation_set	2	1	0	Genes which were shown to be differentially regulated by a given perturbagen 	binary value	1	1
