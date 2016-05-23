@@ -7,7 +7,7 @@
     "constraints": [["hostname", "CLUSTER", "knowcluster05.dyndns.org"]],
     "container": {
         "type": "DOCKER",
-        "volumes": [{"containerPath": "/var/lib/mysql", "hostPath": "/mnt/knowtmp/TMPPATH/", "mode": "RW"}],
+        "volumes": [{"containerPath": "/var/lib/mysql", "hostPath": "/mnt/knowtmp/project1/TMPPATH", "mode": "RW"}],
         "docker": {
             "image": "mysql",
             "network": "BRIDGE",
