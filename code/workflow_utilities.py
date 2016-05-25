@@ -94,7 +94,7 @@ def main_parse_args():
         if opt in config_opts:
             config_opts.remove(opt)
     workflow_opts = []
-    for opt in ['-su', '--setup' '-os', '--one_step', '-ne', '--no_ensembl']:
+    for opt in ['-su', '--setup', '-os', '--one_step', '-ne', '--no_ensembl']:
         if opt in config_opts:
             config_opts.remove(opt)
             workflow_opts.extend([opt])
@@ -289,6 +289,7 @@ def run_fetch(args):
                 version_dict = json.load(infile)
             dependencies = version_dict["dependencies"]
             ismap = version_dict["is_map"]
+            fetch_needed = version_dict["fetch_needed"]
             if len(dependencies) > 0:
                 for dep in dependencies:
                     parent_string = "-".join(["fetch", src, dep])
@@ -307,11 +308,10 @@ def run_fetch(args):
                            })
             step_job = ju.run_job_step(args, "fetcher", jobdict)
 
-            if not ismap:
+            if not ismap and fetch_needed:
                 ns_parameters.extend([",".join([src, alias])])
-
             if not args.setup and not args.one_step and not ismap and \
-                args.chronos not in SPECIAL_MODES:
+                args.chronos not in SPECIAL_MODES and fetch_needed:
 
                 ns_jobname = "-".join([jobname, "next_step"])
                 ns_dict = generic_dict(args, step_job.jobname)
