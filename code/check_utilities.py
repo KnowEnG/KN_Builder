@@ -29,6 +29,7 @@ import csv
 import sys
 import config_utilities as cf
 import table_utilities as tu
+import mysql_utilities as mu
 import import_utilities as iu
 from argparse import ArgumentParser
 
@@ -154,6 +155,34 @@ class SrcClass(object):
         local_dict['local_size'] = os.path.getsize(file)
         local_dict['local_date'] = os.path.getmtime(file)
         return local_dict
+
+    def get_local_version_info(self, alias, args):
+        """Return a dictionary with the local information for the alias.
+
+        This returns the local information for a given source alias, as
+        retrieved from the msyql database and formated as a dicitonary object.
+        (see mysql_utilities.get_file_meta). It adds the local_file_name and
+        local_file_exists to the fields retrieved from the database, which
+        are the name of the file locally and a boolean indicating if it already
+        exists on disk, respectively.
+
+        Args:
+            alias (str): An alias defined in self.aliases.
+
+        Returns:
+            dict: The local file information for a given source alias.
+        """
+        file_id = '.'.join([self.name, alias])
+        file_meta = mu.get_file_meta(file_id, args)
+        f_dir = os.path.join(self.args.local_dir, self.args.data_path, self.name)
+        f_dir = os.path.join(f_dir, alias)
+        url = self.get_remote_url(alias)
+        filename = os.path.basename(url).replace('%20', '_')
+        file = os.path.join(f_dir, filename)
+        file_meta['local_file_name'] = filename
+        file_meta['local_file_exists'] = os.path.isfile(file)
+        return file_meta
+
 
     def get_remote_file_size(self, remote_url):
         """Return the remote file size.
@@ -343,7 +372,7 @@ def get_SrcClass(args):
     """
     return SrcClass(args)
 
-def compare_versions(src_obj):
+def compare_versions(src_obj, args=None):
     """Return a dictionary with the version information for each alias in the
     source and write a dictionary for each alias to file.
 
@@ -353,6 +382,8 @@ def compare_versions(src_obj):
     Args:
         src_obj (SrcClass): A SrcClass object for which the comparison should
             be performed.
+        args (Namespace): args as populated namespace or 'None' for defaults
+
 
     Returns:
         dict: A nested dictionary describing the version information for each
@@ -371,8 +402,8 @@ def compare_versions(src_obj):
                 'remote_file' (str):            File to extract if remote file
                                                 location is a directory,
                 'remote_size' (int):            See get_remote_file_size,
-                'local_file_name' (str):        See get_local_file_info,
-                'local_file_exists' (bool):     See get_local_file_info,
+                'local_file_name' (str):        See get_local_version_info,
+                'file_exists' (bool):           See get_local_version_info,
                 'fetch_needed' (bool):          True if file needs to be downloaded
                                                 from remote source. A fetch will
                                                 be needed if the local file does
@@ -382,10 +413,10 @@ def compare_versions(src_obj):
 
     """
     version_dict = dict()
-    local_dict = dict()
+    file_meta = dict()
     for alias in src_obj.aliases:
         print('Comparing versions for {0}'.format(alias))
-        local_dict[alias] = src_obj.get_local_file_info(alias)
+        file_meta[alias] = src_obj.get_local_version_info(alias, args)
         version_dict[alias] = dict()
         version_dict[alias]['source'] = src_obj.name
         version_dict[alias]['alias'] = alias
@@ -400,28 +431,27 @@ def compare_versions(src_obj):
             src_obj.get_source_version(alias)
         version_dict[alias]['remote_size'] = src_obj.get_remote_file_size(alias)
         version_dict[alias]['local_file_name'] = \
-            local_dict[alias]['local_file_name']
-        version_dict[alias]['local_file_exists'] = \
-            local_dict[alias]['local_file_exists']
+            file_meta[alias]['local_file_name']
+        version_dict[alias]['file_exists'] = \
+            file_meta[alias]['file_exists']
 
-        if not local_dict[alias]['local_file_exists']:
+        if not file_meta[alias]['file_exists']:
             version_dict[alias]['fetch_needed'] = True
             continue
 
-        l_size = local_dict[alias]['local_size']
+        l_size = file_meta[alias]['size']
         r_size = version_dict[alias]['remote_size']
-        l_date = local_dict[alias]['local_date']
+        l_date = file_meta[alias]['date']
         r_date = version_dict[alias]['remote_date']
+        l_version = file_meta[alias]['version']
+        r_version = version_dict[alias]['remote_version']
 
-        if r_size != -1 and l_size != r_size:
+        if r_size == -1 and r_date == 0 and r_version == 'unknown':
             version_dict[alias]['fetch_needed'] = True
-        elif r_date != 'unknown' and l_date < r_date:
-            version_dict[alias]['fetch_needed'] = True
-        elif r_size == -1 and r_date == 'unknown':
-            version_dict[alias]['fetch_needed'] = True
-        else:
+        elif l_size == r_size and l_date == r_date and l_version == r_version:
             version_dict[alias]['fetch_needed'] = False
-
+        else:
+            version_dict[alias]['fetch_needed'] = True
 
     f_dir = os.path.join(src_obj.args.local_dir, src_obj.args.data_path,
                          src_obj.name)
@@ -457,7 +487,7 @@ def check(module, args=None):
     sys.path.append(src_code_dir)
     src_module = __import__(module)
     SrcClass = src_module.get_SrcClass(args)
-    version_dict = compare_versions(SrcClass)
+    version_dict = compare_versions(SrcClass, args)
     for alias in version_dict:
         iu.import_filemeta(version_dict[alias], args)
     return version_dict
