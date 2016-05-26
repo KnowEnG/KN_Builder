@@ -277,3 +277,4 @@ def main_parse_args():
 if __name__ == "__main__":
     args = main_parse_args()
     import_status(args.status_file, args)
+    import_production_edges(args)
