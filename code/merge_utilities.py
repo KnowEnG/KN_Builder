@@ -1,6 +1,8 @@
 """Utilites for merging tables prior to import
 
 Contains module functions::
+    main(infile_list, outfile)
+    main_parse_args()
 
 Examples:
 
