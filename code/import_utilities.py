@@ -163,6 +163,32 @@ def import_edge(edgefile, args=None):
             continue
         import_file(filename, table, ld_cmd, dup_cmd, args)
 
+def import_production_edges(args=None):
+    """Query production edges from status table into the edge table.
+
+    Queries the KnowNet status table and copies all distinct production edges
+    to the edge table. If a duplication occurs during the query, it updates to
+    the maximum edge score and keeps the edge hash for that edge.
+
+    Args:
+        args (Namespace): args as populated namespace or 'None' for defaults
+    """
+
+    if args is None:
+        args=cf.config_args()
+    uedge_cmd  = ('edge.weight = IF(edge.weight > status.weight, edge.weight, '
+                    'status.weight)')
+    uhash_cmd = ('edge.edge_hash = IF(edge.weight > status.weight, '
+                    'edge.edge_hash, status.edge_hash)')
+    db = mu.get_database('KnowNet', args)
+    cmd = ('SELECT DISTINCT n1_id, n2_id, et_name, weight, edge_hash '
+           'FROM KnowNet.status WHERE status.status="production" '
+           'ON DUPLICATE KEY UPDATE edge.weight = '
+           'IF(edge.weight > status.weight, edge.weight, status.weight)')
+    tablename = 'KnowNet.edge'
+    db.insert(tablename, cmd)
+
+
 def import_status(statusfile, args=None):
     """Imports the provided status file and any corresponding meta files into
     the KnowEnG MySQL database.
@@ -251,3 +277,4 @@ def main_parse_args():
 if __name__ == "__main__":
     args = main_parse_args()
     import_status(args.status_file, args)
+    import_production_edges(args)
