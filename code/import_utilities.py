@@ -176,10 +176,6 @@ def import_production_edges(args=None):
 
     if args is None:
         args=cf.config_args()
-    uedge_cmd  = ('edge.weight = IF(edge.weight > status.weight, edge.weight, '
-                    'status.weight)')
-    uhash_cmd = ('edge.edge_hash = IF(edge.weight > status.weight, '
-                    'edge.edge_hash, status.edge_hash)')
     db = mu.get_database('KnowNet', args)
     cmd = ('SELECT DISTINCT n1_id, n2_id, et_name, weight, edge_hash '
            'FROM KnowNet.status WHERE status.status="production" '
