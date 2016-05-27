@@ -263,6 +263,7 @@ def main(version_json, args=None):
     with open(version_json, 'r') as infile:
         version_dict = json.load(infile)
     if not version_dict['fetch_needed']:
+        print('Source has not updated, fetch not needed')
         return
     src_code_dir = os.path.join(args.local_dir, args.code_path, args.src_path)
     sys.path.append(src_code_dir)
