@@ -483,17 +483,21 @@ def run_import(args):
     for filestr in statusfile_list:
 
         statusfile = os.path.basename(filestr)
-        output_files = statusfile.replace('.status.', '.*.')
-        src = statusfile.split('.')[0]
-        alias = statusfile.split('.status.')[0].split(src+'.')[1]
+        if statusfile != 'unique_status.txt':
+            output_files = statusfile.replace('.status.', '.*.')
+            src = statusfile.split('.')[0]
+            alias = statusfile.split('.status.')[0].split(src+'.')[1]
 
-        chunk_path = os.path.join(src, alias, "chunks")
-        local_chunk_dir = os.path.join(args.local_dir, args.data_path, chunk_path)
-        local_statusfile = os.path.join(local_chunk_dir, statusfile)
-        if not os.path.exists(local_statusfile):
-            raise IOError('ERROR: "statusfile" specified with --step_parameters (-p) '
+            chunk_path = os.path.join(src, alias, "chunks")
+            local_chunk_dir = os.path.join(args.local_dir, args.data_path, chunk_path)
+            local_statusfile = os.path.join(local_chunk_dir, statusfile)
+            if not os.path.exists(local_statusfile):
+                raise IOError('ERROR: "statusfile" specified with --step_parameters (-p) '
                           'option, ' + filestr + ' does not exist: ' + local_statusfile)
 
+        else:
+            output_files = statusfile.replace('unique_status.', '*.')
+            chunk_path = '.'
         ctr += 1
         print("\t".join([str(ctr), statusfile]))
 
