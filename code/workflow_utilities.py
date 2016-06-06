@@ -48,8 +48,8 @@ import mysql_utilities as db
 import job_utilities as ju
 
 DEFAULT_START_STEP = 'CHECK'
-POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE', 'MAP']
-SETUP_FILES = ['species', 'ppi', 'ensembl']
+POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE', 'MAP', 'IMPORT']
+SETUP_FILES = ['ppi', 'ensembl']
 SPECIAL_MODES = ['LOCAL', 'DOCKER']
 
 def main_parse_args():
@@ -534,7 +534,7 @@ def main():
 
         jobdict = generic_dict(args, None)
         jobname = "KN_directory_init_" + stage + '_%m-%d_%H-%M-%S'
-        jobdict['TMPJOB'] = time.strftime(jobname)        
+        jobdict['TMPJOB'] = time.strftime(jobname)
         jobdict['TMPLAUNCH'] = '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
         args.dependencies = file_setup_job.jobname
