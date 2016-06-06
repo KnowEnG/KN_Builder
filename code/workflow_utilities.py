@@ -41,6 +41,7 @@ Examples:
 import os
 import sys
 import json
+import time
 from argparse import ArgumentParser
 import config_utilities as cf
 import mysql_utilities as db
@@ -483,17 +484,21 @@ def run_import(args):
     for filestr in statusfile_list:
 
         statusfile = os.path.basename(filestr)
-        output_files = statusfile.replace('.status.', '.*.')
-        src = statusfile.split('.')[0]
-        alias = statusfile.split('.status.')[0].split(src+'.')[1]
+        if statusfile != 'unique_status.txt':
+            output_files = statusfile.replace('.status.', '.*.')
+            src = statusfile.split('.')[0]
+            alias = statusfile.split('.status.')[0].split(src+'.')[1]
 
-        chunk_path = os.path.join(src, alias, "chunks")
-        local_chunk_dir = os.path.join(args.local_dir, args.data_path, chunk_path)
-        local_statusfile = os.path.join(local_chunk_dir, statusfile)
-        if not os.path.exists(local_statusfile):
-            raise IOError('ERROR: "statusfile" specified with --step_parameters (-p) '
+            chunk_path = os.path.join(src, alias, "chunks")
+            local_chunk_dir = os.path.join(args.local_dir, args.data_path, chunk_path)
+            local_statusfile = os.path.join(local_chunk_dir, statusfile)
+            if not os.path.exists(local_statusfile):
+                raise IOError('ERROR: "statusfile" specified with --step_parameters (-p) '
                           'option, ' + filestr + ' does not exist: ' + local_statusfile)
 
+        else:
+            output_files = statusfile.replace('unique_status.', '*.')
+            chunk_path = '.'
         ctr += 1
         print("\t".join([str(ctr), statusfile]))
 
@@ -528,7 +533,8 @@ def main():
             stage = 'SETUP'
 
         jobdict = generic_dict(args, None)
-        jobdict['TMPJOB'] = "KN_directory_init_" + stage
+        jobname = "KN_directory_init_" + stage + '_%m-%d_%H-%M-%S'
+        jobdict['TMPJOB'] = time.strftime(jobname)        
         jobdict['TMPLAUNCH'] = '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
         args.dependencies = file_setup_job.jobname
@@ -557,7 +563,8 @@ def main():
     if init_job != '' and args.chronos not in SPECIAL_MODES:
         args.dependencies = ""
         jobdict = generic_dict(args, None)
-        jobdict['TMPJOB'] = "KN_directory_init_" + stage
+        jobname = "KN_directory_init_" + stage + '_%m-%d_%H-%M-%S'
+        jobdict['TMPJOB'] = time.strftime(jobname)
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
 
 if __name__ == "__main__":
