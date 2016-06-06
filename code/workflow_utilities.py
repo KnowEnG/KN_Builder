@@ -41,6 +41,7 @@ Examples:
 import os
 import sys
 import json
+import time
 from argparse import ArgumentParser
 import config_utilities as cf
 import mysql_utilities as db
@@ -532,7 +533,8 @@ def main():
             stage = 'SETUP'
 
         jobdict = generic_dict(args, None)
-        jobdict['TMPJOB'] = "KN_directory_init_" + stage
+        jobname = "KN_directory_init_" + stage + '_%m-%d_%H-%M-%S'
+        jobdict['TMPJOB'] = time.strftime(jobname)        
         jobdict['TMPLAUNCH'] = '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
         args.dependencies = file_setup_job.jobname
@@ -561,7 +563,8 @@ def main():
     if init_job != '' and args.chronos not in SPECIAL_MODES:
         args.dependencies = ""
         jobdict = generic_dict(args, None)
-        jobdict['TMPJOB'] = "KN_directory_init_" + stage
+        jobname = "KN_directory_init_" + stage + '_%m-%d_%H-%M-%S'
+        jobdict['TMPJOB'] = time.strftime(jobname)
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
 
 if __name__ == "__main__":
