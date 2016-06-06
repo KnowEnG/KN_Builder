@@ -254,8 +254,7 @@ class Reactome(SrcClass):
             pathway = os.path.join('..', 'ReactomePathways', 'reactome.ReactomePathways.json')
             with open(pathway) as infile:
                 path_map = json.load(infile)
-            species = (os.path.join('..', '..', 'species', 'species_map',\
-                    'species.species_map.json'))
+            species = (os.path.join('..', '..', 'id_map', 'species', 'species.json'))
             with open(species) as infile:
                 species_map = json.load(infile)
 

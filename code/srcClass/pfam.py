@@ -225,8 +225,7 @@ class Pfam(SrcClass):
         src = self.name
 
         ###Map the file name
-        species = (os.path.join('..', '..', 'species', 'species_map',\
-                    'species.species_map.json'))
+        species = (os.path.join('..', '..', 'id_map', 'species', 'species.json'))
         with open(species) as infile:
             species_map = json.load(infile)
         n2spec = species_map.get(version_dict['alias_info'], \
