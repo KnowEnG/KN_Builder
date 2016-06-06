@@ -4,6 +4,11 @@ mkdir /mnt/knowtmp/mysql
 docker run -d --restart=always --name p1_mysql -e MYSQL_ROOT_PASSWORD=KnowEnG -p 3306:3306 \
     -v /mnt/knowtmp/mysql:/var/lib/mysql mysql
 
+#create users 
+CREATE USER 'KNviewer'
+  IDENTIFIED BY 'dbdev249';
+GRANT SELECT ON KnowNet.* TO 'KNviewer';
+
 ### redis container
 mkdir /mnt/knowtmp/redis
 docker run -d --name p1_redis -p 6379:6379 -v /mnt/knowtmp/redis:/data \
@@ -106,7 +111,7 @@ done;
 #### clear chronos queue
 for c in 'knowcluster01.dyndns.org:4400' ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep '"name"' | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
-    for s in 'map-' 'table-' 'check-' 'fetch-' 'KN_directory_init' ; do
+    for s in 'map-' 'table-' 'check-' 'fetch-' 'import-' 'KN_directory_init' ; do
         echo $s
         for i in `grep "$s" /tmp/t.txt  `; do
             CMD="curl -L -X DELETE $c/scheduler/job/$i";
@@ -178,3 +183,22 @@ KNP_CMD="python3 code/workflow_utilities.py IMPORT \
     -sd $KNP_SHARE_DIR -p kegg.ath.status.1.txt"
 echo $KNP_CMD
 
+### merge all unique files
+KNP_CMD="time (for i in node node_meta edge2line status edge_meta; \
+     do find "$KNP_DATA_PATH/*/*/*/ -type f -name '*.unique_'\$i'*' -print0 | \
+     xargs -0 sort -m -u -o {$KNP_DATA_PATH}/unique_\$i.txt; done)"
+echo $KNP_CMD
+
+time (for i in node node_meta edge2line status edge_meta; \
+     do find data_chronos_pipe/*/*/*/ -type f -name '*.unique_'$i'*' -print0 | \
+     xargs -0 sort -m -u -o data_chronos_pipe/unique_$i.txt; done)
+
+#timing: 7m38.062s for a merged 11G status file
+     
+### run the import pipeline on merged sources
+KNP_CMD="python3 code/workflow_utilities.py IMPORT \
+    -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
+    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR
+    -sd $KNP_SHARE_DIR -p unique_status.txt"
+echo $KNP_CMD
