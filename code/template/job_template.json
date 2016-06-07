@@ -12,5 +12,6 @@
     "cpus": "TMPCPUS",
     "retries": "1",
     "mem": "TMPMEM",
-    "command": "TMPCMD"
+    "command": "TMPCMD",
+    "highPriority": "TMPPRIOR"
 }
