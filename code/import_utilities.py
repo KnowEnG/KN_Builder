@@ -36,6 +36,10 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
     """
     if args is None:
         args=cf.config_args()
+    db = mu.get_database('KnowNet', args)
+    print('Inserting data from into ' + table)
+    db.load_data(file_name, table, ld_cmd)
+    return 1  ## remove this later (and potentially everything after)
     table_cmds = {'node_meta': 'node_meta.node_id = node_meta.node_id',
                 'node': 'node.node_id = node.node_id',
                 'raw_line' : 'raw_line.file_id = raw_line.file_id',
@@ -60,7 +64,6 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
     db.insert_ignore(table, cmd) #change later to duplicate
     db.drop_table(tmptable)
     db.close()
-    return 1  ## remove this later (and potentially everything after)
     if dup_cmd:
         cmd += ' ON DUPLICATE KEY UPDATE ' + dup_cmd.format(tmptable)
         db.start_transaction(level='READ COMMITTED')
