@@ -99,6 +99,7 @@ def main_parse_args():
         if opt in config_opts:
             config_opts.remove(opt)
             workflow_opts.extend([opt])
+    args.time_stamp = time.strftime('_%m-%d_%H-%M-%S')
     args.config_opts = " ".join(config_opts)
     args.workflow_opts = " ".join(workflow_opts)
     args.cloud_config_opts = args.config_opts
@@ -533,8 +534,7 @@ def main():
             stage = 'SETUP'
 
         jobdict = generic_dict(args, None)
-        jobname = "KN_directory_init_" + stage + '_%m-%d_%H-%M-%S'
-        jobdict['TMPJOB'] = time.strftime(jobname)
+        jobdict['TMPJOB'] = "KN_directory_init_" + stage + args.time_stamp
         jobdict['TMPLAUNCH'] = '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
         args.dependencies = file_setup_job.jobname
@@ -563,8 +563,7 @@ def main():
     if init_job != '' and args.chronos not in SPECIAL_MODES:
         args.dependencies = ""
         jobdict = generic_dict(args, None)
-        jobname = "KN_directory_init_" + stage + '_%m-%d_%H-%M-%S'
-        jobdict['TMPJOB'] = time.strftime(jobname)
+        jobdict['TMPJOB'] = "KN_directory_init_" + stage + args.time_stamp
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
 
 if __name__ == "__main__":
