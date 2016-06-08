@@ -39,16 +39,15 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
         args=cf.config_args()
     db = mu.get_database('KnowNet', args)
     print('Inserting data from into ' + table)
-    table_cmds = {'node_meta': 'node_meta.node_id = node_meta.node_id',
-                'node': 'node.node_id = node.node_id',
-                'raw_line' : 'raw_line.file_id = raw_line.file_id',
-                'edge2line': 'edge2line.edge_hash = edge2line.edge_hash',
-                'edge_meta': 'edge_meta.line_hash = edge_meta.line_hash',
-                'edge': ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
-                    '{0}.weight)')}
-    if not dup_cmd and table in table_cmds:
-        dup_cmd = table_cmds[table]
-    db = mu.get_database('KnowNet', args)
+    #table_cmds = {'node_meta': 'node_meta.node_id = node_meta.node_id',
+    #            'node': 'node.node_id = node.node_id',
+    #            'raw_line' : 'raw_line.file_id = raw_line.file_id',
+    #            'edge2line': 'edge2line.edge_hash = edge2line.edge_hash',
+    #            'edge_meta': 'edge_meta.line_hash = edge_meta.line_hash',
+    #            'edge': ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
+    #                '{0}.weight)')}
+    #if not dup_cmd and table in table_cmds:
+    #    dup_cmd = table_cmds[table]
     #tmptable = os.path.splitext(os.path.basename(file_name))[0].replace('.', '_')
     #tmptable = cf.pretty_name(tmptable, len(tmptable)).replace('-', '_')[:64]
     #print('Creating temporary table ' + tmptable)
@@ -62,13 +61,16 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
     #db.drop_table(tmptable)
     #db.close()
     #return 1  ## remove this later (and potentially everything after)
-    if dup_cmd:
-        ld_cmd += ' ON DUPLICATE KEY UPDATE ' + dup_cmd.format(table)
-        db.start_transaction(level='READ UNCOMMITTED')
-        db.insert(table, ld_cmd)
-    else:
-        db.start_transaction(level='READ UNCOMMITTED')
-        db.replace(table, ld_cmd)
+    #if dup_cmd:
+    #    ld_cmd += ' ON DUPLICATE KEY UPDATE ' + dup_cmd.format(table)
+    #    db.start_transaction(level='READ UNCOMMITTED')
+    #    db.load_data(file_name, table, ld_cmd)
+    #    #db.insert(table, ld_cmd)
+    #else:
+    #    db.start_transaction(level='READ UNCOMMITTED')
+    #    db.load_data(file_name, table, ld_cmd)
+    #    #db.replace(table, ld_cmd)
+    db.load_data(file_name, table, ld_cmd)
     db.close()
 
 def import_filemeta(version_dict, args=None):
@@ -203,7 +205,7 @@ def merge(merge_key, args):
     searchpath = os.path.join(filepath, '*', '*', '*')
     with open(outfile, 'w') as out:
         cmd1 = ['find', searchpath, '-type', 'f',
-                '-name', '*.unique.'+merge_key+'*', '-print0' ]
+                '-name', '*.unique.'+merge_key+'.txt', '-print0' ]
         cmd2 = ['xargs', '-0', 'sort', '-mu']
         p1 = subprocess.Popen(' '.join(cmd1), stdout=subprocess.PIPE, shell=True)
         subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
