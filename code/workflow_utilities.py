@@ -490,15 +490,17 @@ def run_import(args):
         if importfile in TABLES:
             mergefile = 'unique.' + importfile + '.txt'
             output_files = os.path.join(args.local_dir, args.data_path, mergefile)
+            filestr = importfile
         else:
             output_files = importfile
+            filestr = os.path.basename(importfile)
             if not os.path.exists(importfile):
                 raise IOError('ERROR: "importfile" specified with --step_parameters (-p) '
                           'option, ' + importfile + ' does not exist: ' + importfile)
         ctr += 1
-        print("\t".join([str(ctr), importfile]))
+        print("\t".join([str(ctr), filestr]))
 
-        jobname = "-".join(["import", importfile])
+        jobname = "-".join(["import", filestr])
         jobname = jobname.replace(".", "-")
         jobname = jobname.replace(".txt", "")
         jobdict = generic_dict(args, None)
