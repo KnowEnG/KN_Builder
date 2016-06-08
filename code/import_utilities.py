@@ -37,6 +37,12 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
     """
     if args is None:
         args=cf.config_args()
+    db = mu.get_database('KnowNet', args)
+    print('Inserting data from into ' + table)
+    db.load_data(file_name, table, ld_cmd)
+    return 1  ## remove this later (and potentially everything after)
+    if args is None:
+        args=cf.config_args()
     table_cmds = {'node_meta': 'node_meta.node_id = node_meta.node_id',
                 'node': 'node.node_id = node.node_id',
                 'raw_line' : 'raw_line.file_id = raw_line.file_id',
