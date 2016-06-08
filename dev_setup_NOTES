@@ -40,6 +40,7 @@ cd /workspace/knowtmp/project1/
 git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
 cd /workspace/fast/apps/
 git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
+cd KnowNet_Pipeline/
 git checkout chronos_testing
 
 ### set environment vars

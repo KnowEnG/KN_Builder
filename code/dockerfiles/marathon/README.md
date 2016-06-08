@@ -30,6 +30,16 @@ for INST in mysql_perf,3307; do
     curl -X POST -H "Content-type: application/json" knowcluster01.dyndns.org:8080/v2/apps -d"$JOB"
 done;
 
+### deploy with build mysql conf
+for INST in p1_mysql,3306; do
+    echo $INST;
+    TMPPATH=`echo $INST | cut -f1 -d,`
+    TMPPORT=`echo $INST | cut -f2 -d,`
+    JOB=`cat code/dockerfiles/marathon/mysql_build.json | sed -e 's/TMPPATH/'"$TMPPATH"'/g' | sed -e 's/TMPPORT/'"$TMPPORT"'/g'`
+    echo $JOB
+    curl -X POST -H "Content-type: application/json" knowcluster01.dyndns.org:8080/v2/apps -d"$JOB"
+done;
+
 ### restart
 curl -X POST knowcluster01.dyndns.org:8080/v2/apps/p1mysql/restart
 
