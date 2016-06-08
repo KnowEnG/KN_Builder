@@ -43,6 +43,7 @@ def main_parse_args():
                         sorted files which should be merged')
     parser.add_argument('outfile', help='path to file where the merged results \
                         should be stored')
+    parser = cf.add_config_args(parser)
     args = parser.parse_args()
     return args
 

@@ -99,6 +99,7 @@ def main_parse_args():
         if opt in config_opts:
             config_opts.remove(opt)
             workflow_opts.extend([opt])
+    args.time_stamp = time.strftime('_%m-%d_%H-%M-%S')
     args.config_opts = " ".join(config_opts)
     args.workflow_opts = " ".join(workflow_opts)
     args.cloud_config_opts = args.config_opts
@@ -465,50 +466,45 @@ def run_map(args):
 
 
 def run_import(args):
-    """Runs import_status on a single .status. file on the cloud.
+    """Merges sorted files and runs import on output file on the cloud.
 
-    This loops through args.parameters statusfiles, creates a job for each that
-    calls import_utilities main(), and runs job in args.chronos location.
+    This loops through args.step_parameters (see Args below), and creates a job
+    for each that merges the already sorted and unique files found in the data
+    path (if args.merge is True), then calls import_utilities main().
 
     Args:
-        args (Namespace): args as populated namespace from parse_args, must
-            specify --step_parameters(-p) as ',,' separated list of
-            'source.alias.status.chunk.txt' file names
+        args (Namespace): args as populated namespace from parse_args,
+            specify --step_parameters(-p) as ',,' separated list of files to
+            import or the allowed possible SQL table names: node, node_meta,
+            edge2line, status, or edge_meta. If not specified, by default it
+            will try to import all tables.
     """
-    statusfile_list = args.step_parameters.split(",,")
+    importfile_list = args.step_parameters.split(",,")
+    TABLES = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta']
     if args.step_parameters == "":
-        raise ValueError("ERROR: 'statusfile' must be specified with --step_parameters (-p)")
+        importfile_list = TABLES
     ju.Job("importer", args)
 
     ctr = 0
-    for filestr in statusfile_list:
-
-        statusfile = os.path.basename(filestr)
-        if statusfile != 'unique_status.txt':
-            output_files = statusfile.replace('.status.', '.*.')
-            src = statusfile.split('.')[0]
-            alias = statusfile.split('.status.')[0].split(src+'.')[1]
-
-            chunk_path = os.path.join(src, alias, "chunks")
-            local_chunk_dir = os.path.join(args.local_dir, args.data_path, chunk_path)
-            local_statusfile = os.path.join(local_chunk_dir, statusfile)
-            if not os.path.exists(local_statusfile):
-                raise IOError('ERROR: "statusfile" specified with --step_parameters (-p) '
-                          'option, ' + filestr + ' does not exist: ' + local_statusfile)
-
+    for importfile in importfile_list:
+        if importfile in TABLES:
+            mergefile = 'unique.' + importfile + '.txt'
+            output_files = os.path.join(args.local_dir, args.data_path, mergefile)
         else:
-            output_files = statusfile.replace('unique_status.', '*.')
-            chunk_path = '.'
+            output_files = importfile
+            if not os.path.exists(importfile):
+                raise IOError('ERROR: "importfile" specified with --step_parameters (-p) '
+                          'option, ' + importfile + ' does not exist: ' + importfile)
         ctr += 1
-        print("\t".join([str(ctr), statusfile]))
+        print("\t".join([str(ctr), importfile]))
 
-        jobname = "-".join(["import", statusfile])
+        jobname = "-".join(["import", importfile])
         jobname = jobname.replace(".", "-")
         jobname = jobname.replace(".txt", "")
         jobdict = generic_dict(args, None)
         jobdict.update({'TMPJOB': jobname,
-                        'TMPSTATUSPATH': os.path.join(chunk_path, statusfile),
-                        'TMPFILES': os.path.join(chunk_path, output_files)
+                        'TMPIMPORTPATH': importfile,
+                        'TMPFILES': output_files
                        })
         ju.run_job_step(args, "importer", jobdict)
 
@@ -533,8 +529,7 @@ def main():
             stage = 'SETUP'
 
         jobdict = generic_dict(args, None)
-        jobname = "KN_directory_init_" + stage + '_%m-%d_%H-%M-%S'
-        jobdict['TMPJOB'] = time.strftime(jobname)
+        jobdict['TMPJOB'] = "KN_directory_init_" + stage + args.time_stamp
         jobdict['TMPLAUNCH'] = '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
         args.dependencies = file_setup_job.jobname
@@ -563,8 +558,7 @@ def main():
     if init_job != '' and args.chronos not in SPECIAL_MODES:
         args.dependencies = ""
         jobdict = generic_dict(args, None)
-        jobname = "KN_directory_init_" + stage + '_%m-%d_%H-%M-%S'
-        jobdict['TMPJOB'] = time.strftime(jobname)
+        jobdict['TMPJOB'] = "KN_directory_init_" + stage + args.time_stamp
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
 
 if __name__ == "__main__":

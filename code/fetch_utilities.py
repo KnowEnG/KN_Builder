@@ -284,10 +284,10 @@ def main(version_json, args=None):
         num_chunks = 0
         rawline = raw_line(newfile)
         map_dict = mySrc.create_mapping_dict(rawline)
-        nodefile = rawline.replace('rawline', 'unique_node')
+        nodefile = rawline.replace('rawline', 'unique.node')
         if os.path.isfile(nodefile):
             iu.import_pnode(nodefile, args)
-        nmfile = rawline.replace('rawline', 'unique_node_meta')
+        nmfile = rawline.replace('rawline', 'unique.node_meta')
         if os.path.isfile(nmfile):
             iu.import_nodemeta(nmfile, args)
         map_file = os.path.splitext(newfile)[0] + '.json'
