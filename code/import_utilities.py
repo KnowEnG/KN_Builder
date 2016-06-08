@@ -16,6 +16,7 @@ import config_utilities as cf
 import mysql_utilities as mu
 import json
 import os
+import subprocess
 from argparse import ArgumentParser
 
 #@profile
@@ -156,7 +157,7 @@ def import_edge(edgefile, args=None):
             filename = edgefile
         else:
             filename = edgefile.replace('conv', table)
-        ufile = filename.replace(table, 'unique_' + table)
+        ufile = filename.replace(table, 'unique.' + table)
         if os.path.isfile(ufile):
             filename = ufile
         if not os.path.isfile(filename):
@@ -184,6 +185,31 @@ def import_production_edges(args=None):
     tablename = 'KnowNet.edge'
     db.insert(tablename, cmd)
 
+def merge(merge_key, args):
+    """Uses sort to merge and unique the already sorted files of the table type
+    and stores the results into outfile.
+
+    This takes a table type (one of: node, node_meta, edge2line, status, or
+    edge_meta) and merges them using the unix sort command while removing any
+    duplicate elements.
+
+    Args:
+        merge_key (str): table type (one of: node, node_meta, edge2line, status,
+            or edge_meta)
+        args (Namespace): args as populated namespace or 'None' for defaults
+    """
+    if args is None:
+        args=cf.config_args()
+    filepath = os.path.join(args.cloud_dir, args.data_path)
+    outfile = os.path.join(filepath, 'unique.' + merge_key + '.txt')
+    searchpath = os.path.join(filepath, '*', '*', '*')
+    with open(outfile, 'w') as out:
+        cmd1 = ['find', searchpath, '-type', 'f',
+                '-name', '*.unique.'+merge_key+'*', '-print0' ]
+        cmd2 = ['xargs', '-0', 'sort', '-mu']
+        p1 = subprocess.Popen(' '.join(cmd1), stdout=subprocess.PIPE, shell=True)
+        subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
+    return outfile
 
 def import_status(statusfile, args=None):
     """Imports the provided status file and any corresponding meta files into
@@ -208,7 +234,7 @@ def import_status(statusfile, args=None):
             filename = statusfile
         else:
             filename = statusfile.replace('status', table)
-        ufile = filename.replace(table, 'unique_' + table)
+        ufile = filename.replace(table, 'unique.' + table)
         if os.path.isfile(ufile):
             filename = ufile
         if not os.path.isfile(filename):
@@ -264,13 +290,29 @@ def main_parse_args():
         Namespace: args as populated namespace
     """
     parser = ArgumentParser()
-    parser.add_argument('status_file', help='status file produced from map step, \
-                        e.g. kegg/ath/kegg.ath.status.1.txt')
+    parser.add_argument('importfile', help='import file produced from map step, \
+                        or merged files, and must contain the table name e.g. \
+                        kegg/ath/kegg.ath.unique.status.1.txt or \
+                        unique.status.txt')
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
     return args
 
 if __name__ == "__main__":
     args = main_parse_args()
-    import_status(args.status_file, args)
-    import_production_edges(args)
+    merge_keys = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta']
+    if args.importfile in merge_keys:
+        args.importfile = merge(args.importfile, args)
+    table = ''
+    ld_cmd = ''
+    dup_cmd = ''
+    for key in args.importfile.split('.'):
+        if key in merge_keys:
+            table = key
+            break
+    if not table:
+        raise ValueError("ERROR: 'importfile' must contain one of "+\
+                         ','.join(merge_keys))
+    import_file(args.importfile, table, ld_cmd, dup_cmd, args)
+    if table == 'status':
+        import_production_edges(args)
