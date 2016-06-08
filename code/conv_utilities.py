@@ -61,8 +61,8 @@ def main(edgefile, args=None):
         return
     rdb = ru.get_database(args)
     status_file = edgefile.replace('edge', 'status')
-    ue2l_file = edgefile.replace('edge', 'unique_edge2line')
-    us_file = edgefile.replace('edge', 'unique_status')
+    ue2l_file = edgefile.replace('edge', 'unique.edge2line')
+    us_file = edgefile.replace('edge', 'unique.status')
     with open(edgefile, 'r') as infile, \
         open(status_file, 'w') as e_stat:
         reader = csv.reader(infile, delimiter = '\t')
