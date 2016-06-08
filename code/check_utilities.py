@@ -328,9 +328,9 @@ class SrcClass(object):
                 n_writer.writerow([kn_id, kn_name])
                 n_meta_writer.writerow([kn_id, info_type, orig_name])
                 n_meta_writer.writerow([kn_id, info_type, orig_id])
-        outfile = node_file.replace('node', 'unique_node')
+        outfile = node_file.replace('node', 'unique.node')
         tu.csu(node_file, outfile)
-        outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
+        outfile = n_meta_file.replace('node_meta', 'unique.node_meta')
         tu.csu(n_meta_file, outfile)
         return map_dict
 
