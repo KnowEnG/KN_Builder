@@ -27,6 +27,7 @@ import os
 import re
 
 DEFAULT_CHRONOS_URL = 'knowcluster01.dyndns.org:8888'
+DEFAULT_MARATHON_URL = 'knowcluster01.dyndns.org:8080/v2/apps'
 DEFAULT_LOCAL_BASE = '/workspace/prototype/KnowNet_Pipeline'
 DEFAULT_CLOUD_BASE = '/storage-pool/blatti/KnowNet_Pipeline'
 
@@ -40,6 +41,10 @@ DEFAULT_MYSQL_URL = 'knowice.cs.illinois.edu'
 DEFAULT_MYSQL_PORT = '3306'
 DEFAULT_MYSQL_USER = 'root'
 DEFAULT_MYSQL_PASS = 'KnowEnG'
+DEFAULT_MYSQL_MEM = '15000'
+DEFAULT_MYSQL_CPU = '4.0'
+DEFAULT_MYSQL_DIR = '/mnt/knowtmp/project1/p1_mysql'
+DEFAULT_MYSQL_CONF = 'build_conf/'
 
 DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
 DEFAULT_REDIS_PORT = '6379'
@@ -64,11 +69,15 @@ def add_config_args(parser):
     --logs_path	    |str	|-lp	|relative path of data directory from toplevel
     --src_path 	    |str	|-sp	|relative path of source code directory from code directory
     --mysql_host	|str	|-myh	|url of mySQL db
-    --mysql_port	|int	|-myp	|port for mySQL db
+    --mysql_port	|str	|-myp	|port for mySQL db
     --mysql_user	|str	|-myu	|user for mySQL db
     --mysql_pass	|str	|-myps	|password for mySQL db
+    --mysql_mem     |str    |-mym   |memory for deploying MySQL container
+    --mysql_cpu     |str    |-myc   |cpus for deploying MySQL container
+    --mysql_dir     |str    |-myd  |directory for deploying MySQL container
+    --mysql_conf    |str    |-mycf  |config directory for deploying MySQL container
     --redis_host	|str	|-rh 	|url of Redis db
-    --redis_port	|int	|-rp 	|port for Redis db
+    --redis_port	|str	|-rp 	|port for Redis db
     --redis_pass	|str	|-rps	|password for Redis db
     --chunk_size	|int	|-cs	|lines per chunk
     --test_mode	    |   	|-tm	|run in test mode by only printing command, defaults to False
@@ -85,6 +94,8 @@ def add_config_args(parser):
     """
     parser.add_argument('-c', '--chronos', default=DEFAULT_CHRONOS_URL,
                         help='url of chronos scheduler or LOCAL or DOCKER')
+    parser.add_argument('-m', '--marathon', default=DEFAULT_MARATHON_URL,
+                        help='url of marathon scheduler')
     parser.add_argument('-ld', '--local_dir', default=DEFAULT_LOCAL_BASE,
                         help='name of toplevel directory on local machine')
     parser.add_argument('-cd', '--cloud_dir', default=DEFAULT_CLOUD_BASE,
@@ -108,6 +119,14 @@ def add_config_args(parser):
                         help='user for mySQL db')
     parser.add_argument('-myps', '--mysql_pass', default=DEFAULT_MYSQL_PASS,
                         help='password for mySQL db')
+    parser.add_argument('-mym', '--mysql_mem', default=DEFAULT_MYSQL_MEM,
+                        help='memory for deploying MySQL container')
+    parser.add_argument('-myc', '--mysql_cpu', default=DEFAULT_MYSQL_CPU,
+                        help='cpus for deploying MySQL container')
+    parser.add_argument('-myd', '--mysql_dir', default=DEFAULT_MYSQL_DIR,
+                        help='directory for deploying MySQL container')                    
+    parser.add_argument('-mycf', '--mysql_conf', default=DEFAULT_MYSQL_CONF,
+                        help='config directory for deploying MySQL container') 
     parser.add_argument('-rh', '--redis_host', default=DEFAULT_REDIS_URL,
                         help='url of Redis db')
     parser.add_argument('-rp', '--redis_port', default=DEFAULT_REDIS_PORT,

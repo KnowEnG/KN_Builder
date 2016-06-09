@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Utiliites for interacting with the KnowEnG MySQL db through python.
 
 Contains the class MySQL which provides functionality for interacting with
@@ -14,12 +16,44 @@ Contains module functions::
     get_insert_cmd(step)
     import_ensembl(alias, args=None)
 """
-
+from argparse import ArgumentParser
 import config_utilities as cf
 import mysql.connector as sql
 import os
 import json
 import subprocess
+
+def deploy_container(args=None):
+    """Deplays a container with marathon running MySQL using the specified
+    args.
+    
+    This replaces the placeholder args in the json describing how to deploy a 
+    container running mysql with those supplied in the users arguements.
+    
+    Args:
+        args (Namespace): args as populated namespace or 'None' for defaults
+    """
+    if args is None:
+        args=cf.config_args()
+    deploy_dir = os.path.join(args.local_dir, 'marathon_jobs')
+        if not os.path.exists(deploy_dir):
+            os.makedirs(deploy_dir)
+    template_job = os.path.join(args.local_dir, args.code_path, 'mysql', 'mysql.json')
+    with open(template_job, 'r') as infile:
+        deploy_dict = json.load(infile)
+    deploy_dict['id'] = "p1mysql-" + args.mysql_port
+    deploy_dict['cpu'] = int(args.mysql_cpu)
+    deploy_dict['mem'] = int(args.mysql_mem)
+    deploy_dict['constraints'] = ["hostname", "CLUSTER", args.mysql_host]
+    deploy_dict['container']['volumes'][0]['hostPath'] = args.mysql_dir
+    deploy_dict['container']['volumes'][1]['hostPath'] = args.mysql_conf
+    deploy_dict['docker']['parameters'][0]['value'] = "MYSQL_ROOT_PASSWORD="+\
+                                                      args.mysql_pass
+    deploy_dict['docker']['portMappings'][0]['hostPort'] = args.mysql_port
+    job = ("curl -X POST -H 'Content-type: application/json' args.marathon "-d")
+    job += str(deploy_dict)
+    print(job)
+        
 
 def combine_tables(alias, args=None):
     """Combine all of the data imported from ensembl for the provided alias
@@ -711,3 +745,9 @@ class MySQL(object):
         """
         self.conn.commit()
         self.conn.close()
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser = cf.add_config_args(parser)
+    args = parser.parse_args()
+    deploy_container(args)
