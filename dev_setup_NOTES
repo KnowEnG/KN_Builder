@@ -102,7 +102,7 @@ KNP_CMD="redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a KnowEnG FLUSHDB"
 echo $KNP_CMD
 
 #### clear files
-for i in KN_directory_init_SETUP ensembl ppi species id_map; do
+for i in KN_starter_SETUP ensembl ppi species id_map; do
     rm -r $KNP_LOGS_PATH/*$i*
     rm -r $KNP_DATA_PATH/*$i*
     rm -r $KNP_SHARE_DIR/$KNP_LOGS_PATH/*$i*
@@ -112,7 +112,7 @@ done;
 #### clear chronos queue
 for c in 'knowcluster01.dyndns.org:4400' ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep '"name"' | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
-    for s in 'map-' 'table-' 'check-' 'fetch-' 'import-' 'KN_directory_init' ; do
+    for s in 'map-' 'table-' 'check-' 'fetch-' 'import-' 'KN_starter' ; do
         echo $s
         for i in `grep "$s" /tmp/t.txt  `; do
             CMD="curl -L -X DELETE $c/scheduler/job/$i";
@@ -149,7 +149,7 @@ done;
 #### clear chronos queue
 for c in 'knowcluster01.dyndns.org:4400' ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep '"name"' | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
-    for s in 'map-' 'table-' 'check-' 'fetch-' 'KN_directory_init' 'import-'; do
+    for s in 'map-' 'table-' 'check-' 'fetch-' 'KN_starter' 'import-'; do
         echo $s
         for i in `grep "$s" /tmp/t.txt  `; do
             CMD="curl -L -X DELETE $c/scheduler/job/$i";

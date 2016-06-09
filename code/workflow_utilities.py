@@ -523,7 +523,7 @@ def main():
     """
 
     args = main_parse_args()
-    stage = 'PIPELINE'
+    stage = 'PARSE'
     init_job = ''
     if args.dependencies == "":
 
@@ -531,9 +531,11 @@ def main():
             knownet = db.MySQL(None, args)
             knownet.init_knownet()
             stage = 'SETUP'
+        elif args.start_step == 'IMPORT':
+            stage = 'IMPORT'
 
         jobdict = generic_dict(args, None)
-        jobdict['TMPJOB'] = "KN_directory_init_" + stage + args.time_stamp
+        jobdict['TMPJOB'] = "KN_starter_" + stage + args.time_stamp
         jobdict['TMPLAUNCH'] = '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
         args.dependencies = file_setup_job.jobname
@@ -562,7 +564,7 @@ def main():
     if init_job != '' and args.chronos not in SPECIAL_MODES:
         args.dependencies = ""
         jobdict = generic_dict(args, None)
-        jobdict['TMPJOB'] = "KN_directory_init_" + stage + args.time_stamp
+        jobdict['TMPJOB'] = "KN_starter_" + stage + args.time_stamp
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
 
 if __name__ == "__main__":
