@@ -45,6 +45,7 @@ DEFAULT_MYSQL_MEM = '15000'
 DEFAULT_MYSQL_CPU = '4.0'
 DEFAULT_MYSQL_DIR = '/mnt/knowtmp/project1/p1_mysql'
 DEFAULT_MYSQL_CONF = 'build_conf/'
+DEFAULT_MYSQL_CONS_URL = ''
 
 DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
 DEFAULT_REDIS_PORT = '6379'
@@ -74,7 +75,8 @@ def add_config_args(parser):
     --mysql_pass	|str	|-myps	|password for mySQL db
     --mysql_mem     |str    |-mym   |memory for deploying MySQL container
     --mysql_cpu     |str    |-myc   |cpus for deploying MySQL container
-    --mysql_dir     |str    |-myd  |directory for deploying MySQL container
+    --mysql_dir     |str    |-myd   |directory for deploying MySQL container
+    --mysql_curl     |str    |-mycu  |constraint url for deploying MySQL container
     --mysql_conf    |str    |-mycf  |config directory for deploying MySQL container
     --redis_host	|str	|-rh 	|url of Redis db
     --redis_port	|str	|-rp 	|port for Redis db
@@ -123,6 +125,8 @@ def add_config_args(parser):
                         help='memory for deploying MySQL container')
     parser.add_argument('-myc', '--mysql_cpu', default=DEFAULT_MYSQL_CPU,
                         help='cpus for deploying MySQL container')
+    parser.add_argument('-mycu', '--mysql_curl', default=DEFAULT_MYSQL_CONS_URL,
+                        help='constrain url for deploying MySQL container')
     parser.add_argument('-myd', '--mysql_dir', default=DEFAULT_MYSQL_DIR,
                         help='directory for deploying MySQL container')                    
     parser.add_argument('-mycf', '--mysql_conf', default=DEFAULT_MYSQL_CONF,

@@ -35,24 +35,37 @@ def deploy_container(args=None):
     """
     if args is None:
         args=cf.config_args()
-    deploy_dir = os.path.join(args.local_dir, 'marathon_jobs')
-        if not os.path.exists(deploy_dir):
-            os.makedirs(deploy_dir)
-    template_job = os.path.join(args.local_dir, args.code_path, 'mysql', 'mysql.json')
+    deploy_dir = os.path.join(args.code_path, 'marathon_jobs')
+    if not os.path.exists(deploy_dir):
+        os.makedirs(deploy_dir)
+    template_job = os.path.join(args.local_dir, args.code_path, 'dockerfiles', 'marathon', 'mysql.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
-    deploy_dict['id'] = "p1mysql-" + args.mysql_port
-    deploy_dict['cpu'] = int(args.mysql_cpu)
-    deploy_dict['mem'] = int(args.mysql_mem)
-    deploy_dict['constraints'] = ["hostname", "CLUSTER", args.mysql_host]
-    deploy_dict['container']['volumes'][0]['hostPath'] = args.mysql_dir
-    deploy_dict['container']['volumes'][1]['hostPath'] = args.mysql_conf
-    deploy_dict['docker']['parameters'][0]['value'] = "MYSQL_ROOT_PASSWORD="+\
-                                                      args.mysql_pass
-    deploy_dict['docker']['portMappings'][0]['hostPort'] = args.mysql_port
-    job = ("curl -X POST -H 'Content-type: application/json' args.marathon "-d")
-    job += str(deploy_dict)
-    print(job)
+    deploy_dict["id"] = "p1mysql-" + args.mysql_port
+    deploy_dict["cpus"] = float(args.mysql_cpu)
+    deploy_dict["mem"] = int(args.mysql_mem)
+    if args.mysql_curl:
+        deploy_dict["constraints"] = [["hostname", "CLUSTER", args.mysql_host]]
+    else:
+        deploy_dict["constraints"] = []
+    deploy_dict["container"]["volumes"][0]["hostPath"] = args.mysql_dir
+    conf_path = os.path.join(args.cloud_dir, args.code_path, 'mysql', args.mysql_conf)
+    deploy_dict["container"]["volumes"][1]["hostPath"] = conf_path
+    deploy_dict["container"]["docker"]["parameters"][0]["value"] = \
+                    "MYSQL_ROOT_PASSWORD=" + args.mysql_pass
+    deploy_dict["container"]["docker"]["portMappings"][0]["hostPort"] = int(args.mysql_port)
+    out_path = os.path.join(deploy_dir, "p1mysql-" + args.mysql_port +'.json')
+    with open(out_path, 'w') as outfile:
+        outfile.write(json.dumps(deploy_dict))
+    job= 'curl -X POST -H "Content-type: application/json" ' + args.marathon + " -d '"
+    job += json.dumps(deploy_dict) + "'"
+    if not args.test_mode:
+        try:
+            subprocess.check_output(job, shell=True)
+        except subprocess.CalledProcessError as ex1:
+            print(ex1.output)
+    else:
+        print(job)
         
 
 def combine_tables(alias, args=None):
@@ -747,6 +760,12 @@ class MySQL(object):
         self.conn.close()
 
 if __name__ == "__main__":
+    """Deploy a MySQL container using marathon with the provided command line
+    arguements. 
+    
+    This uses the provided command line arguments and the defaults found in 
+    config_utilities to launch a MySQL docker container using marathon.
+    """
     parser = ArgumentParser()
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
