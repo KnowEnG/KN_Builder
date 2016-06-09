@@ -281,11 +281,11 @@ class Pathcom(SrcClass):
                         edge_writer.writerow([chksm, kn_n3id, n3hint, n3_type,
                                     n3spec, node, n1hint, n1type, n1spec,
                                     'pathcom_pathway', score, t_chksum])
-        outfile = e_meta_file.replace('edge_meta', 'unique_edge_meta')
+        outfile = e_meta_file.replace('edge_meta', 'unique.edge_meta')
         tu.csu(e_meta_file, outfile, [1, 2, 3])
-        outfile = node_file.replace('node', 'unique_node')
+        outfile = node_file.replace('node', 'unique.node')
         tu.csu(node_file, outfile)
-        outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
+        outfile = n_meta_file.replace('node_meta', 'unique.node_meta')
         tu.csu(n_meta_file, outfile)
 
 

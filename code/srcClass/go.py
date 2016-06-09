@@ -277,9 +277,9 @@ class Go(SrcClass):
                     alt_id = raw[8:].strip()
                     term_map[alt_id] = kn_id + '::' + kn_name
                     n_meta_writer.writerow([kn_id, info_type, alt_id])
-        outfile = node_file.replace('node', 'unique_node')
+        outfile = node_file.replace('node', 'unique.node')
         tu.csu(node_file, outfile)
-        outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
+        outfile = n_meta_file.replace('node_meta', 'unique.node_meta')
         tu.csu(n_meta_file, outfile)
 
         return term_map
@@ -377,7 +377,7 @@ class Go(SrcClass):
 
                 e_meta_writer.writerow([chksm, info_type1, reference])
                 e_meta_writer.writerow([chksm, info_type2, anno_evidence])
-            outfile = e_meta_file.replace('edge_meta', 'unique_edge_meta')
+            outfile = e_meta_file.replace('edge_meta', 'unique.edge_meta')
             tu.csu(e_meta_file, outfile)
 
 if __name__ == "__main__":

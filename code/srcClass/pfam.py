@@ -279,9 +279,9 @@ class Pfam(SrcClass):
                 edge_writer.writerow([chksm, kn_id, n1hint, n1type, n1spec, 
                                       n2orig, n2hint, n2type, n2spec, et_hint, 
                                       score, t_chksum])
-        outfile = node_file.replace('node', 'unique_node')
+        outfile = node_file.replace('node', 'unique.node')
         tu.csu(node_file, outfile)
-        outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
+        outfile = n_meta_file.replace('node_meta', 'unique.node_meta')
         tu.csu(n_meta_file, outfile)
 
                                       
