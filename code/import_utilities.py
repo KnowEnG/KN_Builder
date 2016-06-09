@@ -185,32 +185,6 @@ def import_production_edges(args=None):
     tablename = 'KnowNet.edge'
     db.insert(tablename, cmd)
 
-def merge(merge_key, args):
-    """Uses sort to merge and unique the already sorted files of the table type
-    and stores the results into outfile.
-
-    This takes a table type (one of: node, node_meta, edge2line, status, or
-    edge_meta) and merges them using the unix sort command while removing any
-    duplicate elements.
-
-    Args:
-        merge_key (str): table type (one of: node, node_meta, edge2line, status,
-            or edge_meta)
-        args (Namespace): args as populated namespace or 'None' for defaults
-    """
-    if args is None:
-        args=cf.config_args()
-    filepath = os.path.join(args.cloud_dir, args.data_path)
-    outfile = os.path.join(filepath, 'unique.' + merge_key + '.txt')
-    searchpath = os.path.join(filepath, '*', '*', '*')
-    with open(outfile, 'w') as out:
-        cmd1 = ['find', searchpath, '-type', 'f',
-                '-name', '*.unique.'+merge_key+'.*', '-print0' ]
-        cmd2 = ['xargs', '-0', 'sort', '-mu']
-        p1 = subprocess.Popen(' '.join(cmd1), stdout=subprocess.PIPE, shell=True)
-        subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
-    return outfile
-
 def import_status(statusfile, args=None):
     """Imports the provided status file and any corresponding meta files into
     the KnowEnG MySQL database.
@@ -279,6 +253,32 @@ def import_pnode(filename, args=None):
     dup_cmd = 'node.node_id = node.node_id'
     table = 'node'
     import_file(filename, table, ld_cmd, dup_cmd, args)
+
+def merge(merge_key, args):
+    """Uses sort to merge and unique the already sorted files of the table type
+    and stores the results into outfile.
+
+    This takes a table type (one of: node, node_meta, edge2line, status, or
+    edge_meta) and merges them using the unix sort command while removing any
+    duplicate elements.
+
+    Args:
+        merge_key (str): table type (one of: node, node_meta, edge2line, status,
+            or edge_meta)
+        args (Namespace): args as populated namespace or 'None' for defaults
+    """
+    if args is None:
+        args=cf.config_args()
+    filepath = os.path.join(args.cloud_dir, args.data_path)
+    outfile = os.path.join(filepath, 'unique.' + merge_key + '.txt')
+    searchpath = os.path.join(filepath, '*', '*', '*')
+    with open(outfile, 'w') as out:
+        cmd1 = ['find', searchpath, '-type', 'f',
+                '-name', '*.unique.'+merge_key+'.*', '-print0' ]
+        cmd2 = ['xargs', '-0', 'sort', '-mu']
+        p1 = subprocess.Popen(' '.join(cmd1), stdout=subprocess.PIPE, shell=True)
+        subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
+    return outfile
 
 def main_parse_args():
     """Processes command line arguments.

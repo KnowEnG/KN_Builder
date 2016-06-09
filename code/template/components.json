@@ -46,7 +46,7 @@
         "TMPMEM": "2500",
         "TMPCPUS": "4",
         "TMPPRIOR": "true",
-        "TMPCMD": "sh -c '{ /usr/local/bin/kernprof -l -v /TMPWORKDIR/TMPCODEPATH/import_utilities.py TMPIMPORTPATH TMPOPTS && if TMPSHAREBOOL ; then cd /TMPWORKDIR && rsync -aR --exclude='*.status.*' TMPDATAPATH/TMPFILES /TMPSHAREDIR/ && cd TMPDATAPATH && rm TMPFILES ; fi; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
+        "TMPCMD": "sh -c '{ /usr/local/bin/kernprof -l -v /TMPWORKDIR/TMPCODEPATH/import_utilities.py TMPIMPORTPATH TMPOPTS && if TMPSHAREBOOL ; then cd /TMPWORKDIR && rsync -aR TMPDATAPATH/TMPFILES /TMPSHAREDIR/ && cd TMPDATAPATH && rm TMPFILES ; fi; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
     },
     "next_step_caller": {
         "TMPIMG": "cblatti3/py3_redis_mysql:0.2",
