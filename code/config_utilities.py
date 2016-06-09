@@ -73,6 +73,8 @@ def add_config_args(parser):
     --chunk_size	|int	|-cs	|lines per chunk
     --test_mode	    |   	|-tm	|run in test mode by only printing command, defaults to False
     --ens_species   |str    |-es    |',,' separated ensembl species to run in setup pipeline
+    --force_fetch   |	    |-ff	|fetch even if file exists and has not changed from last run
+
 
 
     Args:
@@ -116,6 +118,8 @@ def add_config_args(parser):
                         help='run in test mode by only printing commands')
     parser.add_argument('-es', '--ens_species', default='REPRESENTATIVE',
                         help=',, separated list of ensembl species to run in setup pipeline' )
+    parser.add_argument('-ff', '--force_fetch', action='store_true', default=False,
+                        help='fetch even if file exists and has not changed from last run', )
 
     return parser
 

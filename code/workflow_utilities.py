@@ -291,7 +291,7 @@ def run_fetch(args):
                 version_dict = json.load(infile)
             dependencies = version_dict["dependencies"]
             ismap = version_dict["is_map"]
-            fetch_needed = version_dict["fetch_needed"]
+            fetch_needed = version_dict["fetch_needed"] or args.force_fetch
             if len(dependencies) > 0:
                 for dep in dependencies:
                     parent_string = "-".join(["fetch", src, dep])
