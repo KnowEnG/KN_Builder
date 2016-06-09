@@ -489,7 +489,7 @@ def run_import(args):
     for importfile in importfile_list:
         if importfile in TABLES:
             mergefile = 'unique.' + importfile + '.txt'
-            output_files = os.path.join(args.local_dir, args.data_path, mergefile)
+            output_files = mergefile
             filestr = importfile
         else:
             output_files = importfile
@@ -504,6 +504,8 @@ def run_import(args):
         jobname = jobname.replace(".", "-")
         jobname = jobname.replace(".txt", "")
         jobdict = generic_dict(args, None)
+        base_dir = os.path.join(jobdict['TMPWORKDIR'], jobdict['TMPDATAPATH'])
+        output_files.replace(base_dir, '')
         jobdict.update({'TMPJOB': jobname,
                         'TMPIMPORTPATH': importfile,
                         'TMPFILES': output_files
