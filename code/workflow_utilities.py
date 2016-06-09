@@ -181,6 +181,8 @@ def generic_dict(args, ns_parent=None):
             job_dict['TMPWORKDIR'] = args.local_dir
     if args.shared_dir:
         job_dict['TMPSHAREBOOL'] = 'true'
+    else:
+        job_dict['TMPSHAREDIR'] = job_dict['TMPWORKDIR']
     return job_dict
 
 def run_check(args):
