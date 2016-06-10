@@ -56,7 +56,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
 ```
 
 ## Redis setup
-### start Redis database
+### start Redis database if it is not running
 ```
 python3 code/redis_utilities.py \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
