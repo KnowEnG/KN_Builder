@@ -1,5 +1,5 @@
-# Full Pipeline Run
-### on knownbs in /workspace/storage
+# Full Pipeline Run 
+### (on knownbs in /workspace/storage)
 
 ## Set environment variables 
 ```
