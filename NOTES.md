@@ -1,7 +1,7 @@
-# Full Pipeline Run 
+# Full Pipeline Run
 ### (on knownbs in /workspace/storage)
 
-## Set environment variables 
+## Set environment variables
 ```
 KNP_CHRONOS_URL='knownbs.dyndns.org:4400'
 KNP_LOCAL_DIR='/workspace/storage/project1/KnowNet_Pipeline/'
@@ -45,7 +45,8 @@ git checkout chronos_testing
 python3 code/mysql_utilities.py \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -mym $KNP_MYSQL_MEM -myc $KNP_MYSQL_CPU \
-    -myd $KNP_MYSQL_DIR -mycf $KNP_MYSQL_CONF -myps $KNP_MYSQL_PASS\
+    -myd $KNP_MYSQL_DIR -mycf $KNP_MYSQL_CONF \
+    -myps $KNP_MYSQL_PASS -mycu $KNP_MYSQL_CONSTRAINT_URL \
     -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
 ```
 
@@ -61,7 +62,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
 python3 code/redis_utilities.py \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -rm $KNP_REDIS_MEM -rc $KNP_REDIS_CPU \
-    -rd $KNP_REDIS_DIR -rps $KNP_REDIS_PASS\
+    -rd $KNP_REDIS_DIR -rps $KNP_REDIS_PASS -rcu $KNP_REDIS_CONSTRAINT_URL\
     -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
 ```
 ### empty Redis database if it is running
@@ -92,7 +93,7 @@ rm -r $KNP_SHARE_DIR/$KNP_LOGS_PATH/*
 rm -r $KNP_SHARE_DIR/$KNP_DATA_PATH/*
 ```
 
-## run setup pipeline 
+## run setup pipeline
 ```
 python3 code/workflow_utilities.py CHECK -su \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
@@ -102,7 +103,7 @@ python3 code/workflow_utilities.py CHECK -su \
     -sd $KNP_SHARE_DIR -es $KNP_ENS_SPECIES
 ```
 
-## run parse pipeline 
+## run parse pipeline
 ```
 python3 code/workflow_utilities.py CHECK \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
