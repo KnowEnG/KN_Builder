@@ -71,7 +71,7 @@ redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS FLUSHDB
 
 ## clear the chronos queue
 ```
-for c in 'knowcluster01.dyndns.org:4400' ; do
+for c in $KNP_CHRONOS_URL ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep '"name"' | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
     for s in 'map-' 'table-' 'check-' 'fetch-' 'import-' 'KN_starter' ; do
         echo $s
