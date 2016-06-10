@@ -1,6 +1,7 @@
-# AWS Full Pipeline Run on knownbs in /workspace/storage
+# Full Pipeline Run
+### on knownbs in /workspace/storage
 
-## Set environment variables ________________________________________________
+## Set environment variables 
 ```
 KNP_CHRONOS_URL='knownbs.dyndns.org:4400'
 KNP_LOCAL_DIR='/workspace/storage/project1/KnowNet_Pipeline/'
@@ -30,7 +31,7 @@ KNP_REDIS_PASS='KnowEnG'
 KNP_REDIS_CONSTRAINT_URL=''
 ```
 
-## copy pipeline code _______________________________________________________
+## copy pipeline code
 ```
 cd $KNP_LOCAL_DIR
 git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
@@ -38,7 +39,7 @@ cd KnowNet_Pipeline/
 git checkout chronos_testing
 ```
 
-## MySQL setup ____________________________________________________________
+## MySQL setup
 ### start MySQL database if it is not running
 ```
 python3 code/mysql_utilities.py \
@@ -54,7 +55,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
         -P $KNP_MYSQL_PORT --execute \"drop database KnowNet;\"
 ```
 
-## Redis setup ______________________________________________________________
+## Redis setup
 ### start Redis database
 ```
 python3 code/redis_utilities.py \
@@ -68,7 +69,7 @@ python3 code/redis_utilities.py \
 redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS FLUSHDB
 ```
 
-## clear the chronos queue __________________________________________________
+## clear the chronos queue
 ```
 for c in 'knowcluster01.dyndns.org:4400' ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep '"name"' | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
@@ -83,7 +84,7 @@ for c in 'knowcluster01.dyndns.org:4400' ; do
 done;
 ```
 
-## clear any existing files _________________________________________________
+## clear any existing files
 ```
 rm -r $KNP_LOGS_PATH/*
 rm -r $KNP_DATA_PATH/*
@@ -91,7 +92,7 @@ rm -r $KNP_SHARE_DIR/$KNP_LOGS_PATH/*
 rm -r $KNP_SHARE_DIR/$KNP_DATA_PATH/*
 ```
 
-## run setup pipeline _______________________________________________________
+## run setup pipeline 
 ```
 python3 code/workflow_utilities.py CHECK -su \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
@@ -101,7 +102,7 @@ python3 code/workflow_utilities.py CHECK -su \
     -sd $KNP_SHARE_DIR -es $KNP_ENS_SPECIES
 ```
 
-## run parse pipeline _______________________________________________________
+## run parse pipeline 
 ```
 python3 code/workflow_utilities.py CHECK \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
@@ -111,7 +112,7 @@ python3 code/workflow_utilities.py CHECK \
     -sd $KNP_SHARE_DIR
 ```
 
-## run import pipeline ______________________________________________________
+## run import pipeline
 ```
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
@@ -120,7 +121,7 @@ python3 code/workflow_utilities.py IMPORT \
     -sd $KNP_SHARE_DIR
 ```
 
-## create user ______________________________________________________________
+## create user
 ```
 KNP_CMD="mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
         -P $KNP_MYSQL_PORT --execute \
