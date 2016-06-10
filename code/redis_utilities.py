@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Utiliites for interacting with the KnowEnG Redis db through python.
 
 Contains module functions::
@@ -13,6 +15,51 @@ import config_utilities as cf
 import redis
 import json
 import os
+from argparse import ArgumentParser
+import subprocess
+
+def deploy_container(args=None):
+    """Deplays a container with marathon running Redis using the specified
+    args.
+    
+    This replaces the placeholder args in the json describing how to deploy a 
+    container running Redis with those supplied in the users arguements.
+    
+    Args:
+        args (Namespace): args as populated namespace or 'None' for defaults
+    """
+    if args is None:
+        args=cf.config_args()
+    deploy_dir = os.path.join(args.code_path, 'marathon_jobs')
+    if not os.path.exists(deploy_dir):
+        os.makedirs(deploy_dir)
+    template_job = os.path.join(args.local_dir, args.code_path, 
+                                'dockerfiles', 'marathon', 'redis.json')
+    with open(template_job, 'r') as infile:
+        deploy_dict = json.load(infile)
+    deploy_dict["id"] = "p1redis-" + args.redis_port
+    deploy_dict["cmd"] ="redis-server --appendonly yes --requirepass " + \
+                        args.redis_pass
+    deploy_dict["cpus"] = float(args.redis_cpu)
+    deploy_dict["mem"] = int(args.redis_mem)
+    if args.redis_curl:
+        deploy_dict["constraints"] = [["hostname", "CLUSTER", args.redis_host]]
+    else:
+        deploy_dict["constraints"] = []
+    deploy_dict["container"]["volumes"][0]["hostPath"] = args.redis_dir
+    deploy_dict["container"]["docker"]["portMappings"][0]["hostPort"] = int(args.redis_port)
+    out_path = os.path.join(deploy_dir, "p1redis-" + args.redis_port +'.json')
+    with open(out_path, 'w') as outfile:
+        outfile.write(json.dumps(deploy_dict))
+    job= 'curl -X POST -H "Content-type: application/json" ' + args.marathon + " -d '"
+    job += json.dumps(deploy_dict) + "'"
+    if not args.test_mode:
+        try:
+            subprocess.check_output(job, shell=True)
+        except subprocess.CalledProcessError as ex1:
+            print(ex1.output)
+    else:
+        print(job)
 
 def get_database(args=None):
     """Returns a Redis database connection.
@@ -132,3 +179,18 @@ def import_mapping(map_dict, args=None):
         if rkey is not None and rkey != map_dict[orig_id]:
             rdb.set('property::' + orig_id, 'unmapped-many')
         rdb.sadd(orig_id, map_dict[orig_id])
+
+def main():
+    """Deploy a Redis container using marathon with the provided command line
+    arguements. 
+    
+    This uses the provided command line arguments and the defaults found in 
+    config_utilities to launch a Redis docker container using marathon.
+    """
+    parser = ArgumentParser()
+    parser = cf.add_config_args(parser)
+    args = parser.parse_args()
+    deploy_container(args)
+    
+if __name__ == "__main__":
+    main()

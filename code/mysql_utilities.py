@@ -759,7 +759,7 @@ class MySQL(object):
         self.conn.commit()
         self.conn.close()
 
-if __name__ == "__main__":
+def main():
     """Deploy a MySQL container using marathon with the provided command line
     arguements. 
     
@@ -770,3 +770,6 @@ if __name__ == "__main__":
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
     deploy_container(args)
+    
+if __name__ == "__main__":
+    main()
