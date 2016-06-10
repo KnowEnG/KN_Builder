@@ -1,8 +1,8 @@
 {
     "id": "p1redis-TMPREDISPORT",
-    "cmd": "redis-server --appendonly yes --requirepass KnowEnG",
+    "cmd": "redis-server --appendonly yes --requirepass TMPREDISPASS",
     "cpus": 1.0,
-    "mem": TMPREDISMEM,
+    "mem": "TMPREDISMEM",
     "instances": 1,
     "constraints": [["hostname", "CLUSTER", "TMPREDISHOST"]],
     "container": {
@@ -11,7 +11,7 @@
         "docker": {
             "image": "redis",
             "network": "BRIDGE",
-            "portMappings": [{"containerPort": 6379, "hostPort": TMPREDISPORT}]
+            "portMappings": [{"containerPort": 6379, "hostPort": "TMPREDISPORT"}]
         }
     }
 }

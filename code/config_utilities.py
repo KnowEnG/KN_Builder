@@ -50,6 +50,10 @@ DEFAULT_MYSQL_CONS_URL = ''
 DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
 DEFAULT_REDIS_PORT = '6379'
 DEFAULT_REDIS_PASS = 'KnowEnG'
+DEFAULT_REDIS_MEM = '15000'
+DEFAULT_REDIS_CPU = '1.0'
+DEFAULT_REDIS_DIR = '/mnt/knowtmp/project1/p1_redis'
+DEFAULT_REDIS_CONS_URL = ''
 
 def add_config_args(parser):
     """Add global configuation options to command line arguments.
@@ -76,11 +80,15 @@ def add_config_args(parser):
     --mysql_mem     |str    |-mym   |memory for deploying MySQL container
     --mysql_cpu     |str    |-myc   |cpus for deploying MySQL container
     --mysql_dir     |str    |-myd   |directory for deploying MySQL container
-    --mysql_curl     |str    |-mycu  |constraint url for deploying MySQL container
+    --mysql_curl    |str    |-mycu  |constraint url for deploying MySQL container
     --mysql_conf    |str    |-mycf  |config directory for deploying MySQL container
     --redis_host	|str	|-rh 	|url of Redis db
     --redis_port	|str	|-rp 	|port for Redis db
     --redis_pass	|str	|-rps	|password for Redis db
+    --redis_mem     |str    |-rm    |memory for deploying redis container
+    --redis_cpu     |str    |-rc    |cpus for deploying redis container
+    --redis_dir     |str    |-rd    |directory for deploying redis container
+    --redis_curl    |str    |-rcu   |constraint url for deploying redis container
     --chunk_size	|int	|-cs	|lines per chunk
     --test_mode	    |   	|-tm	|run in test mode by only printing command, defaults to False
     --ens_species   |str    |-es    |',,' separated ensembl species to run in setup pipeline
@@ -137,6 +145,14 @@ def add_config_args(parser):
                         help='port for Redis db')
     parser.add_argument('-rps', '--redis_pass', default=DEFAULT_REDIS_PASS,
                         help='password for Redis db')
+    parser.add_argument('-rm', '--redis_mem', default=DEFAULT_REDIS_MEM,
+                        help='memory for deploying redis container')
+    parser.add_argument('-rc', '--redis_cpu', default=DEFAULT_REDIS_CPU,
+                        help='cpus for deploying redis container')
+    parser.add_argument('-rcu', '--redis_curl', default=DEFAULT_REDIS_CONS_URL,
+                        help='constrain url for deploying redis container')
+    parser.add_argument('-rd', '--redis_dir', default=DEFAULT_REDIS_DIR,
+                        help='directory for deploying redis container')                    
     parser.add_argument('-tm', '--test_mode', action='store_true', default=False,
                         help='run in test mode by only printing commands')
     parser.add_argument('-es', '--ens_species', default='REPRESENTATIVE',
