@@ -34,7 +34,7 @@ git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
 cd KnowNet_Pipeline/
 git checkout chronos_testing
 
-### MySQL setup _____________________________________________________________
+### MySQL setup ___________________________________________________________
 ### start MySQL database if it is not running
 python3 code/mysql_utilities.py \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
