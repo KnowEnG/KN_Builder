@@ -4,8 +4,8 @@
 ## Set environment variables
 ```
 KNP_CHRONOS_URL='knownbs.dyndns.org:4400'
-KNP_LOCAL_DIR='/workspace/storage/project1/KnowNet_Pipeline/'
-KNP_CLOUD_DIR='/mnt/storage/project1/KnowNet_Pipeline/'
+KNP_LOCAL_DIR='/workspace/storage/project1/KnowNet_Pipeline'
+KNP_CLOUD_DIR='/mnt/storage/project1/KnowNet_Pipeline'
 KNP_SHARE_DIR=''
 KNP_DATA_PATH='data_representative'
 KNP_LOGS_PATH='logs_representative'
