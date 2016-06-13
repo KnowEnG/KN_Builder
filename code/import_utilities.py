@@ -16,6 +16,7 @@ import config_utilities as cf
 import mysql_utilities as mu
 import json
 import os
+import subprocess
 from argparse import ArgumentParser
 
 #@profile
@@ -36,40 +37,40 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
     """
     if args is None:
         args=cf.config_args()
-    table_cmds = {'node_meta': 'node_meta.node_id = node_meta.node_id',
-                'node': 'node.node_id = node.node_id',
-                'raw_line' : 'raw_line.file_id = raw_line.file_id',
-                'edge2line': 'edge2line.edge_hash = edge2line.edge_hash',
-                'edge_meta': 'edge_meta.line_hash = edge_meta.line_hash',
-                'edge': ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
-                    '{0}.weight)'),
-                'status': ('status.weight = IF(status.weight > {0}.weight, status.weight, '
-                    '{0}.weight)')}
-    if not dup_cmd and table in table_cmds:
-        dup_cmd = table_cmds[table]
     db = mu.get_database('KnowNet', args)
-    tmptable = os.path.splitext(os.path.basename(file_name))[0].replace('.', '_')
-    tmptable = cf.pretty_name(tmptable, len(tmptable)).replace('-', '_')[:64]
-    print('Creating temporary table ' + tmptable)
-    db.create_temp_table(tmptable, 'LIKE ' + table)
-    print('Loading data into temporary table ' + tmptable)
-    db.load_data(file_name, tmptable, ld_cmd)
-    print('Inserting data from ' + tmptable + ' into ' + table)
-    cmd = 'SELECT * FROM ' + tmptable
-    db.start_transaction(level='READ UNCOMMITTED')
-    db.insert_ignore(table, cmd) #change later to duplicate
-    db.drop_table(tmptable)
-    db.close()
-    return 1  ## remove this later (and potentially everything after)
-    if dup_cmd:
-        cmd += ' ON DUPLICATE KEY UPDATE ' + dup_cmd.format(tmptable)
-        db.start_transaction(level='READ COMMITTED')
-        db.insert(table, cmd)
-    else:
-        pass
-        db.start_transaction(level='READ COMMITTED')
-        db.replace(table, cmd)
-    db.drop_table(tmptable)
+    print('Inserting data from into ' + table)
+    #table_cmds = {'node_meta': 'node_meta.node_id = node_meta.node_id',
+    #            'node': 'node.node_id = node.node_id',
+    #            'raw_line' : 'raw_line.file_id = raw_line.file_id',
+    #            'edge2line': 'edge2line.edge_hash = edge2line.edge_hash',
+    #            'edge_meta': 'edge_meta.line_hash = edge_meta.line_hash',
+    #            'edge': ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
+    #                '{0}.weight)')}
+    #if not dup_cmd and table in table_cmds:
+    #    dup_cmd = table_cmds[table]
+    #tmptable = os.path.splitext(os.path.basename(file_name))[0].replace('.', '_')
+    #tmptable = cf.pretty_name(tmptable, len(tmptable)).replace('-', '_')[:64]
+    #print('Creating temporary table ' + tmptable)
+    #db.create_temp_table(tmptable, 'LIKE ' + table)
+    #print('Loading data into temporary table ' + tmptable)
+    #db.load_data(file_name, tmptable, ld_cmd)
+    #print('Inserting data from ' + tmptable + ' into ' + table)
+    #cmd = 'SELECT * FROM ' + tmptable
+    #db.start_transaction(level='READ UNCOMMITTED')
+    #db.insert_ignore(table, cmd) #change later to duplicate
+    #db.drop_table(tmptable)
+    #db.close()
+    #return 1  ## remove this later (and potentially everything after)
+    #if dup_cmd:
+    #    ld_cmd += ' ON DUPLICATE KEY UPDATE ' + dup_cmd.format(table)
+    #    db.start_transaction(level='READ UNCOMMITTED')
+    #    db.load_data(file_name, table, ld_cmd)
+    #    #db.insert(table, ld_cmd)
+    #else:
+    #    db.start_transaction(level='READ UNCOMMITTED')
+    #    db.load_data(file_name, table, ld_cmd)
+    #    #db.replace(table, ld_cmd)
+    db.load_data(file_name, table, ld_cmd)
     db.close()
 
 def import_filemeta(version_dict, args=None):
@@ -156,7 +157,7 @@ def import_edge(edgefile, args=None):
             filename = edgefile
         else:
             filename = edgefile.replace('conv', table)
-        ufile = filename.replace(table, 'unique_' + table)
+        ufile = filename.replace(table, 'unique.' + table)
         if os.path.isfile(ufile):
             filename = ufile
         if not os.path.isfile(filename):
@@ -176,10 +177,6 @@ def import_production_edges(args=None):
 
     if args is None:
         args=cf.config_args()
-    uedge_cmd  = ('edge.weight = IF(edge.weight > status.weight, edge.weight, '
-                    'status.weight)')
-    uhash_cmd = ('edge.edge_hash = IF(edge.weight > status.weight, '
-                    'edge.edge_hash, status.edge_hash)')
     db = mu.get_database('KnowNet', args)
     cmd = ('SELECT DISTINCT n1_id, n2_id, et_name, weight, edge_hash '
            'FROM KnowNet.status WHERE status.status="production" '
@@ -187,7 +184,6 @@ def import_production_edges(args=None):
            'IF(edge.weight > status.weight, edge.weight, status.weight)')
     tablename = 'KnowNet.edge'
     db.insert(tablename, cmd)
-
 
 def import_status(statusfile, args=None):
     """Imports the provided status file and any corresponding meta files into
@@ -212,7 +208,7 @@ def import_status(statusfile, args=None):
             filename = statusfile
         else:
             filename = statusfile.replace('status', table)
-        ufile = filename.replace(table, 'unique_' + table)
+        ufile = filename.replace(table, 'unique.' + table)
         if os.path.isfile(ufile):
             filename = ufile
         if not os.path.isfile(filename):
@@ -258,6 +254,32 @@ def import_pnode(filename, args=None):
     table = 'node'
     import_file(filename, table, ld_cmd, dup_cmd, args)
 
+def merge(merge_key, args):
+    """Uses sort to merge and unique the already sorted files of the table type
+    and stores the results into outfile.
+
+    This takes a table type (one of: node, node_meta, edge2line, status, or
+    edge_meta) and merges them using the unix sort command while removing any
+    duplicate elements.
+
+    Args:
+        merge_key (str): table type (one of: node, node_meta, edge2line, status,
+            or edge_meta)
+        args (Namespace): args as populated namespace or 'None' for defaults
+    """
+    if args is None:
+        args=cf.config_args()
+    filepath = os.path.join(args.cloud_dir, args.data_path)
+    outfile = os.path.join(filepath, 'unique.' + merge_key + '.txt')
+    searchpath = os.path.join(filepath, '*', '*', '*')
+    with open(outfile, 'w') as out:
+        cmd1 = ['find', searchpath, '-type', 'f',
+                '-name', '*.unique.'+merge_key+'.*', '-print0' ]
+        cmd2 = ['xargs', '-0', 'sort', '-mu']
+        p1 = subprocess.Popen(' '.join(cmd1), stdout=subprocess.PIPE, shell=True)
+        subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
+    return outfile
+
 def main_parse_args():
     """Processes command line arguments.
 
@@ -268,13 +290,29 @@ def main_parse_args():
         Namespace: args as populated namespace
     """
     parser = ArgumentParser()
-    parser.add_argument('status_file', help='status file produced from map step, \
-                        e.g. kegg/ath/kegg.ath.status.1.txt')
+    parser.add_argument('importfile', help='import file produced from map step, \
+                        or merged files, and must contain the table name e.g. \
+                        kegg/ath/kegg.ath.unique.status.1.txt or \
+                        unique.status.txt')
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
     return args
 
 if __name__ == "__main__":
     args = main_parse_args()
-    import_status(args.status_file, args)
-    import_production_edges(args)
+    merge_keys = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta']
+    if args.importfile in merge_keys:
+        args.importfile = merge(args.importfile, args)
+    table = ''
+    ld_cmd = ''
+    dup_cmd = ''
+    for key in args.importfile.split('.'):
+        if key in merge_keys:
+            table = key
+            break
+    if not table:
+        raise ValueError("ERROR: 'importfile' must contain one of "+\
+                         ','.join(merge_keys))
+    import_file(args.importfile, table, ld_cmd, dup_cmd, args)
+    if table == 'status':
+        import_production_edges(args)

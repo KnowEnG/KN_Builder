@@ -1,18 +1,19 @@
 {
-    "id": "p1mysql-TMPPORT",
-    "cpus": 4.0,
-    "mem": 25000,
+    "id": "p1mysql-TMPMYSQLPORT",
+    "cpus": "TMPCPU",
+    "mem": "TMPMYSQLMEM",
     "instances": 1,
     "env": {"PORT": "3306"},    
-    "constraints": [["hostname", "CLUSTER", "knowcluster05.dyndns.org"]],
+    "constraints": [["hostname", "CLUSTER", "TMPMYSQLHOST"]],
     "container": {
         "type": "DOCKER",
-        "volumes": [{"containerPath": "/var/lib/mysql", "hostPath": "/mnt/knowtmp/project1/TMPPATH", "mode": "RW"}],
+        "volumes": [{"containerPath": "/var/lib/mysql", "hostPath": "TMPMYSQLPATH", "mode": "RW"},
+                    {"containerPath": "/etc/mysql/conf.d/", "hostPath": "TMPMYSQLCONFPATH", "mode": "RW"}],
         "docker": {
             "image": "mysql",
             "network": "BRIDGE",
-            "parameters": [{ "key": "env", "value": "MYSQL_ROOT_PASSWORD=KnowEnG" }],
-            "portMappings": [{"containerPort": 3306, "hostPort": TMPPORT}]
+            "parameters": [{ "key": "env", "value": "MYSQL_ROOT_PASSWORD=TMPSQLPASS" }],
+            "portMappings": [{"containerPort": 3306, "hostPort": "TMPMYSQLPORT"}]
         }
     }
 }

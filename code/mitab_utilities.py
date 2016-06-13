@@ -112,5 +112,5 @@ def table(rawline, version_dict, taxid_list=[]):
                         n2id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
             publist = raw[8]
             e_meta_writer.writerow([chksm, info_type, publist])
-    outfile = e_meta_file.replace('edge_meta', 'unique_edge_meta')
+    outfile = e_meta_file.replace('edge_meta', 'unique.edge_meta')
     tu.csu(e_meta_file, outfile)

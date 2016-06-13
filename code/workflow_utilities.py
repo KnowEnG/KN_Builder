@@ -41,14 +41,15 @@ Examples:
 import os
 import sys
 import json
+import time
 from argparse import ArgumentParser
 import config_utilities as cf
 import mysql_utilities as db
 import job_utilities as ju
 
 DEFAULT_START_STEP = 'CHECK'
-POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE', 'MAP']
-SETUP_FILES = ['species', 'ppi', 'ensembl']
+POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE', 'MAP', 'IMPORT']
+SETUP_FILES = ['ppi', 'ensembl']
 SPECIAL_MODES = ['LOCAL', 'DOCKER']
 
 def main_parse_args():
@@ -98,6 +99,7 @@ def main_parse_args():
         if opt in config_opts:
             config_opts.remove(opt)
             workflow_opts.extend([opt])
+    args.time_stamp = time.strftime('_%m-%d_%H-%M-%S')
     args.config_opts = " ".join(config_opts)
     args.workflow_opts = " ".join(workflow_opts)
     args.cloud_config_opts = args.config_opts
@@ -179,6 +181,8 @@ def generic_dict(args, ns_parent=None):
             job_dict['TMPWORKDIR'] = args.local_dir
     if args.shared_dir:
         job_dict['TMPSHAREBOOL'] = 'true'
+    else:
+        job_dict['TMPSHAREDIR'] = job_dict['TMPWORKDIR']
     return job_dict
 
 def run_check(args):
@@ -289,7 +293,7 @@ def run_fetch(args):
                 version_dict = json.load(infile)
             dependencies = version_dict["dependencies"]
             ismap = version_dict["is_map"]
-            fetch_needed = version_dict["fetch_needed"]
+            fetch_needed = version_dict["fetch_needed"] or args.force_fetch
             if len(dependencies) > 0:
                 for dep in dependencies:
                     parent_string = "-".join(["fetch", src, dep])
@@ -464,46 +468,49 @@ def run_map(args):
 
 
 def run_import(args):
-    """Runs import_status on a single .status. file on the cloud.
+    """Merges sorted files and runs import on output file on the cloud.
 
-    This loops through args.parameters statusfiles, creates a job for each that
-    calls import_utilities main(), and runs job in args.chronos location.
+    This loops through args.step_parameters (see Args below), and creates a job
+    for each that merges the already sorted and unique files found in the data
+    path (if args.merge is True), then calls import_utilities main().
 
     Args:
-        args (Namespace): args as populated namespace from parse_args, must
-            specify --step_parameters(-p) as ',,' separated list of
-            'source.alias.status.chunk.txt' file names
+        args (Namespace): args as populated namespace from parse_args,
+            specify --step_parameters(-p) as ',,' separated list of files to
+            import or the allowed possible SQL table names: node, node_meta,
+            edge2line, status, or edge_meta. If not specified, by default it
+            will try to import all tables.
     """
-    statusfile_list = args.step_parameters.split(",,")
+    importfile_list = args.step_parameters.split(",,")
+    TABLES = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta']
     if args.step_parameters == "":
-        raise ValueError("ERROR: 'statusfile' must be specified with --step_parameters (-p)")
+        importfile_list = TABLES
     ju.Job("importer", args)
 
     ctr = 0
-    for filestr in statusfile_list:
-
-        statusfile = os.path.basename(filestr)
-        output_files = statusfile.replace('.status.', '.*.')
-        src = statusfile.split('.')[0]
-        alias = statusfile.split('.status.')[0].split(src+'.')[1]
-
-        chunk_path = os.path.join(src, alias, "chunks")
-        local_chunk_dir = os.path.join(args.local_dir, args.data_path, chunk_path)
-        local_statusfile = os.path.join(local_chunk_dir, statusfile)
-        if not os.path.exists(local_statusfile):
-            raise IOError('ERROR: "statusfile" specified with --step_parameters (-p) '
-                          'option, ' + filestr + ' does not exist: ' + local_statusfile)
-
+    for importfile in importfile_list:
+        if importfile in TABLES:
+            mergefile = 'unique.' + importfile + '.txt'
+            output_files = mergefile
+            filestr = importfile
+        else:
+            output_files = importfile
+            filestr = os.path.basename(importfile)
+            if not os.path.exists(importfile):
+                raise IOError('ERROR: "importfile" specified with --step_parameters (-p) '
+                          'option, ' + importfile + ' does not exist: ' + importfile)
         ctr += 1
-        print("\t".join([str(ctr), statusfile]))
+        print("\t".join([str(ctr), filestr]))
 
-        jobname = "-".join(["import", statusfile])
+        jobname = "-".join(["import", filestr])
         jobname = jobname.replace(".", "-")
         jobname = jobname.replace(".txt", "")
         jobdict = generic_dict(args, None)
+        base_dir = os.path.join(jobdict['TMPWORKDIR'], jobdict['TMPDATAPATH'])
+        output_files.replace(base_dir, '')
         jobdict.update({'TMPJOB': jobname,
-                        'TMPSTATUSPATH': os.path.join(chunk_path, statusfile),
-                        'TMPFILES': os.path.join(chunk_path, output_files)
+                        'TMPIMPORTPATH': importfile,
+                        'TMPFILES': output_files
                        })
         ju.run_job_step(args, "importer", jobdict)
 
@@ -518,7 +525,7 @@ def main():
     """
 
     args = main_parse_args()
-    stage = 'PIPELINE'
+    stage = 'PARSE'
     init_job = ''
     if args.dependencies == "":
 
@@ -526,9 +533,11 @@ def main():
             knownet = db.MySQL(None, args)
             knownet.init_knownet()
             stage = 'SETUP'
+        elif args.start_step == 'IMPORT':
+            stage = 'IMPORT'
 
         jobdict = generic_dict(args, None)
-        jobdict['TMPJOB'] = "KN_directory_init_" + stage
+        jobdict['TMPJOB'] = "KN_starter_" + stage + args.time_stamp
         jobdict['TMPLAUNCH'] = '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
         args.dependencies = file_setup_job.jobname
@@ -557,7 +566,7 @@ def main():
     if init_job != '' and args.chronos not in SPECIAL_MODES:
         args.dependencies = ""
         jobdict = generic_dict(args, None)
-        jobdict['TMPJOB'] = "KN_directory_init_" + stage
+        jobdict['TMPJOB'] = "KN_starter_" + stage + args.time_stamp
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
 
 if __name__ == "__main__":

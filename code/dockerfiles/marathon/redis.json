@@ -1,17 +1,17 @@
 {
-    "id": "p1redis",
-    "cmd": "redis-server --appendonly yes --requirepass KnowEnG",
+    "id": "p1redis-TMPREDISPORT",
+    "cmd": "redis-server --appendonly yes --requirepass TMPREDISPASS",
     "cpus": 1.0,
-    "mem": 35000,
+    "mem": "TMPREDISMEM",
     "instances": 1,
-    "constraints": [["hostname", "CLUSTER", "knowcluster07.dyndns.org"]],
+    "constraints": [["hostname", "CLUSTER", "TMPREDISHOST"]],
     "container": {
         "type": "DOCKER",
-        "volumes": [{"containerPath": "/data", "hostPath": "/mnt/knowtmp/project1/p1_redis/", "mode": "RW"}],
+        "volumes": [{"containerPath": "/data", "hostPath": "TMPPATH/TMPREDISNAME/", "mode": "RW"}],
         "docker": {
             "image": "redis",
             "network": "BRIDGE",
-            "portMappings": [{"containerPort": 6379, "hostPort": 6379}]
+            "portMappings": [{"containerPort": 6379, "hostPort": "TMPREDISPORT"}]
         }
     }
 }

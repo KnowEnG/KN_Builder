@@ -280,9 +280,9 @@ class Kegg(SrcClass):
                     n_writer.writerow([kn_id, kn_name, n1_type_id])
                     n_meta_writer.writerow([kn_id, info_type, orig_name])
                     n_meta_writer.writerow([kn_id, info_type, orig_id])
-            outfile = node_file.replace('node', 'unique_node')
+            outfile = node_file.replace('node', 'unique.node')
             tu.csu(node_file, outfile)
-            outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
+            outfile = n_meta_file.replace('node_meta', 'unique.node_meta')
             tu.csu(n_meta_file, outfile)
 
         else:
@@ -338,8 +338,7 @@ class Kegg(SrcClass):
         alias_map = os.path.join('..', a_map, 'kegg.' + a_map + '.json')
         with open(alias_map) as infile:
             node_map = json.load(infile)
-        species = (os.path.join('..', '..', 'species', 'species_map',\
-                    'species.species_map.json'))
+        species = (os.path.join('..', '..', 'id_map', 'species', 'species.json'))
         with open(species) as infile:
             species_map = json.load(infile)
 

@@ -1,0 +1,21 @@
+{
+    "id": "mysql-TMPPORT",
+    "cpus": 4.0,
+    "mem": 35000,
+    "instances": 1,
+    "env": {"PORT": "3306"},    
+    "constraints": [["hostname", "CLUSTER", "knowcluster05.dyndns.org"]],
+    "container": {
+        "type": "DOCKER",
+        "volumes": [{"containerPath": "/var/lib/mysql", "hostPath": "/mnt/knowtmp/project1/TMPPATH", "mode": "RW"},
+                    {"containerPath": "/etc/mysql/conf.d/", "hostPath": "/mnt/knowtmp/project1/KnowNet_Pipeline/code/mysql/build_conf/", "mode": "RW"}],
+        "docker": {
+            "image": "mysql",
+            "network": "BRIDGE",
+            "parameters": [{ "key": "env", "value": "MYSQL_ROOT_PASSWORD=KnowEnG" }],
+            "portMappings": [{"containerPort": 3306, "hostPort": TMPPORT}]
+        }
+    }
+}
+
+

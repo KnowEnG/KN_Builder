@@ -65,10 +65,6 @@ def download(version_dict):
     """
 
     ret_file = version_dict['source'] + '.' + version_dict['alias'] + '.txt'
-    #check if remote file must be downloaded
-    if not version_dict['fetch_needed'] and version_dict['local_file_exists']:
-        return os.path.relpath(ret_file)
-
     #download remote file
     url = version_dict['remote_url']
     if url[-1] == '/':
@@ -262,7 +258,7 @@ def main(version_json, args=None):
         args=cf.config_args()
     with open(version_json, 'r') as infile:
         version_dict = json.load(infile)
-    if not version_dict['fetch_needed']:
+    if not version_dict['fetch_needed'] and not args.force_fetch:
         print('Source has not updated, fetch not needed')
         return
     src_code_dir = os.path.join(args.local_dir, args.code_path, args.src_path)
@@ -284,10 +280,10 @@ def main(version_json, args=None):
         num_chunks = 0
         rawline = raw_line(newfile)
         map_dict = mySrc.create_mapping_dict(rawline)
-        nodefile = rawline.replace('rawline', 'unique_node')
+        nodefile = rawline.replace('rawline', 'unique.node')
         if os.path.isfile(nodefile):
             iu.import_pnode(nodefile, args)
-        nmfile = rawline.replace('rawline', 'unique_node_meta')
+        nmfile = rawline.replace('rawline', 'unique.node_meta')
         if os.path.isfile(nmfile):
             iu.import_nodemeta(nmfile, args)
         map_file = os.path.splitext(newfile)[0] + '.json'

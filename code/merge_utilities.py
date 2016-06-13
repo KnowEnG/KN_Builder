@@ -39,10 +39,11 @@ def main_parse_args():
         Namespace: args as populated namespace
     """
     parser = ArgumentParser()
-    parser.add_argument('infile_list', help='",,"-separate list of paths to \
+    parser.add_argument('infile_list', help='",,"-separated list of paths to \
                         sorted files which should be merged')
     parser.add_argument('outfile', help='path to file where the merged results \
                         should be stored')
+    parser = cf.add_config_args(parser)
     args = parser.parse_args()
     return args
 

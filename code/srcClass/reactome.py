@@ -254,8 +254,7 @@ class Reactome(SrcClass):
             pathway = os.path.join('..', 'ReactomePathways', 'reactome.ReactomePathways.json')
             with open(pathway) as infile:
                 path_map = json.load(infile)
-            species = (os.path.join('..', '..', 'species', 'species_map',\
-                    'species.species_map.json'))
+            species = (os.path.join('..', '..', 'id_map', 'species', 'species.json'))
             with open(species) as infile:
                 species_map = json.load(infile)
 
@@ -294,9 +293,9 @@ class Reactome(SrcClass):
                         n2_id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
                     n_meta_writer.writerow([n1_id, info_type1, n1_link])
                     e_meta_writer.writerow([chksm, info_type2, e_meta])
-            outfile = e_meta_file.replace('edge_meta', 'unique_edge_meta')
+            outfile = e_meta_file.replace('edge_meta', 'unique.edge_meta')
             tu.csu(e_meta_file, outfile)
-            outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
+            outfile = n_meta_file.replace('node_meta', 'unique.node_meta')
             tu.csu(n_meta_file, outfile)
         if alias == 'homo_sapiens.interactions':
 
@@ -352,7 +351,7 @@ class Reactome(SrcClass):
                     if len(raw) > 8:
                         ref_str = raw[8]
                         e_meta_writer.writerow([chksm, info_type1, ref_str])
-            outfile = e_meta_file.replace('edge_meta', 'unique_edge_meta')
+            outfile = e_meta_file.replace('edge_meta', 'unique.edge_meta')
             tu.csu(e_meta_file, outfile)
 
 

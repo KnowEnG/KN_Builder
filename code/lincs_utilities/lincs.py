@@ -402,9 +402,9 @@ class Lincs(SrcClass):
                     n_meta_writer.writerow([n2_map, info_type, n2])
                     writer.writerow([n1_map, n2_map, et_map, weight, e_chksum,
                                     chksum])
-        outfile = node_file.replace('node','unique_node')
+        outfile = node_file.replace('node','unique.node')
         tu.csu(node_file, outfile)
-        outfile = n_meta_file.replace('node_meta','unique_node_meta')
+        outfile = n_meta_file.replace('node_meta','unique.node_meta')
         tu.csu(n_meta_file, outfile)
 
 

@@ -225,8 +225,7 @@ class Pfam(SrcClass):
         src = self.name
 
         ###Map the file name
-        species = (os.path.join('..', '..', 'species', 'species_map',\
-                    'species.species_map.json'))
+        species = (os.path.join('..', '..', 'id_map', 'species', 'species.json'))
         with open(species) as infile:
             species_map = json.load(infile)
         n2spec = species_map.get(version_dict['alias_info'], \
@@ -280,9 +279,9 @@ class Pfam(SrcClass):
                 edge_writer.writerow([chksm, kn_id, n1hint, n1type, n1spec, 
                                       n2orig, n2hint, n2type, n2spec, et_hint, 
                                       score, t_chksum])
-        outfile = node_file.replace('node', 'unique_node')
+        outfile = node_file.replace('node', 'unique.node')
         tu.csu(node_file, outfile)
-        outfile = n_meta_file.replace('node_meta', 'unique_node_meta')
+        outfile = n_meta_file.replace('node_meta', 'unique.node_meta')
         tu.csu(n_meta_file, outfile)
 
                                       
