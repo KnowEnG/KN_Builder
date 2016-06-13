@@ -100,7 +100,7 @@ for USER in blatti,8484 post3,8585; do
 done;
 
 ### delete
-for USER in blatti,8484 post3,8585; do
+for USER in project1,8282 analytics,8383; do
     TMPID=`echo $USER | cut -f1 -d,`
-    curl -X DELETE knowcluster01.dyndns.org:8080/v2/apps/"$TMPID"-c9/restart
+    curl -X DELETE knowcluster01.dyndns.org:8080/v2/apps/"$TMPID"-c9
 done;
