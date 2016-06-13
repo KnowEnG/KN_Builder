@@ -105,6 +105,8 @@ def main_parse_args():
     args.cloud_config_opts = args.config_opts
     if args.chronos != 'LOCAL':
         args.cloud_config_opts = cf.cloud_config_opts(args, config_opts)
+    args.cloud_dir = args.cloud_dir.rstrip('/')
+    args.local_dir = args.local_dir.rstrip('/')
     return args
 
 
