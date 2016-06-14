@@ -38,8 +38,10 @@ def deploy_container(args=None):
         deploy_dict = json.load(infile)
     deploy_dict["id"] = "p1nginx-" + args.nginx_port
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.nginx_dir
+    docs_path = os.path.join(args.cloud_dir, 'docs', '_build', 'html')
+    deploy_dict["container"]["volumes"][1]["hostPath"] = docs_path
     conf_path = os.path.join(args.cloud_dir, args.code_path, 'nginx', args.nginx_conf)
-    deploy_dict["container"]["volumes"][1]["hostPath"] = conf_path
+    deploy_dict["container"]["volumes"][2]["hostPath"] = conf_path
     deploy_dict["container"]["docker"]["portMappings"][0]["hostPort"] = int(args.nginx_port)
     out_path = os.path.join(deploy_dir, "p1nginx-" + args.nginx_port +'.json')
     with open(out_path, 'w') as outfile:
