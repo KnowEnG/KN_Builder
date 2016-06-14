@@ -275,10 +275,10 @@ def merge(merge_key, args):
     with open(outfile, 'w') as out:
         cmd1 = ['find', searchpath, '-type', 'f',
                 '-name', '*.unique.'+merge_key+'.*', '-print0' ]
-        if args.temp_dir:
-            cmd2 = ['xargs', '-0', 'sort', '-mu', '-T', args.temp_dir]
-        else:
-            cmd2 = ['xargs', '-0', 'sort', '-mu']
+        temppath = os.path.join(filepath, 'tmp')
+        if not os.path.isdir(temppath):
+            os.makedirs(temppath)
+        cmd2 = ['xargs', '-0', 'sort', '-mu', '-T', temppath]
         p1 = subprocess.Popen(' '.join(cmd1), stdout=subprocess.PIPE, shell=True)
         subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
     return outfile

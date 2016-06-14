@@ -76,7 +76,6 @@ def add_config_args(parser):
     --local_dir	    |str	|-ld	|name of toplevel directory on local machine
     --cloud_dir	    |str	|-cd	|name of toplevel directory on cloud storage
     --shared_dir    |str	|-sd	|name of toplevel directory of shared storage
-    --temp_dir	    |str	|-td	|name of toplevel directory of tmp dir if more space is needed than system default
     --code_path	    |str	|-cp	|relative path of code directory from toplevel
     --data_path	    |str	|-dp	|relative path of data directory from toplevel
     --logs_path	    |str	|-lp	|relative path of data directory from toplevel
@@ -120,8 +119,6 @@ def add_config_args(parser):
                         help='name of toplevel directory on cloud storage')
     parser.add_argument('-sd', '--shared_dir', default='', nargs='?',
                         help='name of toplevel directory on shared storage')
-    parser.add_argument('-td', '--temp_dir', default='', nargs='?',
-                        help='name of toplevel directory of tmp dir if more space is needed than system default')
     parser.add_argument('-cp', '--code_path', default=DEFAULT_CODE_PATH,
                         help='relative path of code directory from toplevel')
     parser.add_argument('-dp', '--data_path', default=DEFAULT_DATA_PATH,
