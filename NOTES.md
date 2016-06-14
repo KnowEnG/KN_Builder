@@ -39,6 +39,8 @@ KNP_NGINX_CONF='autoindex/'
 ```
 cd $(dirname $KNP_LOCAL_DIR)
 git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
+```
+```
 cd KnowNet_Pipeline/
 git checkout chronos_testing
 ```
