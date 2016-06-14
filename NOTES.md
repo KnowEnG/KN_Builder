@@ -53,7 +53,7 @@ python3 code/mysql_utilities.py \
 ### empty MySQL database if it is running
 ```
 mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
-        -P $KNP_MYSQL_PORT --execute \"drop database KnowNet;\"
+        -P $KNP_MYSQL_PORT --execute "drop database KnowNet;"
 ```
 
 ## Redis setup
