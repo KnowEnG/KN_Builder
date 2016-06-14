@@ -29,6 +29,10 @@ KNP_REDIS_MEM='8000'
 KNP_REDIS_CPU='2.0'
 KNP_REDIS_PASS='KnowEnG'
 KNP_REDIS_CONSTRAINT_URL=''
+
+KNP_NGINX_PORT='8282'
+KNP_NGINX_DIR='/mnt/storage/project1/p1_nginx'
+KNP_NGINX_CONF='autoindex/'
 ```
 
 ## copy pipeline code
@@ -68,6 +72,15 @@ python3 code/redis_utilities.py \
 ### empty Redis database if it is running
 ```
 redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS FLUSHDB
+```
+
+### nginx setup
+## start nginx server if it is not running
+```
+python3 code/nginx_utilities.py \
+    -ngp $KNP_NGINX_PORT \
+    -ngd $KNP_NGINX_DIR -ngcf $KNP_NGINX_CONF \
+    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
 ```
 
 ## clear the chronos queue
@@ -131,3 +144,22 @@ KNP_CMD="mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
 echo $KNP_CMD
 ```
 
+## launch nginx for export
+```
+
+NGINXCONF=$KNP_CLOUD_DIR'/code/nginx/'
+mkdir $NGINXDIR
+JOB=`cat code/dockerfiles/marathon/nginx.json`
+JOB=`echo $JOB | sed -e 's#TMPPATH#'"$NGINXDIR"'#g'`
+JOB=`echo $JOB | sed -e 's#TMPPORT#'"$NGINXPORT"'#g'`
+JOB=`echo $JOB | sed -e 's#CONFPATH#'"$NGINXCONF"'#g'`
+curl -X POST -H "Content-type: application/json" $KNP_MARATHON_URL -d"$JOB"
+```
+,
+                    {"conatinerPath": "/etc/nginx/conf.d/autoindex.conf", "hostPath": "CONFPATH", "mode": "RW"}
+## dump databases into nginx
+```
+mysqldump -u root -p$KNP_MYSQL_PASS KnowNet | gzip > $NGINXDIR/KnowNet.sql.gz
+cat $KNP_REDIS_DIR/appendonly.aof | gzip > $NGINXDIR/appendonly.aof.gz
+
+```
