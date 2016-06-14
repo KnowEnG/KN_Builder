@@ -251,9 +251,9 @@ class Pathcom(SrcClass):
                     continue
                 chksm = line[2]
                 raw = line[3:]
-                if len(raw) !=6: #extended information
+                if len(raw) !=7: #extended information
                     continue
-                (n1id, et_hint, n2id, src, publist, n3id) = raw
+                (n1id, et_hint, n2id, src, publist, n3id, mediator_ids) = raw
                 et_hint = 'pathcom_' + et_hint.replace('-', '_')
                 #n1-n2 edge
                 hasher = hashlib.md5()
