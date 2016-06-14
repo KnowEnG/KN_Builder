@@ -43,6 +43,13 @@ cd KnowNet_Pipeline/
 git checkout chronos_testing
 ```
 
+## build the documentation
+```
+cd $KNP_LOCAL_DIR/docs/
+make html
+cd $KNP_LOCAL_DIR
+```
+
 ## MySQL setup
 ### start MySQL database if it is not running
 ```
@@ -237,6 +244,4 @@ docker run -d --restart=always --name p1_mysql-$KNP_NGINX_PORT \
     -v $KNP_LOCAL_DIR/code/nginx/$KNP_NGINX_CONF:/etc/nginx/conf.d/:rw \
     nginx
     
-    
-docker run --name tmpnginx -v /mnt/backup/blatti/apps/KnowNet_Pipeline/docs/_build/html/:/usr/share/nginx/html:ro -d -p 8080:80 nginx
 
