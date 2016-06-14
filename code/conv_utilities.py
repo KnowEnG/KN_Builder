@@ -17,7 +17,7 @@ Examples:
 
     To run conv on a file of gene names::
 
-        $ python3 code/conv_utilities.py -m LIST list_of_gene_names.txt
+        $ python3 code/conv_utilities.py -mo LIST list_of_gene_names.txt
 
     To view all optional arguments that can be specified::
 
@@ -136,7 +136,7 @@ def main_parse_args():
                         is LIST, it should contain one identifer on each line. \
                         If mode is EDGE, it should be a single edge file \
                         produced in table, e.g. biogrid.PPI.edge.1.txt')
-    parser.add_argument('-m', '--mode', help='mode for running convert. "EDGE" \
+    parser.add_argument('-mo', '--mode', help='mode for running convert. "EDGE" \
                         if mapping and edge file, or "LIST" to map a list of \
                         names to the stable ids used in the Knowledge Network',
                         default='EDGE')
