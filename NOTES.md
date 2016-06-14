@@ -118,7 +118,7 @@ python3 code/workflow_utilities.py CHECK \
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR
+    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR \
     -sd $KNP_SHARE_DIR
 ```
 
