@@ -137,16 +137,15 @@ python3 code/workflow_utilities.py IMPORT \
 
 ## create user
 ```
-KNP_CMD="mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
+mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
         -P $KNP_MYSQL_PORT --execute \
-        \"CREATE USER 'KNviewer' IDENTIFIED BY 'dbdev249'; \
-        GRANT SELECT ON KnowNet.* TO 'KNviewer';\""
-echo $KNP_CMD
+        "CREATE USER 'KNviewer' IDENTIFIED BY 'dbdev249'; \
+        GRANT SELECT ON KnowNet.* TO 'KNviewer';"
 ```
 
 ## dump databases into nginx
 ```
-mysqldump -u root -p$KNP_MYSQL_PASS KnowNet | gzip > $KNP_NGINX_DIR/KnowNet.sql.gz
-cat $KNP_REDIS_DIR/appendonly.aof | gzip > $KNP_NGINX_DIR/appendonly.aof.gz
+mysqldump -u root -p$KNP_MYSQL_PASS KnowNet | gzip > $KNP_NGINX_DIR/data/KnowNet.sql.gz
+cat $KNP_REDIS_DIR/appendonly.aof | gzip > $KNP_NGINX_DIR/data/appendonly.aof.gz
 
 ```
