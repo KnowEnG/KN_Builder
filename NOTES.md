@@ -29,6 +29,8 @@ KNP_REDIS_MEM='8000'
 KNP_REDIS_CPU='2.0'
 KNP_REDIS_PASS='KnowEnG'
 KNP_REDIS_CONSTRAINT_URL=''
+
+KNP_TMP_DIR='/mnt/storage/project1/tmp'
 ```
 
 ## copy pipeline code
@@ -118,8 +120,8 @@ python3 code/workflow_utilities.py CHECK \
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR
-    -sd $KNP_SHARE_DIR
+    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR \
+    -sd $KNP_SHARE_DIR -td $KNP_TMP_DIR
 ```
 
 ## create user
