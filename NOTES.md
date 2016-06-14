@@ -84,6 +84,8 @@ redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS FLUSHDB
 ## nginx setup
 ### start nginx server if it is not running
 ```
+mkdir $KNP_NGINX_DIR
+mkdir $KNP_NGINX_DIR/docs/
 python3 code/nginx_utilities.py \
     -ngp $KNP_NGINX_PORT \
     -ngd $KNP_NGINX_DIR -ngcf $KNP_NGINX_CONF \
