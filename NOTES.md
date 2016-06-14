@@ -49,6 +49,8 @@ git checkout chronos_testing
 ```
 cd $KNP_LOCAL_DIR/docs/
 make html
+```
+```
 cd $KNP_LOCAL_DIR
 ```
 
