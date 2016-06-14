@@ -74,8 +74,8 @@ python3 code/redis_utilities.py \
 redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS FLUSHDB
 ```
 
-### nginx setup
-## start nginx server if it is not running
+## nginx setup
+### start nginx server if it is not running
 ```
 python3 code/nginx_utilities.py \
     -ngp $KNP_NGINX_PORT \
@@ -144,22 +144,9 @@ KNP_CMD="mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
 echo $KNP_CMD
 ```
 
-## launch nginx for export
-```
-
-NGINXCONF=$KNP_CLOUD_DIR'/code/nginx/'
-mkdir $NGINXDIR
-JOB=`cat code/dockerfiles/marathon/nginx.json`
-JOB=`echo $JOB | sed -e 's#TMPPATH#'"$NGINXDIR"'#g'`
-JOB=`echo $JOB | sed -e 's#TMPPORT#'"$NGINXPORT"'#g'`
-JOB=`echo $JOB | sed -e 's#CONFPATH#'"$NGINXCONF"'#g'`
-curl -X POST -H "Content-type: application/json" $KNP_MARATHON_URL -d"$JOB"
-```
-,
-                    {"conatinerPath": "/etc/nginx/conf.d/autoindex.conf", "hostPath": "CONFPATH", "mode": "RW"}
 ## dump databases into nginx
 ```
-mysqldump -u root -p$KNP_MYSQL_PASS KnowNet | gzip > $NGINXDIR/KnowNet.sql.gz
-cat $KNP_REDIS_DIR/appendonly.aof | gzip > $NGINXDIR/appendonly.aof.gz
+mysqldump -u root -p$KNP_MYSQL_PASS KnowNet | gzip > $KNP_NGINX_DIR/KnowNet.sql.gz
+cat $KNP_REDIS_DIR/appendonly.aof | gzip > $KNP_NGINX_DIR/appendonly.aof.gz
 
 ```
