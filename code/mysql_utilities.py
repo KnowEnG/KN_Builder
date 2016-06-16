@@ -751,6 +751,28 @@ class MySQL(object):
                database, '-L', tablefile, '-v']
         subprocess.call(' '.join(cmd), shell=True)
 
+    def disable_keys(self):
+        """Disables keys for faster operations.
+        
+        Turns off autocommit, unique_checks, and foreign_key_checks for
+        the MySQLdatabase.
+        """
+        self.cursor.execute('SET autocommit=0;')
+        self.cursor.execute('SET unique_checks=0;')
+        self.cursor.execute('SET foreign_key_checks=0;')
+        self.conn.commit()
+
+    def enable_keys(self):
+        """Enables keys for safer operations.
+        
+        Turns on autocommit, unique_checks, and foreign_key_checks for
+        the MySQLdatabase.
+        """
+        self.cursor.execute('SET autocommit=1;')
+        self.cursor.execute('SET unique_checks=1;')
+        self.cursor.execute('SET foreign_key_checks=1;')
+        self.conn.commit()
+
     def close(self):
         """Close connection to the MySQL server.
 

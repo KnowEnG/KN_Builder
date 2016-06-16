@@ -73,6 +73,50 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
     db.load_data(file_name, table, ld_cmd)
     db.close()
 
+def import_file_nokeys(file_name, table, ld_cmd='', args=None):
+    """Imports the provided  file into the KnowEnG MySQL database using optimal
+    settings.
+
+    Starts a transaction and changes some MySQL settings for optimization, which
+    disables the keys. It then loads the data into the provided table in MySQL.
+    Note that the keys are not re-enabled after import. To do this call 
+    enable_keys(args).
+
+    Args:
+        file_name (str): path to the file to be imported
+        table (str): name of the permanent table to import to
+        ld_cmd (str): optional additional command for loading data
+        args (Namespace): args as populated namespace or 'None' for defaults
+    """
+    if args is None:
+        args=cf.config_args()
+    db = mu.get_database('KnowNet', args)
+    print('Inserting data from into ' + table)
+    db.disable_keys()
+    db.load_data(file_name, table, ld_cmd)
+    db.close()
+
+def enable_keys(args=None):
+    """Imports the provided  file into the KnowEnG MySQL database using optimal
+    settings.
+
+    Starts a transaction and changes some MySQL settings for optimization, which
+    disables the keys. It then loads the data into the provided table in MySQL.
+    Note that the keys are not re-enabled after import. To do this call 
+    mysql_utilities.get_database('KnowNet', args).enable_keys().
+
+    Args:
+        file_name (str): path to the file to be imported
+        table (str): name of the permanent table to import to
+        ld_cmd (str): optional additional command for loading data
+        args (Namespace): args as populated namespace or 'None' for defaults
+    """
+    if args is None:
+        args=cf.config_args()
+    db = mu.get_database('KnowNet', args)
+    db.enable_keys()
+    db.close()
+
 def import_filemeta(version_dict, args=None):
     """Imports the provided version_dict into the KnowEnG MySQL database.
 
@@ -308,7 +352,7 @@ if __name__ == "__main__":
         args.importfile = merge(args.importfile, args)
     table = ''
     ld_cmd = ''
-    dup_cmd = ''
+    #dup_cmd = ''
     for key in args.importfile.split('.'):
         if key in merge_keys:
             table = key
@@ -316,6 +360,7 @@ if __name__ == "__main__":
     if not table:
         raise ValueError("ERROR: 'importfile' must contain one of "+\
                          ','.join(merge_keys))
-    import_file(args.importfile, table, ld_cmd, dup_cmd, args)
+    #import_file(args.importfile, table, ld_cmd, dup_cmd, args)
+    import_file_nokeys(args.importfile, table, ld_cmd, args)
     if table == 'status':
         import_production_edges(args)
