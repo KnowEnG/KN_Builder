@@ -33,6 +33,7 @@ import csv
 import sys
 import hashlib
 import os
+import json
 
 csv.field_size_limit(sys.maxsize)
 
@@ -63,6 +64,11 @@ def main(edgefile, args=None):
     status_file = edgefile.replace('edge', 'status')
     ue2l_file = edgefile.replace('edge', 'unique.edge2line')
     us_file = edgefile.replace('edge', 'unique.status')
+    src_data_dir = os.path.join(args.local_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+    species_file = os.path.join(src_data_dir, 'species', 'species.json')
+    with open(species_file, 'r') as infile:
+        species_dict = json.load(infile)
+    supported_taxids = species_dict.values().append('unknown')
     with open(edgefile, 'r') as infile, \
         open(status_file, 'w') as e_stat:
         reader = csv.reader(infile, delimiter = '\t')
@@ -70,12 +76,18 @@ def main(edgefile, args=None):
         for line in reader:
             (n1, hint, ntype, taxid) = line[1:5]
             if ntype == 'gene':
-                n1_map = ru.conv_gene(rdb, n1, hint, taxid)
+                if taxid not in supported_taxids:
+                    n1_map = 'unmapped-unsupported-species'
+                else:
+                    n1_map = ru.conv_gene(rdb, n1, hint, taxid)
             else:
                 n1_map = n1
             (n2, hint, ntype, taxid) = line[5:9]
             if ntype == 'gene':
-                n2_map = ru.conv_gene(rdb, n2, hint, taxid)
+                if taxid not in supported_taxids:
+                    n2_map = 'unmapped-unsupported-species'
+                else:
+                    n2_map = ru.conv_gene(rdb, n2, hint, taxid)
             else:
                 n2_map = n2
             chksum = line[0] #line chksum
