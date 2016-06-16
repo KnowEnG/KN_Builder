@@ -43,7 +43,7 @@ def deploy_container(args=None):
     deploy_dict["cpus"] = float(args.redis_cpu)
     deploy_dict["mem"] = int(args.redis_mem)
     if args.redis_curl:
-        deploy_dict["constraints"] = [["hostname", "CLUSTER", args.redis_host]]
+        deploy_dict["constraints"] = [["hostname", "CLUSTER", args.redis_curl]]
     else:
         deploy_dict["constraints"] = []
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.redis_dir
