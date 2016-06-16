@@ -68,7 +68,7 @@ def main(edgefile, args=None):
     species_file = os.path.join(src_data_dir, 'species', 'species.json')
     with open(species_file, 'r') as infile:
         species_dict = json.load(infile)
-    supported_taxids = species_dict.values().append('unknown')
+    supported_taxids = list(species_dict.values()).append('unknown')
     with open(edgefile, 'r') as infile, \
         open(status_file, 'w') as e_stat:
         reader = csv.reader(infile, delimiter = '\t')
