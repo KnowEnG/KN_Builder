@@ -352,7 +352,7 @@ if __name__ == "__main__":
         args.importfile = merge(args.importfile, args)
     table = ''
     ld_cmd = ''
-    #dup_cmd = ''
+    dup_cmd = ''
     for key in args.importfile.split('.'):
         if key in merge_keys:
             table = key
@@ -360,7 +360,7 @@ if __name__ == "__main__":
     if not table:
         raise ValueError("ERROR: 'importfile' must contain one of "+\
                          ','.join(merge_keys))
-    #import_file(args.importfile, table, ld_cmd, dup_cmd, args)
-    import_file_nokeys(args.importfile, table, ld_cmd, args)
+    import_file(args.importfile, table, ld_cmd, dup_cmd, args)
+    #import_file_nokeys(args.importfile, table, ld_cmd, args)
     if table == 'status':
         import_production_edges(args)
