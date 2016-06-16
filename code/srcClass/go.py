@@ -186,10 +186,12 @@ class Go(SrcClass):
         Returns:
             str: The url needed to fetch the file corresponding to the alias.
         """
-        url = self.url_base + 'gene_association.' + alias + '.gz'
-        # format for ontology information
         if alias == 'obo_map':
             url = 'http://purl.obolibrary.org/obo/go.obo'
+        elif alias == 'goa_human':
+                    url = self.url_base + alias + '.gaf.gz'
+        else:
+            url = self.url_base + 'gene_association.' + alias + '.gz'
         return url
 
     def is_map(self, alias):

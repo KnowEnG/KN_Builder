@@ -30,6 +30,10 @@ Attributes:
     DEFAULT_REDIS_MEM (str): memory for launching Redis db
     DEFAULT_REDIS_CPU (str): CPUs for launching Redis db
     DEFAULT_REDIS_DIR (str): toplevel directory for Redis db storage
+    
+    DEFAULT_NGINX_PORT (int): port for nginx db
+    DEFAULT_NGINX_DIR (str): toplevel directory for nginx db storage
+    DEFAULT_NGINX_CONF (str): name of config path for launching nginx
 """
 from argparse import ArgumentParser
 import os
@@ -52,7 +56,7 @@ DEFAULT_MYSQL_USER = 'root'
 DEFAULT_MYSQL_PASS = 'KnowEnG'
 DEFAULT_MYSQL_MEM = '15000'
 DEFAULT_MYSQL_CPU = '4.0'
-DEFAULT_MYSQL_DIR = '/mnt/knowtmp/project1/p1_mysql'
+DEFAULT_MYSQL_DIR = os.path.join(os.path.dirname(DEFAULT_CLOUD_BASE), 'p1_mysql')
 DEFAULT_MYSQL_CONF = 'build_conf/'
 
 DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
@@ -60,7 +64,12 @@ DEFAULT_REDIS_PORT = '6379'
 DEFAULT_REDIS_PASS = 'KnowEnG'
 DEFAULT_REDIS_MEM = '15000'
 DEFAULT_REDIS_CPU = '1.0'
-DEFAULT_REDIS_DIR = '/mnt/knowtmp/project1/p1_redis'
+DEFAULT_REDIS_DIR = os.path.join(os.path.dirname(DEFAULT_CLOUD_BASE), 'p1_redis')
+
+DEFAULT_NGINX_PORT = '8080'
+DEFAULT_NGINX_DIR = os.path.join(os.path.dirname(DEFAULT_CLOUD_BASE), 'p1_nginx')
+DEFAULT_NGINX_CONF = 'autoindex/'
+
 
 def add_config_args(parser):
     """Add global configuation options to command line arguments.
@@ -88,6 +97,8 @@ def add_config_args(parser):
     --mysql_cpu     |str    |-myc   |cpus for deploying MySQL container
     --mysql_dir     |str    |-myd   |directory for deploying MySQL container
     --mysql_curl    |str    |-mycu  |constraint url for deploying MySQL container
+    --mysql_dir     |str    |-myd   |directory for deploying MySQL container
+    --mysql_curl    |str    |-mycu  |constraint url for deploying MySQL container
     --mysql_conf    |str    |-mycf  |config directory for deploying MySQL container
     --redis_host	|str	|-rh 	|url of Redis db
     --redis_port	|str	|-rp 	|port for Redis db
@@ -96,6 +107,9 @@ def add_config_args(parser):
     --redis_cpu     |str    |-rc    |cpus for deploying redis container
     --redis_dir     |str    |-rd    |directory for deploying redis container
     --redis_curl    |str    |-rcu   |constraint url for deploying redis container
+    --nginx_port	|str	|-ngp	|port for nginx db
+    --nginx_dir     |str    |-ngd   |directory for deploying MySQL container
+    --nginx_conf    |str    |-ngcf  |config directory for deploying nginx container
     --chunk_size	|int	|-cs	|lines per chunk
     --test_mode	    |   	|-tm	|run in test mode by only printing command, defaults to False
     --ens_species   |str    |-es    |',,' separated ensembl species to run in setup pipeline
@@ -160,6 +174,12 @@ def add_config_args(parser):
                         help='constrain url for deploying redis container')
     parser.add_argument('-rd', '--redis_dir', default=DEFAULT_REDIS_DIR,
                         help='directory for deploying redis container')
+    parser.add_argument('-ngp', '--nginx_port', default=DEFAULT_NGINX_PORT,
+                        help='port for nginx db')
+    parser.add_argument('-ngd', '--nginx_dir', default=DEFAULT_NGINX_DIR,
+                        help='directory for deploying nginx container')
+    parser.add_argument('-ngcf', '--nginx_conf', default=DEFAULT_NGINX_CONF,
+                        help='config directory for deploying nginx container')
     parser.add_argument('-tm', '--test_mode', action='store_true', default=False,
                         help='run in test mode by only printing commands')
     parser.add_argument('-es', '--ens_species', default='REPRESENTATIVE',
