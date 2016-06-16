@@ -94,11 +94,10 @@ def main(edgefile, args=None):
             else:
                 status = 'production'
                 status_desc = 'mapped'
-            s_writer.writerow([n1_map, n2_map, et_map, weight, e_chksum, \
-                chksum, t_chksum, status, status_desc])
+            s_writer.writerow([t_chksum, n1_map, n2_map, et_map, weight, e_chksum, \
+                chksum, status, status_desc])
     tu.csu(status_file, us_file)
-    tu.csu(us_file, ue2l_file, [5, 6])
-#    iu.import_status(status_file, args)  #### change after import testing
+    tu.csu(us_file, ue2l_file, [6, 7])
 
 def map_list(namefile, args=None):
     """Maps the nodes for the provided namefile.
