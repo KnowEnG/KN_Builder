@@ -1,9 +1,8 @@
-raw_downloads/*
 data*
 logs*
 tests/*
-code/chron_jobs/
-code/marathon_jobs/
+chron_jobs/
+marathon_jobs/
 code/log*
 id_map/
 jobs/*

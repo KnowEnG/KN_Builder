@@ -26,16 +26,16 @@ import subprocess
 def deploy_container(args=None):
     """Deplays a container with marathon running MySQL using the specified
     args.
-    
-    This replaces the placeholder args in the json describing how to deploy a 
+
+    This replaces the placeholder args in the json describing how to deploy a
     container running mysql with those supplied in the users arguements.
-    
+
     Args:
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
         args=cf.config_args()
-    deploy_dir = os.path.join(args.code_path, 'marathon_jobs')
+    deploy_dir = os.path.join(args.local_dir, 'marathon_jobs')
     if not os.path.exists(deploy_dir):
         os.makedirs(deploy_dir)
     template_job = os.path.join(args.local_dir, args.code_path, 'dockerfiles', 'marathon', 'mysql.json')
@@ -66,7 +66,7 @@ def deploy_container(args=None):
             print(ex1.output)
     else:
         print(job)
-        
+
 
 def combine_tables(alias, args=None):
     """Combine all of the data imported from ensembl for the provided alias
@@ -94,14 +94,15 @@ def combine_tables(alias, args=None):
     for step in steps:
         db.insert(tablename, get_insert_cmd(step))
     db.drop_table(combined_db + '.' + combined_table)
-    db.move_table(alias_db, tablename, combined_db, combined_table)
+    #db.move_table(alias_db, tablename, combined_db, combined_table)
     db.use_db(combined_db)
-    cmd = ("SELECT *, db_display_name AS species FROM " + alias + "_mappings "
-           "WHERE 1=2")
+    cmd = ("SELECT *, db_display_name AS species FROM " + alias_db + '.' +
+            alias + "_mappings WHERE 1=2")
     db.create_table(all_table, cmd)
     #cmd = ("DELETE FROM " + all_table + " WHERE species = '" + alias + "'")
     #db.execute(cmd)
-    cmd = ("SELECT *, '" + alias + "' AS species FROM " + alias + "_mappings")
+    cmd = ("SELECT *, '" + alias + "' AS species FROM " + alias_db + '.'+
+            alias + "_mappings")
     db.insert(all_table, cmd)
     db.close()
 
@@ -761,15 +762,15 @@ class MySQL(object):
 
 def main():
     """Deploy a MySQL container using marathon with the provided command line
-    arguements. 
-    
-    This uses the provided command line arguments and the defaults found in 
+    arguements.
+
+    This uses the provided command line arguments and the defaults found in
     config_utilities to launch a MySQL docker container using marathon.
     """
     parser = ArgumentParser()
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
     deploy_container(args)
-    
+
 if __name__ == "__main__":
     main()

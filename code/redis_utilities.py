@@ -30,7 +30,7 @@ def deploy_container(args=None):
     """
     if args is None:
         args=cf.config_args()
-    deploy_dir = os.path.join(args.code_path, 'marathon_jobs')
+    deploy_dir = os.path.join(args.local_dir, 'marathon_jobs')
     if not os.path.exists(deploy_dir):
         os.makedirs(deploy_dir)
     template_job = os.path.join(args.local_dir, args.code_path, 
