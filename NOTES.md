@@ -251,9 +251,9 @@ docker restart p1_redis-$KNP_REDIS_PORT
 ## nginx setup
 ### start nginx server if it is not running
 ```
-docker run -d --restart=always --name p1_mysql-$KNP_NGINX_PORT \
+docker run -d --restart=always --name p1_nginx-$KNP_NGINX_PORT \
     -p $KNP_NGINX_PORT:80 \
-    -v $KNP_NGINX_DIR:/usr/share/nginx/html:ro \
+    -v $KNP_NGINX_DIR:/usr/share/nginx/html \
     -v $KNP_LOCAL_DIR/docs/_build/html/:/usr/share/nginx/html/docs \
     -v $KNP_LOCAL_DIR/code/nginx/$KNP_NGINX_CONF:/etc/nginx/conf.d/ \
     nginx
