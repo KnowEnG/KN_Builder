@@ -175,7 +175,7 @@ tar czvf $KNP_NGINX_DIR/data/KnowNet.tgz $KNP_LOCAL_DIR
 
 ## Set environment variables
 ```
-KNP_LOCAL_DIR='/workspace/KnowNet_0.3/KnowNet_Pipeline
+KNP_LOCAL_DIR='/workspace/KnowNet_0.3/KnowNet_Pipeline'
 KNP_DATA_PATH='data_representative'
 KNP_LOGS_PATH='logs_representative'
 KNP_ENS_SPECIES='REPRESENTATIVE'
