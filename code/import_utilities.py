@@ -347,7 +347,7 @@ def main_parse_args():
 
 if __name__ == "__main__":
     args = main_parse_args()
-    merge_keys = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta']
+    merge_keys = ['node', 'node_meta', 'edge2line', 'status', 'edge', 'edge_meta']
     if args.importfile in merge_keys:
         args.importfile = merge(args.importfile, args)
     table = ''
@@ -362,5 +362,5 @@ if __name__ == "__main__":
                          ','.join(merge_keys))
     import_file(args.importfile, table, ld_cmd, dup_cmd, args)
     #import_file_nokeys(args.importfile, table, ld_cmd, args)
-    if table == 'status':
-        import_production_edges(args)
+    #if table == 'status':
+    #    import_production_edges(args)
