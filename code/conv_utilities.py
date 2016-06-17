@@ -65,7 +65,6 @@ def main(tablefile, args=None):
     rdb = ru.get_database(args)
     edge_file = tablefile.replace('table', 'edge')
     status_file = tablefile.replace('table', 'status')
-    se_file = tablefile.replace('table', 'unique-tmp.edge')
     ue_file = tablefile.replace('table', 'unique.edge')
     ue2l_file = tablefile.replace('table', 'unique.edge2line')
     us_file = tablefile.replace('table', 'unique.status')
@@ -116,25 +115,7 @@ def main(tablefile, args=None):
                 e_writer.writerow([e_chksum, n1_map, n2_map, et_map, weight])
             s_writer.writerow([t_chksum, n1_map, n2_map, et_map, weight, e_chksum, \
                 chksum, status, status_desc])
-    tu.csu(edge_file, se_file)
-    with open(se_file, 'r') as infile, \
-        open(ue_file, 'w') as outfile:
-        reader = csv.reader(infile, delimiter = '\t')
-        writer = csv.writer(outfile, delimiter = '\t', lineterminator='\n')
-        prev = False
-        for line in reader:
-            e_chksum = line[0]
-            weight = line[4]
-            if not prev:
-                prev = line
-            if e_chksum != prev[0]:
-                writer.writerow(prev)
-                prev = line
-            elif float(weight) > float(prev[4]):
-                prev = line
-        if prev:
-            writer.writerow(prev)
-    os.remove(se_file)
+    tu.csu(edge_file, ue_file)
     tu.csu(status_file, us_file)
     tu.csu(us_file, ue2l_file, [6, 7])
 
