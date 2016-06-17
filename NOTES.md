@@ -199,7 +199,7 @@ KNP_NGINX_CONF='autoindex/'
 
 ## symlink directory
 ```
-ln -s /workspace/ /project
+ln -s /workspace/ /project1
 ```
 ## Download the data
 ```
