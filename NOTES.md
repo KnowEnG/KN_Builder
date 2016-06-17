@@ -187,16 +187,21 @@ KNP_MYSQL_PORT='3306'
 KNP_MYSQL_DIR='/project1/KnowNet_0.3/p1_mysql'
 KNP_MYSQL_CONF='build_conf/'
 KNP_MYSQL_PASS='KnowEnG'
+KNP_MYSQL_MEM='5000'
 
 KNP_REDIS_HOST='knownet.dyndns.org'
 KNP_REDIS_PORT='6379'
 KNP_REDIS_DIR='/project1/KnowNet_0.3/p1_redis'
 KNP_REDIS_PASS='KnowEnG'
+KNP_REDIS_MEM='2000'
+
 
 KNP_NGINX_HOST='knownbs.dyndns.org'
 KNP_NGINX_PORT='8282'
 KNP_NGINX_DIR='/project1/KnowNet_0.3/p1_nginx'
 KNP_NGINX_CONF='autoindex/'
+KNP_NGINX_HOST2='knowcluster03.dyndns.org'
+KNP_NGINX_PORT2='8081'
 ```
 
 ## symlink directory
@@ -204,14 +209,26 @@ KNP_NGINX_CONF='autoindex/'
 ln -s /workspace/ /project1
 ```
 ## Download the data
+### Download KnowNet_Pipeline directory
 ```
 mkdir $(dirname $KNP_LOCAL_DIR)
 cd $(dirname $KNP_LOCAL_DIR)
 wget $KNP_NGINX_HOST:$KNP_NGINX_PORT/data/KnowNet.tgz
 tar xzvf KnowNet.tgz
+```
+### Download Redis data (from knownbs - 6 species)
+```
 mkdir $KNP_REDIS_DIR && cd $KNP_REDIS_DIR
 wget $KNP_NGINX_HOST:$KNP_NGINX_PORT/data/appendonly.aof.gz
 gunzip -d appendonly.aof.gz
+```
+### Download Redis data (from knowcluster - human only)
+```
+mkdir $KNP_REDIS_DIR && cd $KNP_REDIS_DIR
+wget $KNP_NGINX_HOST2:$KNP_NGINX_PORT2/data/appendonly.aof
+```
+### Download MySQL data
+```
 mkdir $KNP_MYSQL_DIR && cd $(dirname $KNP_LOCAL_DIR)
 wget $KNP_NGINX_HOST:$KNP_NGINX_PORT/data/KnowNet.dump.sql.gz
 ```
@@ -221,7 +238,7 @@ wget $KNP_NGINX_HOST:$KNP_NGINX_PORT/data/KnowNet.dump.sql.gz
 ```
 docker run -d --restart=always --name p1_mysql-$KNP_MYSQL_PORT \
     -e MYSQL_ROOT_PASSWORD=$KNP_MYSQL_PASS -p $KNP_MYSQL_PORT:3306 \
-    -v $KNP_MYSQL_DIR:/var/lib/mysql \
+    -m $KNP_MYSQL_MEM -v $KNP_MYSQL_DIR:/var/lib/mysql \
     -v $KNP_CLOUD_DIR/code/mysql/$KNP_MYSQL_CONF:/etc/mysql/conf.d/ mysql
 ```
 
@@ -244,7 +261,7 @@ gunzip < KnowNet.dump.sql.gz | mysql -h $KNP_MYSQL_HOST -uroot \
 ### start Redis database if it is not running
 ```
 docker run -d --restart=always --name p1_redis-$KNP_REDIS_PORT \
-    -p $KNP_REDIS_PORT:6379 -v $KNP_REDIS_DIR:/data \
+    -m $KNP_REDIS_MEM -p $KNP_REDIS_PORT:6379 -v $KNP_REDIS_DIR:/data \
     redis redis-server --appendonly yes --requirepass $KNP_REDIS_PASS
 ```
 ### restart the Redis database if it is running
