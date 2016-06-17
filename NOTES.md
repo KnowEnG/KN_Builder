@@ -212,7 +212,7 @@ tar xzvf KnowNet.tgz
 mkdir $KNP_REDIS_DIR && cd $KNP_REDIS_DIR
 wget $KNP_NGINX_HOST:$KNP_NGINX_PORT/data/appendonly.aof.gz
 gunzip -d appendonly.aof.gz
-mkdir $KNP_MYSQL_DIR && cd $KNP_MYSQL_DIR
+mkdir $KNP_MYSQL_DIR && cd $(dirname $KNP_LOCAL_DIR)
 wget $KNP_NGINX_HOST:$KNP_NGINX_PORT/data/KnowNet.dump.sql.gz
 ```
 
@@ -233,7 +233,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
 
 ### load the downloaded data
 ```
-cd $KNP_MYSQL_DIR
+cd $(dirname $KNP_LOCAL_DIR)
 gunzip < KnowNet.dump.sql.gz | mysql -h $KNP_MYSQL_HOST -uroot \
     -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT KnowNet
 ```
