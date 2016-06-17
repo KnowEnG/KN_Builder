@@ -187,7 +187,7 @@ KNP_MYSQL_PORT='3306'
 KNP_MYSQL_DIR='/project1/KnowNet_0.3/p1_mysql'
 KNP_MYSQL_CONF='build_conf/'
 KNP_MYSQL_PASS='KnowEnG'
-KNP_MYSQL_MEM='5000'
+KNP_MYSQL_MEM='4000'
 
 KNP_REDIS_HOST='knownet.dyndns.org'
 KNP_REDIS_PORT='6379'
