@@ -77,11 +77,11 @@ CREATE TABLE IF NOT EXISTS `edge2line`(
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge` (
+  `edge_hash` varchar(40) NOT NULL,
   `n1_id` varchar(64) NOT NULL,
   `n2_id` varchar(64) NOT NULL,
   `et_name` varchar(80) NOT NULL,
   `weight` float NOT NULL,
-  `edge_hash` varchar(40) NOT NULL,
   PRIMARY KEY (`edge_hash`),
   KEY `n1_id` (`n1_id`),
   KEY `n2_id` (`n2_id`),
