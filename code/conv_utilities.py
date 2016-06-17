@@ -45,9 +45,10 @@ def main(edgefile, args=None):
     """Maps the nodes for the source:alias edgefile.
 
     This takes the path to an edgefile (see table_utilities.main) and maps
-    the nodes in it using the Redis DB. It then outputs an edge_mapped file in
-    the format (n1, n2, line_checksum, edge_type, weight, status, status_desc),
-    where status is production if both nodes mapped and unmapped otherwise.
+    the nodes in it using the Redis DB. It then outputs a stats file in
+    the format (table_hash, n1, n2, edge_type, weight, edge_hash, line_hash, 
+    status, status_desc), where status is production if both snodes mapped and 
+    unmapped otherwise.
 
     Args:
         edgefile (str): path to an edgefile to be mapped
