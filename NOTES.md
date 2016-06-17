@@ -199,6 +199,7 @@ KNP_NGINX_CONF='autoindex/'
 
 ## Download the data
 ```
+mkdir $(dirname $KNP_LOCAL_DIR)
 cd $(dirname $KNP_LOCAL_DIR)
 wget $KNP_NGINX_HOST:$KNP_NGINX_PORT/data/KnowNet.tgz
 tar xzvf KnowNet.tgz
