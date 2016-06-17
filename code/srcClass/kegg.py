@@ -322,7 +322,7 @@ class Kegg(SrcClass):
         """
 
         #outfiles
-        table_file = rawline.replace('rawline', 'edge')
+        table_file = rawline.replace('rawline', 'table')
 
         #static column values
         n1type = 'property'

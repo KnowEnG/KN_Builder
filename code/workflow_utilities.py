@@ -393,14 +393,14 @@ def run_table(args):
                            })
             step_job = ju.run_job_step(args, "tabler", jobdict)
 
-            ns_parameters.extend([chunk_name.replace('.rawline.', '.edge.')])
+            ns_parameters.extend([chunk_name.replace('.rawline.', '.table.')])
 
             if not args.setup and not args.one_step and args.chronos not in SPECIAL_MODES:
                 ns_jobname = "-".join([jobname, "next_step"])
                 ns_dict = generic_dict(args, step_job.jobname)
                 ns_dict.update({'TMPJOB': ns_jobname,
                                 'TMPNEXTSTEP': "MAP",
-                                'TMPSTART': chunk_name.replace('.rawline.', '.edge.'),
+                                'TMPSTART': chunk_name.replace('.rawline.', '.table.'),
                                 'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
                                                      '-d', ns_jobname])
                                })
@@ -423,45 +423,45 @@ def run_table(args):
 
 
 def run_map(args):
-    """Runs id conversion for a single .edge. file on the cloud.
+    """Runs id conversion for a single .table. file on the cloud.
 
-    This loops through args.parameters edgefiles, creates a job for each that
+    This loops through args.parameters tablefiles, creates a job for each that
     calls conv_utilities main(), and runs job in args.chronos location.
 
     Args:
         args (Namespace): args as populated namespace from parse_args, must
             specify --step_parameters(-p) as ',,' separated list of
-            'source.alias.chunk.edge.txt' file names
+            'source.alias.table.chunk.txt' file names
     """
-    edgefile_list = args.step_parameters.split(",,")
+    tablefile_list = args.step_parameters.split(",,")
     if args.step_parameters == "":
-        raise ValueError("ERROR: 'edgefile' must be specified with --step_parameters (-p)")
+        raise ValueError("ERROR: 'tablefile' must be specified with --step_parameters (-p)")
     ju.Job("mapper", args)
 
     ctr = 0
-    for filestr in edgefile_list:
+    for filestr in tablefile_list:
 
-        edgefile = os.path.basename(filestr)
-        output_files = edgefile.replace('.edge.', '.*.')
-        src = edgefile.split('.')[0]
-        alias = edgefile.split('.edge.')[0].split(src+'.')[1]
+        tablefile = os.path.basename(filestr)
+        output_files = tablefile.replace('.table.', '.*.')
+        src = tablefile.split('.')[0]
+        alias = tablefile.split('.table.')[0].split(src+'.')[1]
 
         chunk_path = os.path.join(src, alias, "chunks")
         local_chunk_dir = os.path.join(args.local_dir, args.data_path, chunk_path)
-        local_edgefile = os.path.join(local_chunk_dir, edgefile)
-        if not os.path.exists(local_edgefile):
-            raise IOError('ERROR: "edgefile" specified with --step_parameters (-p) '
-                          'option, ' + filestr + ' does not exist: ' + local_edgefile)
+        local_tablefile = os.path.join(local_chunk_dir, tablefile)
+        if not os.path.exists(local_tablefile):
+            raise IOError('ERROR: "tablefile" specified with --step_parameters (-p) '
+                          'option, ' + filestr + ' does not exist: ' + local_tablefile)
 
         ctr += 1
-        print("\t".join([str(ctr), edgefile]))
+        print("\t".join([str(ctr), tablefile]))
 
-        jobname = "-".join(["map", edgefile])
+        jobname = "-".join(["map", tablefile])
         jobname = jobname.replace(".", "-")
         jobname = jobname.replace(".txt", "")
         jobdict = generic_dict(args, None)
         jobdict.update({'TMPJOB': jobname,
-                        'TMPEDGEPATH': os.path.join(chunk_path, edgefile),
+                        'TMPTABLEPATH': os.path.join(chunk_path, tablefile),
                         'TMPFILES': os.path.join(chunk_path, output_files)
                        })
         ju.run_job_step(args, "mapper", jobdict)
@@ -484,7 +484,7 @@ def run_import(args):
             will try to import all tables.
     """
     importfile_list = args.step_parameters.split(",,")
-    TABLES = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta']
+    TABLES = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta', 'edge']
     if args.step_parameters == "":
         importfile_list = TABLES
     ju.Job("importer", args)

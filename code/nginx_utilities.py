@@ -37,6 +37,10 @@ def deploy_container(args=None):
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
     deploy_dict["id"] = "p1nginx-" + args.nginx_port
+    if args.nginx_curl:
+        deploy_dict["constraints"] = [["hostname", "CLUSTER", args.nginx_curl]]
+    else:
+        deploy_dict["constraints"] = []
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.nginx_dir
     docs_path = os.path.join(args.cloud_dir, 'docs', '_build', 'html')
     deploy_dict["container"]["volumes"][1]["hostPath"] = docs_path

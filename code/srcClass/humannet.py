@@ -220,7 +220,7 @@ class HumanNet(SrcClass):
         n2spec = "9606"
 
         #output file
-        table_file = rawline.replace('rawline', 'edge')
+        table_file = rawline.replace('rawline', 'table')
 
         with open(rawline) as infile, \
             open(table_file, 'w') as edges:

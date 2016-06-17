@@ -26,10 +26,10 @@ import subprocess
 def deploy_container(args=None):
     """Deplays a container with marathon running MySQL using the specified
     args.
-    
-    This replaces the placeholder args in the json describing how to deploy a 
+
+    This replaces the placeholder args in the json describing how to deploy a
     container running mysql with those supplied in the users arguements.
-    
+
     Args:
         args (Namespace): args as populated namespace or 'None' for defaults
     """
@@ -45,7 +45,7 @@ def deploy_container(args=None):
     deploy_dict["cpus"] = float(args.mysql_cpu)
     deploy_dict["mem"] = int(args.mysql_mem)
     if args.mysql_curl:
-        deploy_dict["constraints"] = [["hostname", "CLUSTER", args.mysql_host]]
+        deploy_dict["constraints"] = [["hostname", "CLUSTER", args.mysql_curl]]
     else:
         deploy_dict["constraints"] = []
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.mysql_dir
@@ -66,7 +66,7 @@ def deploy_container(args=None):
             print(ex1.output)
     else:
         print(job)
-        
+
 
 def combine_tables(alias, args=None):
     """Combine all of the data imported from ensembl for the provided alias
@@ -83,25 +83,26 @@ def combine_tables(alias, args=None):
     if args is None:
         args=cf.config_args()
     alias_db = 'ensembl_' + alias
-    tablename = 'knownet_mappings'
+    #tablename = 'knownet_mappings'
     combined_db = 'KnowNet'
     combined_table = alias + '_mappings'
     all_table = 'all_mappings'
     steps = ['transcript', 'translation', 'transcript2stable',
              'translation2stable']
     db = MySQL(alias_db, args)
-    db.create_table(tablename, get_insert_cmd('gene'))
+    db.create_table(combined_table, get_insert_cmd('gene'))
     for step in steps:
-        db.insert(tablename, get_insert_cmd(step))
-    db.drop_table(combined_db + '.' + combined_table)
-    db.move_table(alias_db, tablename, combined_db, combined_table)
+        db.insert(combined_table, get_insert_cmd(step))
+    #db.drop_table(combined_db + '.' + combined_table)
+    #db.move_table(alias_db, tablename, combined_db, combined_table)
     db.use_db(combined_db)
-    cmd = ("SELECT *, db_display_name AS species FROM " + alias + "_mappings "
-           "WHERE 1=2")
+    cmd = ("SELECT *, db_display_name AS species FROM " + alias_db + '.' +
+            alias + "_mappings WHERE 1=2")
     db.create_table(all_table, cmd)
     #cmd = ("DELETE FROM " + all_table + " WHERE species = '" + alias + "'")
     #db.execute(cmd)
-    cmd = ("SELECT *, '" + alias + "' AS species FROM " + alias + "_mappings")
+    cmd = ("SELECT *, '" + alias + "' AS species FROM " + alias_db + '.'+
+            alias + "_mappings")
     db.insert(all_table, cmd)
     db.close()
 
@@ -170,7 +171,7 @@ def query_all_mappings(version_dict, args=None):
         args=cf.config_args()
     alias = version_dict['alias']
     taxid = version_dict['alias_info']
-    database = 'KnowNet'
+    database = 'ensembl_' + alias
     table = alias + '_mappings'
     map_dir = os.path.join(args.data_path, cf.DEFAULT_MAP_PATH)
     if os.path.isdir(args.local_dir):
@@ -750,6 +751,28 @@ class MySQL(object):
                database, '-L', tablefile, '-v']
         subprocess.call(' '.join(cmd), shell=True)
 
+    def disable_keys(self):
+        """Disables keys for faster operations.
+        
+        Turns off autocommit, unique_checks, and foreign_key_checks for
+        the MySQLdatabase.
+        """
+        self.cursor.execute('SET autocommit=0;')
+        self.cursor.execute('SET unique_checks=0;')
+        self.cursor.execute('SET foreign_key_checks=0;')
+        self.conn.commit()
+
+    def enable_keys(self):
+        """Enables keys for safer operations.
+        
+        Turns on autocommit, unique_checks, and foreign_key_checks for
+        the MySQLdatabase.
+        """
+        self.cursor.execute('SET autocommit=1;')
+        self.cursor.execute('SET unique_checks=1;')
+        self.cursor.execute('SET foreign_key_checks=1;')
+        self.conn.commit()
+
     def close(self):
         """Close connection to the MySQL server.
 
@@ -761,15 +784,15 @@ class MySQL(object):
 
 def main():
     """Deploy a MySQL container using marathon with the provided command line
-    arguements. 
-    
-    This uses the provided command line arguments and the defaults found in 
+    arguements.
+
+    This uses the provided command line arguments and the defaults found in
     config_utilities to launch a MySQL docker container using marathon.
     """
     parser = ArgumentParser()
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
     deploy_container(args)
-    
+
 if __name__ == "__main__":
     main()

@@ -309,7 +309,7 @@ class Go(SrcClass):
         """
 
         #outfiles
-        table_file = rawline.replace('rawline', 'edge')
+        table_file = rawline.replace('rawline', 'table')
         e_meta_file = rawline.replace('rawline', 'edge_meta')
 
         #static column values
