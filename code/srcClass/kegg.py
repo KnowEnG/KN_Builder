@@ -81,12 +81,11 @@ class Kegg(SrcClass):
         kegg_dict = dict()
         for line in kegg_resp:
             (_, org, species, _) = line.decode().split('\t')
-            species = '_'.join(species.lower().split(' ')[:2])
+            species = ' '.join(species.split(' ')[:2])
             kegg_dict[species] = org
         for species in sp_dict:
             if species in kegg_dict:
                 org = kegg_dict[species]
-                species = species.capitalize().replace('_', ' ')
                 sp_abbrev = species[0] + species.split(' ')[1][:3]
                 alias_dict[org] = species
                 alias_dict[org + '_map'] = sp_abbrev + '_IDmap'
