@@ -152,7 +152,7 @@ python3 code/workflow_utilities.py IMPORT \
 ```
 code/reports/enumerate_files.sh $KNP_LOCAL_DIR/$KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
     $KNP_REDIS_HOST $KNP_MYSQL_PORT $KNP_REDIS_PORT > tests/KN03build.$KNP_DATA_PATH.pipe
-git add tests/KN03build.$KNP_DATA_PATH.pipe
+git add -f tests/KN03build.$KNP_DATA_PATH.pipe
 git commit -m 'adding result report'
 git push
 ```
@@ -192,7 +192,7 @@ KNP_REDIS_DIR='/project1/KnowNet_0.3/p1_redis'
 KNP_REDIS_PASS='KnowEnG'
 
 KNP_NGINX_HOST='knownbs.dyndns.org'
-KNP_NGINX_PORT='8081'
+KNP_NGINX_PORT='8282'
 KNP_NGINX_DIR='/project1/KnowNet_0.3/p1_nginx'
 KNP_NGINX_CONF='autoindex/'
 ```
