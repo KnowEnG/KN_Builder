@@ -180,6 +180,8 @@ def add_config_args(parser):
                         help='directory for deploying nginx container')
     parser.add_argument('-ngcf', '--nginx_conf', default=DEFAULT_NGINX_CONF,
                         help='config directory for deploying nginx container')
+    parser.add_argument('-ncu', '--nginx_curl', default='', nargs='?',
+                        help='constrain url for deploying nginx container')
     parser.add_argument('-tm', '--test_mode', action='store_true', default=False,
                         help='run in test mode by only printing commands')
     parser.add_argument('-es', '--ens_species', default='REPRESENTATIVE',
