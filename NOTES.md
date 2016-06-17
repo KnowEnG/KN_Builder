@@ -191,7 +191,7 @@ KNP_REDIS_PORT='6379'
 KNP_REDIS_DIR='/workspace/KnowNet_0.3/p1_redis'
 KNP_REDIS_PASS='KnowEnG'
 
-KNP_NGINS_HOST='knownbs.dyndns.org'
+KNP_NGINX_HOST='knownbs.dyndns.org'
 KNP_NGINX_PORT='8282'
 KNP_NGINX_DIR='/mnt/storage/project1/p1_nginx'
 KNP_NGINX_CONF='autoindex/'
