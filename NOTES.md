@@ -182,24 +182,24 @@ KNP_ENS_SPECIES='REPRESENTATIVE'
 
 KNP_MYSQL_HOST='knowet.dyndns.org'
 KNP_MYSQL_PORT='3306'
-KNP_MYSQL_DIR='/mnt/KnowNet_0.3/p1_mysql'
+KNP_MYSQL_DIR='/project1/KnowNet_0.3/p1_mysql'
 KNP_MYSQL_CONF='build_conf/'
 KNP_MYSQL_PASS='KnowEnG'
 
 KNP_REDIS_HOST='knowet.dyndns.org'
 KNP_REDIS_PORT='6379'
-KNP_REDIS_DIR='/mnt/KnowNet_0.3/p1_redis'
+KNP_REDIS_DIR='/project1/KnowNet_0.3/p1_redis'
 KNP_REDIS_PASS='KnowEnG'
 
 KNP_NGINX_HOST='knownbs.dyndns.org'
-KNP_NGINX_PORT='8282'
-KNP_NGINX_DIR='/mnt/storage/project1/p1_nginx'
+KNP_NGINX_PORT='8081'
+KNP_NGINX_DIR='/project1/KnowNet_0.3/p1_nginx'
 KNP_NGINX_CONF='autoindex/'
 ```
 
 ## symlink directory
 ```
-ln -s /workspace/KnowNet_0.3/ /mnt/
+ln -s /workspace/ /project
 ```
 ## Download the data
 ```
