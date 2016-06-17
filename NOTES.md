@@ -234,6 +234,8 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
 ### load the downloaded data
 ```
 cd $(dirname $KNP_LOCAL_DIR)
+mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
+    -P $KNP_MYSQL_PORT -e "CREATE DATABASE KnowNet;"
 gunzip < KnowNet.dump.sql.gz | mysql -h $KNP_MYSQL_HOST -uroot \
     -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT KnowNet
 ```
