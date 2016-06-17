@@ -168,7 +168,8 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
 mysqldump -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     KnowNet | gzip > $KNP_NGINX_DIR/data/KnowNet.dump.sql.gz
 cat $KNP_REDIS_DIR/appendonly.aof | gzip > $KNP_NGINX_DIR/data/appendonly.aof.gz
-tar czvf $KNP_NGINX_DIR/data/KnowNet.tgz $KNP_LOCAL_DIR
+cd $(dirname $KNP_LOCAL_DIR)
+tar czvf $KNP_NGINX_DIR/data/KnowNet.tgz $(basename $KNP_LOCAL_DIR)
 ```
 
 # Transfer data to KnowNet
