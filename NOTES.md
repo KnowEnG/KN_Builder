@@ -215,8 +215,8 @@ wget $KNP_NGINX_HOST:$KNP_NGINX_PORT/data/KnowNet.dump.sql.gz
 ```
 docker run -d --restart=always --name p1_mysql-$KNP_MYSQL_PORT \
     -e MYSQL_ROOT_PASSWORD=$KNP_MYSQL_PASS -p $KNP_MYSQL_PORT:3306 \
-    -v $KNP_MYSQL_DIR:/var/lib/mysql:rw \
-    -v $KNP_LOCAL_DIR/code/mysql/$KNP_MYSQL_CONF:/etc/mysql/conf.d/:rw mysql
+    -v $KNP_MYSQL_DIR:/var/lib/mysql \
+    -v $KNP_LOCAL_DIR/code/mysql/$KNP_MYSQL_CONF:/etc/mysql/conf.d/ mysql
 ```
 
 ### empty MySQL database if it is running
@@ -236,7 +236,7 @@ gunzip < KnowNet.dump.sql.gz | mysql -h $KNP_MYSQL_HOST -uroot \
 ### start Redis database if it is not running
 ```
 docker run -d --restart=always --name p1_redis-$KNP_REDIS_PORT \
-    -p $KNP_REDIS_PORT:6379 -v $KNP_REDIS_DIR:/data:rw \
+    -p $KNP_REDIS_PORT:6379 -v $KNP_REDIS_DIR:/data \
     redis redis-server --appendonly yes --requirepass $KNP_REDIS_PASS
 ```
 ### restart the Redis database if it is running
@@ -250,8 +250,8 @@ docker restart p1_redis-$KNP_REDIS_PORT
 docker run -d --restart=always --name p1_mysql-$KNP_NGINX_PORT \
     -p $KNP_NGINX_PORT:80 \
     -v $KNP_NGINX_DIR:/usr/share/nginx/html:ro \
-    -v $KNP_LOCAL_DIR/docs/_build/html/:/usr/share/nginx/html/docs:ro \
-    -v $KNP_LOCAL_DIR/code/nginx/$KNP_NGINX_CONF:/etc/nginx/conf.d/:rw \
+    -v $KNP_LOCAL_DIR/docs/_build/html/:/usr/share/nginx/html/docs \
+    -v $KNP_LOCAL_DIR/code/nginx/$KNP_NGINX_CONF:/etc/nginx/conf.d/ \
     nginx
     
 
