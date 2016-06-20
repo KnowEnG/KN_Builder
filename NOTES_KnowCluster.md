@@ -6,7 +6,7 @@
 KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
 KNP_LOCAL_DIR='/workspace/knowtmp/project1/KnowNet_Pipeline'
 KNP_CLOUD_DIR='/mnt/knowtmp/project1/KnowNet_Pipeline'
-KNP_SHARE_DIR=''
+KNP_SHARE_DIR='/mnt/knowstorage/project1'
 KNP_DATA_PATH='data_tests'
 KNP_LOGS_PATH='logs_tests'
 KNP_ENS_SPECIES='caenorhabditis_elegans,,saccharomyces_cerevisiae'
