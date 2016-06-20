@@ -9,7 +9,7 @@ KNP_CLOUD_DIR='/mnt/knowtmp/project1/KnowNet_Pipeline'
 KNP_SHARE_DIR='/mnt/knowstorage/project1'
 KNP_DATA_PATH='data_tests'
 KNP_LOGS_PATH='logs_tests'
-KNP_ENS_SPECIES='caenorhabditis_elegans,,saccharomyces_cerevisiae'
+KNP_ENS_SPECIES='REPRESENTATVIE'
 
 KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
 
