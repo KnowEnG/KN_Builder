@@ -314,19 +314,25 @@ def merge(merge_key, args):
     """
     if args is None:
         args=cf.config_args()
-    filepath = os.path.join(args.cloud_dir, args.data_path)
-    if merge_key == 'edge':
-        outfile = os.path.join(filepath, 'unique-tmp.' + merge_key + '.txt')
+    if args.shared_dir:
+        searchpath = os.path.join(args.shared_dir, args.data_path)
     else:
-        outfile = os.path.join(filepath, 'unique.' + merge_key + '.txt')
-    searchpath = os.path.join(filepath, '*', '*', '*')
+        searchpath = os.path.join(args.cloud_dir, args.data_path)
+    outpath = os.path.join(args.cloud_dir, args.data_path)
+    if merge_key == 'edge':
+        outfile = os.path.join(outpath, 'unique-tmp.' + merge_key + '.txt')
+    else:
+        outfile = os.path.join(outpath, 'unique.' + merge_key + '.txt')
+    searchpath = os.path.join(searchpath, '*', '*', '*')
     with open(outfile, 'w') as out:
         cmd1 = ['find', searchpath, '-type', 'f',
                 '-name', '*.unique.'+merge_key+'.*', '-print0' ]
-        temppath = os.path.join(filepath, 'tmp')
+        temppath = os.path.join(outpath, 'tmp')
         if not os.path.isdir(temppath):
             os.makedirs(temppath)
         cmd2 = ['xargs', '-0', 'sort', '-mu', '-T', temppath]
+        print(' '.join(cmd1))
+        print(' '.join(cmd2))
         p1 = subprocess.Popen(' '.join(cmd1), stdout=subprocess.PIPE, shell=True)
         subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
     
@@ -334,7 +340,7 @@ def merge(merge_key, args):
         return outfile
 
     tmp_file = outfile
-    ue_file = os.path.join(filepath, 'unique.edge.txt')
+    ue_file = os.path.join(outpath, 'unique.edge.txt')
     with open(tmp_file, 'r') as infile, \
         open(ue_file, 'w') as edge:
         reader = csv.reader(infile, delimiter = '\t')
