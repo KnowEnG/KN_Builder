@@ -190,10 +190,10 @@ def raw_line(filename):
         with open(rawline, 'wb') as outfile:
             for line in infile:
                 hasher = hashlib.md5()
-                hasher.update(line)
+                hasher.update(source_alias + '\t' + line)
                 md5 = hasher.hexdigest()
                 line_count += 1
-                outline = '\t'.join([source_alias, str(line_count), md5, ''])
+                outline = '\t'.join([md5, str(line_count), source_alias, ''])
                 outfile.write(outline.encode())
                 cleanline = line.decode('ascii', 'ignore')
                 outfile.write(cleanline.encode())
