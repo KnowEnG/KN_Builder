@@ -45,8 +45,12 @@ ln -s /workspace/knowstorage/ /mnt/
 
 ## copy pipeline code
 ```
-cd $KNP_LOCAL_DIR
-git pull
+cd $(dirname $KNP_LOCAL_DIR)
+git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
+```
+```
+cd KnowNet_Pipeline/
+git checkout chronos_testing
 ```
 
 ## build the documentation
