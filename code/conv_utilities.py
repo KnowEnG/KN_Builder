@@ -4,7 +4,7 @@ Contains module functions::
 
     map_list(namefile, args=None)
     main_parse_args()
-    main(edgefile, args=None)
+    main(tablefile, args=None)
 
 Attributes:
     DEFAULT_HINT (str): the default mapping hint for converting identifiers
@@ -41,39 +41,44 @@ DEFAULT_HINT = ''
 DEFAULT_TAXON = 9606
 
 #@profile
-def main(edgefile, args=None):
-    """Maps the nodes for the source:alias edgefile.
+def main(tablefile, args=None):
+    """Maps the nodes for the source:alias tablefile.
 
-    This takes the path to an edgefile (see table_utilities.main) and maps
-    the nodes in it using the Redis DB. It then outputs a stats file in
+    This takes the path to an tablefile (see table_utilities.main) and maps
+    the nodes in it using the Redis DB. It then outputs a status files in
     the format (table_hash, n1, n2, edge_type, weight, edge_hash, line_hash, 
-    status, status_desc), where status is production if both snodes mapped and 
-    unmapped otherwise.
+    status, status_desc), where status is production if both nodes mapped and 
+    unmapped otherwise. It also outpus an edge file which all rows where status 
+    is production, in the format (edge_hash, n1, n2, edge_type, weight).
 
     Args:
-        edgefile (str): path to an edgefile to be mapped
+        tablefile (str): path to an tablefile to be mapped
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
         args=cf.config_args()
-    if 'lincs.level4' in edgefile or 'lincs.exp_meta' in edgefile:
-        if os.path.isfile(edgefile.replace('conv', 'node')):
-            iu.import_pnode(edgefile.replace('conv', 'node'), args)
-        iu.import_edge(edgefile, args)
+    if 'lincs.level4' in tablefile or 'lincs.exp_meta' in tablefile:
+        if os.path.isfile(tablefile.replace('conv', 'node')):
+            iu.import_pnode(tablefile.replace('conv', 'node'), args)
+        iu.import_edge(tablefile, args)
         return
     rdb = ru.get_database(args)
-    status_file = edgefile.replace('edge', 'status')
-    ue2l_file = edgefile.replace('edge', 'unique.edge2line')
-    us_file = edgefile.replace('edge', 'unique.status')
+    edge_file = tablefile.replace('table', 'edge')
+    status_file = tablefile.replace('table', 'status')
+    ue_file = tablefile.replace('table', 'unique.edge')
+    ue2l_file = tablefile.replace('table', 'unique.edge2line')
+    us_file = tablefile.replace('table', 'unique.status')
     src_data_dir = os.path.join(args.local_dir, args.data_path, cf.DEFAULT_MAP_PATH)
     species_file = os.path.join(src_data_dir, 'species', 'species.json')
     with open(species_file, 'r') as infile:
         species_dict = json.load(infile)
     supported_taxids = ['unknown'] + list(species_dict.values())
-    with open(edgefile, 'r') as infile, \
+    with open(tablefile, 'r') as infile, \
+        open(edge_file, 'w') as edge, \
         open(status_file, 'w') as e_stat:
         reader = csv.reader(infile, delimiter = '\t')
         s_writer = csv.writer(e_stat, delimiter = '\t', lineterminator='\n')
+        e_writer = csv.writer(edge, delimiter = '\t', lineterminator='\n')
         for line in reader:
             (n1, hint, ntype, taxid) = line[1:5]
             if ntype == 'gene':
@@ -107,8 +112,10 @@ def main(edgefile, args=None):
             else:
                 status = 'production'
                 status_desc = 'mapped'
+                e_writer.writerow([e_chksum, n1_map, n2_map, et_map, weight])
             s_writer.writerow([t_chksum, n1_map, n2_map, et_map, weight, e_chksum, \
                 chksum, status, status_desc])
+    tu.csu(edge_file, ue_file)
     tu.csu(status_file, us_file)
     tu.csu(us_file, ue2l_file, [6, 7])
 

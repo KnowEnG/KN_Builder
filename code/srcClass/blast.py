@@ -218,7 +218,7 @@ class Blast(SrcClass):
         """
 
         #outfiles
-        table_file = rawline.replace('rawline', 'edge')
+        table_file = rawline.replace('rawline', 'table')
         #n_meta_file = rawline.replace('rawline', 'node_meta')
         #e_meta_file = rawline.replace('rawline', 'edge_meta')
 

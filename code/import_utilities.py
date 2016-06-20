@@ -16,6 +16,7 @@ import config_utilities as cf
 import mysql_utilities as mu
 import json
 import os
+import csv
 import subprocess
 from argparse import ArgumentParser
 
@@ -308,13 +309,16 @@ def merge(merge_key, args):
 
     Args:
         merge_key (str): table type (one of: node, node_meta, edge2line, status,
-            or edge_meta)
+            edge, or edge_meta)
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
         args=cf.config_args()
     filepath = os.path.join(args.cloud_dir, args.data_path)
-    outfile = os.path.join(filepath, 'unique.' + merge_key + '.txt')
+    if merge_key == 'edge':
+        outfile = os.path.join(filepath, 'unique-tmp.' + merge_key + '.txt')
+    else:
+        outfile = os.path.join(filepath, 'unique.' + merge_key + '.txt')
     searchpath = os.path.join(filepath, '*', '*', '*')
     with open(outfile, 'w') as out:
         cmd1 = ['find', searchpath, '-type', 'f',
@@ -325,7 +329,32 @@ def merge(merge_key, args):
         cmd2 = ['xargs', '-0', 'sort', '-mu', '-T', temppath]
         p1 = subprocess.Popen(' '.join(cmd1), stdout=subprocess.PIPE, shell=True)
         subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
-    return outfile
+    
+    if merge_key != 'edge':
+        return outfile
+
+    tmp_file = outfile
+    ue_file = os.path.join(filepath, 'unique.edge.txt')
+    with open(tmp_file, 'r') as infile, \
+        open(ue_file, 'w') as edge:
+        reader = csv.reader(infile, delimiter = '\t')
+        writer = csv.writer(edge, delimiter = '\t', lineterminator='\n')
+        prev = False
+        for line in reader:
+            e_chksum = line[0]
+            weight = line[4]
+            if not prev:
+                prev = line
+            if e_chksum != prev[0]:
+                writer.writerow(prev)
+                prev = line
+            elif float(weight) > float(prev[4]):
+                prev = line
+        if prev:
+            writer.writerow(prev)
+    os.remove(tmp_file)
+    return ue_file
+    
 
 def main_parse_args():
     """Processes command line arguments.
@@ -347,7 +376,7 @@ def main_parse_args():
 
 if __name__ == "__main__":
     args = main_parse_args()
-    merge_keys = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta']
+    merge_keys = ['node', 'node_meta', 'edge2line', 'status', 'edge', 'edge_meta']
     if args.importfile in merge_keys:
         args.importfile = merge(args.importfile, args)
     table = ''
@@ -362,5 +391,5 @@ if __name__ == "__main__":
                          ','.join(merge_keys))
     import_file(args.importfile, table, ld_cmd, dup_cmd, args)
     #import_file_nokeys(args.importfile, table, ld_cmd, args)
-    if table == 'status':
-        import_production_edges(args)
+    #if table == 'status':
+    #    import_production_edges(args)
