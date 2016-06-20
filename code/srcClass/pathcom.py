@@ -247,9 +247,9 @@ class Pathcom(SrcClass):
             n_writer = csv.writer(nfile, delimiter='\t', lineterminator='\n')
             for line in infile:
                 line = line.replace('"', '').strip().split('\t')
-                if 'PARTICIPANT' in line[0]: #skip header
+                if line[1] == '1': #skip header
                     continue
-                chksm = line[2]
+                chksm = line[0]
                 raw = line[3:]
                 if len(raw) !=7: #extended information
                     continue

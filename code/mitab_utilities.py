@@ -68,7 +68,7 @@ def table(rawline, version_dict, taxid_list=[]):
                 continue
             if line[1] == '1':
                 continue
-            chksm = line[2]
+            chksm = line[0]
             raw = line[3:]
             n1list = raw[0].split('|') + raw[2].split('|')
             n2list = raw[1].split('|') + raw[3].split('|')

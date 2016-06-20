@@ -277,7 +277,7 @@ class Stringdb(SrcClass):
                 line = line.replace('"', '').strip().split('\t')
                 if line[1] == '1':
                     continue
-                chksm = line[2]
+                chksm = line[0]
                 raw = line[3].split(' ')
                 n1list = raw[0].split('.')
                 n2list = raw[1].split('.')

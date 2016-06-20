@@ -337,7 +337,7 @@ class Go(SrcClass):
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:
                     continue
-                chksm = line[2]
+                chksm = line[0]
                 raw = line[3:]
 
                 # skip commented lines

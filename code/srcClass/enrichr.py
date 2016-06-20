@@ -109,7 +109,7 @@ class Enrichr(SrcClass):
                    "Virus_Perturbations_from_GEO_up": "GEO_expression_set::virus_up",
                    "WikiPathways_2016": "enrichr_pathway::WikiPath"}
         super(Enrichr, self).__init__(name, url_base, aliases, args)
-        self.chunk_size = 1500
+        self.chunk_size = 500
         self.date_modified = 'unknown'
 
     def get_source_version(self, alias):
@@ -293,7 +293,7 @@ class Enrichr(SrcClass):
                 #line = re.split('\s{2,}', line)
                 if len(line) == 1:
                     continue
-                chksm = line[2]
+                chksm = line[0]
                 raw = line[3:]
                 n1_orig_name = raw[0]
                 n1_kn_name = n1_orig_name

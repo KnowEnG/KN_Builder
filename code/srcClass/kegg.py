@@ -348,7 +348,7 @@ class Kegg(SrcClass):
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:
                     continue
-                chksm = line[2]
+                chksm = line[0]
                 raw = line[3:]
                 n1_orig = raw[1]
                 n1_mapped = path_map.get(n1_orig.replace(':'+alias, ':map'),

@@ -242,7 +242,7 @@ class Blast(SrcClass):
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:
                     continue
-                chksm = line[2]
+                chksm = line[0]
                 raw = line[3:]
                 n1id = raw[0]
                 n2id = raw[1]

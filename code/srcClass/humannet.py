@@ -229,7 +229,7 @@ class HumanNet(SrcClass):
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:
                     continue
-                chksm = line[2]
+                chksm = line[0]
                 n1name = line[3]
                 n2name = line[4]
                 for edge_num in range(len(line[5:])):

@@ -267,7 +267,7 @@ class Msigdb(SrcClass):
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:
                     continue
-                chksm = line[2]
+                chksm = line[0]
                 raw = line[3:]
                 n1_orig_name = raw[0]
                 n1_url = raw[1]
