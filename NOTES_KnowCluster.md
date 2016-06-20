@@ -1,5 +1,5 @@
 # Full Pipeline Run
-### (on knowcluster01 in /workspace/tmp/project1/)
+### (on knowcluster01 in /workspace/knowtmp/project1/)
 
 ## Set environment variables
 ```
