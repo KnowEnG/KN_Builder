@@ -40,6 +40,7 @@ KNP_NGINX_CONSTRAINT_URL='knowcluster03.dyndns.org'
 ## add symlinks
 ```
 ln -s /workspace/knowtmp/ /mnt/
+ln -s /workspace/knowstorage/ /mnt/
 ```
 
 ## copy pipeline code
