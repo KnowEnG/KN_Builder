@@ -168,7 +168,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
     "CREATE USER 'KNviewer' IDENTIFIED BY 'dbdev249'; \
     GRANT SELECT ON KnowNet.* TO 'KNviewer';"
 ```
-## dump data into nginx (on KnowNBS)
+## dump data into nginx 
 ```
 mysqldump -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     KnowNet | gzip > $KNP_NGINX_DIR/data/KnowNet.dump.sql.gz
