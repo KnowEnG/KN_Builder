@@ -42,6 +42,7 @@ import hashlib
 import config_utilities as cf
 import redis_utilities as ru
 import import_utilities as iu
+import table_utilities as tu
 from argparse import ArgumentParser
 
 ARCHIVES = ['.zip', '.tar', '.gz']
@@ -161,7 +162,6 @@ def chunk(filename, total_lines, args, chunksize=500000):
                     j += 1
                     if j == num_lines and i < num_chunks:
                         break
-#            iu.import_file(chunk_file + str(i) + ext, 'raw_line', '', '', args)  #### change after import testing
     return num_chunks
 
 def raw_line(filename):
@@ -197,6 +197,7 @@ def raw_line(filename):
                 outfile.write(outline.encode())
                 cleanline = line.decode('ascii', 'ignore')
                 outfile.write(cleanline.encode())
+    tu.csu(rawline, rawline.replace('rawline', 'unique.raw_line'), [1,2,3])
     return rawline
 
 def get_md5_hash(filename):
