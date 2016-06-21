@@ -152,8 +152,8 @@ python3 code/workflow_utilities.py IMPORT \
 ## create report of results
 ```
 code/reports/enumerate_files.sh $KNP_LOCAL_DIR/$KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
-    $KNP_REDIS_HOST $KNP_MYSQL_PORT $KNP_REDIS_PORT > tests/KN03build.$KNP_DATA_PATH.pipe
-git add -f tests/KN03build.$KNP_DATA_PATH.pipe
+    $KNP_REDIS_HOST $KNP_MYSQL_PORT $KNP_REDIS_PORT > tests/KN03-NBS-build.$KNP_DATA_PATH.pipe
+git add -f tests/KN03-NBS-build.$KNP_DATA_PATH.pipe
 git commit -m 'adding result report'
 git push
 ```
