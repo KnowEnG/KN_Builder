@@ -98,6 +98,7 @@ redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS BGREWRITEAOF
 ### start nginx server if it is not running
 ```
 mkdir $KNP_NGINX_DIR
+mkdir $KNP_NGINX_DIR/data/
 mkdir $KNP_NGINX_DIR/docs/
 python3 code/nginx_utilities.py \
     -ngp $KNP_NGINX_PORT -ncu $KNP_NGINX_CONSTRAINT_URL \
