@@ -376,9 +376,9 @@ def run_table(args):
 
         chunk_ctr = 0
         for chunk_name in sorted(os.listdir(local_chunk_dir)):
-            if "rawline" not in chunk_name:
+            if "raw_line" not in chunk_name:
                 continue
-            output_files = chunk_name.replace('.rawline.', '.*.')
+            output_files = chunk_name.replace('.raw_line.', '.*.')
             chunk_ctr += 1
             print("\t".join([str(chunk_ctr), chunk_name]))
 
@@ -393,14 +393,14 @@ def run_table(args):
                            })
             step_job = ju.run_job_step(args, "tabler", jobdict)
 
-            ns_parameters.extend([chunk_name.replace('.rawline.', '.table.')])
+            ns_parameters.extend([chunk_name.replace('.raw_line.', '.table.')])
 
             if not args.setup and not args.one_step and args.chronos not in SPECIAL_MODES:
                 ns_jobname = "-".join([jobname, "next_step"])
                 ns_dict = generic_dict(args, step_job.jobname)
                 ns_dict.update({'TMPJOB': ns_jobname,
                                 'TMPNEXTSTEP': "MAP",
-                                'TMPSTART': chunk_name.replace('.rawline.', '.table.'),
+                                'TMPSTART': chunk_name.replace('.raw_line.', '.table.'),
                                 'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
                                                      '-d', ns_jobname])
                                })

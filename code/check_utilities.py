@@ -307,8 +307,8 @@ class SrcClass(object):
         alias = filename.split('.')[1]
         map_dict = dict()
         info_type = "alt_alias"
-        n_meta_file = filename.replace('rawline', 'node_meta')
-        node_file = filename.replace('rawline', 'node')
+        n_meta_file = filename.replace('raw_line', 'node_meta')
+        node_file = filename.replace('raw_line', 'node')
         if not self.is_map(alias):
             return map_dict
         with open(filename, 'rb') as map_file, \
@@ -334,14 +334,14 @@ class SrcClass(object):
         tu.csu(n_meta_file, outfile)
         return map_dict
 
-    def table(self, rawline, version_dict):
+    def table(self, raw_line, version_dict):
         """Uses the provided raw_lines file to produce a 2table_edge file, an
         edge_meta file, and a node_meta file (only for property nodes).
 
         This returns nothing but produces the 2table formatted files from the
         provided raw_lines file::
 
-            raw_lines table (file, line num, line_chksum, rawline)
+            raw_lines table (file, line num, line_chksum, raw_line)
             2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
@@ -352,7 +352,7 @@ class SrcClass(object):
         By default this function does nothing (must be overridden)
 
         Args:
-            rawline (str): The path to the raw_lines file
+            raw_line (str): The path to the raw_lines file
             version_dict (dict): A dictionary describing the attributes of the
                 alias for a source.
         """

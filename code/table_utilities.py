@@ -11,7 +11,7 @@ Examples:
     To run table on a single source (e.g. dip) after fetch complete::
 
         $ cd data/dip/PPI
-        $ python3 ../../../code/table_utilities.py chunks/dip.PPI.rawline.1.txt \
+        $ python3 ../../../code/table_utilities.py chunks/dip.PPI.raw_line.1.txt \
             file_metadata.json
 
     To view all optional arguments that can be specified::
@@ -51,7 +51,7 @@ def csu(infile, outfile, columns=list()):
 def main(chunkfile, version_json, args=None):
     """Tables the source:alias described by version_json.
 
-    This takes the path to a chunked (see fetch_utilities.chunk)  rawline file
+    This takes the path to a chunked (see fetch_utilities.chunk)  raw_line file
     and it's correpsonding version_json (source.alias.json) and runs the
     source specific table command (see SrcClass.table) if the alias is a data
     file. If it is a mapping file, it does nothing.
@@ -71,7 +71,7 @@ def main(chunkfile, version_json, args=None):
     SrcClass = src_module.get_SrcClass(args)
     if not version_dict['is_map']:
         SrcClass.table(chunkfile, version_dict)
-        #csu(chunkfile.replace('rawline', 'edge'))
+        #csu(chunkfile.replace('raw_line', 'edge'))
 
 def main_parse_args():
     """Processes command line arguments.
@@ -84,7 +84,7 @@ def main_parse_args():
     """
     parser = ArgumentParser()
     parser.add_argument('chunkfile', help='path to a single chunk file produced \
-                        in fetch, e.g. dip.PPI.rawline.1.txt')
+                        in fetch, e.g. dip.PPI.raw_line.1.txt')
     parser.add_argument('metadata_json', help='json file produced from check, \
                         e.g. file_metadata.json')
     parser = cf.add_config_args(parser)

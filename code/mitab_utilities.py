@@ -3,7 +3,7 @@
 Classes:
 
 Functions:
-    2table(rawline, version_dict) -> str: takes as input a fetched file in
+    2table(raw_line, version_dict) -> str: takes as input a fetched file in
         MITAB format and a dictionary object version_dict describing the file.
         Produces the 2table edge file, edge_meta file and node_meta files.
 
@@ -17,14 +17,14 @@ import re
 import hashlib
 import table_utilities as tu
 
-def table(rawline, version_dict, taxid_list=[]):
-    """Uses the provided rawline file to produce a 2table_edge file, an
+def table(raw_line, version_dict, taxid_list=[]):
+    """Uses the provided raw_line file to produce a 2table_edge file, an
     edge_meta file, and a node_meta file (only for property nodes).
 
     This returns noting but produces the 2table formatted files from the
-    provided rawline file:
-        rawline table (file, line num, line_chksum, rawline)
-        2tbl_edge table (rawline_cksum, n1name, n1hint, n1type, n1spec,
+    provided raw_line file:
+        raw_line table (file, line num, line_chksum, raw_line)
+        2tbl_edge table (raw_line_cksum, n1name, n1hint, n1type, n1spec,
                         n2name, n2hint, n2type, n2spec, et_hint, score,
                         tableline_cksum)
         edge_meta (line_cksum, info_type, info_desc)
@@ -33,7 +33,7 @@ def table(rawline, version_dict, taxid_list=[]):
                    info_desc (text))
 
     Args:
-        rawline(str): The path to the rawline file
+        raw_line(str): The path to the raw_line file
         version_dict (dict): A dictionary describing the attributes of the
             alias for a source.
         taxid_list (list): A list of taxon ids to support
@@ -42,9 +42,9 @@ def table(rawline, version_dict, taxid_list=[]):
     """
 
     #outfiles
-    table_file = rawline.replace('rawline', 'table')
-    #n_meta_file = rawline.replace('rawline','node_meta')
-    e_meta_file = rawline.replace('rawline', 'edge_meta')
+    table_file = raw_line.replace('raw_line', 'table')
+    #n_meta_file = raw_line.replace('raw_line','node_meta')
+    e_meta_file = raw_line.replace('raw_line', 'edge_meta')
 
     #static column values
     n1type = 'gene'
@@ -57,7 +57,7 @@ def table(rawline, version_dict, taxid_list=[]):
     with open(ppi) as infile:
         term_map = json.load(infile)
 
-    with open(rawline, encoding='utf-8') as infile, \
+    with open(raw_line, encoding='utf-8') as infile, \
         open(table_file, 'w') as edges,\
         open(e_meta_file, 'w') as e_meta:
         edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')

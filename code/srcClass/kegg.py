@@ -256,8 +256,8 @@ class Kegg(SrcClass):
         map_dict = dict()
         info_type = "alt_alias"
         n1_type_id = '2'
-        n_meta_file = filename.replace('rawline', 'node_meta')
-        node_file = filename.replace('rawline', 'node')
+        n_meta_file = filename.replace('raw_line', 'node_meta')
+        node_file = filename.replace('raw_line', 'node')
         if not self.is_map(alias):
             return map_dict
 
@@ -298,13 +298,13 @@ class Kegg(SrcClass):
 
         return map_dict
 
-    def table(self, rawline, version_dict):
-        """Uses the provided rawline file to produce a 2table_edge file, an
+    def table(self, raw_line, version_dict):
+        """Uses the provided raw_line file to produce a 2table_edge file, an
         edge_meta file, and a node_meta file (only for property nodes).
 
         This returns noting but produces the 2table formatted files from the
-        provided rawline file:
-            rawline table (file, line num, line_chksum, rawline)
+        provided raw_line file:
+            raw_line table (file, line num, line_chksum, raw_line)
             2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
@@ -313,7 +313,7 @@ class Kegg(SrcClass):
                        info_desc (text))
 
         Args:
-            rawline(str): The path to the rawline file
+            raw_line(str): The path to the raw_line file
             version_dict (dict): A dictionary describing the attributes of the
                 alias for a source.
 
@@ -321,7 +321,7 @@ class Kegg(SrcClass):
         """
 
         #outfiles
-        table_file = rawline.replace('rawline', 'table')
+        table_file = raw_line.replace('raw_line', 'table')
 
         #static column values
         n1type = 'property'
@@ -341,7 +341,7 @@ class Kegg(SrcClass):
         with open(species) as infile:
             species_map = json.load(infile)
 
-        with open(rawline, encoding='utf-8') as infile, \
+        with open(raw_line, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges:
             edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
             for line in infile:

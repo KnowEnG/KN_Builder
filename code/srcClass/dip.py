@@ -208,13 +208,13 @@ class Dip(SrcClass):
         """
         return super(Dip, self).create_mapping_dict(filename)
 
-    def table(self, rawline, version_dict):
+    def table(self, raw_line, version_dict):
         """Uses the provided raw_lines file to produce a 2table_edge file, an
         edge_meta file, and a node_meta file (only for property nodes).
 
         This returns noting but produces the 2table formatted files from the
         provided raw_lines file:
-            raw_lines table (file, line num, line_chksum, rawline)
+            raw_lines table (file, line num, line_chksum, raw_line)
             2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
@@ -224,13 +224,13 @@ class Dip(SrcClass):
         By default this function does nothing (must be overridden)
 
         Args:
-            rawline(str): The path to the raw_lines file
+            raw_line(str): The path to the raw_lines file
             version_dict (dict): A dictionary describing the attributes of the
                 alias for a source.
 
         Returns:
         """
-        return table(rawline, version_dict, self.taxid_list)
+        return table(raw_line, version_dict, self.taxid_list)
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a dip

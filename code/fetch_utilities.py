@@ -116,7 +116,7 @@ def chunk(filename, total_lines, args, chunksize=500000):
     This takes the path to a file and reads through the file, splitting it
     into equal chunks with each of size ceiling(num_lines/chunksize). It
     then returns the number of chunks and sets up the raw_lines table in the
-    format: (file, line num, line_chksum, rawline)
+    format: (file, line num, line_chksum, raw_line)
 
     Args:
         filename (str): the file to split into chunks
@@ -139,7 +139,7 @@ def chunk(filename, total_lines, args, chunksize=500000):
     chunk_dir = os.path.join(path, 'chunks')
     os.makedirs(chunk_dir, exist_ok=True)
     source_alias, ext = os.path.splitext(file)
-    chunk_file = os.path.join(chunk_dir, source_alias + '.rawline.')
+    chunk_file = os.path.join(chunk_dir, source_alias + '.raw_line.')
 
     #divide file into chunks
     line_count = 0
@@ -171,7 +171,7 @@ def raw_line(filename):
     This takes the path to a file and reads through the file, adding three tab
     separated columns to the beginning, saving to disk, and then returning the
     output file path. Output looks like:
-    raw_lines table (file, line num, line_chksum, rawline)
+    raw_lines table (file, line num, line_chksum, raw_line)
 
     Args:
         filename (str): the file to convert to raw_line table format
@@ -182,12 +182,12 @@ def raw_line(filename):
     #determine file output information
     path, file = os.path.split(filename)
     source_alias, ext = os.path.splitext(file)
-    rawline = os.path.join(path, source_alias + '.rawline' + ext)
+    raw_line = os.path.join(path, source_alias + '.raw_line' + ext)
 
     #convert the file to raw_line format
     line_count = 0
     with open(filename, 'rb') as infile:
-        with open(rawline, 'wb') as outfile:
+        with open(raw_line, 'wb') as outfile:
             for line in infile:
                 line_count += 1
                 hasher = hashlib.md5()
@@ -197,8 +197,8 @@ def raw_line(filename):
                 outfile.write(outline.encode())
                 cleanline = line.decode('ascii', 'ignore')
                 outfile.write(cleanline.encode())
-    tu.csu(rawline, rawline.replace('rawline', 'unique.raw_line'), [1,2,3])
-    return rawline
+    tu.csu(raw_line, raw_line.replace('raw_line', 'unique.raw_line'), [1,2,3])
+    return raw_line
 
 def get_md5_hash(filename):
     """Returns the md5 hash of the file at filename.
@@ -279,12 +279,12 @@ def main(version_json, args=None):
         num_chunks = 0
     elif version_dict['is_map']:
         num_chunks = 0
-        rawline = raw_line(newfile)
-        map_dict = mySrc.create_mapping_dict(rawline)
-        nodefile = rawline.replace('rawline', 'unique.node')
+        raw_line = raw_line(newfile)
+        map_dict = mySrc.create_mapping_dict(raw_line)
+        nodefile = raw_line.replace('raw_line', 'unique.node')
         if os.path.isfile(nodefile):
             iu.import_pnode(nodefile, args)
-        nmfile = rawline.replace('rawline', 'unique.node_meta')
+        nmfile = raw_line.replace('raw_line', 'unique.node_meta')
         if os.path.isfile(nmfile):
             iu.import_nodemeta(nmfile, args)
         map_file = os.path.splitext(newfile)[0] + '.json'
@@ -292,7 +292,7 @@ def main(version_json, args=None):
             json.dump(map_dict, outfile, indent=4, sort_keys=True)
         ru.import_mapping(map_dict, args)
     else:
-        #rawline = raw_line(newfile)
+        #raw_line = raw_line(newfile)
         num_chunks = chunk(newfile, line_count, args, mySrc.chunk_size)
     #update version_dict
     version_dict['checksum'] = md5hash

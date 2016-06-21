@@ -177,13 +177,13 @@ class Fake_src(SrcClass):
         """
         return super(Fake_src, self).create_mapping_dict(filename)
 
-    def table(self, rawline, version_dict):
+    def table(self, raw_line, version_dict):
         """Uses the provided raw_lines file to produce a 2table_edge file, an
         edge_meta file, and a node_meta file (only for property nodes).
 
         This returns noting but produces the 2table formatted files from the
         provided raw_lines file:
-            raw_lines table (file, line num, line_chksum, rawline)
+            raw_lines table (file, line num, line_chksum, raw_line)
             2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
@@ -193,21 +193,21 @@ class Fake_src(SrcClass):
         By default this function does nothing (must be overridden)
 
         Args:
-            rawline(str): The path to the raw_lines file
+            raw_line(str): The path to the raw_lines file
             version_dict (dict): A dictionary describing the attributes of the
                 alias for a source.
 
         Returns:
         """
                #outfiles
-        table_file = rawline.replace('rawline', 'edge')
-        n_meta_file = rawline.replace('rawline', 'node_meta')
-        n_file = rawline.replace('rawline', 'node')
-        e_meta_file = rawline.replace('rawline', 'edge_meta')
+        table_file = raw_line.replace('raw_line', 'edge')
+        n_meta_file = raw_line.replace('raw_line', 'node_meta')
+        n_file = raw_line.replace('raw_line', 'node')
+        e_meta_file = raw_line.replace('raw_line', 'edge_meta')
 
         #static column values
 
-        with open(rawline, encoding='utf-8') as infile, \
+        with open(raw_line, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
             open(e_meta_file, 'w') as e_meta, \
             open(n_meta_file, 'w') as n_meta, \

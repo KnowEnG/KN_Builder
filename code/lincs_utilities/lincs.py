@@ -242,38 +242,38 @@ class Lincs(SrcClass):
         with open(os.path.splitext(tab_file)[0] + '.json') as infile:
             return json.load(infile)
 
-    def table(self, rawline, version_dict):
-        """Uses the provided rawline file to produce an edge file.
+    def table(self, raw_line, version_dict):
+        """Uses the provided raw_line file to produce an edge file.
 
         This returns noting but produces the edge file formatted files from the
-        provided rawline file (performs both the conv and table steps).
+        provided raw_line file (performs both the conv and table steps).
         It outputs an edge_mapped file in the format (n1, n2, line_checksum,
         edge_type, weight, status, status_desc), where status is production if
         both nodes mapped and unmapped otherwise.
 
         Args:
-            rawline(str): The path to the rawline file
+            raw_line(str): The path to the raw_line file
             version_dict (dict): A dictionary describing the attributes of the
                 alias for a source.
 
         Returns:
         """
         if version_dict['alias'] == 'level4':
-            self.table_level4(rawline, version_dict)
+            self.table_level4(raw_line, version_dict)
         elif version_dict['alias'] == 'exp_meta':
-            self.table_expmeta(rawline, version_dict)
+            self.table_expmeta(raw_line, version_dict)
 
-    def table_level4(self, rawline, version_dict):
-        """Uses the provided level4 rawline file to produce an edge file.
+    def table_level4(self, raw_line, version_dict):
+        """Uses the provided level4 raw_line file to produce an edge file.
 
         This returns noting but produces the edge file formatted files from the
-        provided rawline file (performs both the conv and table steps).
+        provided raw_line file (performs both the conv and table steps).
         It outputs an edge_mapped file in the format (n1, n2, line_checksum,
         edge_type, weight, status, status_desc), where status is production if
         both nodes mapped and unmapped otherwise.
 
         Args:
-            rawline(str): The path to the rawline file
+            raw_line(str): The path to the raw_line file
             version_dict (dict): A dictionary describing the attributes of the
                 alias for a source.
 
@@ -281,7 +281,7 @@ class Lincs(SrcClass):
         """
 
         #outfiles
-        table_file = rawline.replace('rawline','conv')
+        table_file = raw_line.replace('raw_line','conv')
 
         #open mapping files
         map_file = os.path.join('..', 'baseline_gene_expression',
@@ -292,7 +292,7 @@ class Lincs(SrcClass):
         with open(head_file) as infile:
             headers = json.load(infile)
 
-        with open(rawline, encoding='utf-8') as infile, \
+        with open(raw_line, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges:
             writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
             for line in infile:
@@ -329,17 +329,17 @@ class Lincs(SrcClass):
                     e_chksum = hasher.hexdigest()
                     writer.writerow([n1_map, n2_map, et_map, weight, e_chksum, chksum])
 
-    def table_expmeta(self, rawline, version_dict):
-        """Uses the provided exp_meta rawline file to produce an edge file.
+    def table_expmeta(self, raw_line, version_dict):
+        """Uses the provided exp_meta raw_line file to produce an edge file.
 
         This returns noting but produces the edge file formatted files from the
-        provided rawline file (performs both the conv and table steps).
+        provided raw_line file (performs both the conv and table steps).
         It outputs an edge_mapped file in the format (n1, n2, line_checksum,
         edge_type, weight, status, status_desc), where status is production if
         both nodes mapped and unmapped otherwise.
 
         Args:
-            rawline(str): The path to the rawline file
+            raw_line(str): The path to the raw_line file
             version_dict (dict): A dictionary describing the attributes of the
                 alias for a source.
 
@@ -347,9 +347,9 @@ class Lincs(SrcClass):
         """
 
         #outfiles
-        table_file = rawline.replace('rawline','conv')
-        n_meta_file = rawline.replace('rawline', 'node_meta')
-        node_file = rawline.replace('rawline', 'node')
+        table_file = raw_line.replace('raw_line','conv')
+        n_meta_file = raw_line.replace('raw_line', 'node_meta')
+        node_file = raw_line.replace('raw_line', 'node')
 
         #static column values
         et_map_list = ['LINCS_perturbagen', 'LINCS_cell_type', \
@@ -358,7 +358,7 @@ class Lincs(SrcClass):
         info_type = "alt_alias"
         weight = 1
 
-        with open(rawline, encoding='utf-8') as infile, \
+        with open(raw_line, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges, \
             open(n_meta_file, 'w') as n_meta, \
             open(node_file, 'w') as nfile:

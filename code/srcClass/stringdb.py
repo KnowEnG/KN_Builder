@@ -227,13 +227,13 @@ class Stringdb(SrcClass):
         """
         return super(Stringdb, self).create_mapping_dict(filename)
 
-    def table(self, rawline, version_dict):
-        """Uses the provided rawline file to produce a 2table_edge file, an
+    def table(self, raw_line, version_dict):
+        """Uses the provided raw_line file to produce a 2table_edge file, an
         edge_meta file, and a node_meta file (only for property nodes).
 
         This returns noting but produces the 2table formatted files from the
-        provided rawline file:
-            rawline table (file, line num, line_chksum, rawline)
+        provided raw_line file:
+            raw_line table (file, line num, line_chksum, raw_line)
             2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
@@ -242,7 +242,7 @@ class Stringdb(SrcClass):
                        info_desc (text))
 
         Args:
-            rawline(str): The path to the rawline file
+            raw_line(str): The path to the raw_line file
             version_dict (dict): A dictionary describing the attributes of the
                 alias for a source.
 
@@ -250,9 +250,9 @@ class Stringdb(SrcClass):
         """
 
         #outfiles
-        table_file = rawline.replace('rawline', 'table')
-        #n_meta_file = rawline.replace('rawline', 'node_meta')
-        e_meta_file = rawline.replace('rawline', 'edge_meta')
+        table_file = raw_line.replace('raw_line', 'table')
+        #n_meta_file = raw_line.replace('raw_line', 'node_meta')
+        e_meta_file = raw_line.replace('raw_line', 'edge_meta')
 
         #static column values
         n1type = 'gene'
@@ -268,7 +268,7 @@ class Stringdb(SrcClass):
                       7: 'STRING_database',
                       8: 'STRING_textmining'}
 
-        with open(rawline, encoding='utf-8') as infile, \
+        with open(raw_line, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
             open(e_meta_file, 'w') as e_meta:
             edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
