@@ -32,7 +32,7 @@
         "TMPMEM": "1000",
         "TMPCPUS": "1",
         "TMPPRIOR": "true",
-        "TMPCMD": "sh -c '{ cd /TMPWORKDIR/TMPDATAPATH/TMPALIASPATH && /usr/local/bin/kernprof -l -v /TMPWORKDIR/TMPCODEPATH/table_utilities.py TMPCHUNK file_metadata.json TMPOPTS && if TMPSHAREBOOL ; then cd /TMPWORKDIR && rsync -aR --exclude='*.rawline.*' TMPDATAPATH/TMPALIASPATH/TMPFILES /TMPSHAREDIR/ && cd TMPDATAPATH/TMPALIASPATH && rm TMPCHUNK ; fi; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
+        "TMPCMD": "sh -c '{ cd /TMPWORKDIR/TMPDATAPATH/TMPALIASPATH && /usr/local/bin/kernprof -l -v /TMPWORKDIR/TMPCODEPATH/table_utilities.py TMPCHUNK file_metadata.json TMPOPTS && if TMPSHAREBOOL ; then cd /TMPWORKDIR && rsync -aR --exclude='*.raw_line.*' TMPDATAPATH/TMPALIASPATH/TMPFILES /TMPSHAREDIR/ && cd TMPDATAPATH/TMPALIASPATH && rm TMPCHUNK ; fi; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
     },
     "mapper": {
         "TMPIMG": "cblatti3/py3_redis_mysql:0.2",

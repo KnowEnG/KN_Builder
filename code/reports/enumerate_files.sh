@@ -24,12 +24,12 @@ FILE_CTR=0
 echo -e "tnum\ttype\tsnum\tsource\tfile\tempty\ttime\tlines"
 
 for KNP_FILE_TYPE in "*/file_metadata.json" "*/*.*.txt" "*json" "*/*json" \
-    "*/*.rawline.*" "*/*.node.*" "*/*.unique.node.*" "*/*.node_meta.*" \
-    "*/*.unique.node_meta.*" "*/chunks/*.rawline.*" "*/chunks/*.edge.*" \
-    "*/chunks/*.edge_meta.*" "*/chunks/*.unique.edge_meta.*" "*/chunks/*.node.*" \
-    "*/chunks/*.unique.node.*" "*/chunks/*.node_meta.*" \
-    "*/chunks/*.unique.node_meta.*" "*/chunks/*.status.*" \
-    "*/chunks/*.unique.status.*" "*/chunks/*.unique.edge2line.*"; do
+    "*/*.raw_line.*" "*/*.node.*" "*/*.unique.node.*" "*/*.node_meta.*" \
+    "*/*.unique.node_meta.*" "*/chunks/*.raw_line.*" "*/chunks/*.unique.raw_line.*" \
+    "*/chunks/*.table.*" "*/chunks/*.edge_meta.*" "*/chunks/*.unique.edge_meta.*" \
+    "*/chunks/*.node.*" "*/chunks/*.unique.node.*" "*/chunks/*.node_meta.*" \
+    "*/chunks/*.unique.node_meta.*" "*/chunks/*.edge.*" "*/chunks/*.unique.edge.*" \
+    "*/chunks/*.status.*" "*/chunks/*.unique.status.*" "*/chunks/*.unique.edge2line.*"; do
     FILE_CTR=$(($FILE_CTR + 1))
     files='-'
     zeros='-'
