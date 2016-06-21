@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS `raw_file` (
 
 CREATE TABLE IF NOT EXISTS `raw_line` (
   `line_hash` varchar(40) NOT NULL,
-  `file_id` varchar(80) NOT NULL,
   `line_num` int(11) NOT NULL,
+  `file_id` varchar(80) NOT NULL,
   `line_str` text NOT NULL,
   PRIMARY KEY (`line_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
