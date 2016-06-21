@@ -145,15 +145,17 @@ def chunk(filename, total_lines, args, chunksize=500000):
     line_count = 0
     with open(filename, 'rb') as infile:
         for i in range(1, num_chunks + 1):
-            with open(chunk_file + str(i) + ext, 'wb') as out:
+            curr_chunk = chunk_file + str(i) + ext
+            with open(curr_chunk, 'wb') as out:
                 j = 0
                 for line in infile:
+                    line_count += 1
                     hasher = hashlib.md5()
+                    hasher.update(source_alias.encode())
+                    hasher.update(str(line_count).encode())
                     hasher.update(line)
                     md5 = hasher.hexdigest()
-                    line_count += 1
-                    src = os.path.splitext(filename)[0]
-                    outline = '\t'.join((src, str(line_count), md5, ''))
+                    outline = '\t'.join((md5, str(line_count), source_alias, ''))
                     out.write(outline.encode())
                     cleanline = line.decode("ascii", errors="ignore")
                     cleanline = cleanline.replace('\n', '')
@@ -162,6 +164,8 @@ def chunk(filename, total_lines, args, chunksize=500000):
                     j += 1
                     if j == num_lines and i < num_chunks:
                         break
+            u_chunk_file = curr_chunk.replace('raw_line', 'unique.raw_line')
+            tu.csu(curr_chunk, u_chunk_file, [1,2,3])
     return num_chunks
 
 def format_raw_line(filename):
