@@ -191,7 +191,9 @@ def format_raw_line(filename):
             for line in infile:
                 line_count += 1
                 hasher = hashlib.md5()
-                hasher.update('\t'.join([source_alias, str(line_count), line]))
+                hasher.update(source_alias.encode())
+                hasher.update(str(line_count).encode())
+                hasher.update(line)
                 md5 = hasher.hexdigest()
                 outline = '\t'.join([md5, str(line_count), source_alias, ''])
                 outfile.write(outline.encode())
