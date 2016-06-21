@@ -83,6 +83,7 @@ python3 code/redis_utilities.py \
 ### empty Redis database if it is running
 ```
 redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS FLUSHDB
+redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS BGREWRITEAOF
 ```
 
 ## nginx setup
@@ -167,6 +168,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
 ```
 mysqldump -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     KnowNet | gzip > $KNP_NGINX_DIR/data/KnowNet.dump.sql.gz
+redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS BGREWRITEAOF
 cat $KNP_REDIS_DIR/appendonly.aof | gzip > $KNP_NGINX_DIR/data/appendonly.aof.gz
 cd $(dirname $KNP_LOCAL_DIR)
 tar czvf $KNP_NGINX_DIR/data/KnowNet.tgz $(basename $KNP_LOCAL_DIR)

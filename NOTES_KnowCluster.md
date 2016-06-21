@@ -91,6 +91,7 @@ python3 code/redis_utilities.py \
 ### empty Redis database if it is running
 ```
 redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS FLUSHDB
+redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS BGREWRITEAOF
 ```
 
 ## nginx setup
