@@ -5,7 +5,7 @@ Contains module functions::
 
     download(version_dict)
     chunk(filename, total_lines, args)
-    raw_line(filename)
+    format_raw_line(filename)
     get_md5_hash(filename)
     get_line_count(filename)
     main_parse_args()
@@ -164,7 +164,7 @@ def chunk(filename, total_lines, args, chunksize=500000):
                         break
     return num_chunks
 
-def raw_line(filename):
+def format_raw_line(filename):
     """Creates the raw_line table from the provided file and returns the
        path to the output file.
 
@@ -279,7 +279,7 @@ def main(version_json, args=None):
         num_chunks = 0
     elif version_dict['is_map']:
         num_chunks = 0
-        raw_line = raw_line(newfile)
+        raw_line = format_raw_line(newfile)
         map_dict = mySrc.create_mapping_dict(raw_line)
         nodefile = raw_line.replace('raw_line', 'unique.node')
         if os.path.isfile(nodefile):
@@ -292,7 +292,7 @@ def main(version_json, args=None):
             json.dump(map_dict, outfile, indent=4, sort_keys=True)
         ru.import_mapping(map_dict, args)
     else:
-        #raw_line = raw_line(newfile)
+        #raw_line = format_raw_line(newfile)
         num_chunks = chunk(newfile, line_count, args, mySrc.chunk_size)
     #update version_dict
     version_dict['checksum'] = md5hash
