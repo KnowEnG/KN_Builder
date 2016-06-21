@@ -144,7 +144,7 @@ class Msigdb(SrcClass):
                     time_str = match.group(1)
                     response.close()
                     break
-            time_format = "%B %Y"
+            time_format = "%b %Y"
             date_modified = time.mktime(time.strptime(time_str, time_format))
             self.date_modified = date_modified
         return self.date_modified
