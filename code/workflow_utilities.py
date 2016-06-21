@@ -484,7 +484,7 @@ def run_import(args):
             will try to import all tables.
     """
     importfile_list = args.step_parameters.split(",,")
-    TABLES = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta', 'edge']
+    TABLES = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta', 'edge', 'raw_line']
     if args.step_parameters == "":
         importfile_list = TABLES
     ju.Job("importer", args)
