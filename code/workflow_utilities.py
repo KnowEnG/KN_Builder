@@ -376,7 +376,7 @@ def run_table(args):
 
         chunk_ctr = 0
         for chunk_name in sorted(os.listdir(local_chunk_dir)):
-            if "raw_line" not in chunk_name:
+            if "raw_line" not in chunk_name or "unique" in chunk_name:
                 continue
             output_files = chunk_name.replace('.raw_line.', '.*.')
             chunk_ctr += 1
