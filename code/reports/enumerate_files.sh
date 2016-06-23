@@ -51,7 +51,7 @@ for KNP_FILE_TYPE in "*/file_metadata.json" "*/*.*.txt" "*json" "*/*json" \
     SRC_CTR=0
     echo -e "$FILE_CTR\t$KNP_FILE_TYPE\t$SRC_CTR\tALL\t$files\t$zeros\t$mins\t$lines"
 
-    for KNP_SRC in ensembl id_map ppi species biogrid blast dip enrichr go \
+    for KNP_SRC in ensembl id_map ppi biogrid blast dip enrichr go \
         humannet intact kegg msigdb pathcom pfam reactome stringdb; do
         SRC_CTR=$(($SRC_CTR + 1))
         files='-'
