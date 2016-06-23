@@ -320,7 +320,7 @@ def merge(merge_key, args):
         searchpath = os.path.join(args.cloud_dir, args.data_path)
     outpath = os.path.join(args.cloud_dir, args.data_path)
     if merge_key == 'edge':
-        outfile = os.path.join(outpath, 'unique-tmp.' + merge_key + '.txt')
+        outfile = os.path.join(outpath, 'unique-sort.' + merge_key + '.txt')
     else:
         outfile = os.path.join(outpath, 'unique.' + merge_key + '.txt')
     searchpath = os.path.join(searchpath, '*', '*', '*')
@@ -339,26 +339,39 @@ def merge(merge_key, args):
     if merge_key != 'edge':
         return outfile
 
-    tmp_file = outfile
+    us_file = outfile
+    ud_file = os.path.join(outpath, 'unique-dup.edge.txt')
     ue_file = os.path.join(outpath, 'unique.edge.txt')
-    with open(tmp_file, 'r') as infile, \
-        open(ue_file, 'w') as edge:
+    with open(us_file, 'r') as infile, \
+        open(ud_file, 'w') as edge:
         reader = csv.reader(infile, delimiter = '\t')
         writer = csv.writer(edge, delimiter = '\t', lineterminator='\n')
         prev = False
         for line in reader:
-            e_chksum = line[0]
-            weight = line[4]
+            line = line[1:] + [line[0]]
+            e_chksum = line[4]
+            weight = line[3]
             if not prev:
                 prev = line
-            if e_chksum != prev[0]:
+            if e_chksum != prev[4]:
                 writer.writerow(prev)
                 prev = line
-            elif float(weight) > float(prev[4]):
+            elif float(weight) > float(prev[3]):
                 prev = line
         if prev:
             writer.writerow(prev)
-    os.remove(tmp_file)
+    os.remove(us_file)
+    with open(ue_file, 'w') as out:
+        cmd1 = ['cat', ud_file]
+        temppath = os.path.join(outpath, 'tmp')
+        if not os.path.isdir(temppath):
+            os.makedirs(temppath)
+        cmd2 = ['sort', '-u', '-T', temppath]
+        print(' '.join(cmd1))
+        print(' '.join(cmd2))
+        p1 = subprocess.Popen(cmd1, stdout=subprocess.PIPE)
+        subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
+    os.remove(ud_file)
     return ue_file
     
 

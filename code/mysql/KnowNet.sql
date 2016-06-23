@@ -77,13 +77,12 @@ CREATE TABLE IF NOT EXISTS `edge2line`(
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge` (
-  `edge_hash` varchar(40) NOT NULL,
   `n1_id` varchar(64) NOT NULL,
   `n2_id` varchar(64) NOT NULL,
   `et_name` varchar(80) NOT NULL,
   `weight` float NOT NULL,
-  PRIMARY KEY (`edge_hash`),
-  KEY `n1_id` (`n1_id`),
+  `edge_hash` varchar(40) NOT NULL,
+  PRIMARY KEY (`n1_id`, `n2_id`, `et_name`),
   KEY `n2_id` (`n2_id`),
   KEY `et_name` (`et_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -99,9 +98,7 @@ CREATE TABLE IF NOT EXISTS `status` (
   `status` varchar(80) NOT NULL,
   `status_desc` varchar(255) NOT NULL,
   PRIMARY KEY (`table_hash`),
-  KEY `edge_hash` (`edge_hash`),
-  KEY `n1_id` (`n1_id`),
-  KEY `n2_id` (`n2_id`),
+  KEY `status_desc` (`status_desc`),
   KEY `et_name` (`et_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
