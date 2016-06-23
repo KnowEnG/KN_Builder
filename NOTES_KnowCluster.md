@@ -31,7 +31,7 @@ KNP_REDIS_PASS='KnowEnG'
 KNP_REDIS_CONSTRAINT_URL='knowcluster07.dyndns.org'
 
 KNP_NGINX_PORT='8081'
-KNP_NGINX_DIR='/mnt/knowtmp/project1/p1_nginx-tests'
+KNP_NGINX_DIR='/mnt/knowtmp/project1/p1_nginx-6sp'
 KNP_NGINX_CONF='autoindex/'
 KNP_NGINX_CONSTRAINT_URL='knowcluster03.dyndns.org'
 
