@@ -81,6 +81,9 @@ def db_import(version_dict, args=cf.config_args()):
     db.query_all_mappings(version_dict, args)
     db.import_nodes(version_dict, args)
     ru.import_ensembl(version_dict['alias'], args)
+    db_name = 'ensembl_' + version_dict['alias']
+    mysql_db = db.get_database(db_name, args)
+    mysql_db.drop_db(db_name)
 
 def species_import(alias_dict, args=cf.config_args()):
     """Produces the species.txt file and imports it into the database. Also
