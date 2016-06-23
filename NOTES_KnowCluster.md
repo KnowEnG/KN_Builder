@@ -129,7 +129,7 @@ rm -r $KNP_SHARE_DIR/$KNP_LOGS_PATH/*
 rm -r $KNP_SHARE_DIR/$KNP_DATA_PATH/*
 ```
 
-## run setup pipeline
+## run setup pipeline (time: 2hr 31 min)
 ```
 python3 code/workflow_utilities.py CHECK -su \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
@@ -139,7 +139,7 @@ python3 code/workflow_utilities.py CHECK -su \
     -sd $KNP_SHARE_DIR -es $KNP_ENS_SPECIES
 ```
 
-## run parse pipeline
+## run parse pipeline 
 ```
 python3 code/workflow_utilities.py CHECK \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
