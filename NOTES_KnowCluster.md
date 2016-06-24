@@ -180,7 +180,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
 stop the marathon redis and mysql jobs
 ```
 KNP_SHARE_MYSQL=$KNP_SHARE_DIR'/p1_mysql-3307'
-KNP_SHARE_REDIS=$KNP_SHARED_DIR'/p1_redis-6380'
+KNP_SHARE_REDIS=$KNP_SHARE_DIR'/p1_redis-6380'
 mv $KNP_MYSQL_DIR $KNP_SHARE_MYSQL
 mv $KNP_REDIS_DIR $KNP_SHARE_REDIS
 ```
