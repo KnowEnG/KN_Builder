@@ -1,5 +1,5 @@
 tnum	type	snum	source	file	empty	time	lines
-1	*/file_metadata.json	0	ALL	133	0	258	2277
+1	*/file_metadata.json	0	ALL	133	0	943	2277
 1	*/file_metadata.json	1	ensembl	6	0	1	84
 1	*/file_metadata.json	2	id_map	-	-	-	-
 1	*/file_metadata.json	3	ppi	1	0	0	17
@@ -17,10 +17,10 @@ tnum	type	snum	source	file	empty	time	lines
 1	*/file_metadata.json	15	reactome	4	0	2	72
 1	*/file_metadata.json	16	stringdb	6	0	24	102
 
-2	*/*.*.txt	0	ALL	175	0	24446590	110587695
+2	*/*.*.txt	0	ALL	175	0	24447509	110587695
 2	*/*.*.txt	1	ensembl	-	-	-	-
 2	*/*.*.txt	2	id_map	-	-	-	-
-2	*/*.*.txt	3	ppi	3	0	4774	38946
+2	*/*.*.txt	3	ppi	3	0	5890	38946
 2	*/*.*.txt	4	biogrid	2	0	0	2056762
 2	*/*.*.txt	5	blast	21	0	0	11413383
 2	*/*.*.txt	6	dip	1	0	0	76109
@@ -53,7 +53,7 @@ tnum	type	snum	source	file	empty	time	lines
 3	*json	15	reactome	-	-	-	-
 3	*json	16	stringdb	-	-	-	-
 
-4	*/*json	0	ALL	145	0	1068	254096
+4	*/*json	0	ALL	145	0	943	254096
 4	*/*json	1	ensembl	6	0	1	84
 4	*/*json	2	id_map	1	0	0	7
 4	*/*json	3	ppi	2	0	1	139
@@ -71,7 +71,7 @@ tnum	type	snum	source	file	empty	time	lines
 4	*/*json	15	reactome	6	0	3	29800
 4	*/*json	16	stringdb	6	0	24	102
 
-5	*/*.raw_line.*	0	ALL	22	0	181	1700794
+5	*/*.raw_line.*	0	ALL	22	0	939	1700794
 5	*/*.raw_line.*	1	ensembl	-	-	-	-
 5	*/*.raw_line.*	2	id_map	-	-	-	-
 5	*/*.raw_line.*	3	ppi	2	0	1	25964
@@ -414,20 +414,20 @@ tnum	type	snum	source	file	empty	time	lines
 23	*/chunks/*.unique.edge2line.*	16	stringdb	169	0	39	64409820
 
 
-Redis Keys	keys=2965577
+Redis Keys	keys=20675585
 MySQL Tables
 table_name	exact_row_count
 species	6
 table_name	exact_row_count
 edge_type	95
 node_type	3
-all_mappings	3110275
-node	105026
-raw_file	7
-raw_line	0
-node_meta	0
-node_species	105026
-status	0
-edge2line	0
-edge	0
-edge_meta	0
+all_mappings	8659776
+node	311895
+raw_file	133
+raw_line	61742663
+node_meta	226116
+node_species	219927
+status	127035845
+edge2line	112629937
+edge	98977787
+edge_meta	8149972
