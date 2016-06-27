@@ -8,7 +8,8 @@
     "container": {
         "type": "DOCKER",
         "volumes": [{"containerPath": "/var/lib/mysql", "hostPath": "TMPMYSQLPATH", "mode": "RW"},
-                    {"containerPath": "/etc/mysql/conf.d/", "hostPath": "TMPMYSQLCONFPATH", "mode": "RW"}],
+                    {"containerPath": "/etc/mysql/conf.d/", "hostPath": "TMPMYSQLCONFPATH", "mode": "RW"},
+                    {"containerPath": "/tmp", "hostPath": "TMPTMPPATH", "mode": "RW"}],
         "docker": {
             "image": "mysql",
             "network": "BRIDGE",
