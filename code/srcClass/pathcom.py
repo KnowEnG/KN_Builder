@@ -142,7 +142,7 @@ class Pathcom(SrcClass):
             str: The url needed to fetch the file corresponding to the alias.
         """
         url = self.url_base
-        url += 'PathwayCommons.{0}.All.EXTENDED_BINARY_SIF.hgnc.txt.gz'
+        url += 'PathwayCommons.{0}.All.EXTENDED_BINARY_SIF.uniprot.txt.gz'
         url = url.format(self.get_source_version(alias))
         return url
 
