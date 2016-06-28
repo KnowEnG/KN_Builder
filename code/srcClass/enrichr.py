@@ -311,11 +311,11 @@ class Enrichr(SrcClass):
                             n2_id, n2hint, n2type, n2spec, et_hint, score, \
                             t_chksum])
 
-            if alias != 'PPI_Hub_Proteins':
-                outfile = n_meta_file.replace('node_meta', 'unique.node_meta')
-                tu.csu(n_meta_file, outfile)
-            else:
-                os.remove(n_meta_file)
+        if alias != 'PPI_Hub_Proteins':
+            outfile = n_meta_file.replace('node_meta', 'unique.node_meta')
+            tu.csu(n_meta_file, outfile)
+        else:
+            os.remove(n_meta_file)
 
 
 if __name__ == "__main__":
