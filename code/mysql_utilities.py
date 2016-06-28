@@ -55,17 +55,12 @@ def deploy_container(args=None):
     else:
         mysql_dir = os.path.join(args.cloud_dir, args.data_path, 'mysql')
     conf_path = os.path.join(mysql_dir, args.mysql_conf)
-    tmp_path = os.path.join(mysql_dir, 'tmp')
     if not os.path.exists(conf_path):
         os.makedirs(conf_path)
-    if not os.path.exists(tmp_path):
-        os.makedirs(tmp_path)
     os.chmod(os.path.dirname(mysql_dir), 0o777)
-    os.chmod(tmp_path, 0o777)
     shutil.copy(os.path.join(conf_template, 'my.cnf'), os.path.join(conf_path, 'my.cnf'))
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.mysql_dir
     deploy_dict["container"]["volumes"][1]["hostPath"] = conf_path
-    deploy_dict["container"]["volumes"][2]["hostPath"] = tmp_path
     deploy_dict["container"]["docker"]["parameters"][0]["value"] = \
                     "MYSQL_ROOT_PASSWORD=" + args.mysql_pass
     deploy_dict["container"]["docker"]["portMappings"][0]["hostPort"] = int(args.mysql_port)
