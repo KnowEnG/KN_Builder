@@ -357,6 +357,8 @@ class Go(SrcClass):
 
                 n2spec_str = raw[12].split("|", 1)[0].rstrip() #only take first species
                 n2spec = n2spec_str.split(":", 1)[1] #remove label taxon:
+                if n2spec == '559292': #manually overwrite taxid for Scer
+                    n2spec = '4932'
 
                 reference = raw[5]
                 anno_evidence = raw[6]
