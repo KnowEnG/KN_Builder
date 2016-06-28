@@ -20,16 +20,20 @@ KNP_REDIS_HOST=$4
 KNP_MYSQL_PORT=$5
 KNP_REDIS_PORT=$6
 
+shopt -s extglob
 FILE_CTR=0
 echo -e "tnum\ttype\tsnum\tsource\tfile\tempty\ttime\tlines"
 
-for KNP_FILE_TYPE in "*/file_metadata.json" "*/*.*.txt" "*json" "*/*json" \
-    "*/*.raw_line.*" "*/*.node.*" "*/*.unique.node.*" "*/*.node_meta.*" \
-    "*/*.unique.node_meta.*" "*/chunks/*.raw_line.*" "*/chunks/*.unique.raw_line.*" \
-    "*/chunks/*.table.*" "*/chunks/*.edge_meta.*" "*/chunks/*.unique.edge_meta.*" \
-    "*/chunks/*.node.*" "*/chunks/*.unique.node.*" "*/chunks/*.node_meta.*" \
-    "*/chunks/*.unique.node_meta.*" "*/chunks/*.edge.*" "*/chunks/*.unique.edge.*" \
-    "*/chunks/*.status.*" "*/chunks/*.unique.status.*" "*/chunks/*.unique.edge2line.*"; do
+for KNP_FILE_TYPE in "*/file_metadata.json" "*/*.*.txt" "*.json" \
+    "*/!(*file_metadata).json" "*/!(*unique).raw_line.*" "*/!(*unique).node.*" \
+    "*/*.unique.node.*" "*/!(*unique).node_meta.*" "*/*.unique.node_meta.*" \
+    "*/chunks/!(*unique).raw_line.*" "*/chunks/*.unique.raw_line.*" \
+    "*/chunks/*.table.*" "*/chunks/!(*unique).edge_meta.*" \
+    "*/chunks/*.unique.edge_meta.*" "*/chunks/!(*unique).node.*" \
+    "*/chunks/*.unique.node.*" "*/chunks/!(*unique).node_meta.*" \
+    "*/chunks/*.unique.node_meta.*" "*/chunks/!(*unique).edge.*" \
+    "*/chunks/*.unique.edge.*" "*/chunks/!(*unique).status.*" \
+    "*/chunks/*.unique.status.*" "*/chunks/*.unique.edge2line.*"; do
     FILE_CTR=$(($FILE_CTR + 1))
     files='-'
     zeros='-'
