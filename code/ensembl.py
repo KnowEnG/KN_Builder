@@ -18,6 +18,7 @@ import config_utilities as cf
 from fetch_utilities import download
 import mysql_utilities as db
 import redis_utilities as ru
+import mysql.connector
 import ftplib
 import json
 import urllib.request
@@ -60,7 +61,14 @@ def fetch(version_dict, args=cf.config_args()):
     for table in TABLE_LIST:
         version_dict['remote_url'] = base_url + table + '.txt.gz'
         shutil.move(download(version_dict), table + '.txt')
-    db_import(version_dict, args)
+    try:
+        db_import(version_dict, args)
+    except mysql.connector.DatabaseError as err:
+        print('Encountered error: ' + err)
+        print('Trying operation again')
+        db_import(version_dict, args)
+    except:
+        raise
 
 def db_import(version_dict, args=cf.config_args()):
     """Imports the data into the database and saves local id mapping
