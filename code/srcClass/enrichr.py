@@ -267,19 +267,26 @@ class Enrichr(SrcClass):
         #static column values
         alias = version_dict['alias']
         source = version_dict['source']
+        mouse_aliases = ["MGI_Mammalian_Phenotype_2013", \
+                         "MGI_Mammalian_Phenotype_Level_3",\
+                         "MGI_Mammalian_Phenotype_Level_4", "Mouse_Gene_Atlas"]
         n1type = 'property'
         n1spec = '0'
         n1hint = source + '_' + alias
         n2type = 'gene'
-        n2spec = 'unknown'
-        n2hint = 'HGNC'
+        if alias in mouse_aliases:
+            n2spec = '10090'
+            n2hint = 'MGI'
+        else:
+            n2spec = '9606'
+            n2hint = 'HGNC'
         (et_hint, node_prefix) = self.aliases[alias].split('::')
         score = 1
         info_type = 'alt_alias'
 
         if alias == 'PPI_Hub_Proteins':
             n1type = 'gene'
-            n1spec = 'unknown'
+            n1spec = '9606'
             n1hint = 'HGNC'
 
 
