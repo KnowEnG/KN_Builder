@@ -51,7 +51,7 @@ def table(raw_line, version_dict, taxid_list=[]):
     n2type = 'gene'
     score = 1
     info_type = 'reference'
-
+    src_specific_hints = ["intact", "biogrid"]
     #mapping files
     ppi = os.path.join('..', '..', 'ppi', 'obo_map', 'ppi.obo_map.json')
     with open(ppi) as infile:
@@ -100,10 +100,14 @@ def table(raw_line, version_dict, taxid_list=[]):
                 if n1tuple.count(':') != 1:
                     continue
                 n1hint, n1id = n1tuple.split(':')
+                if n1hint in src_specific_hints:
+                    continue
                 for n2tuple in n2list:
                     if n2tuple.count(':') != 1:
                         continue
                     n2hint, n2id = n2tuple.split(':')
+                    if n2hint in src_specific_hints:
+                        continue
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1id, n1hint, n1type, n1spec,\
                         n2id, n2hint, n2type, n2spec, et_hint, str(score)]).encode())
