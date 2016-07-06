@@ -557,7 +557,7 @@ class MySQL(object):
         """Import data into table in the MySQL database.
 
         Loads the data located on the local machine into the provided MySQL
-        table. Uses the LOAD DATA INFILE command.
+        table. Uses the LOAD DATA LOCAL INFILE command.
 
         Args:
             filename (str): name of the file to import from
