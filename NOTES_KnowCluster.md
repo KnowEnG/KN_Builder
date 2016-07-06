@@ -35,6 +35,9 @@ KNP_NGINX_DIR='/mnt/knowtmp/project1/p1_nginx-6sp'
 KNP_NGINX_CONF='autoindex/'
 KNP_NGINX_CONSTRAINT_URL='knowcluster03.dyndns.org'
 
+KNP_NEO4J_PORT='7475'
+KNP_NEO4J_DIR='/mnt/knowstorage/project1/p1_neo4j-7475'
+
 ```
 
 ## add symlinks
@@ -199,14 +202,28 @@ python3 code/redis_utilities.py \
     -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
 ```
 
-# setup neo4j
+## neo4j setup
+### start neo4j server if it is not running
+```
+
+mkdir $KNP_NEO4J_DIR
+mkdir $KNP_NEO4J_DIR/data
+mkdir $KNP_NEO4J_DIR/shared
+docker run -dt --restart=always --name hdfs sequenceiq/hadoop-docker:latest /etc/bootstrap.sh -bash #ctrl-c to detach
+docker run -d --restart=always --name mazerunner --link hdfs:hdfs kbastani/neo4j-graph-analytics:latest
+docker run -dt --restart=always --name p1_neo4j-$KNP_NEO4J_PORT \
+    -p $KNP_NEO4J_PORT:7474 --link mazerunner:mazerunner --link hdfs:hdfs \
+    -v $KNP_NEO4J_DIR/data:/opt/data -v $KNP_NEO4J_DIR/shared:/shared \
+    kbastani/docker-neo4j
+```
+
 ## dump data from MySQL for species
 ```
 mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     --execute "SELECT DISTINCT taxon AS taxonQID, sp_abbrev AS abbrev, \
     sp_sciname AS sci_name, \"Species\" AS QLABEL FROM KnowNet.species s" | \
     sed 's/QID/:ID(Species)/g' | sed 's/QLABEL/:LABEL/g' > \
-    $KNP_SHARE_DIR/$KNP_DATA_PATH/neo4j.species.txt;
+    $KNP_NEO4J_DIR/shared/neo4j.species.txt;
 ```
 ## dump data from MySQL for nodes
 ```
@@ -214,7 +231,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     --execute "SELECT DISTINCT node_id AS node_idQID, n_alias AS alias, \
     n_type_desc AS QLABEL FROM KnowNet.node n, KnowNet.node_type nt \
     WHERE n.n_type_id=nt.n_type_id" | sed 's/QID/:ID(Node)/g' | \
-    sed 's/QLABEL/:LABEL/g' > $KNP_SHARE_DIR/$KNP_DATA_PATH/neo4j.nodes.txt;
+    sed 's/QLABEL/:LABEL/g' > $KNP_NEO4J_DIR/shared/neo4j.nodes.txt;
 ```
 ## dump data from MySQL for node-species relationships
 ```
@@ -223,13 +240,40 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     \"InGenome\" AS QTYPE FROM KnowNet.node_species ns, KnowNet.node n \
     WHERE n.node_id=ns.node_id AND n.n_type_id = 1 " | \
     sed 's/QSTART_ID/:START_ID(Node)/g' | sed 's/QEND_ID/:END_ID(Species)/g' | \
-    sed 's/QTYPE/:TYPE/g' > $KNP_SHARE_DIR/$KNP_DATA_PATH/neo4j.species_edges.txt;
+    sed 's/QTYPE/:TYPE/g' > $KNP_NEO4J_DIR/shared/neo4j.species_edges.txt;
 ```
 ## format data from unique.edge.txt for edges
 ```
 awk -v OFS="\t" 'BEGIN { print ":START_ID(Node)", \
     ":END_ID(Node)", "weight", ":TYPE" }; { print $1, $2, $4, $3 }; END {}'\
     $KNP_SHARE_DIR/$KNP_DATA_PATH/unique.edge.txt > \
-    $KNP_SHARE_DIR/$KNP_DATA_PATH/neo4j.edges.txt
+    $KNP_NEO4J_DIR/shared/neo4j.edges.txt
+```
+## import data
+# stop old database
+```
+docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j stop
+```
+# remove old database
+```
+docker exec p1_neo4j-$KNP_NEO4J_PORT rm -rf /opt/data/graph.db
+```
+# insert uniq nodes and production edges
+```
+docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-import \
+    --into /opt/data/graph.db --nodes /shared/neo4j.species.txt \
+    --nodes /shared/neo4j.nodes.txt \
+    --relationships /shared/neo4j.species_edges.txt \
+    --relationships /shared/neo4j.edges.txt --delimiter "TAB"
+```
+# add meta_data to nodes and edges
+```
+cp $KNP_LOCAL_DIR/code/neo4j/import.cyper $KNP_NEO4J_DIR/shared/
+docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-shell \
+    -path /opt/data/graph.db -file /shared/import.cypher
+```
+# start new database 
+```
+docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j start-no-wait
 ```
 
