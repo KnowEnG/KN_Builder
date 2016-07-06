@@ -217,7 +217,7 @@ docker run -dt --restart=always --name p1_neo4j-$KNP_NEO4J_PORT \
     kbastani/docker-neo4j
 ```
 
-## dump data from MySQL for species
+### dump data from MySQL for species
 ```
 mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     --execute "SELECT DISTINCT taxon AS taxonQID, sp_abbrev AS abbrev, \
@@ -225,7 +225,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     sed 's/QID/:ID(Species)/g' | sed 's/QLABEL/:LABEL/g' > \
     $KNP_NEO4J_DIR/shared/neo4j.species.txt;
 ```
-## dump data from MySQL for nodes
+### dump data from MySQL for nodes
 ```
 mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     --execute "SELECT DISTINCT node_id AS node_idQID, n_alias AS alias, \
@@ -233,7 +233,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     WHERE n.n_type_id=nt.n_type_id" | sed 's/QID/:ID(Node)/g' | \
     sed 's/QLABEL/:LABEL/g' > $KNP_NEO4J_DIR/shared/neo4j.nodes.txt;
 ```
-## dump data from MySQL for node-species relationships
+### dump data from MySQL for node-species relationships
 ```
 mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     --execute "SELECT DISTINCT n.node_id AS QSTART_ID, taxon AS QEND_ID, \
@@ -242,23 +242,23 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     sed 's/QSTART_ID/:START_ID(Node)/g' | sed 's/QEND_ID/:END_ID(Species)/g' | \
     sed 's/QTYPE/:TYPE/g' > $KNP_NEO4J_DIR/shared/neo4j.species_edges.txt;
 ```
-## format data from unique.edge.txt for edges
+### format data from unique.edge.txt for edges
 ```
 awk -v OFS="\t" 'BEGIN { print ":START_ID(Node)", \
     ":END_ID(Node)", "weight", ":TYPE" }; { print $1, $2, $4, $3 }; END {}'\
     $KNP_SHARE_DIR/$KNP_DATA_PATH/unique.edge.txt > \
     $KNP_NEO4J_DIR/shared/neo4j.edges.txt
 ```
-## import data
-# stop old database
+### import data
+#### stop old database
 ```
 docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j stop
 ```
-# remove old database
+#### remove old database
 ```
 docker exec p1_neo4j-$KNP_NEO4J_PORT rm -rf /opt/data/graph.db
 ```
-# insert uniq nodes and production edges
+#### insert uniq nodes and production edges
 ```
 docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-import \
     --into /opt/data/graph.db --nodes /shared/neo4j.species.txt \
@@ -266,13 +266,13 @@ docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-import \
     --relationships /shared/neo4j.species_edges.txt \
     --relationships /shared/neo4j.edges.txt --delimiter "TAB"
 ```
-# add meta_data to nodes and edges
+#### add meta_data to nodes and edges
 ```
 cp $KNP_LOCAL_DIR/code/neo4j/import.cyper $KNP_NEO4J_DIR/shared/
 docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-shell \
     -path /opt/data/graph.db -file /shared/import.cypher
 ```
-# start new database 
+#### start new database 
 ```
 docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j start-no-wait
 ```
