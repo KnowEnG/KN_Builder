@@ -198,3 +198,38 @@ python3 code/redis_utilities.py \
     -rd $KNP_SHARE_REDIS -rps $KNP_REDIS_PASS -rcu $KNP_REDIS_CONSTRAINT_URL\
     -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
 ```
+
+# setup neo4j
+## dump data from MySQL for species
+```
+mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
+    --execute "SELECT DISTINCT taxon AS taxonQID, sp_abbrev AS abbrev, \
+    sp_sciname AS sci_name, \"Species\" AS QLABEL FROM KnowNet.species s" | \
+    sed 's/QID/:ID(Species)/g' | sed 's/QLABEL/:LABEL/g' > \
+    $KNP_SHARE_DIR/$KNP_DATA_PATH/neo4j.species.txt;
+```
+## dump data from MySQL for nodes
+```
+mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
+    --execute "SELECT DISTINCT node_id AS node_idQID, n_alias AS alias, \
+    n_type_desc AS QLABEL FROM KnowNet.node n, KnowNet.node_type nt \
+    WHERE n.n_type_id=nt.n_type_id" | sed 's/QID/:ID(Node)/g' | \
+    sed 's/QLABEL/:LABEL/g' > $KNP_SHARE_DIR/$KNP_DATA_PATH/neo4j.nodes.txt;
+```
+## dump data from MySQL for node-species relationships
+```
+mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
+    --execute "SELECT DISTINCT n.node_id AS QSTART_ID, taxon AS QEND_ID, \
+    \"InGenome\" AS QTYPE FROM KnowNet.node_species ns, KnowNet.node n \
+    WHERE n.node_id=ns.node_id AND n.n_type_id = 1 " | \
+    sed 's/QSTART_ID/:START_ID(Node)/g' | sed 's/QEND_ID/:END_ID(Species)/g' | \
+    sed 's/QTYPE/:TYPE/g' > $KNP_SHARE_DIR/$KNP_DATA_PATH/neo4j.species_edges.txt;
+```
+## format data from unique.edge.txt for edges
+```
+awk -v OFS="\t" 'BEGIN { print ":START_ID(Node)", \
+    ":END_ID(Node)", "weight", ":TYPE" }; { print $1, $2, $4, $3 }; END {}'\
+    $KNP_SHARE_DIR/$KNP_DATA_PATH/unique.edge.txt > \
+    $KNP_SHARE_DIR/$KNP_DATA_PATH/neo4j.edges.txt
+```
+
