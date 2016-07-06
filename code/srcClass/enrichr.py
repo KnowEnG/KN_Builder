@@ -262,6 +262,7 @@ class Enrichr(SrcClass):
         #outfiles
         table_file = raw_line.replace('raw_line', 'table')
         n_meta_file = raw_line.replace('raw_line', 'node_meta')
+        node_file = raw_line.replace('raw_line', 'node')
         #e_meta_file = raw_line.replace('raw_line','edge_meta')
 
         #static column values
@@ -271,6 +272,7 @@ class Enrichr(SrcClass):
                          "MGI_Mammalian_Phenotype_Level_3",\
                          "MGI_Mammalian_Phenotype_Level_4", "Mouse_Gene_Atlas"]
         n1type = 'property'
+        n_type_id = '2'
         n1spec = '0'
         n1hint = source + '_' + alias
         n2type = 'gene'
@@ -292,9 +294,11 @@ class Enrichr(SrcClass):
 
         with open(raw_line, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
-            open(n_meta_file, 'w') as n_meta:
+            open(n_meta_file, 'w') as n_meta, \
+            open(node_file, 'w') as nfile:
             edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
             n_meta_writer = csv.writer(n_meta, delimiter='\t', lineterminator='\n')
+            n_writer = csv.writer(nfile, delimiter='\t', lineterminator='\n')
             for line in infile:
                 line = line.replace('"', '').strip().split('\t')
                 #line = re.split('\s{2,}', line)
@@ -307,6 +311,7 @@ class Enrichr(SrcClass):
                 if alias != 'PPI_Hub_Proteins':
                     n1_kn_name = cf.pretty_name(node_prefix + '_'+ n1_orig_name)
                     n_meta_writer.writerow([n1_kn_name, info_type, n1_orig_name])
+                    n_writer.writerow([n1_kn_name, n1_kn_name, n_type_id])
                 for n2_id in raw[1:]:
                     n2_id = n2_id.split(',')[0]
                     hasher = hashlib.md5()
@@ -321,8 +326,11 @@ class Enrichr(SrcClass):
         if alias != 'PPI_Hub_Proteins':
             outfile = n_meta_file.replace('node_meta', 'unique.node_meta')
             tu.csu(n_meta_file, outfile)
+            outfile = node_file.replace('node', 'unique.node')
+            tu.csu(node_file, outfile)
         else:
             os.remove(n_meta_file)
+            os.remove(node_file)
 
 
 if __name__ == "__main__":

@@ -241,12 +241,14 @@ class Msigdb(SrcClass):
         #outfiles
         table_file = raw_line.replace('raw_line', 'table')
         n_meta_file = raw_line.replace('raw_line', 'node_meta')
+        node_file = raw_line.replace('raw_line', 'node')
         #e_meta_file = raw_line.replace('raw_line','edge_meta')
 
         #static column values
         alias = version_dict['alias']
         source = version_dict['source']
         n1type = 'property'
+        n_type_id = '2'
         n1spec = '0'
         n1hint = source + '_' + alias
         n2type = 'gene'
@@ -260,9 +262,11 @@ class Msigdb(SrcClass):
 
         with open(raw_line, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
-            open(n_meta_file, 'w') as n_meta:
+            open(n_meta_file, 'w') as n_meta, \
+            open(node_file, 'w') as nfile:
             edge_writer = csv.writer(edges, delimiter='\t', lineterminator='\n')
             n_meta_writer = csv.writer(n_meta, delimiter='\t', lineterminator='\n')
+            n_writer = csv.writer(nfile, delimiter='\t', lineterminator='\n')
             for line in infile:
                 line = line.replace('"', '').strip().split('\t')
                 if len(line) == 1:
@@ -279,6 +283,7 @@ class Msigdb(SrcClass):
                 n1hint = n1_kn_name
                 n_meta_writer.writerow([n1_kn_id, info_type1, n1_orig_name])
                 n_meta_writer.writerow([n1_kn_id, info_type2, n1_url])
+                n_writer.writerow([n1_kn_id, n1_kn_name, n_type_id])
                 for n2_id in raw[2:]:
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1_kn_id, n1hint, n1type, n1spec,\
@@ -290,6 +295,8 @@ class Msigdb(SrcClass):
                             t_chksum])
         outfile = n_meta_file.replace('node_meta', 'unique.node_meta')
         tu.csu(n_meta_file, outfile)
+        outfile = node_file.replace('node', 'unique.node')
+        tu.csu(node_file, outfile)
 
 if __name__ == "__main__":
     """Runs compare_versions (see utilities.compare_versions) on a Msigdb
