@@ -1,12 +1,12 @@
 tnum	type	snum	source	file	empty	time	lines
-1	*/file_metadata.json	0	ALL	482	0	2299	8030
+1	*/file_metadata.json	0	ALL	482	0	10321	8030
 1	*/file_metadata.json	1	ensembl	133	0	2	1862
 1	*/file_metadata.json	2	id_map	-	-	-	-
 1	*/file_metadata.json	3	ppi	1	0	0	17
 1	*/file_metadata.json	4	biogrid	1	0	0	17
 1	*/file_metadata.json	5	blast	21	0	4	357
 1	*/file_metadata.json	6	dip	1	0	0	17
-1	*/file_metadata.json	7	enrichr	58	0	65	986
+1	*/file_metadata.json	7	enrichr	58	0	21	986
 1	*/file_metadata.json	8	go	13	0	54	233
 1	*/file_metadata.json	9	humannet	1	0	0	17
 1	*/file_metadata.json	10	intact	1	0	0	17
@@ -17,11 +17,11 @@ tnum	type	snum	source	file	empty	time	lines
 1	*/file_metadata.json	15	reactome	4	0	0	72
 1	*/file_metadata.json	16	stringdb	88	0	1205	1496
 
-2	*/*.*.txt	0	ALL	609	0	24455949	928141341
+2	*/*.*.txt	0	ALL	610	0	24463597	929171970
 2	*/*.*.txt	1	ensembl	-	-	-	-
 2	*/*.*.txt	2	id_map	-	-	-	-
 2	*/*.*.txt	3	ppi	3	0	12056	38946
-2	*/*.*.txt	4	biogrid	2	0	0	2056762
+2	*/*.*.txt	4	biogrid	3	0	9002	3087391
 2	*/*.*.txt	5	blast	21	0	0	11413383
 2	*/*.*.txt	6	dip	1	0	0	76109
 2	*/*.*.txt	7	enrichr	58	0	0	107256
@@ -53,9 +53,9 @@ tnum	type	snum	source	file	empty	time	lines
 3	*.json	15	reactome	-	-	-	-
 3	*.json	16	stringdb	-	-	-	-
 
-4	*/!(*file_metadata).json	0	ALL	79	0	6026	1632821
+4	*/!(*file_metadata).json	0	ALL	212	0	10845	44529621
 4	*/!(*file_metadata).json	1	ensembl	-	-	-	-
-4	*/!(*file_metadata).json	2	id_map	1	0	0	134
+4	*/!(*file_metadata).json	2	id_map	134	0	4819	42896934
 4	*/!(*file_metadata).json	3	ppi	1	0	0	122
 4	*/!(*file_metadata).json	4	biogrid	-	-	-	-
 4	*/!(*file_metadata).json	5	blast	-	-	-	-
@@ -161,14 +161,14 @@ tnum	type	snum	source	file	empty	time	lines
 9	*/*.unique.node_meta.*	15	reactome	2	0	0	74470
 9	*/*.unique.node_meta.*	16	stringdb	-	-	-	-
 
-10	*/chunks/!(*unique).raw_line.*	0	ALL	2239	0	1191	468267398
+10	*/chunks/!(*unique).raw_line.*	0	ALL	2239	0	9222	468268522
 10	*/chunks/!(*unique).raw_line.*	1	ensembl	-	-	-	-
 10	*/chunks/!(*unique).raw_line.*	2	id_map	-	-	-	-
 10	*/chunks/!(*unique).raw_line.*	3	ppi	-	-	-	-
-10	*/chunks/!(*unique).raw_line.*	4	biogrid	21	0	2	1028381
+10	*/chunks/!(*unique).raw_line.*	4	biogrid	21	0	2	1029505
 10	*/chunks/!(*unique).raw_line.*	5	blast	34	0	3	11413383
 10	*/chunks/!(*unique).raw_line.*	6	dip	1	0	0	76109
-10	*/chunks/!(*unique).raw_line.*	7	enrichr	240	0	66	107256
+10	*/chunks/!(*unique).raw_line.*	7	enrichr	240	0	23	107256
 10	*/chunks/!(*unique).raw_line.*	8	go	11	0	43	1821400
 10	*/chunks/!(*unique).raw_line.*	9	humannet	2	0	1	476399
 10	*/chunks/!(*unique).raw_line.*	10	intact	12	0	2	598415
@@ -179,14 +179,14 @@ tnum	type	snum	source	file	empty	time	lines
 10	*/chunks/!(*unique).raw_line.*	15	reactome	7	0	3	2762697
 10	*/chunks/!(*unique).raw_line.*	16	stringdb	1816	0	1197	443697912
 
-11	*/chunks/*.unique.raw_line.*	0	ALL	2239	0	1191	468267398
+11	*/chunks/*.unique.raw_line.*	0	ALL	2239	0	9223	468268522
 11	*/chunks/*.unique.raw_line.*	1	ensembl	-	-	-	-
 11	*/chunks/*.unique.raw_line.*	2	id_map	-	-	-	-
 11	*/chunks/*.unique.raw_line.*	3	ppi	-	-	-	-
-11	*/chunks/*.unique.raw_line.*	4	biogrid	21	0	2	1028381
+11	*/chunks/*.unique.raw_line.*	4	biogrid	21	0	2	1029505
 11	*/chunks/*.unique.raw_line.*	5	blast	34	0	4	11413383
 11	*/chunks/*.unique.raw_line.*	6	dip	1	0	0	76109
-11	*/chunks/*.unique.raw_line.*	7	enrichr	240	0	67	107256
+11	*/chunks/*.unique.raw_line.*	7	enrichr	240	0	23	107256
 11	*/chunks/*.unique.raw_line.*	8	go	11	0	41	1821400
 11	*/chunks/*.unique.raw_line.*	9	humannet	2	0	1	476399
 11	*/chunks/*.unique.raw_line.*	10	intact	12	0	2	598415
@@ -197,17 +197,17 @@ tnum	type	snum	source	file	empty	time	lines
 11	*/chunks/*.unique.raw_line.*	15	reactome	7	0	2	2762697
 11	*/chunks/*.unique.raw_line.*	16	stringdb	1816	0	1198	443697912
 
-12	*/chunks/*.table.*	0	ALL	2239	1	1132	866215887
+12	*/chunks/*.table.*	0	ALL	2239	1	9086	859689296
 12	*/chunks/*.table.*	1	ensembl	-	-	-	-
 12	*/chunks/*.table.*	2	id_map	-	-	-	-
 12	*/chunks/*.table.*	3	ppi	-	-	-	-
-12	*/chunks/*.table.*	4	biogrid	21	1	2	5257128
+12	*/chunks/*.table.*	4	biogrid	21	1	2	2670085
 12	*/chunks/*.table.*	5	blast	34	0	4	11413383
 12	*/chunks/*.table.*	6	dip	1	0	0	158080
-12	*/chunks/*.table.*	7	enrichr	240	0	68	25136148
+12	*/chunks/*.table.*	7	enrichr	240	0	23	25136148
 12	*/chunks/*.table.*	8	go	11	0	43	3629502
 12	*/chunks/*.table.*	9	humannet	2	0	1	1019186
-12	*/chunks/*.table.*	10	intact	12	0	2	10702239
+12	*/chunks/*.table.*	10	intact	12	0	2	6762691
 12	*/chunks/*.table.*	11	kegg	73	0	8	878691
 12	*/chunks/*.table.*	12	msigdb	6	0	2	1478228
 12	*/chunks/*.table.*	13	pathcom	10	0	2	7310881
@@ -215,11 +215,11 @@ tnum	type	snum	source	file	empty	time	lines
 12	*/chunks/*.table.*	15	reactome	7	0	2	2762696
 12	*/chunks/*.table.*	16	stringdb	1816	0	1138	795730616
 
-13	*/chunks/!(*unique).edge_meta.*	0	ALL	1878	1	1140	459551754
+13	*/chunks/!(*unique).edge_meta.*	0	ALL	1878	1	8691	459552601
 13	*/chunks/!(*unique).edge_meta.*	1	ensembl	-	-	-	-
 13	*/chunks/!(*unique).edge_meta.*	2	id_map	-	-	-	-
 13	*/chunks/!(*unique).edge_meta.*	3	ppi	-	-	-	-
-13	*/chunks/!(*unique).edge_meta.*	4	biogrid	21	1	1	440996
+13	*/chunks/!(*unique).edge_meta.*	4	biogrid	21	1	2	441843
 13	*/chunks/!(*unique).edge_meta.*	5	blast	-	-	-	-
 13	*/chunks/!(*unique).edge_meta.*	6	dip	1	0	0	58996
 13	*/chunks/!(*unique).edge_meta.*	7	enrichr	-	-	-	-
@@ -233,11 +233,11 @@ tnum	type	snum	source	file	empty	time	lines
 13	*/chunks/!(*unique).edge_meta.*	15	reactome	7	0	2	3272120
 13	*/chunks/!(*unique).edge_meta.*	16	stringdb	1816	0	1138	443697824
 
-14	*/chunks/*.unique.edge_meta.*	0	ALL	62	1	55	15840365
+14	*/chunks/*.unique.edge_meta.*	0	ALL	62	1	9005	15841212
 14	*/chunks/*.unique.edge_meta.*	1	ensembl	-	-	-	-
 14	*/chunks/*.unique.edge_meta.*	2	id_map	-	-	-	-
 14	*/chunks/*.unique.edge_meta.*	3	ppi	-	-	-	-
-14	*/chunks/*.unique.edge_meta.*	4	biogrid	21	1	2	440996
+14	*/chunks/*.unique.edge_meta.*	4	biogrid	21	1	2	441843
 14	*/chunks/*.unique.edge_meta.*	5	blast	-	-	-	-
 14	*/chunks/*.unique.edge_meta.*	6	dip	1	0	0	58996
 14	*/chunks/*.unique.edge_meta.*	7	enrichr	-	-	-	-
@@ -287,14 +287,14 @@ tnum	type	snum	source	file	empty	time	lines
 16	*/chunks/*.unique.node.*	15	reactome	-	-	-	-
 16	*/chunks/*.unique.node.*	16	stringdb	-	-	-	-
 
-17	*/chunks/!(*unique).node_meta.*	0	ALL	262	0	76	3170006
+17	*/chunks/!(*unique).node_meta.*	0	ALL	262	0	9403	3170006
 17	*/chunks/!(*unique).node_meta.*	1	ensembl	-	-	-	-
 17	*/chunks/!(*unique).node_meta.*	2	id_map	-	-	-	-
 17	*/chunks/!(*unique).node_meta.*	3	ppi	-	-	-	-
 17	*/chunks/!(*unique).node_meta.*	4	biogrid	-	-	-	-
 17	*/chunks/!(*unique).node_meta.*	5	blast	-	-	-	-
 17	*/chunks/!(*unique).node_meta.*	6	dip	-	-	-	-
-17	*/chunks/!(*unique).node_meta.*	7	enrichr	239	0	67	106871
+17	*/chunks/!(*unique).node_meta.*	7	enrichr	239	0	23	106871
 17	*/chunks/!(*unique).node_meta.*	8	go	-	-	-	-
 17	*/chunks/!(*unique).node_meta.*	9	humannet	-	-	-	-
 17	*/chunks/!(*unique).node_meta.*	10	intact	-	-	-	-
@@ -305,14 +305,14 @@ tnum	type	snum	source	file	empty	time	lines
 17	*/chunks/!(*unique).node_meta.*	15	reactome	1	0	0	10914
 17	*/chunks/!(*unique).node_meta.*	16	stringdb	-	-	-	-
 
-18	*/chunks/*.unique.node_meta.*	0	ALL	262	0	76	278080
+18	*/chunks/*.unique.node_meta.*	0	ALL	262	0	9403	278080
 18	*/chunks/*.unique.node_meta.*	1	ensembl	-	-	-	-
 18	*/chunks/*.unique.node_meta.*	2	id_map	-	-	-	-
 18	*/chunks/*.unique.node_meta.*	3	ppi	-	-	-	-
 18	*/chunks/*.unique.node_meta.*	4	biogrid	-	-	-	-
 18	*/chunks/*.unique.node_meta.*	5	blast	-	-	-	-
 18	*/chunks/*.unique.node_meta.*	6	dip	-	-	-	-
-18	*/chunks/*.unique.node_meta.*	7	enrichr	239	0	66	106871
+18	*/chunks/*.unique.node_meta.*	7	enrichr	239	0	23	106871
 18	*/chunks/*.unique.node_meta.*	8	go	-	-	-	-
 18	*/chunks/*.unique.node_meta.*	9	humannet	-	-	-	-
 18	*/chunks/*.unique.node_meta.*	10	intact	-	-	-	-
@@ -323,17 +323,17 @@ tnum	type	snum	source	file	empty	time	lines
 18	*/chunks/*.unique.node_meta.*	15	reactome	1	0	0	2798
 18	*/chunks/*.unique.node_meta.*	16	stringdb	-	-	-	-
 
-19	*/chunks/!(*unique).edge.*	0	ALL	2239	131	1127	729544387
+19	*/chunks/!(*unique).edge.*	0	ALL	2239	131	9169	750572812
 19	*/chunks/!(*unique).edge.*	1	ensembl	-	-	-	-
 19	*/chunks/!(*unique).edge.*	2	id_map	-	-	-	-
 19	*/chunks/!(*unique).edge.*	3	ppi	-	-	-	-
-19	*/chunks/!(*unique).edge.*	4	biogrid	21	1	73	2522323
+19	*/chunks/!(*unique).edge.*	4	biogrid	21	1	14	1588000
 19	*/chunks/!(*unique).edge.*	5	blast	34	0	79	10279093
 19	*/chunks/!(*unique).edge.*	6	dip	1	0	0	146020
-19	*/chunks/!(*unique).edge.*	7	enrichr	240	0	187	2105324
+19	*/chunks/!(*unique).edge.*	7	enrichr	240	0	120	24068072
 19	*/chunks/!(*unique).edge.*	8	go	11	0	63	3252232
 19	*/chunks/!(*unique).edge.*	9	humannet	2	0	6	1013006
-19	*/chunks/!(*unique).edge.*	10	intact	12	0	71	296465
+19	*/chunks/!(*unique).edge.*	10	intact	12	0	10	296465
 19	*/chunks/!(*unique).edge.*	11	kegg	73	8	10	628156
 19	*/chunks/!(*unique).edge.*	12	msigdb	6	0	73	1463699
 19	*/chunks/!(*unique).edge.*	13	pathcom	10	0	50	2446407
@@ -341,17 +341,17 @@ tnum	type	snum	source	file	empty	time	lines
 19	*/chunks/!(*unique).edge.*	15	reactome	7	0	23	2021858
 19	*/chunks/!(*unique).edge.*	16	stringdb	1816	122	1134	702656036
 
-20	*/chunks/*.unique.edge.*	0	ALL	2239	131	1126	722765027
+20	*/chunks/*.unique.edge.*	0	ALL	2239	131	9167	744189029
 20	*/chunks/*.unique.edge.*	1	ensembl	-	-	-	-
 20	*/chunks/*.unique.edge.*	2	id_map	-	-	-	-
 20	*/chunks/*.unique.edge.*	3	ppi	-	-	-	-
-20	*/chunks/*.unique.edge.*	4	biogrid	21	1	75	832330
+20	*/chunks/*.unique.edge.*	4	biogrid	21	1	15	421318
 20	*/chunks/*.unique.edge.*	5	blast	34	0	79	10279068
 20	*/chunks/*.unique.edge.*	6	dip	1	0	0	53949
-20	*/chunks/*.unique.edge.*	7	enrichr	240	0	185	2093353
+20	*/chunks/*.unique.edge.*	7	enrichr	240	0	118	23928367
 20	*/chunks/*.unique.edge.*	8	go	11	0	62	1464296
 20	*/chunks/*.unique.edge.*	9	humannet	2	0	7	1012392
-20	*/chunks/*.unique.edge.*	10	intact	12	0	71	237464
+20	*/chunks/*.unique.edge.*	10	intact	12	0	11	237464
 20	*/chunks/*.unique.edge.*	11	kegg	73	8	8	618749
 20	*/chunks/*.unique.edge.*	12	msigdb	6	0	73	1463518
 20	*/chunks/*.unique.edge.*	13	pathcom	10	0	50	1387755
@@ -359,17 +359,17 @@ tnum	type	snum	source	file	empty	time	lines
 20	*/chunks/*.unique.edge.*	15	reactome	7	0	21	369122
 20	*/chunks/*.unique.edge.*	16	stringdb	1816	122	1133	702401115
 
-21	*/chunks/!(*unique).status.*	0	ALL	2239	1	1125	866215887
+21	*/chunks/!(*unique).status.*	0	ALL	2239	1	9168	859689296
 21	*/chunks/!(*unique).status.*	1	ensembl	-	-	-	-
 21	*/chunks/!(*unique).status.*	2	id_map	-	-	-	-
 21	*/chunks/!(*unique).status.*	3	ppi	-	-	-	-
-21	*/chunks/!(*unique).status.*	4	biogrid	21	1	74	5257128
+21	*/chunks/!(*unique).status.*	4	biogrid	21	1	15	2670085
 21	*/chunks/!(*unique).status.*	5	blast	34	0	78	11413383
 21	*/chunks/!(*unique).status.*	6	dip	1	0	0	158080
-21	*/chunks/!(*unique).status.*	7	enrichr	240	0	185	25136148
+21	*/chunks/!(*unique).status.*	7	enrichr	240	0	119	25136148
 21	*/chunks/!(*unique).status.*	8	go	11	0	63	3629502
 21	*/chunks/!(*unique).status.*	9	humannet	2	0	6	1019186
-21	*/chunks/!(*unique).status.*	10	intact	12	0	69	10702239
+21	*/chunks/!(*unique).status.*	10	intact	12	0	9	6762691
 21	*/chunks/!(*unique).status.*	11	kegg	73	0	10	878691
 21	*/chunks/!(*unique).status.*	12	msigdb	6	0	73	1478228
 21	*/chunks/!(*unique).status.*	13	pathcom	10	0	48	7310881
@@ -377,17 +377,17 @@ tnum	type	snum	source	file	empty	time	lines
 21	*/chunks/!(*unique).status.*	15	reactome	7	0	23	2762696
 21	*/chunks/!(*unique).status.*	16	stringdb	1816	0	1134	795730616
 
-22	*/chunks/*.unique.status.*	0	ALL	2239	1	1127	866105023
+22	*/chunks/*.unique.status.*	0	ALL	2239	1	9168	859608634
 22	*/chunks/*.unique.status.*	1	ensembl	-	-	-	-
 22	*/chunks/*.unique.status.*	2	id_map	-	-	-	-
 22	*/chunks/*.unique.status.*	3	ppi	-	-	-	-
-22	*/chunks/*.unique.status.*	4	biogrid	21	1	74	5147418
+22	*/chunks/*.unique.status.*	4	biogrid	21	1	15	2589425
 22	*/chunks/*.unique.status.*	5	blast	34	0	80	11413383
 22	*/chunks/*.unique.status.*	6	dip	1	0	0	158080
-22	*/chunks/*.unique.status.*	7	enrichr	240	0	187	25136147
+22	*/chunks/*.unique.status.*	7	enrichr	240	0	118	25136147
 22	*/chunks/*.unique.status.*	8	go	11	0	64	3629502
 22	*/chunks/*.unique.status.*	9	humannet	2	0	7	1019186
-22	*/chunks/*.unique.status.*	10	intact	12	0	71	10701086
+22	*/chunks/*.unique.status.*	10	intact	12	0	11	6762690
 22	*/chunks/*.unique.status.*	11	kegg	73	0	9	878691
 22	*/chunks/*.unique.status.*	12	msigdb	6	0	75	1478228
 22	*/chunks/*.unique.status.*	13	pathcom	10	0	50	7310881
@@ -395,17 +395,17 @@ tnum	type	snum	source	file	empty	time	lines
 22	*/chunks/*.unique.status.*	15	reactome	7	0	23	2762696
 22	*/chunks/*.unique.status.*	16	stringdb	1816	0	1135	795730616
 
-23	*/chunks/*.unique.edge2line.*	0	ALL	2239	1	1127	829120129
+23	*/chunks/*.unique.edge2line.*	0	ALL	2239	1	9171	849454504
 23	*/chunks/*.unique.edge2line.*	1	ensembl	-	-	-	-
 23	*/chunks/*.unique.edge2line.*	2	id_map	-	-	-	-
 23	*/chunks/*.unique.edge2line.*	3	ppi	-	-	-	-
-23	*/chunks/*.unique.edge2line.*	4	biogrid	21	1	74	2464403
+23	*/chunks/*.unique.edge2line.*	4	biogrid	21	1	14	1137192
 23	*/chunks/*.unique.edge2line.*	5	blast	34	0	79	11413383
 23	*/chunks/*.unique.edge2line.*	6	dip	1	0	0	61879
-23	*/chunks/*.unique.edge2line.*	7	enrichr	240	0	189	2326163
+23	*/chunks/*.unique.edge2line.*	7	enrichr	240	0	121	24227893
 23	*/chunks/*.unique.edge2line.*	8	go	11	0	63	2104418
 23	*/chunks/*.unique.edge2line.*	9	humannet	2	0	7	1019186
-23	*/chunks/*.unique.edge2line.*	10	intact	12	0	72	1294524
+23	*/chunks/*.unique.edge2line.*	10	intact	12	0	10	1054380
 23	*/chunks/*.unique.edge2line.*	11	kegg	73	0	10	878691
 23	*/chunks/*.unique.edge2line.*	12	msigdb	6	0	72	1468266
 23	*/chunks/*.unique.edge2line.*	13	pathcom	10	0	50	6856795
