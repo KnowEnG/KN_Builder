@@ -209,7 +209,7 @@ python3 code/redis_utilities.py \
 mkdir $KNP_NEO4J_DIR
 mkdir $KNP_NEO4J_DIR/data
 mkdir $KNP_NEO4J_DIR/shared
-docker run -dt --restart=always --name hdfs sequenceiq/hadoop-docker:latest /etc/bootstrap.sh -bash #ctrl-c to detach
+docker run -dt --restart=always --name hdfs sequenceiq/hadoop-docker:latest /etc/bootstrap.sh -bash
 docker run -d --restart=always --name mazerunner --link hdfs:hdfs kbastani/neo4j-graph-analytics:latest
 docker run -dt --restart=always --name p1_neo4j-$KNP_NEO4J_PORT \
     -p $KNP_NEO4J_PORT:7474 --link mazerunner:mazerunner --link hdfs:hdfs \
@@ -228,7 +228,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
 ### dump data from MySQL for nodes
 ```
 mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
-    --execute "SELECT DISTINCT node_id AS node_idQID, n_alias AS alias, \
+    --execute "SELECT DISTINCT UCASE(node_id) AS node_idQID, n_alias AS alias, \
     n_type_desc AS QLABEL FROM KnowNet.node n, KnowNet.node_type nt \
     WHERE n.n_type_id=nt.n_type_id" | sed 's/QID/:ID(Node)/g' | \
     sed 's/QLABEL/:LABEL/g' > $KNP_NEO4J_DIR/shared/neo4j.nodes.txt;
@@ -236,7 +236,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
 ### dump data from MySQL for node-species relationships
 ```
 mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
-    --execute "SELECT DISTINCT n.node_id AS QSTART_ID, taxon AS QEND_ID, \
+    --execute "SELECT DISTINCT UCASE(n.node_id) AS QSTART_ID, taxon AS QEND_ID, \
     \"InGenome\" AS QTYPE FROM KnowNet.node_species ns, KnowNet.node n \
     WHERE n.node_id=ns.node_id AND n.n_type_id = 1 " | \
     sed 's/QSTART_ID/:START_ID(Node)/g' | sed 's/QEND_ID/:END_ID(Species)/g' | \
@@ -245,7 +245,8 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
 ### format data from unique.edge.txt for edges
 ```
 awk -v OFS="\t" 'BEGIN { print ":START_ID(Node)", \
-    ":END_ID(Node)", "weight", ":TYPE" }; { print $1, $2, $4, $3 }; END {}'\
+    ":END_ID(Node)", "weight", ":TYPE" }; \
+    { print toupper($1), toupper($2), $4, $3 }; END {}'\
     $KNP_SHARE_DIR/$KNP_DATA_PATH/unique.edge.txt > \
     $KNP_NEO4J_DIR/shared/neo4j.edges.txt
 ```
@@ -258,7 +259,7 @@ docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j stop
 ```
 docker exec p1_neo4j-$KNP_NEO4J_PORT rm -rf /opt/data/graph.db
 ```
-#### insert uniq nodes and production edges
+#### insert uniq nodes and production edges (time: 7m)
 ```
 docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-import \
     --into /opt/data/graph.db --nodes /shared/neo4j.species.txt \
@@ -266,9 +267,9 @@ docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-import \
     --relationships /shared/neo4j.species_edges.txt \
     --relationships /shared/neo4j.edges.txt --delimiter "TAB"
 ```
-#### add meta_data to nodes and edges
+#### add meta_data to nodes and edges (skipped)
 ```
-cp $KNP_LOCAL_DIR/code/neo4j/import.cyper $KNP_NEO4J_DIR/shared/
+cp $KNP_LOCAL_DIR/code/neo4j/import.cypher $KNP_NEO4J_DIR/shared/
 docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-shell \
     -path /opt/data/graph.db -file /shared/import.cypher
 ```
