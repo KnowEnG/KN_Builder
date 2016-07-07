@@ -153,6 +153,7 @@ python3 code/workflow_utilities.py CHECK \
 ```
 
 ## run import pipeline (time: 2hr 45min) 
+## (re-import of edge2line with additional key time: )
 ```
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
