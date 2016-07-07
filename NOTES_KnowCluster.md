@@ -250,11 +250,28 @@ awk -v OFS="\t" 'BEGIN { print ":START_ID(Node)", \
     $KNP_SHARE_DIR/$KNP_DATA_PATH/unique.edge.txt > \
     $KNP_NEO4J_DIR/shared/neo4j.edges.txt
 ```
+### format data from unique.node_meta for node_meta
+```
+awk -v OFS="\t" 'BEGIN { print "node_id", "n_type_desc", "info_type", \
+    "info_desc" }; { print toupper($1), "Property", $2, $3 }; END {}'\
+    $KNP_SHARE_DIR/$KNP_DATA_PATH/unique.node_meta.txt > \
+    $KNP_NEO4J_DIR/shared/neo4j.node_meta.txt
+```
+### dump data from MySQL for edge_meta
+```
+mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
+    --execute "SELECT UCASE(e.n1_id) AS n1_id, nt1.n_type_desc AS n1_desc, \
+    UCASE(e.n2_id) AS n2_id, nt2.n_type_desc AS n2_desc, e.et_name, \
+    em.info_type, em.info_desc FROM KnowNet.edge e, KnowNet.edge_meta em, \
+    KnowNet.node_type nt1, KnowNet.node_type nt2, KnowNet.edge2line el, \
+    KnowNet.edge_type et WHERE em.line_hash = el.line_hash \
+    AND e.edge_hash = el.edge_hash AND et.n1_type = nt1.n_type_id \
+    AND et.n2_type = nt2.n_type_id AND e.et_name = et.et_name " > \
+    $KNP_NEO4J_DIR/shared/neo4j.edge_meta.txt;
+```
+
 ### import data
-#### stop old database
-```
-docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j stop
-```
+
 #### remove old database
 ```
 docker exec p1_neo4j-$KNP_NEO4J_PORT rm -rf /opt/data/graph.db
@@ -275,6 +292,6 @@ docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-shell \
 ```
 #### start new database 
 ```
-docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j start-no-wait
+docker restart p1_neo4j-$KNP_NEO4J_PORT
 ```
 
