@@ -153,7 +153,6 @@ python3 code/workflow_utilities.py CHECK \
 ```
 
 ## run import pipeline (time: 2hr 45min) 
-## (re-import of edge2line with additional key time: )
 ```
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
@@ -260,15 +259,13 @@ awk -v OFS="\t" 'BEGIN { print "node_id", "n_type_desc", "info_type", \
 ```
 ### dump data from MySQL for edge_meta
 ```
-mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
-    --execute "SELECT UCASE(e.n1_id) AS n1_id, nt1.n_type_desc AS n1_desc, \
-    UCASE(e.n2_id) AS n2_id, nt2.n_type_desc AS n2_desc, e.et_name, \
-    em.info_type, em.info_desc FROM KnowNet.edge e, KnowNet.edge_meta em, \
-    KnowNet.node_type nt1, KnowNet.node_type nt2, KnowNet.edge2line el, \
-    KnowNet.edge_type et WHERE em.line_hash = el.line_hash \
-    AND e.edge_hash = el.edge_hash AND et.n1_type = nt1.n_type_id \
-    AND et.n2_type = nt2.n_type_id AND e.et_name = et.et_name " > \
-    $KNP_NEO4J_DIR/shared/neo4j.edge_meta.txt;
+mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT --quick \
+    --execute "SELECT DISTINCT UCASE(s.n1_id), UCASE(s.n2_id), s.et_name, em.info_type, \
+    em.info_desc FROM KnowNet.status s, KnowNet.edge_meta em, \
+    KnowNet.edge_type et WHERE s.line_hash = em.line_hash \
+    AND s.status_desc = 'mapped'; " > $KNP_NEO4J_DIR/shared/neo4j.edge_meta.dmp
+sort -u $KNP_NEO4J_DIR/shared/neo4j.edge_meta.dmp > \
+    $KNP_NEO4J_DIR/shared/neo4j.edge_meta.txt
 ```
 
 ### import data
