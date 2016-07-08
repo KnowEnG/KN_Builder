@@ -73,8 +73,7 @@ CREATE TABLE IF NOT EXISTS `edge_type` (
 CREATE TABLE IF NOT EXISTS `edge2line`(
   `edge_hash` varchar(40) NOT NULL,
   `line_hash` varchar(40) NOT NULL,
-  PRIMARY KEY (`edge_hash`, `line_hash`),
-  KEY (`line_hash`)
+  PRIMARY KEY (`edge_hash`, `line_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge` (
@@ -99,15 +98,15 @@ CREATE TABLE IF NOT EXISTS `status` (
   `status` varchar(80) NOT NULL,
   `status_desc` varchar(255) NOT NULL,
   PRIMARY KEY (`table_hash`),
-  KEY `status_desc` (`status_desc`),
-  KEY `et_name` (`et_name`)
+  KEY (`status_desc`),
+  KEY (`et_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge_meta` (
   `line_hash` varchar(40) NOT NULL,
   `info_type` varchar(80) NOT NULL,
   `info_desc` varchar(255) NOT NULL,
-  PRIMARY KEY `idx_edge_meta_key` (`line_hash`,`info_type`,`info_desc`)
+  PRIMARY KEY (`line_hash`,`info_type`,`info_desc`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `all_mappings` (
