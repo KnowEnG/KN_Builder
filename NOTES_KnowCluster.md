@@ -4,9 +4,8 @@
 ## Set environment variables
 ```
 KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
-KNP_LOCAL_DIR='/workspace/knowtmp/project1/KnowNet_Pipeline'
-KNP_CLOUD_DIR='/mnt/knowtmp/project1/KnowNet_Pipeline'
-KNP_SHARE_DIR='/mnt/knowstorage/project1'
+KNP_WORKING_DIR='/workspace/knowtmp/project1'
+KNP_STORAGE_DIR='/mnt/knowstorage/project1'
 KNP_DATA_PATH='data_6sp'
 KNP_LOGS_PATH='logs_6sp'
 KNP_ENS_SPECIES='REPRESENTATIVE'
@@ -48,7 +47,7 @@ ln -s /workspace/knowstorage/ /mnt/
 
 ## copy pipeline code
 ```
-cd $(dirname $KNP_LOCAL_DIR)
+cd $KNP_WORKING_DIR
 git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
 ```
 ```
@@ -58,11 +57,11 @@ git checkout chronos_testing
 
 ## build the documentation
 ```
-cd $KNP_LOCAL_DIR/docs/
+cd $KNP_WORKING_DIR/docs/
 make html
 ```
 ```
-cd $KNP_LOCAL_DIR
+cd $KNP_WORKING_DIR
 ```
 
 ## MySQL setup
@@ -73,7 +72,7 @@ python3 code/mysql_utilities.py \
     -mym $KNP_MYSQL_MEM -myc $KNP_MYSQL_CPU \
     -myd $KNP_MYSQL_DIR -mycf $KNP_MYSQL_CONF \
     -myps $KNP_MYSQL_PASS -mycu $KNP_MYSQL_CONSTRAINT_URL \
-    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
 ```
 
 ### empty MySQL database if it is running
@@ -89,7 +88,7 @@ python3 code/redis_utilities.py \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -rm $KNP_REDIS_MEM -rc $KNP_REDIS_CPU \
     -rd $KNP_REDIS_DIR -rps $KNP_REDIS_PASS -rcu $KNP_REDIS_CONSTRAINT_URL\
-    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
 ```
 ### empty Redis database if it is running
 ```
@@ -106,7 +105,7 @@ mkdir $KNP_NGINX_DIR/docs/
 python3 code/nginx_utilities.py \
     -ngp $KNP_NGINX_PORT -ncu $KNP_NGINX_CONSTRAINT_URL \
     -ngd $KNP_NGINX_DIR -ngcf $KNP_NGINX_CONF \
-    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
 ```
 
 ## clear the chronos queue
@@ -128,8 +127,8 @@ done;
 ```
 rm -r $KNP_LOGS_PATH/*
 rm -r $KNP_DATA_PATH/*
-rm -r $KNP_SHARE_DIR/$KNP_LOGS_PATH/*
-rm -r $KNP_SHARE_DIR/$KNP_DATA_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
 ```
 
 ## run setup pipeline (time: 2hr 30min)
@@ -137,9 +136,9 @@ rm -r $KNP_SHARE_DIR/$KNP_DATA_PATH/*
 python3 code/workflow_utilities.py CHECK -su \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
-    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR \
-    -sd $KNP_SHARE_DIR -es $KNP_ENS_SPECIES
+    -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL \
+    -sd $KNP_STORAGE_DIR -es $KNP_ENS_SPECIES
 ```
 
 ## run parse pipeline (time: 2hr)
@@ -147,24 +146,24 @@ python3 code/workflow_utilities.py CHECK -su \
 python3 code/workflow_utilities.py CHECK \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
-    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR \
-    -sd $KNP_SHARE_DIR
+    -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL \
+    -sd $KNP_STORAGE_DIR
 ```
 
 ## run import pipeline (time: 2hr 45min) 
 ```
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
-    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR \
-    -sd $KNP_SHARE_DIR
+    -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL \
+    -sd $KNP_STORAGE_DIR
 ```
 
 ## create report of results
 ```
-cp -r $KNP_LOCAL_DIR/$KNP_DATA_PATH/id_map $KNP_SHARE_DIR/$KNP_DATA_PATH/id_map
-code/reports/enumerate_files.sh $KNP_SHARE_DIR/$KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
+cp -r $KNP_WORKING_DIR/$KNP_DATA_PATH/id_map $KNP_STORAGE_DIR/$KNP_DATA_PATH/id_map
+code/reports/enumerate_files.sh $KNP_STORAGE_DIR/$KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
     $KNP_REDIS_HOST $KNP_MYSQL_PORT $KNP_REDIS_PORT > tests/KN03-KClus-build.$KNP_DATA_PATH.pipe
 git add -f tests/KN03-KClus-build.$KNP_DATA_PATH.pipe
 git commit -m 'adding result report'
@@ -182,24 +181,24 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
 ## move databases to knowstorage
 stop the marathon redis and mysql jobs
 ```
-KNP_SHARE_MYSQL=$KNP_SHARE_DIR'/p1_mysql-3307'
-KNP_SHARE_REDIS=$KNP_SHARE_DIR'/p1_redis-6380'
-mv $KNP_MYSQL_DIR $KNP_SHARE_MYSQL
-mv $KNP_REDIS_DIR $KNP_SHARE_REDIS
+KNP_STORAGE_MYSQL=$KNP_STORAGE_DIR'/p1_mysql-3307'
+KNP_STORAGE_REDIS=$KNP_STORAGE_DIR'/p1_redis-6380'
+mv $KNP_MYSQL_DIR $KNP_STORAGE_MYSQL
+mv $KNP_REDIS_DIR $KNP_STORAGE_REDIS
 ```
 start new marathon redis and mysql jobs
 ```
 python3 code/mysql_utilities.py \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -mym $KNP_MYSQL_MEM -myc $KNP_MYSQL_CPU \
-    -myd $KNP_SHARE_MYSQL -mycf $KNP_MYSQL_CONF \
+    -myd $KNP_STORAGE_MYSQL -mycf $KNP_MYSQL_CONF \
     -myps $KNP_MYSQL_PASS -mycu $KNP_MYSQL_CONSTRAINT_URL \
-    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
 python3 code/redis_utilities.py \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -rm $KNP_REDIS_MEM -rc $KNP_REDIS_CPU \
-    -rd $KNP_SHARE_REDIS -rps $KNP_REDIS_PASS -rcu $KNP_REDIS_CONSTRAINT_URL\
-    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
+    -rd $KNP_STORAGE_REDIS -rps $KNP_REDIS_PASS -rcu $KNP_REDIS_CONSTRAINT_URL\
+    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -wd $KNP_WORKING_DIR
 ```
 
 ## neo4j setup
@@ -247,14 +246,14 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
 awk -v OFS="\t" 'BEGIN { print ":START_ID(Node)", \
     ":END_ID(Node)", "weight", ":TYPE" }; \
     { print toupper($1), toupper($2), $4, $3 }; END {}'\
-    $KNP_SHARE_DIR/$KNP_DATA_PATH/unique.edge.txt > \
+    $KNP_STORAGE_DIR/$KNP_DATA_PATH/unique.edge.txt > \
     $KNP_NEO4J_DIR/shared/neo4j.edges.txt
 ```
 ### format data from unique.node_meta for node_meta
 ```
 awk -v OFS="\t" 'BEGIN { print "node_id", "n_type_desc", "info_type", \
     "info_desc" }; { print toupper($1), "Property", $2, $3 }; END {}'\
-    $KNP_SHARE_DIR/$KNP_DATA_PATH/unique.node_meta.txt > \
+    $KNP_STORAGE_DIR/$KNP_DATA_PATH/unique.node_meta.txt > \
     $KNP_NEO4J_DIR/shared/neo4j.node_meta.txt
 ```
 ### dump data from MySQL for edge_meta
@@ -284,7 +283,7 @@ docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-import \
 ```
 #### add meta_data to nodes and edges (skipped)
 ```
-cp $KNP_LOCAL_DIR/code/neo4j/import.cypher $KNP_NEO4J_DIR/shared/
+cp $KNP_WORKING_DIR/code/neo4j/import.cypher $KNP_NEO4J_DIR/shared/
 docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-shell \
     -path /opt/data/graph.db -file /shared/import.cypher
 ```

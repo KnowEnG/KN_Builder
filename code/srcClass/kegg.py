@@ -72,7 +72,7 @@ class Kegg(SrcClass):
         Returns:
             dict: A dictionary of species:(taxid, division) values
         """
-        src_data_dir = os.path.join(args.local_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+        src_data_dir = os.path.join(args.working_dir, args.data_path, cf.DEFAULT_MAP_PATH)
         sp_dir = os.path.join(src_data_dir, 'species', 'species.json')
         sp_dict = json.load(open(sp_dir))
         alias_dict = {"pathway": "pathways"}

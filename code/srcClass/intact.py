@@ -51,7 +51,7 @@ class Intact(SrcClass):
         super(Intact, self).__init__(name, url_base, aliases, args)
         self.remote_file = 'intact.txt'
         self.chunk_size = 50000
-        src_data_dir = os.path.join(args.local_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+        src_data_dir = os.path.join(args.working_dir, args.data_path, cf.DEFAULT_MAP_PATH)
         sp_dir = os.path.join(src_data_dir, 'species', 'species.json')
         sp_dict = json.load(open(sp_dir))
         self.taxid_list = sp_dict.values()

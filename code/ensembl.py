@@ -107,7 +107,7 @@ def species_import(alias_dict, args=cf.config_args()):
 
     Returns:
     """
-    src_data_dir = os.path.join(args.work_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+    src_data_dir = os.path.join(args.working_dir, args.data_path, cf.DEFAULT_MAP_PATH)
     table_dir = os.path.join(src_data_dir, 'species')
     os.makedirs(table_dir, exist_ok=True)
     table_file = os.path.join(table_dir, 'species.txt')

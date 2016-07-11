@@ -234,7 +234,7 @@ class Lincs(SrcClass):
         tab_file = os.path.join('..', 'baseline_gene_expression',
                 '.'.join(['lincs', 'baseline_gene_expression', 'txt']))
         cmd = ['python',
-               os.path.join(args.local_dir, args.code_path, args.src_path,
+               os.path.join(args.working_dir, args.code_path, args.src_path,
                'affy2ens_utilities.py'), gctx_file, tab_file, args.redis_host,
                args.redis_port]
         print(' '.join(cmd))
@@ -462,7 +462,7 @@ def gctx_to_txt(gctx_file, ret_file, args):
     Returns:
         The relative path to the converted file.
     """
-    cmd = ['python', os.path.join(args.local_dir, args.code_path, args.src_path,
+    cmd = ['python', os.path.join(args.working_dir, args.code_path, args.src_path,
             'gctx2tsv_utilities.py'), gctx_file, ret_file]
     print(' '.join(cmd))
     subprocess.Popen(cmd).communicate()

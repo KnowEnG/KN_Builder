@@ -36,10 +36,10 @@ def deploy_container(args=None):
     """
     if args is None:
         args=cf.config_args()
-    deploy_dir = os.path.join(args.work_dir, args.logs_path, 'marathon_jobs')
+    deploy_dir = os.path.join(args.working_dir, args.logs_path, 'marathon_jobs')
     if not os.path.exists(deploy_dir):
         os.makedirs(deploy_dir)
-    template_job = os.path.join(args.work_dir, args.code_path, 'dockerfiles', 'marathon', 'mysql.json')
+    template_job = os.path.join(args.working_dir, args.code_path, 'dockerfiles', 'marathon', 'mysql.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
     deploy_dict["id"] = "p1mysql-" + args.mysql_port
@@ -49,11 +49,11 @@ def deploy_container(args=None):
         deploy_dict["constraints"] = [["hostname", "CLUSTER", args.mysql_curl]]
     else:
         deploy_dict["constraints"] = []
-    conf_template = os.path.join(args.cloud_dir, args.code_path, 'mysql', args.mysql_conf)
-    if args.shared_dir:
-        mysql_dir = os.path.join(args.shared_dir, args.data_path, 'mysql')
+    conf_template = os.path.join(args.working_dir, args.code_path, 'mysql', args.mysql_conf)
+    if args.storage_dir:
+        mysql_dir = os.path.join(args.storage_dir, args.data_path, 'mysql')
     else:
-        mysql_dir = os.path.join(args.cloud_dir, args.data_path, 'mysql')
+        mysql_dir = os.path.join(args.working_dir, args.data_path, 'mysql')
     conf_path = os.path.join(mysql_dir, args.mysql_conf)
     if not os.path.exists(conf_path):
         os.makedirs(conf_path)
@@ -184,8 +184,8 @@ def query_all_mappings(version_dict, args=None):
     database = 'ensembl_' + alias
     table = alias + '_mappings'
     map_dir = os.path.join(args.data_path, cf.DEFAULT_MAP_PATH)
-    if os.path.isdir(args.work_dir):
-        map_dir = os.path.join(args.work_dir, map_dir)
+    if os.path.isdir(args.working_dir):
+        map_dir = os.path.join(args.working_dir, map_dir)
     if not os.path.isdir(map_dir):
         os.mkdir(map_dir)
     db = MySQL(database, args)
@@ -233,8 +233,8 @@ def create_mapping_dicts(version_dict, args=None):
     table = 'all_mappings'
     cmd = "WHERE species='" + alias + "'"
     map_dir = os.path.join(args.data_path, cf.DEFAULT_MAP_PATH)
-    if os.path.isdir(args.work_dir):
-        map_dir = os.path.join(args.work_dir, map_dir)
+    if os.path.isdir(args.working_dir):
+        map_dir = os.path.join(args.working_dir, map_dir)
     if not os.path.isdir(map_dir):
         os.mkdir(map_dir)
     db = MySQL(database, args)
@@ -493,8 +493,8 @@ class MySQL(object):
         """
         import_tables = ['node_type.txt', 'edge_type.txt']
         mysql_dir = os.sep + os.path.join(self.args.code_path, 'mysql')
-        if os.path.isdir(self.args.work_dir):
-            mysql_dir = self.args.work_dir + mysql_dir
+        if os.path.isdir(self.args.working_dir):
+            mysql_dir = self.args.working_dir + mysql_dir
         self.import_schema('KnowNet', os.path.join(mysql_dir, 'KnowNet.sql'))
         for table in import_tables:
             tablefile = os.path.join(mysql_dir, table)

@@ -101,19 +101,19 @@ def download_outputs(args):
     """Downloads the correct outputs to disk in order to diff the outputs
 
     This downloads the correct outputs for the pipeline_utilities functions
-    from knowcloud and stores them in the args.local_dir/tests/ directory.
+    from knowcloud and stores them in the args.working_dir/tests/ directory.
 
     Args:
         args (Namespace): args as populated namespace from parse_args
     """
     url = ('http://knowcloud.cse.illinois.edu/index.php/s/uUaaHc7NYvxmfZV/'
         'download')
-    filename = os.path.join(args.local_dir, 'tests', 'outputs.tgz')
+    filename = os.path.join(args.working_dir, 'tests', 'outputs.tgz')
     with urllib.request.urlopen(url) as response:
         with open(filename, 'wb') as outfile:
             shutil.copyfileobj(response, outfile)
     with tarfile.open(filename, 'r:gz') as tar:
-        tar.extractall(path=os.path.join(args.local_dir, 'tests'))
+        tar.extractall(path=os.path.join(args.working_dir, 'tests'))
     os.remove(filename)
 
 def diff_outputs(outdir, testdir):
@@ -152,8 +152,8 @@ def main():
     diffs their outputs with the expected outputs.
     """
     args = main_parse_args()
-    outdir = os.path.join(args.local_dir, args.data_path, SRC, ALIAS)
-    testdir = os.path.join(args.local_dir, 'tests', SRC)
+    outdir = os.path.join(args.working_dir, args.data_path, SRC, ALIAS)
+    testdir = os.path.join(args.working_dir, 'tests', SRC)
     cleanup(outdir, testdir)
     download_outputs(args)
     allpass = True

@@ -29,10 +29,10 @@ def deploy_container(args=None):
     """
     if args is None:
         args=cf.config_args()
-    deploy_dir = os.path.join(args.work_dir, args.logs_path, 'marathon_jobs')
+    deploy_dir = os.path.join(args.working_dir, args.logs_path, 'marathon_jobs')
     if not os.path.exists(deploy_dir):
         os.makedirs(deploy_dir)
-    template_job = os.path.join(args.work_dir, args.code_path, 
+    template_job = os.path.join(args.working_dir, args.code_path, 
                                 'dockerfiles', 'marathon', 'nginx.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
@@ -42,9 +42,9 @@ def deploy_container(args=None):
     else:
         deploy_dict["constraints"] = []
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.nginx_dir
-    docs_path = os.path.join(args.cloud_dir, 'docs', '_build', 'html')
+    docs_path = os.path.join(args.working_dir, 'docs', '_build', 'html')
     deploy_dict["container"]["volumes"][1]["hostPath"] = docs_path
-    conf_path = os.path.join(args.cloud_dir, args.code_path, 'nginx', args.nginx_conf)
+    conf_path = os.path.join(args.working_dir, args.code_path, 'nginx', args.nginx_conf)
     deploy_dict["container"]["volumes"][2]["hostPath"] = conf_path
     deploy_dict["container"]["docker"]["portMappings"][0]["hostPort"] = int(args.nginx_port)
     out_path = os.path.join(deploy_dir, "p1nginx-" + args.nginx_port +'.json')

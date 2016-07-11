@@ -283,11 +283,11 @@ def merge(merge_key, args):
     """
     if args is None:
         args=cf.config_args()
-    if args.shared_dir:
-        searchpath = os.path.join(args.shared_dir, args.data_path)
+    if args.storage_dir:
+        searchpath = os.path.join(args.storage_dir, args.data_path)
     else:
-        searchpath = os.path.join(args.cloud_dir, args.data_path)
-    outpath = os.path.join(args.cloud_dir, args.data_path)
+        searchpath = os.path.join(args.working_dir, args.data_path)
+    outpath = os.path.join(args.working_dir, args.data_path)
     if merge_key == 'edge':
         outfile = os.path.join(outpath, 'unique-sort.' + merge_key + '.txt')
     else:

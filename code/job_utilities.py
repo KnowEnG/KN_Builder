@@ -53,12 +53,12 @@ class Job:
         self.cjobfile = 'missing.json'
         # read in dummy template
         self.cjobstr = ""
-        with open(os.path.join(self.args.work_dir, args.code_path, "template",
+        with open(os.path.join(self.args.working_dir, args.code_path, "template",
                                "job_template.json"), 'r') as infile:
             self.cjobstr = infile.read(10000)
         # read in job dictionaries
         jobsdesc = ""
-        with open(os.path.join(self.args.work_dir, args.code_path, "template",
+        with open(os.path.join(self.args.working_dir, args.code_path, "template",
                                "components.json"), 'r') as infile:
             jobsdesc = json.load(infile)
         # replace global dummy values with job specific ones
@@ -94,7 +94,7 @@ class Job:
 
         Returns:
         """
-        jobs_dir = os.path.join(self.args.work_dir, self.args.logs_path, 'chron_jobs')
+        jobs_dir = os.path.join(self.args.working_dir, self.args.logs_path, 'chron_jobs')
         if not os.path.exists(jobs_dir):
             os.makedirs(jobs_dir)
         cjobfile = jobs_dir + os.sep + self.jobname + ".json"
@@ -128,8 +128,8 @@ class Job:
         for env in envvars:
             envstr += ' -e ' + env['variable'] + '=' + env['value']
         docker_cmd = ["docker", "run", "--name", jobjson["name"], "--rm=true",
-                      "-v", self.args.cloud_dir+":"+self.args.cloud_dir,
-                      "-v", self.args.shared_dir+":"+self.args.shared_dir,
+                      "-v", self.args.working_dir+":"+self.args.working_dir,
+                      "-v", self.args.storage_dir+":"+self.args.storage_dir,
                       self.tmpdict["TMPIMG"],
                       jobjson["command"]
                      ]

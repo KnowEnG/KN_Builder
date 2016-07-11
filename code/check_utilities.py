@@ -142,7 +142,7 @@ class SrcClass(object):
         Returns:
             dict: The local file information for a given source alias.
         """
-        f_dir = os.path.join(self.args.work_dir, self.args.data_path, self.name)
+        f_dir = os.path.join(self.args.working_dir, self.args.data_path, self.name)
         f_dir = os.path.join(f_dir, alias)
         url = self.get_remote_url(alias)
         filename = os.path.basename(url).replace('%20', '_')
@@ -174,7 +174,7 @@ class SrcClass(object):
         """
         file_id = '.'.join([self.name, alias])
         file_meta = mu.get_file_meta(file_id, args)
-        f_dir = os.path.join(self.args.work_dir, self.args.data_path, self.name)
+        f_dir = os.path.join(self.args.working_dir, self.args.data_path, self.name)
         f_dir = os.path.join(f_dir, alias)
         url = self.get_remote_url(alias)
         filename = os.path.basename(url).replace('%20', '_')
@@ -453,7 +453,7 @@ def compare_versions(src_obj, args=None):
         else:
             version_dict[alias]['fetch_needed'] = True
 
-    f_dir = os.path.join(src_obj.args.work_dir, src_obj.args.data_path,
+    f_dir = os.path.join(src_obj.args.working_dir, src_obj.args.data_path,
                          src_obj.name)
     os.makedirs(f_dir, exist_ok=True)
     for alias in src_obj.aliases:
@@ -483,7 +483,7 @@ def check(module, args=None):
     """
     if args is None:
         args=cf.config_args()
-    src_code_dir = os.path.join(args.work_dir, args.code_path, args.src_path)
+    src_code_dir = os.path.join(args.working_dir, args.code_path, args.src_path)
     sys.path.append(src_code_dir)
     src_module = __import__(module)
     SrcClass = src_module.get_SrcClass(args)

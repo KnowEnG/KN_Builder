@@ -68,7 +68,7 @@ def main(tablefile, args=None):
     ue_file = tablefile.replace('table', 'unique.edge')
     ue2l_file = tablefile.replace('table', 'unique.edge2line')
     us_file = tablefile.replace('table', 'unique.status')
-    src_data_dir = os.path.join(args.work_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+    src_data_dir = os.path.join(args.working_dir, args.data_path, cf.DEFAULT_MAP_PATH)
     species_file = os.path.join(src_data_dir, 'species', 'species.json')
     with open(species_file, 'r') as infile:
         species_dict = json.load(infile)

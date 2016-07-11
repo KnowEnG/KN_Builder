@@ -4,9 +4,8 @@
 ## Set environment variables
 ```
 KNP_CHRONOS_URL='knownbs.dyndns.org:4400'
-KNP_LOCAL_DIR='/workspace/storage/project1/KnowNet_Pipeline'
-KNP_CLOUD_DIR='/mnt/storage/project1/KnowNet_Pipeline'
-KNP_SHARE_DIR=''
+KNP_WORKING_DIR='/workspace/storage/project1/KnowNet_Pipeline'
+KNP_STORAGE_DIR=''
 KNP_DATA_PATH='data_representative'
 KNP_LOGS_PATH='logs_representative'
 KNP_ENS_SPECIES='REPRESENTATIVE'
@@ -37,7 +36,7 @@ KNP_NGINX_CONF='autoindex/'
 
 ## copy pipeline code
 ```
-cd $(dirname $KNP_LOCAL_DIR)
+cd $KNP_WORKING_DIR
 git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
 ```
 ```
@@ -47,11 +46,11 @@ git checkout chronos_testing
 
 ## build the documentation
 ```
-cd $KNP_LOCAL_DIR/docs/
+cd $KNP_WORKING_DIR/docs/
 make html
 ```
 ```
-cd $KNP_LOCAL_DIR
+cd $KNP_WORKING_DIR
 ```
 
 ## MySQL setup
@@ -62,7 +61,7 @@ python3 code/mysql_utilities.py \
     -mym $KNP_MYSQL_MEM -myc $KNP_MYSQL_CPU \
     -myd $KNP_MYSQL_DIR -mycf $KNP_MYSQL_CONF \
     -myps $KNP_MYSQL_PASS -mycu $KNP_MYSQL_CONSTRAINT_URL \
-    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
 ```
 
 ### empty MySQL database if it is running
@@ -78,7 +77,7 @@ python3 code/redis_utilities.py \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -rm $KNP_REDIS_MEM -rc $KNP_REDIS_CPU \
     -rd $KNP_REDIS_DIR -rps $KNP_REDIS_PASS -rcu $KNP_REDIS_CONSTRAINT_URL\
-    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
 ```
 ### empty Redis database if it is running
 ```
@@ -94,7 +93,7 @@ mkdir $KNP_NGINX_DIR/docs/
 python3 code/nginx_utilities.py \
     -ngp $KNP_NGINX_PORT \
     -ngd $KNP_NGINX_DIR -ngcf $KNP_NGINX_CONF \
-    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
 ```
 
 ## clear the chronos queue
@@ -116,8 +115,8 @@ done;
 ```
 rm -r $KNP_LOGS_PATH/*
 rm -r $KNP_DATA_PATH/*
-rm -r $KNP_SHARE_DIR/$KNP_LOGS_PATH/*
-rm -r $KNP_SHARE_DIR/$KNP_DATA_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
 ```
 
 ## run setup pipeline
@@ -125,9 +124,9 @@ rm -r $KNP_SHARE_DIR/$KNP_DATA_PATH/*
 python3 code/workflow_utilities.py CHECK -su \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
-    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR \
-    -sd $KNP_SHARE_DIR -es $KNP_ENS_SPECIES
+    -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL \
+    -sd $KNP_STORAGE_DIR -es $KNP_ENS_SPECIES
 ```
 
 ## run parse pipeline
@@ -135,23 +134,23 @@ python3 code/workflow_utilities.py CHECK -su \
 python3 code/workflow_utilities.py CHECK \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
-    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR \
-    -sd $KNP_SHARE_DIR
+    -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL \
+    -sd $KNP_STORAGE_DIR
 ```
 
 ## run import pipeline
 ```
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
-    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR \
-    -sd $KNP_SHARE_DIR
+    -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL \
+    -sd $KNP_STORAGE_DIR
 ```
 
 ## create report of results
 ```
-code/reports/enumerate_files.sh $KNP_LOCAL_DIR/$KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
+code/reports/enumerate_files.sh $KNP_WORKING_DIR/$KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
     $KNP_REDIS_HOST $KNP_MYSQL_PORT $KNP_REDIS_PORT > tests/KN03-NBS-build.$KNP_DATA_PATH.pipe
 git add -f tests/KN03-NBS-build.$KNP_DATA_PATH.pipe
 git commit -m 'adding result report'
@@ -170,16 +169,15 @@ mysqldump -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     KnowNet | gzip > $KNP_NGINX_DIR/data/KnowNet.dump.sql.gz
 redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS BGREWRITEAOF
 cat $KNP_REDIS_DIR/appendonly.aof | gzip > $KNP_NGINX_DIR/data/appendonly.aof.gz
-cd $(dirname $KNP_LOCAL_DIR)
-tar czvf $KNP_NGINX_DIR/data/KnowNet.tgz $(basename $KNP_LOCAL_DIR)
+cd $KNP_WORKING_DIR
+tar czvf $KNP_NGINX_DIR/data/KnowNet.tgz $(basename $KNP_WORKING_DIR)
 ```
 
 # Transfer data to KnowNet
 
 ## Set environment variables
 ```
-KNP_LOCAL_DIR='/workspace/KnowNet_0.3/KnowNet_Pipeline'
-KNP_CLOUD_DIR='/project1/KnowNet_0.3/KnowNet_Pipeline'
+KNP_WORKING_DIR='/workspace/KnowNet_0.3/KnowNet_Pipeline'
 KNP_DATA_PATH='data_representative'
 KNP_LOGS_PATH='logs_representative'
 KNP_ENS_SPECIES='REPRESENTATIVE'
@@ -213,8 +211,8 @@ ln -s /workspace/ /project1
 ## Download the data
 ### Download KnowNet_Pipeline directory
 ```
-mkdir $(dirname $KNP_LOCAL_DIR)
-cd $(dirname $KNP_LOCAL_DIR)
+mkdir $KNP_WORKING_DIR
+cd $KNP_WORKING_DIR
 wget $KNP_NGINX_HOST:$KNP_NGINX_PORT/data/KnowNet.tgz
 tar xzvf KnowNet.tgz
 ```
@@ -231,7 +229,7 @@ wget $KNP_NGINX_HOST2:$KNP_NGINX_PORT2/data/appendonly.aof
 ```
 ### Download MySQL data
 ```
-mkdir $KNP_MYSQL_DIR && cd $(dirname $KNP_LOCAL_DIR)
+mkdir $KNP_MYSQL_DIR && cd $KNP_WORKING_DIR
 wget $KNP_NGINX_HOST:$KNP_NGINX_PORT/data/KnowNet.dump.sql.gz
 ```
 
@@ -252,7 +250,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
 
 ### load the downloaded data
 ```
-cd $(dirname $KNP_LOCAL_DIR)
+cd $KNP_WORKING_DIR
 mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
     -P $KNP_MYSQL_PORT -e "CREATE DATABASE KnowNet;"
 gunzip < KnowNet.dump.sql.gz | mysql -h $KNP_MYSQL_HOST -uroot \

@@ -102,11 +102,7 @@ def main_parse_args():
     args.time_stamp = time.strftime('_%m-%d_%H-%M-%S')
     args.config_opts = " ".join(config_opts)
     args.workflow_opts = " ".join(workflow_opts)
-    args.cloud_config_opts = args.config_opts
-    if args.chronos != 'LOCAL':
-        args.cloud_config_opts = cf.cloud_config_opts(args, config_opts)
-    args.cloud_dir = args.cloud_dir.rstrip('/')
-    args.work_dir = args.work_dir.rstrip('/')
+    args.working_dir = args.working_dir.rstrip('/')
     return args
 
 
@@ -127,7 +123,7 @@ def list_sources(args):
                     continue
                 src_list.extend([srcstr])
         else:
-            local_src_code_dir = os.path.join(args.work_dir, args.code_path,
+            local_src_code_dir = os.path.join(args.working_dir, args.code_path,
                                               args.src_path)
             if not os.path.exists(local_src_code_dir):
                 raise IOError("ERROR: cannot find {0}!".format(local_src_code_dir))
@@ -162,26 +158,20 @@ def generic_dict(args, ns_parent=None):
     """
 
     job_dict = {'TMPLAUNCH': r'"schedule": "R1\/\/P3M"',
-                'TMPWORKDIR': args.cloud_dir,
+                'TMPWORKDIR': args.working_dir,
                 'TMPDATAPATH': args.data_path,
                 'TMPCODEPATH': args.code_path,
                 'TMPLOGSPATH': args.logs_path,
-                'TMPOPTS': args.cloud_config_opts,
-                'TMPSHAREDIR': args.shared_dir,
+                'TMPOPTS': args.config_opts,
+                'TMPSHAREDIR': args.storage_dir,
                 'TMPSHAREBOOL': 'false'
                }
     if ns_parent is None: # regular job
         if args.dependencies != "": # continuation job
             job_dict['TMPLAUNCH'] = ju.chronos_parent_str(args.dependencies.split(",,"))
-        if args.chronos == 'LOCAL':
-            job_dict['TMPOPTS'] = args.config_opts
-            job_dict['TMPWORKDIR'] = args.work_dir
     else: # next step caller job
         job_dict['TMPLAUNCH'] = ju.chronos_parent_str([ns_parent])
-        if args.chronos in SPECIAL_MODES:
-            job_dict['TMPOPTS'] = args.config_opts
-            job_dict['TMPWORKDIR'] = args.work_dir
-    if args.shared_dir:
+    if args.storage_dir:
         job_dict['TMPSHAREBOOL'] = 'true'
     else:
         job_dict['TMPSHAREDIR'] = job_dict['TMPWORKDIR']
@@ -223,7 +213,7 @@ def run_check(args):
             ns_dict.update({'TMPJOB': ns_jobname,
                             'TMPNEXTSTEP': "FETCH",
                             'TMPSTART': module,
-                            'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
+                            'TMPOPTS': " ".join([args.config_opts, args.workflow_opts,
                                                  '-d', ns_jobname])
                            })
             ju.run_job_step(args, "next_step_caller", ns_dict)
@@ -259,7 +249,7 @@ def run_fetch(args):
     step_job = ju.Job("fetcher", args)
 
     for src in src_list:
-        local_src_dir = os.path.join(args.work_dir, args.data_path, src)
+        local_src_dir = os.path.join(args.working_dir, args.data_path, src)
         if not os.path.exists(local_src_dir):
             raise IOError("ERROR: source specified with --step_parameters (-p) option, \
                 {0}, does not have data directory: {1}".format(src, local_src_dir))
@@ -324,7 +314,7 @@ def run_fetch(args):
                 ns_dict.update({'TMPJOB': ns_jobname,
                                 'TMPNEXTSTEP': "TABLE",
                                 'TMPSTART': ",".join([src, alias]),
-                                'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
+                                'TMPOPTS': " ".join([args.config_opts, args.workflow_opts,
                                                      '-d', ns_jobname])
                                })
                 ju.run_job_step(args, "next_step_caller", ns_dict)
@@ -368,7 +358,7 @@ def run_table(args):
         src, alias = pair.split(",")
 
         alias_path = os.path.join(src, alias)
-        local_chunk_dir = os.path.join(args.work_dir, args.data_path, alias_path, "chunks")
+        local_chunk_dir = os.path.join(args.working_dir, args.data_path, alias_path, "chunks")
         if not os.path.exists(local_chunk_dir):
             raise IOError('ERROR: "source,alias" specified with --step_parameters '
                           '(-p) option, ' + pair + ' does not have chunk directory:'
@@ -401,7 +391,7 @@ def run_table(args):
                 ns_dict.update({'TMPJOB': ns_jobname,
                                 'TMPNEXTSTEP': "MAP",
                                 'TMPSTART': chunk_name.replace('.raw_line.', '.table.'),
-                                'TMPOPTS': " ".join([args.cloud_config_opts, args.workflow_opts,
+                                'TMPOPTS': " ".join([args.config_opts, args.workflow_opts,
                                                      '-d', ns_jobname])
                                })
                 ju.run_job_step(args, "next_step_caller", ns_dict)
@@ -447,7 +437,7 @@ def run_map(args):
         alias = tablefile.split('.table.')[0].split(src+'.')[1]
 
         chunk_path = os.path.join(src, alias, "chunks")
-        local_chunk_dir = os.path.join(args.work_dir, args.data_path, chunk_path)
+        local_chunk_dir = os.path.join(args.working_dir, args.data_path, chunk_path)
         local_tablefile = os.path.join(local_chunk_dir, tablefile)
         if not os.path.exists(local_tablefile):
             raise IOError('ERROR: "tablefile" specified with --step_parameters (-p) '

@@ -4,9 +4,8 @@
 ## Set environment variables
 ```
 KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
-KNP_LOCAL_DIR='/workspace/knowtmp/project1/KnowNet_Pipeline'
-KNP_CLOUD_DIR='/mnt/knowtmp/project1/KnowNet_Pipeline'
-KNP_SHARE_DIR='/mnt/knowstorage/project1'
+KNP_WORKING_DIR='/workspace/knowtmp/project1'
+KNP_STORAGE_DIR='/mnt/knowstorage/project1'
 KNP_DATA_PATH='data_rep_vert_metazoa'
 KNP_LOGS_PATH='logs_rep_vert_metazoa'
 KNP_ENS_SPECIES='REPRESENTATIVE,,METAZOA,,VERTEBRATES'
@@ -45,7 +44,7 @@ ln -s /workspace/knowstorage/ /mnt/
 
 ## copy pipeline code
 ```
-cd $(dirname $KNP_LOCAL_DIR)
+cd $KNP_WORKING_DIR
 git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
 ```
 ```
@@ -55,11 +54,11 @@ git checkout chronos_testing
 
 ## build the documentation
 ```
-cd $KNP_LOCAL_DIR/docs/
+cd $KNP_WORKING_DIR/docs/
 make html
 ```
 ```
-cd $KNP_LOCAL_DIR
+cd $KNP_WORKING_DIR
 ```
 
 
@@ -67,8 +66,8 @@ cd $KNP_LOCAL_DIR
 ```
 rm -r $KNP_LOGS_PATH/*
 rm -r $KNP_DATA_PATH/*
-rm -r $KNP_SHARE_DIR/$KNP_LOGS_PATH/*
-rm -r $KNP_SHARE_DIR/$KNP_DATA_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
 ```
 
 ## MySQL setup
@@ -79,8 +78,8 @@ python3 code/mysql_utilities.py \
     -mym $KNP_MYSQL_MEM -myc $KNP_MYSQL_CPU \
     -myd $KNP_MYSQL_DIR -mycf $KNP_MYSQL_CONF \
     -myps $KNP_MYSQL_PASS -mycu $KNP_MYSQL_CONSTRAINT_URL \
-    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR \
-    -sd $KNP_SHARE_DIR -dp $KNP_DATA_PATH
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR \
+    -sd $KNP_STORAGE_DIR -dp $KNP_DATA_PATH
 ```
 
 ### empty MySQL database if it is running
@@ -96,7 +95,7 @@ python3 code/redis_utilities.py \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -rm $KNP_REDIS_MEM -rc $KNP_REDIS_CPU \
     -rd $KNP_REDIS_DIR -rps $KNP_REDIS_PASS -rcu $KNP_REDIS_CONSTRAINT_URL\
-    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
 ```
 ### empty Redis database if it is running
 ```
@@ -113,7 +112,7 @@ mkdir $KNP_NGINX_DIR/docs/
 python3 code/nginx_utilities.py \
     -ngp $KNP_NGINX_PORT -ncu $KNP_NGINX_CONSTRAINT_URL \
     -ngd $KNP_NGINX_DIR -ngcf $KNP_NGINX_CONF \
-    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -ld $KNP_LOCAL_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
 ```
 
 ## clear the chronos queue
@@ -137,9 +136,9 @@ done;
 python3 code/workflow_utilities.py CHECK -su \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
-    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR \
-    -sd $KNP_SHARE_DIR -es $KNP_ENS_SPECIES
+    -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL \
+    -sd $KNP_STORAGE_DIR -es $KNP_ENS_SPECIES
 ```
 
 ## run parse pipeline (time: 24hr 30min)
@@ -148,24 +147,24 @@ python3 code/workflow_utilities.py CHECK -su \
 python3 code/workflow_utilities.py CHECK \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
-    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR \
-    -sd $KNP_SHARE_DIR
+    -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL \
+    -sd $KNP_STORAGE_DIR
 ```
 
 ## run import pipeline (time: 32hr 15min) 
 ```
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
-    -ld $KNP_LOCAL_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -cd $KNP_CLOUD_DIR \
-    -sd $KNP_SHARE_DIR
+    -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL \
+    -sd $KNP_STORAGE_DIR
 ```
 
 ## create report of results
 ```
-cp -r $KNP_LOCAL_DIR/$KNP_DATA_PATH/id_map $KNP_SHARE_DIR/$KNP_DATA_PATH/id_map
-code/reports/enumerate_files.sh $KNP_SHARE_DIR/$KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
+cp -r $KNP_WORKING_DIR/$KNP_DATA_PATH/id_map $KNP_STORAGE_DIR/$KNP_DATA_PATH/id_map
+code/reports/enumerate_files.sh $KNP_STORAGE_DIR/$KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
     $KNP_REDIS_HOST $KNP_MYSQL_PORT $KNP_REDIS_PORT > tests/KN03-KClus-build.$KNP_DATA_PATH.pipe
 git add -f tests/KN03-KClus-build.$KNP_DATA_PATH.pipe
 git commit -m 'adding result report'

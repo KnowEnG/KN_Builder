@@ -7,7 +7,6 @@ Attributes:
     DEFAULT_CHRONOS_URL (str): address of chronos scheduler
     DEFAULT_MARATHON_URL (str): address of marathon scheduler
     DEFAULT_WORK_BASE (str): toplevel directory of working directory
-    DEFAULT_STORAGE_BASE (str): toplevel directory of storage directory
 
     DEFAULT_CODE_PATH (str): relative path of code dir from toplevel
     DEFAULT_DATA_PATH (str): relative path of data dir from toplevel
@@ -41,8 +40,7 @@ import re
 
 DEFAULT_CHRONOS_URL = 'knowcluster01.dyndns.org:8888'
 DEFAULT_MARATHON_URL = 'knowcluster01.dyndns.org:8080/v2/apps'
-DEFAULT_WORK_BASE = '/workspace/prototype'
-DEFAULT_STORAGE_BASE = '/storage-pool/blatti'
+DEFAULT_WORKING_DIR = '/workspace/prototype'
 
 DEFAULT_CODE_PATH = 'KnowNet_Pipeline/code'
 DEFAULT_DATA_PATH = 'data'
@@ -56,7 +54,7 @@ DEFAULT_MYSQL_USER = 'root'
 DEFAULT_MYSQL_PASS = 'KnowEnG'
 DEFAULT_MYSQL_MEM = '15000'
 DEFAULT_MYSQL_CPU = '4.0'
-DEFAULT_MYSQL_DIR = os.path.join(DEFAULT_STORAGE_BASE, 'p1_mysql')
+DEFAULT_MYSQL_DIR = os.path.join(DEFAULT_WORKING_DIR, 'p1_mysql')
 DEFAULT_MYSQL_CONF = 'build_conf/'
 
 DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
@@ -64,10 +62,10 @@ DEFAULT_REDIS_PORT = '6379'
 DEFAULT_REDIS_PASS = 'KnowEnG'
 DEFAULT_REDIS_MEM = '15000'
 DEFAULT_REDIS_CPU = '1.0'
-DEFAULT_REDIS_DIR = os.path.join(DEFAULT_STORAGE_BASE, 'p1_redis')
+DEFAULT_REDIS_DIR = os.path.join(DEFAULT_WORKING_DIR, 'p1_redis')
 
 DEFAULT_NGINX_PORT = '8080'
-DEFAULT_NGINX_DIR = os.path.join(DEFAULT_STORAGE_BASE, 'p1_nginx')
+DEFAULT_NGINX_DIR = os.path.join(DEFAULT_WORKING_DIR, 'p1_nginx')
 DEFAULT_NGINX_CONF = 'autoindex/'
 
 
@@ -82,9 +80,8 @@ def add_config_args(parser):
     :delim: |
 
     --chronos  	    |str	|-c	    |url of chronos scheduler or LOCAL or DOCKER
-    --work_dir	    |str	|-ld	|name of toplevel directory of working dir
-    --cloud_dir	    |str	|-cd	|name of toplevel directory on cloud storage
-    --shared_dir    |str	|-sd	|name of toplevel directory of shared storage
+    --working_dir	    |str	|-wd	|name of toplevel directory of working dir
+    --storage_dir    |str	|-sd	|name of toplevel directory of shared storage
     --code_path	    |str	|-cp	|relative path of code directory from toplevel
     --data_path	    |str	|-dp	|relative path of data directory from toplevel
     --logs_path	    |str	|-lp	|relative path of data directory from toplevel
@@ -127,12 +124,10 @@ def add_config_args(parser):
                         help='url of chronos scheduler or LOCAL or DOCKER')
     parser.add_argument('-m', '--marathon', default=DEFAULT_MARATHON_URL,
                         help='url of marathon scheduler')
-    parser.add_argument('-ld', '--work_dir', default=DEFAULT_WORK_BASE,
-                        help='name of toplevel directory on local machine')
-    parser.add_argument('-cd', '--cloud_dir', default=DEFAULT_CLOUD_BASE,
-                        help='name of toplevel directory on cloud storage')
-    parser.add_argument('-sd', '--shared_dir', default='', nargs='?',
-                        help='name of toplevel directory on shared storage')
+    parser.add_argument('-wd', '--working_dir', default=DEFAULT_WORKING_DIR,
+                        help='name of toplevel directory of working directory')
+    parser.add_argument('-sd', '--storage_dir', default='', nargs='?',
+                        help='name of toplevel directory of storage directory')
     parser.add_argument('-cp', '--code_path', default=DEFAULT_CODE_PATH,
                         help='relative path of code directory from toplevel')
     parser.add_argument('-dp', '--data_path', default=DEFAULT_DATA_PATH,
@@ -202,43 +197,6 @@ def config_args():
     parser = add_config_args(parser)
     args = parser.parse_args('')
     return args
-
-def cloud_config_opts(args, config_opts):
-    """Convert config options to the directory structure within containers on cloud
-
-    changes/appends arg.work_dir to root of container's file system
-
-    Args:
-        args (Namespace): args as populated namespace
-        config_opts (list): list of command line arguments
-
-    Returns:
-        str: string for command line arguments on cloud
-    """
-    if '-ld' not in config_opts:
-        config_opts.extend(['-ld', args.cloud_dir])
-    new_config_opts = [opt.replace(args.work_dir, args.cloud_dir) for opt in config_opts]
-    return " ".join(new_config_opts)
-
-def cloud_template_subs(args, job_str):
-    """Convert tmp values in template json job string to config options
-
-    Args:
-        args (Namespace): args as populated namespace
-        job_str (str): json job as string with tmp placeholder values
-
-    Returns:
-        str: json job as string with cloud tmp values replaced
-    """
-
-    job_str = job_str.replace("TMPIMG", args.image)
-    job_str = job_str.replace("TMPDATADIR", os.path.join(args.cloud_dir, args.data_path))
-    job_str = job_str.replace("TMPCODEDIR", os.path.join(args.cloud_dir, args.code_path))
-    job_str = job_str.replace("TMPDATAPATH", args.data_path)
-    job_str = job_str.replace("TMPCODEPATH", args.code_path)
-    job_str = job_str.replace("TMPOPTS", args.cloud_config_opts)
-
-    return job_str
 
 def pretty_name(orig_name, endlen=63):
     """Shortens names strs and removes problematic characters
