@@ -53,12 +53,12 @@ class Job:
         self.cjobfile = 'missing.json'
         # read in dummy template
         self.cjobstr = ""
-        with open(os.path.join(self.args.local_dir, "code", "template",
+        with open(os.path.join(self.args.work_dir, args.code_path, "template",
                                "job_template.json"), 'r') as infile:
             self.cjobstr = infile.read(10000)
         # read in job dictionaries
         jobsdesc = ""
-        with open(os.path.join(self.args.local_dir, "code", "template",
+        with open(os.path.join(self.args.work_dir, args.code_path, "template",
                                "components.json"), 'r') as infile:
             jobsdesc = json.load(infile)
         # replace global dummy values with job specific ones
@@ -94,7 +94,7 @@ class Job:
 
         Returns:
         """
-        jobs_dir = os.path.join(self.args.local_dir, 'chron_jobs')
+        jobs_dir = os.path.join(self.args.work_dir, self.args.logs_path, 'chron_jobs')
         if not os.path.exists(jobs_dir):
             os.makedirs(jobs_dir)
         cjobfile = jobs_dir + os.sep + self.jobname + ".json"

@@ -30,10 +30,10 @@ def deploy_container(args=None):
     """
     if args is None:
         args=cf.config_args()
-    deploy_dir = os.path.join(args.local_dir, 'marathon_jobs')
+    deploy_dir = os.path.join(args.work_dir, args.logs_path, 'marathon_jobs')
     if not os.path.exists(deploy_dir):
         os.makedirs(deploy_dir)
-    template_job = os.path.join(args.local_dir, args.code_path, 
+    template_job = os.path.join(args.work_dir, args.code_path, 
                                 'dockerfiles', 'marathon', 'redis.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
@@ -96,7 +96,7 @@ def import_ensembl(alias, args=None):
     if args is None:
         args=cf.config_args()
     rdb = get_database(args)
-    map_dir = os.path.join(args.local_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+    map_dir = os.path.join(args.work_dir, args.data_path, cf.DEFAULT_MAP_PATH)
     with open(os.path.join(map_dir, alias + '_all.json')) as infile:
         map_dict = json.load(infile)
     for key in map_dict:

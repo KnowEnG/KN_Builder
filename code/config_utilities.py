@@ -6,8 +6,8 @@ used variables
 Attributes:
     DEFAULT_CHRONOS_URL (str): address of chronos scheduler
     DEFAULT_MARATHON_URL (str): address of marathon scheduler
-    DEFAULT_LOCAL_BASE (str): toplevel directory on local machine
-    DEFAULT_CLOUD_BASE (str): toplevel directory on shared cloud storage
+    DEFAULT_WORK_BASE (str): toplevel directory of working directory
+    DEFAULT_STORAGE_BASE (str): toplevel directory of storage directory
 
     DEFAULT_CODE_PATH (str): relative path of code dir from toplevel
     DEFAULT_DATA_PATH (str): relative path of data dir from toplevel
@@ -41,10 +41,10 @@ import re
 
 DEFAULT_CHRONOS_URL = 'knowcluster01.dyndns.org:8888'
 DEFAULT_MARATHON_URL = 'knowcluster01.dyndns.org:8080/v2/apps'
-DEFAULT_LOCAL_BASE = '/workspace/prototype/KnowNet_Pipeline'
-DEFAULT_CLOUD_BASE = '/storage-pool/blatti/KnowNet_Pipeline'
+DEFAULT_WORK_BASE = '/workspace/prototype'
+DEFAULT_STORAGE_BASE = '/storage-pool/blatti'
 
-DEFAULT_CODE_PATH = 'code'
+DEFAULT_CODE_PATH = 'KnowNet_Pipeline/code'
 DEFAULT_DATA_PATH = 'data'
 DEFAULT_LOGS_PATH = 'logs'
 DEFAULT_SRC_PATH = 'srcClass'
@@ -56,7 +56,7 @@ DEFAULT_MYSQL_USER = 'root'
 DEFAULT_MYSQL_PASS = 'KnowEnG'
 DEFAULT_MYSQL_MEM = '15000'
 DEFAULT_MYSQL_CPU = '4.0'
-DEFAULT_MYSQL_DIR = os.path.join(os.path.dirname(DEFAULT_CLOUD_BASE), 'p1_mysql')
+DEFAULT_MYSQL_DIR = os.path.join(DEFAULT_STORAGE_BASE, 'p1_mysql')
 DEFAULT_MYSQL_CONF = 'build_conf/'
 
 DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
@@ -64,10 +64,10 @@ DEFAULT_REDIS_PORT = '6379'
 DEFAULT_REDIS_PASS = 'KnowEnG'
 DEFAULT_REDIS_MEM = '15000'
 DEFAULT_REDIS_CPU = '1.0'
-DEFAULT_REDIS_DIR = os.path.join(os.path.dirname(DEFAULT_CLOUD_BASE), 'p1_redis')
+DEFAULT_REDIS_DIR = os.path.join(DEFAULT_STORAGE_BASE, 'p1_redis')
 
 DEFAULT_NGINX_PORT = '8080'
-DEFAULT_NGINX_DIR = os.path.join(os.path.dirname(DEFAULT_CLOUD_BASE), 'p1_nginx')
+DEFAULT_NGINX_DIR = os.path.join(DEFAULT_STORAGE_BASE, 'p1_nginx')
 DEFAULT_NGINX_CONF = 'autoindex/'
 
 
@@ -82,7 +82,7 @@ def add_config_args(parser):
     :delim: |
 
     --chronos  	    |str	|-c	    |url of chronos scheduler or LOCAL or DOCKER
-    --local_dir	    |str	|-ld	|name of toplevel directory on local machine
+    --work_dir	    |str	|-ld	|name of toplevel directory of working dir
     --cloud_dir	    |str	|-cd	|name of toplevel directory on cloud storage
     --shared_dir    |str	|-sd	|name of toplevel directory of shared storage
     --code_path	    |str	|-cp	|relative path of code directory from toplevel
@@ -127,7 +127,7 @@ def add_config_args(parser):
                         help='url of chronos scheduler or LOCAL or DOCKER')
     parser.add_argument('-m', '--marathon', default=DEFAULT_MARATHON_URL,
                         help='url of marathon scheduler')
-    parser.add_argument('-ld', '--local_dir', default=DEFAULT_LOCAL_BASE,
+    parser.add_argument('-ld', '--work_dir', default=DEFAULT_WORK_BASE,
                         help='name of toplevel directory on local machine')
     parser.add_argument('-cd', '--cloud_dir', default=DEFAULT_CLOUD_BASE,
                         help='name of toplevel directory on cloud storage')
@@ -206,7 +206,7 @@ def config_args():
 def cloud_config_opts(args, config_opts):
     """Convert config options to the directory structure within containers on cloud
 
-    changes/appends arg.local_dir to root of container's file system
+    changes/appends arg.work_dir to root of container's file system
 
     Args:
         args (Namespace): args as populated namespace
@@ -217,7 +217,7 @@ def cloud_config_opts(args, config_opts):
     """
     if '-ld' not in config_opts:
         config_opts.extend(['-ld', args.cloud_dir])
-    new_config_opts = [opt.replace(args.local_dir, args.cloud_dir) for opt in config_opts]
+    new_config_opts = [opt.replace(args.work_dir, args.cloud_dir) for opt in config_opts]
     return " ".join(new_config_opts)
 
 def cloud_template_subs(args, job_str):

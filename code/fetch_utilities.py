@@ -268,7 +268,7 @@ def main(version_json, args=None):
     if not version_dict['fetch_needed'] and not args.force_fetch:
         print('Source has not updated, fetch not needed')
         return
-    src_code_dir = os.path.join(args.local_dir, args.code_path, args.src_path)
+    src_code_dir = os.path.join(args.work_dir, args.code_path, args.src_path)
     sys.path.append(src_code_dir)
     src_module = __import__(version_dict['source'])
     if version_dict['source'] == 'ensembl':
