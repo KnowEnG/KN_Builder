@@ -41,16 +41,15 @@ git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
 ```
 ```
 cd KnowNet_Pipeline/
-git checkout chronos_testing
 ```
 
 ## build the documentation
 ```
-cd $KNP_WORKING_DIR/docs/
+cd $KNP_WORKING_DIR/KnowNet_Pipeline/docs/
 make html
 ```
 ```
-cd $KNP_WORKING_DIR
+cd $KNP_WORKING_DIR/KnowNet_Pipeline
 ```
 
 ## MySQL setup
@@ -61,7 +60,7 @@ python3 code/mysql_utilities.py \
     -mym $KNP_MYSQL_MEM -myc $KNP_MYSQL_CPU \
     -myd $KNP_MYSQL_DIR -mycf $KNP_MYSQL_CONF \
     -myps $KNP_MYSQL_PASS -mycu $KNP_MYSQL_CONSTRAINT_URL \
-    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH
 ```
 
 ### empty MySQL database if it is running

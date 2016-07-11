@@ -1,43 +1,125 @@
 # Full Pipeline Run
 ### (on knowcluster01 in /workspace/knowtmp/project1/)
 
+# LOCAL
 ## Set environment variables
 ```
-KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
-KNP_WORKING_DIR='/workspace/knowtmp/project1'
+KNP_CHRONOS_URL='LOCAL'
+KNP_WORKING_DIR='/mnt/knowtmp/project1'
 KNP_STORAGE_DIR='/mnt/knowstorage/project1'
-KNP_DATA_PATH='data_6sp'
-KNP_LOGS_PATH='logs_6sp'
-KNP_ENS_SPECIES='REPRESENTATIVE'
+KNP_DATA_PATH='data_local'
+KNP_LOGS_PATH='logs_local'
+KNP_ENS_SPECIES='homo_sapiens'
 
 KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
 
-KNP_MYSQL_HOST='knowcluster05.dyndns.org'
-KNP_MYSQL_PORT='3307'
-KNP_MYSQL_DIR='/mnt/knowtmp/project1/p1_mysql-3307'
+KNP_MYSQL_HOST='knowcluster03.dyndns.org'
+KNP_MYSQL_PORT='3333'
+KNP_MYSQL_DIR='/mnt/knowtmp/project1/p1_mysql-LOCAL'
 KNP_MYSQL_CONF='build_conf/'
 KNP_MYSQL_MEM='10000'
 KNP_MYSQL_CPU='2.0'
 KNP_MYSQL_PASS='KnowEnG'
-KNP_MYSQL_CONSTRAINT_URL='knowcluster05.dyndns.org'
+KNP_MYSQL_CONSTRAINT_URL='knowcluster03.dyndns.org'
 
-KNP_REDIS_HOST='knowcluster07.dyndns.org'
-KNP_REDIS_PORT='6380'
-KNP_REDIS_DIR='/mnt/knowtmp/project1/p1_redis-6380'
+KNP_REDIS_HOST='knowcluster03.dyndns.org'
+KNP_REDIS_PORT='6333'
+KNP_REDIS_DIR='/mnt/knowtmp/project1/p1_redis-LOCAL'
 KNP_REDIS_MEM='8000'
 KNP_REDIS_CPU='2.0'
 KNP_REDIS_PASS='KnowEnG'
-KNP_REDIS_CONSTRAINT_URL='knowcluster07.dyndns.org'
+KNP_REDIS_CONSTRAINT_URL='knowcluster03.dyndns.org'
 
-KNP_NGINX_PORT='8081'
-KNP_NGINX_DIR='/mnt/knowtmp/project1/p1_nginx-6sp'
+KNP_NGINX_PORT='8033'
+KNP_NGINX_DIR='/mnt/knowtmp/project1/p1_nginx-LOCAL'
 KNP_NGINX_CONF='autoindex/'
 KNP_NGINX_CONSTRAINT_URL='knowcluster03.dyndns.org'
 
-KNP_NEO4J_PORT='7475'
-KNP_NEO4J_DIR='/mnt/knowstorage/project1/p1_neo4j-7475'
+KNP_NEO4J_PORT='7433'
+KNP_NEO4J_DIR='/mnt/knowstorage/project1/p1_neo4j-7433'
 
 ```
+# CHRONOS
+
+## Set environment variables
+```
+KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
+KNP_WORKING_DIR='/mnt/knowtmp/project1'
+KNP_STORAGE_DIR='/mnt/knowstorage/project1'
+KNP_DATA_PATH='data_chronos'
+KNP_LOGS_PATH='logs_chronos'
+KNP_ENS_SPECIES='homo_sapiens'
+
+KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
+
+KNP_MYSQL_HOST='knowcluster03.dyndns.org'
+KNP_MYSQL_PORT='3334'
+KNP_MYSQL_DIR='/mnt/knowtmp/project1/p1_mysql-CHRONOS'
+KNP_MYSQL_CONF='build_conf/'
+KNP_MYSQL_MEM='10000'
+KNP_MYSQL_CPU='2.0'
+KNP_MYSQL_PASS='KnowEnG'
+KNP_MYSQL_CONSTRAINT_URL='knowcluster03.dyndns.org'
+
+KNP_REDIS_HOST='knowcluster03.dyndns.org'
+KNP_REDIS_PORT='6334'
+KNP_REDIS_DIR='/mnt/knowtmp/project1/p1_redis-CHRONOS'
+KNP_REDIS_MEM='8000'
+KNP_REDIS_CPU='2.0'
+KNP_REDIS_PASS='KnowEnG'
+KNP_REDIS_CONSTRAINT_URL='knowcluster03.dyndns.org'
+
+KNP_NGINX_PORT='8034'
+KNP_NGINX_DIR='/mnt/knowtmp/project1/p1_nginx-CHRONOS'
+KNP_NGINX_CONF='autoindex/'
+KNP_NGINX_CONSTRAINT_URL='knowcluster03.dyndns.org'
+
+KNP_NEO4J_PORT='7434'
+KNP_NEO4J_DIR='/mnt/knowstorage/project1/p1_neo4j-CHRONOS'
+
+```
+
+# DOCKER
+
+## Set environment variables
+```
+KNP_CHRONOS_URL='DOCKER'
+KNP_WORKING_DIR='/mnt/knowtmp/project1'
+KNP_STORAGE_DIR='/mnt/knowstorage/project1'
+KNP_DATA_PATH='data_docker'
+KNP_LOGS_PATH='logs_docker'
+KNP_ENS_SPECIES='homo_sapiens'
+
+KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
+
+KNP_MYSQL_HOST='knowcluster03.dyndns.org'
+KNP_MYSQL_PORT='3335'
+KNP_MYSQL_DIR='/mnt/knowtmp/project1/p1_mysql-DOCKER'
+KNP_MYSQL_CONF='build_conf/'
+KNP_MYSQL_MEM='10000'
+KNP_MYSQL_CPU='2.0'
+KNP_MYSQL_PASS='KnowEnG'
+KNP_MYSQL_CONSTRAINT_URL='knowcluster03.dyndns.org'
+
+KNP_REDIS_HOST='knowcluster03.dyndns.org'
+KNP_REDIS_PORT='6335'
+KNP_REDIS_DIR='/mnt/knowtmp/project1/p1_redis-DOCKER'
+KNP_REDIS_MEM='8000'
+KNP_REDIS_CPU='2.0'
+KNP_REDIS_PASS='KnowEnG'
+KNP_REDIS_CONSTRAINT_URL='knowcluster03.dyndns.org'
+
+KNP_NGINX_PORT='8035'
+KNP_NGINX_DIR='/mnt/knowtmp/project1/p1_nginx-DOCKER'
+KNP_NGINX_CONF='autoindex/'
+KNP_NGINX_CONSTRAINT_URL='knowcluster03.dyndns.org'
+
+KNP_NEO4J_PORT='7435'
+KNP_NEO4J_DIR='/mnt/knowstorage/project1/p1_neo4j-DOCKER'
+
+```
+
+#SETUP
 
 ## add symlinks
 ```
@@ -59,6 +141,7 @@ cd KnowNet_Pipeline/
 cd $KNP_WORKING_DIR/KnowNet_Pipeline/docs/
 make html
 ```
+
 ```
 cd $KNP_WORKING_DIR/KnowNet_Pipeline
 ```
@@ -71,8 +154,7 @@ python3 code/mysql_utilities.py \
     -mym $KNP_MYSQL_MEM -myc $KNP_MYSQL_CPU \
     -myd $KNP_MYSQL_DIR -mycf $KNP_MYSQL_CONF \
     -myps $KNP_MYSQL_PASS -mycu $KNP_MYSQL_CONSTRAINT_URL \
-    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR \
-    -sd $KNP_STORAGE_DIR -dp $KNP_DATA_PATH
+    -m $KNP_MARATHON_URL -dp $KNP_DATA_PATH -wd $KNP_WORKING_DIR
 ```
 
 ### empty MySQL database if it is running
@@ -131,33 +213,39 @@ rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
 rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
 ```
 
-## run setup pipeline (time: 2hr 30min)
+## run setup pipeline 
+## local time: 2hrs 12min
+## docker time: 2hrs 17min
+## chronos time: 2hrs
 ```
 python3 code/workflow_utilities.py CHECK -su \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL \
-    -sd $KNP_STORAGE_DIR -es $KNP_ENS_SPECIES
+    -c $KNP_CHRONOS_URL -sd $KNP_STORAGE_DIR -es $KNP_ENS_SPECIES
 ```
 
-## run parse pipeline (time: 2hr)
+## run parse pipeline
+## local time:
+## docker time:
+## chronos time:
 ```
 python3 code/workflow_utilities.py CHECK \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL \
-    -sd $KNP_STORAGE_DIR
+    -c $KNP_CHRONOS_URL -sd $KNP_STORAGE_DIR
 ```
 
-## run import pipeline (time: 2hr 45min) 
+## run import pipeline
+## local time:
+## docker time:
+## chronos time:
 ```
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL \
-    -sd $KNP_STORAGE_DIR
+    -c $KNP_CHRONOS_URL -sd $KNP_STORAGE_DIR
 ```
 
 ## create report of results
@@ -175,30 +263,6 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
     -P $KNP_MYSQL_PORT --execute \
     "CREATE USER 'KNviewer' IDENTIFIED BY 'dbdev249'; \
     GRANT SELECT ON KnowNet.* TO 'KNviewer';"
-```
-
-# cleanup
-## move databases to knowstorage
-stop the marathon redis and mysql jobs
-```
-KNP_STORAGE_MYSQL=$KNP_STORAGE_DIR'/p1_mysql-3307'
-KNP_STORAGE_REDIS=$KNP_STORAGE_DIR'/p1_redis-6380'
-mv $KNP_MYSQL_DIR $KNP_STORAGE_MYSQL
-mv $KNP_REDIS_DIR $KNP_STORAGE_REDIS
-```
-start new marathon redis and mysql jobs
-```
-python3 code/mysql_utilities.py \
-    -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
-    -mym $KNP_MYSQL_MEM -myc $KNP_MYSQL_CPU \
-    -myd $KNP_STORAGE_MYSQL -mycf $KNP_MYSQL_CONF \
-    -myps $KNP_MYSQL_PASS -mycu $KNP_MYSQL_CONSTRAINT_URL \
-    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
-python3 code/redis_utilities.py \
-    -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
-    -rm $KNP_REDIS_MEM -rc $KNP_REDIS_CPU \
-    -rd $KNP_STORAGE_REDIS -rps $KNP_REDIS_PASS -rcu $KNP_REDIS_CONSTRAINT_URL\
-    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -wd $KNP_WORKING_DIR
 ```
 
 ## neo4j setup
@@ -249,23 +313,6 @@ awk -v OFS="\t" 'BEGIN { print ":START_ID(Node)", \
     $KNP_STORAGE_DIR/$KNP_DATA_PATH/unique.edge.txt > \
     $KNP_NEO4J_DIR/shared/neo4j.edges.txt
 ```
-### format data from unique.node_meta for node_meta
-```
-awk -v OFS="\t" 'BEGIN { print "node_id", "n_type_desc", "info_type", \
-    "info_desc" }; { print toupper($1), "Property", $2, $3 }; END {}'\
-    $KNP_STORAGE_DIR/$KNP_DATA_PATH/unique.node_meta.txt > \
-    $KNP_NEO4J_DIR/shared/neo4j.node_meta.txt
-```
-### dump data from MySQL for edge_meta
-```
-mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT --quick \
-    --execute "SELECT DISTINCT UCASE(s.n1_id), UCASE(s.n2_id), s.et_name, em.info_type, \
-    em.info_desc FROM KnowNet.status s, KnowNet.edge_meta em, \
-    KnowNet.edge_type et WHERE s.line_hash = em.line_hash \
-    AND s.status_desc = 'mapped'; " > $KNP_NEO4J_DIR/shared/neo4j.edge_meta.dmp
-sort -u $KNP_NEO4J_DIR/shared/neo4j.edge_meta.dmp > \
-    $KNP_NEO4J_DIR/shared/neo4j.edge_meta.txt
-```
 
 ### import data
 
@@ -291,4 +338,3 @@ docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-shell \
 ```
 docker restart p1_neo4j-$KNP_NEO4J_PORT
 ```
-

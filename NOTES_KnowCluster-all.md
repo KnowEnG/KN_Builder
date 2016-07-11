@@ -49,16 +49,15 @@ git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
 ```
 ```
 cd KnowNet_Pipeline/
-git checkout chronos_testing
 ```
 
 ## build the documentation
 ```
-cd $KNP_WORKING_DIR/docs/
+cd $KNP_WORKING_DIR/KnowNet_Pipeline/docs/
 make html
 ```
 ```
-cd $KNP_WORKING_DIR
+cd $KNP_WORKING_DIR/KnowNet_Pipeline
 ```
 
 
