@@ -228,8 +228,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
 ```
 mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     --execute "SELECT DISTINCT UCASE(node_id) AS node_idQID, n_alias AS alias, \
-    n_type_desc AS QLABEL FROM KnowNet.node n, KnowNet.node_type nt \
-    WHERE n.n_type_id=nt.n_type_id" | sed 's/QID/:ID(Node)/g' | \
+    n_type AS QLABEL FROM KnowNet.node n " | sed 's/QID/:ID(Node)/g' | \
     sed 's/QLABEL/:LABEL/g' > $KNP_NEO4J_DIR/shared/neo4j.nodes.txt;
 ```
 ### dump data from MySQL for node-species relationships
@@ -237,7 +236,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
 mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     --execute "SELECT DISTINCT UCASE(n.node_id) AS QSTART_ID, taxon AS QEND_ID, \
     \"InGenome\" AS QTYPE FROM KnowNet.node_species ns, KnowNet.node n \
-    WHERE n.node_id=ns.node_id AND n.n_type_id = 1 " | \
+    WHERE n.node_id=ns.node_id AND n.n_type = 'Gene' " | \
     sed 's/QSTART_ID/:START_ID(Node)/g' | sed 's/QEND_ID/:END_ID(Species)/g' | \
     sed 's/QTYPE/:TYPE/g' > $KNP_NEO4J_DIR/shared/neo4j.species_edges.txt;
 ```
@@ -249,14 +248,14 @@ awk -v OFS="\t" 'BEGIN { print ":START_ID(Node)", \
     $KNP_STORAGE_DIR/$KNP_DATA_PATH/unique.edge.txt > \
     $KNP_NEO4J_DIR/shared/neo4j.edges.txt
 ```
-### format data from unique.node_meta for node_meta
+### format data from unique.node_meta for node_meta (skipped)
 ```
 awk -v OFS="\t" 'BEGIN { print "node_id", "n_type_desc", "info_type", \
     "info_desc" }; { print toupper($1), "Property", $2, $3 }; END {}'\
     $KNP_STORAGE_DIR/$KNP_DATA_PATH/unique.node_meta.txt > \
     $KNP_NEO4J_DIR/shared/neo4j.node_meta.txt
 ```
-### dump data from MySQL for edge_meta
+### dump data from MySQL for edge_meta (skipped)
 ```
 mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT --quick \
     --execute "SELECT DISTINCT UCASE(s.n1_id), UCASE(s.n2_id), s.et_name, em.info_type, \

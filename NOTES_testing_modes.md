@@ -36,7 +36,7 @@ KNP_NGINX_CONF='autoindex/'
 KNP_NGINX_CONSTRAINT_URL='knowcluster03.dyndns.org'
 
 KNP_NEO4J_PORT='7433'
-KNP_NEO4J_DIR='/mnt/knowstorage/project1/p1_neo4j-7433'
+KNP_NEO4J_DIR='/mnt/knowstorage/project1/p1_neo4j-LOCAL'
 
 ```
 # CHRONOS
@@ -227,9 +227,9 @@ python3 code/workflow_utilities.py CHECK -su \
 ```
 
 ## run parse pipeline
-## local time: 
-## docker time: 
-## chronos time: 
+## local time: 58 min (no enrichr - website down)
+## docker time: 60 min (no enrichr - website down)
+## chronos time: 30 min (no enrichr - website down)
 ```
 python3 code/workflow_utilities.py CHECK \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
@@ -239,9 +239,9 @@ python3 code/workflow_utilities.py CHECK \
 ```
 
 ## run import pipeline
-## local time:
-## docker time:
-## chronos time:
+## local time: 9 min
+## docker time: 11 min
+## chronos time: 40 min
 ```
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
@@ -273,8 +273,8 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
 mkdir $KNP_NEO4J_DIR
 mkdir $KNP_NEO4J_DIR/data
 mkdir $KNP_NEO4J_DIR/shared
-docker run -dt --restart=always --name hdfs sequenceiq/hadoop-docker:latest /etc/bootstrap.sh -bash
-docker run -d --restart=always --name mazerunner --link hdfs:hdfs kbastani/neo4j-graph-analytics:latest
+docker run -dt --restart=always --name hdfs-chronos sequenceiq/hadoop-docker:latest /etc/bootstrap.sh -bash
+docker run -d --restart=always --name mazerunner-chronos --link hdfs-chronos:hdfs kbastani/neo4j-graph-analytics:latest
 docker run -dt --restart=always --name p1_neo4j-$KNP_NEO4J_PORT \
     -p $KNP_NEO4J_PORT:7474 --link mazerunner:mazerunner --link hdfs:hdfs \
     -v $KNP_NEO4J_DIR/data:/opt/data -v $KNP_NEO4J_DIR/shared:/shared \
@@ -293,8 +293,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
 ```
 mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     --execute "SELECT DISTINCT UCASE(node_id) AS node_idQID, n_alias AS alias, \
-    n_type_desc AS QLABEL FROM KnowNet.node n, KnowNet.node_type nt \
-    WHERE n.n_type_id=nt.n_type_id" | sed 's/QID/:ID(Node)/g' | \
+    n_type AS QLABEL FROM KnowNet.node n " | sed 's/QID/:ID(Node)/g' | \
     sed 's/QLABEL/:LABEL/g' > $KNP_NEO4J_DIR/shared/neo4j.nodes.txt;
 ```
 ### dump data from MySQL for node-species relationships
@@ -302,7 +301,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
 mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     --execute "SELECT DISTINCT UCASE(n.node_id) AS QSTART_ID, taxon AS QEND_ID, \
     \"InGenome\" AS QTYPE FROM KnowNet.node_species ns, KnowNet.node n \
-    WHERE n.node_id=ns.node_id AND n.n_type_id = 1 " | \
+    WHERE n.node_id=ns.node_id AND n.n_type = 'Gene' " | \
     sed 's/QSTART_ID/:START_ID(Node)/g' | sed 's/QEND_ID/:END_ID(Species)/g' | \
     sed 's/QTYPE/:TYPE/g' > $KNP_NEO4J_DIR/shared/neo4j.species_edges.txt;
 ```
@@ -321,7 +320,7 @@ awk -v OFS="\t" 'BEGIN { print ":START_ID(Node)", \
 ```
 docker exec p1_neo4j-$KNP_NEO4J_PORT rm -rf /opt/data/graph.db
 ```
-#### insert uniq nodes and production edges (time: 7m)
+#### insert uniq nodes and production edges (time: 2m)
 ```
 docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-import \
     --into /opt/data/graph.db --nodes /shared/neo4j.species.txt \
@@ -331,7 +330,7 @@ docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-import \
 ```
 #### add meta_data to nodes and edges (skipped)
 ```
-cp $KNP_WORKING_DIR/code/neo4j/import.cypher $KNP_NEO4J_DIR/shared/
+cp $KNP_WORKING_DIR/KnowNet_Pipeline/code/neo4j/import.cypher $KNP_NEO4J_DIR/shared/
 docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-shell \
     -path /opt/data/graph.db -file /shared/import.cypher
 ```
