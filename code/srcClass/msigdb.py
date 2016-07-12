@@ -248,7 +248,7 @@ class Msigdb(SrcClass):
         alias = version_dict['alias']
         source = version_dict['source']
         n1type = 'property'
-        n_type_id = '2'
+        n_type = 'Property'
         n1spec = '0'
         n1hint = source + '_' + alias
         n2type = 'gene'
@@ -283,7 +283,7 @@ class Msigdb(SrcClass):
                 n1hint = n1_kn_name
                 n_meta_writer.writerow([n1_kn_id, info_type1, n1_orig_name])
                 n_meta_writer.writerow([n1_kn_id, info_type2, n1_url])
-                n_writer.writerow([n1_kn_id, n1_kn_name, n_type_id])
+                n_writer.writerow([n1_kn_id, n1_kn_name, n_type])
                 for n2_id in raw[2:]:
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1_kn_id, n1hint, n1type, n1spec,\

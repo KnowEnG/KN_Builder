@@ -207,10 +207,11 @@ done;
 
 ## clear any existing files
 ```
-rm -r $KNP_LOGS_PATH/*
-rm -r $KNP_DATA_PATH/*
-rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
-rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
+shopt extglob
+rm -r $KNP_WORKING_DIR/$KNP_LOGS_PATH/!(*mysql)
+rm -r $KNP_WORKING_DIR/$KNP_DATA_PATH/!(*mysql)
+rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/!(*mysql)
+rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/!(*mysql)
 ```
 
 ## run setup pipeline 
@@ -226,9 +227,9 @@ python3 code/workflow_utilities.py CHECK -su \
 ```
 
 ## run parse pipeline
-## local time:
-## docker time:
-## chronos time:
+## local time: 
+## docker time: 
+## chronos time: 
 ```
 python3 code/workflow_utilities.py CHECK \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \

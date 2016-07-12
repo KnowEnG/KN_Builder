@@ -30,15 +30,15 @@ CREATE TABLE IF NOT EXISTS `species` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `node_type` (
-  `n_type_id` int(11) NOT NULL AUTO_INCREMENT,
-  `n_type_desc` varchar(80) NOT NULL,
-  PRIMARY KEY (`n_type_id`)
+  `n_type` varchar(12) NOT NULL,
+  `n_type_desc` text,
+  PRIMARY KEY (`n_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `node` (
   `node_id` varchar(64) NOT NULL,
   `n_alias` varchar(512) DEFAULT NULL,
-  `n_type_id` int(11) NOT NULL,
+  `n_type` varchar(12) DEFAULT NULL,
   PRIMARY KEY (`node_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -46,28 +46,28 @@ CREATE TABLE IF NOT EXISTS `node_meta` (
   `node_id` varchar(64) NOT NULL,
   `info_type` varchar(80) NOT NULL,
   `info_desc` varchar(255) NOT NULL,
-  PRIMARY KEY `idx_node_meta_key` (`node_id`,`info_type`,`info_desc`)
+  PRIMARY KEY (`node_id`,`info_type`,`info_desc`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `node_species` (
   `node_id` varchar(128) NOT NULL,
   `taxon` int(11) NOT NULL,
-  UNIQUE KEY `node_species_key` (`node_id`,`taxon`),
+  PRIMARY KEY (`node_id`,`taxon`),
   KEY `taxon` (`taxon`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge_type` (
   `et_name` varchar(80) NOT NULL,
-  `n1_type` int(11) NOT NULL,
-  `n2_type` int(11) NOT NULL,
+  `n1_type` varchar(12) NOT NULL,
+  `n2_type` varchar(12) NOT NULL,
   `bidir` tinyint(1) NOT NULL,
   `et_desc` text,
   `sc_desc` text,
   `sc_best` float DEFAULT NULL,
   `sc_worst` float DEFAULT NULL,
   PRIMARY KEY (`et_name`),
-  KEY `n1_type` (`n1_type`),
-  KEY `n2_type` (`n2_type`)
+  KEY (`n1_type`),
+  KEY (`n2_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `edge2line`(

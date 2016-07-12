@@ -214,7 +214,7 @@ class Pfam(SrcClass):
 
         #static column values
         n1type = 'property'
-        n1_type_id = '2'
+        n_type = 'Property'
         n2type = 'gene'
         n1hint = 'Pfam/Family'
         n2hint = 'UniProt/Ensembl_GeneID'
@@ -255,7 +255,7 @@ class Pfam(SrcClass):
                 kn_id = cf.pretty_name(src + '_' + orig_id)
                 kn_name = cf.pretty_name(src + '_' + orig_name)
                 map_dict[orig_id] = kn_id + '::' + kn_name
-                n_writer.writerow([kn_id, kn_name, n1_type_id])
+                n_writer.writerow([kn_id, kn_name, n_type])
                 n_meta_writer.writerow([kn_id, info_type, orig_name])
                 n_meta_writer.writerow([kn_id, info_type, orig_id])
                 n2orig = raw[2]

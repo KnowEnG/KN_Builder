@@ -263,7 +263,7 @@ def import_pnode(filename, args=None):
     """
     if args is None:
         args=cf.config_args()
-    ld_cmd = '(node_id, n_alias) SET n_type_id=2'
+    ld_cmd = '(node_id, n_alias) SET n_type="Property"'
     dup_cmd = 'node.node_id = node.node_id'
     table = 'node'
     import_file(filename, table, ld_cmd, dup_cmd, args)

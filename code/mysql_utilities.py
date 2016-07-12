@@ -93,7 +93,6 @@ def combine_tables(alias, args=None):
     if args is None:
         args=cf.config_args()
     alias_db = 'ensembl_' + alias
-    #tablename = 'knownet_mappings'
     combined_db = 'KnowNet'
     combined_table = alias + '_mappings'
     all_table = 'all_mappings'
@@ -103,16 +102,16 @@ def combine_tables(alias, args=None):
     db.create_table(combined_table, get_insert_cmd('gene'))
     for step in steps:
         db.insert(combined_table, get_insert_cmd(step))
-    #db.drop_table(combined_db + '.' + combined_table)
-    #db.move_table(alias_db, tablename, combined_db, combined_table)
     db.use_db(combined_db)
     cmd = ("SELECT *, db_display_name AS species FROM " + alias_db + '.' +
             alias + "_mappings WHERE 1=2")
     db.create_table(all_table, cmd)
-    #cmd = ("DELETE FROM " + all_table + " WHERE species = '" + alias + "'")
-    #db.execute(cmd)
-    cmd = ("SELECT *, '" + alias + "' AS species FROM " + alias_db + '.'+
-            alias + "_mappings")
+    cmd = ("SELECT UCASE(dbprimary_acc) as dbprimary_acc, "
+            "UCASE(display_label) AS display_label, "
+            "UCASE(db_name) AS db_name, priority, "
+            "UCASE(db_display_name) AS db_display_name, "
+            "UCASE(stable_id) AS stable_id, '" + alias + "' AS species FROM " + 
+            alias_db + '.' + alias + "_mappings")
     db.insert(all_table, cmd)
     db.close()
 
@@ -152,16 +151,15 @@ def import_nodes(version_dict, args=None):
     taxid = version_dict['alias_info'].split('::')[0]
     alias_db = 'ensembl_' + alias
     db = MySQL(alias_db, args)
-    cmd = ("SELECT DISTINCT gene.stable_id AS node_id, "
+    cmd = ("SELECT DISTINCT UCASE(gene.stable_id) AS node_id, "
            "SUBSTRING(gene.description, 1, 512) AS n_alias, "
-           "1 AS n_type_id "
+           "'Gene' AS n_type_id "
            "FROM gene "
            "ON DUPLICATE KEY UPDATE node_id=node_id")
     tablename = 'KnowNet.node'
     db.insert(tablename, cmd)
-    cmd = ("SELECT DISTINCT gene.stable_id AS node_id, " + taxid + " AS taxon "
-           "FROM gene "
-           "ON DUPLICATE KEY UPDATE node_id=node_id")
+    cmd = ("SELECT DISTINCT UCASE(gene.stable_id) AS node_id, " + taxid +
+           " AS taxon FROM gene ON DUPLICATE KEY UPDATE node_id=node_id")
     tablename = 'KnowNet.node_species'
     db.insert(tablename, cmd)
 
@@ -189,7 +187,7 @@ def query_all_mappings(version_dict, args=None):
     if not os.path.isdir(map_dir):
         os.mkdir(map_dir)
     db = MySQL(database, args)
-    cmd = "WHERE db_name='ENS_LRG_gene'"
+    cmd = "WHERE db_name='ENS_LRG_GENE'"
     results = db.query_distinct('dbprimary_acc, stable_id', table, cmd)
     lrg_dict = create_dictionary(results)
     results = db.query_distinct('stable_id, stable_id', table)

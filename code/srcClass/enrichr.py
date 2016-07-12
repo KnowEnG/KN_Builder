@@ -272,7 +272,7 @@ class Enrichr(SrcClass):
                          "MGI_Mammalian_Phenotype_Level_3",\
                          "MGI_Mammalian_Phenotype_Level_4", "Mouse_Gene_Atlas"]
         n1type = 'property'
-        n_type_id = '2'
+        n_type = 'Property'
         n1spec = '0'
         n1hint = source + '_' + alias
         n2type = 'gene'
@@ -311,7 +311,7 @@ class Enrichr(SrcClass):
                 if alias != 'PPI_Hub_Proteins':
                     n1_kn_name = cf.pretty_name(node_prefix + '_'+ n1_orig_name)
                     n_meta_writer.writerow([n1_kn_name, info_type, n1_orig_name])
-                    n_writer.writerow([n1_kn_name, n1_kn_name, n_type_id])
+                    n_writer.writerow([n1_kn_name, n1_kn_name, n_type])
                 for n2_id in raw[1:]:
                     n2_id = n2_id.split(',')[0]
                     hasher = hashlib.md5()

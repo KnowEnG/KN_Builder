@@ -234,7 +234,7 @@ class Pathcom(SrcClass):
         n3spec = 'unknown'
         score = '1'
         info_type = 'alt_alias'
-        n_type_id = '2'
+        n_type = 'Property'
 
         with open(raw_line, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
@@ -270,7 +270,7 @@ class Pathcom(SrcClass):
                 #pathway edge
                 if n3id:
                     kn_n3id = cf.pretty_name('paco_' + n3id)
-                    n_writer.writerow([kn_n3id, kn_n3id, n_type_id])
+                    n_writer.writerow([kn_n3id, kn_n3id, n_type])
                     n_meta_writer.writerow([kn_n3id, info_type, n3id])
                     for node in [n1id, n2id]:
                         hasher = hashlib.md5()

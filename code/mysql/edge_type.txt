@@ -1,95 +1,95 @@
-achilles_genetic_fitness	2	1	0	Genes that effect cell survival in a given cell line	binary value	1	1
-allen_brain_atlas_signature	2	1	0	Genes which were shown to be differentially regulated in a region of the brain	binary value	1	1
-blastp_homology	1	1	1	protein sequence similarity as measured by basic local alignment search tool 	negative log 10 of E-value, expected number of local alignments with a given score that would be found in random sequences of the same length as the query and database	100	2
-enrichr_cell_signature	2	1	0	Genes associated with a given cancer cell line	binary value	1	1
-enrichr_ChIP_gene_set	2	1	0	Genes assocuated with a given ChIP or histone modification experiment  	binary value	1	1
-enrichr_pathway	2	1	0	Membership of gene in a pathway	binary value	1	1
-enrichr_perturbation_set	2	1	0	Genes which were shown to be differentially regulated by a given perturbagen 	binary value	1	1
-enrichr_phenotype_signature	2	1	0	Genes associated with a given genotype or phenotype	binary value	1	1
-enrichr_tissue_signature	2	1	0	Genes associate with a given tissue type	binary value	1	1
-ESCAPE_gene_set	2	1	0	Embryonic Stem Cell Atlas from Pluripotency Evidence (ESCAPE) gene sets integrating data from many recent diverse high-throughput studies including: gene expression microarrays, RNA-seq, ChIP-chip/seq, genome-wide inhibitory RNA (RNAi) screens, immunoprecipitation followed by mass spectrometry (IP-MS) proteomics and phosphoproteomics	binary value	1	1
-genesigdb_gene_signature	2	1	0	Traceable, standardized, annotated gene signatures which have been manually curated from publications that are indexed in PubMed	binary value	1	1
-GEO_expression_set	2	1	0	Gene expression values from GEO	binary value	1	1
-go_curated_evidence	2	1	0	Curated evidence includes experimentally inferred (expression pattern, mutant phenotype, direct assay, physical or genetic interaction) as well as computational analysis inferred (sequence based, analysis of hierarchy).  This is separate from uncurated "IEA" evidence codes which are automatically assigned from Electronic Annotations.	Binary value indicating that gene had curated annotation for GO term	1	1
-go_hierarchy	2	2	0	relationship between go terms	Binary value indicating relationship exists	1	1
-go_inferred_evidence	2	1	0	uncurated "IEA" evidence codes which are automatically assigned from Electronic Annotations.  This is distinct from more reliable Curated evidence includes experimentally inferred (expression pattern, mutant phenotype, direct assay, physical or genetic interaction) as well as computational analysis inferred (sequence based, analysis of hierarchy).	Binary value indicating that gene had automatically inferred from electronic annotation evidence for GO term	1	1
-HMDB_metabolite_signatures	2	1	0	Genes associated with a given metabolite	binary value	1	1
-hn_CE_CC	1	1	0	Co-citation of worm genes	log likelihood value	10	0
-hn_CE_CX	1	1	0	Co-expression among worm genes	log likelihood value	10	0
-hn_CE_GT	1	1	0	Worm genetic interactions	log likelihood value	10	0
-hn_CE_LC	1	1	0	Literature curated worm protein physical interactions	log likelihood value	10	0
-hn_CE_YH	1	1	0	High-throughput yeast 2-hybrid assays among worm genes	log likelihood value	10	0
-hn_DM_PI	1	1	0	Fly protein physical interactions	log likelihood value	10	0
-hn_HS_CC	1	1	0	Co-citation of human genes	log likelihood value	10	0
-hn_HS_CX	1	1	0	Co-expression among human genes	log likelihood value	10	0
-hn_HS_DC	1	1	0	Co-occurrence of domains among human proteins	log likelihood value	10	0
-hn_HS_GN	1	1	0	Gene neighbourhoods of bacterial and archaeal orthologs of human genes	log likelihood value	10	0
-hn_HS_LC	1	1	0	Literature curated human protein physical interactions	log likelihood value	10	0
-hn_HS_MS	1	1	0	human protein complexes from affinity purification/mass spectrometry	log likelihood value	10	0
-hn_HS_PG	1	1	0	Co-inheritance of bacterial and archaeal orthologs of human genes	log likelihood value	10	0
-hn_HS_YH	1	1	0	High-throughput yeast 2-hybrid assays among human genes	log likelihood value	10	0
-hn_IntNet	1	1	0	Integrated network (HumanNet)	log likelihood value	10	0
-hn_SC_CC	1	1	0	Co-citation of yeast genes	log likelihood value	10	0
-hn_SC_CX	1	1	0	Co-expression among yeast genes	log likelihood value	10	0
-hn_SC_GT	1	1	0	Yeast genetic interactions	log likelihood value	10	0
-hn_SC_LC	1	1	0	Literature curated yeast protein physical interactions	log likelihood value	10	0
-hn_SC_MS	1	1	0	Yeast protein complexes from affinity purification/mass spectrometry	log likelihood value	10	0
-hn_SC_TS	1	1	0	Yeast protein interactions inferred from tertiary structures of complexes	log likelihood value	10	0
-hn_SC_YH	1	1	0	High-throughput yeast 2-hybrid assays among yeast genes	log likelihood value	10	0
-KEA_kinase_signatures	2	1	0	Genes associated with a given kinase	binary value	1	1
-kegg_pathway	2	1	0	Each pathway map contains a network of molecular interactions and reactions and is designed to link genes in the genome to gene products (mostly proteins) in the pathway	Binary value indicating that the gene has a known role in kegg pathway	1	1
-LINCS_cell_type	2	2	0	Cell type from LINCS experiment	binary value	1	1
-LINCS_down_set	2	1	0	Genes which were shown to be differentially down regulated after treatment with a given perturbagen	binary value	1	1
-LINCS_down_signature	2	1	0	Genes which were shown to be differentially down regulated after treatment with a given perturbagen	Robust z-scores for each profile relative to population control	100	2.5
-LINCS_perturbagen	2	2	0	Perturbagen from LINCS experiment	binary value	1	1
-LINCS_perturbagen_dose	2	2	0	Perturbagen dose from LINCS experiment	binary value	1	1
-LINCS_perturbagen_time	2	2	0	Perturbagen time from LINCS experiment	binary value	1	1
-LINCS_perturbagen_type	2	2	0	Perturbagen type from LINCS experiment	binary value	1	1
-LINCS_up_set	2	1	0	Genes which were shown to be differentially up regulated after treatment with a given perturbagen	binary value	1	1
-LINCS_up_signature	2	1	0	Genes which were shown to be differentially up regulated after treatment with a given perturbagen	Robust z-scores for each profile relative to population control	100	2.5
-msigdb_c2_cgp	2	1	0	Gene sets represent expression signatures of genetic and chemical perturbations. A number of these gene sets come in pairs: an xxx_UP (xxx_DN) gene set representing genes induced (repressed) by the perturbation	1 if there is an edge from the gene set's node to the gene	1	1
-msigdb_c3_mir	2	1	0	Gene sets that contain genes that share a 3'-UTR microRNA binding motif.	1 if there is an edge from the gene set's node to the gene	1	1
-msigdb_c4_cgn	2	1	0	Gene sets defined by expression neighborhoods centered on 380 cancer-associated genes (Brentani, Caballero et al. 2003). This collection is identical to that previously reported in (Subramanian, Tamayo et al. 2005).	1 if there is an edge from the gene set's node to the gene	1	1
-msigdb_c4_cm	2	1	0	Gene sets defined by Segal et al. 2004. Briefly, the authors compiled gene sets ('modules') from a variety of resources such as KEGG, GO, and others. By mining a large compendium of cancer-related microarray data, they identified 456 such modules as significantly changed in a variety of cancer conditions.	1 if there is an edge from the gene set's node to the gene	1	1
-msigdb_c6_all	2	1	0	Gene sets represent signatures of cellular pathways which are often dis-regulated in cancer. The majority of signatures were generated directly from microarray data from NCBI GEO or from internal unpublished profiling experiments which involved perturbation of known cancer genes.	1 if there is an edge from the gene set's node to the gene	1	1
-msigdb_c7_all	2	1	0	Gene sets that represent cell states and perturbations within the immune system. The signatures were generated by manual curation of published studies in human and mouse immunology. For each study, pairwise comparisons of relevant classes were made and genes ranked by mutual information. Gene sets correspond to top or bottom genes (FDR < 0.25 or maximum of 200 genes) for each comparison. This resource is generated as part of the Human Immunology Project Consortium	1 if there is an edge from the gene set's node to the gene	1	1
-panther_classification	2	1	0	Proteins classfied using PANTHER (Protein ANalysis THrough Evolutionary Relationships) Classification System	binary value	1	1
-pathcom_catalysis_precedes	1	1	0	First protein controls a reaction whose output molecule is input to another reaction controled by the second protein	binary value	1	1
-pathcom_chemical_affects	3	1	0	A small molecule has an effect on the protein state	binary value	1	1
-pathcom_consumption_controled_by	3	1	0	The small molecule is consumed by a reaction that is controled by a protein	binary value	1	1
-pathcom_controls_expression_of	1	1	0	First protein controls a conversion or a template reaction that changes expression of the second protein	binary value	1	1
-pathcom_controls_phosphorylation_of	1	1	0	First protein controls a reaction that changes the phosphorylation status of the second protein	binary value	1	1
-pathcom_controls_production_of	1	3	0	The protein controls a reaction of which the small molecule is an output	binary value	1	1
-pathcom_controls_state_change_of	1	1	0	First protein controls a reaction that changes the state of the second protein	binary value	1	1
-pathcom_controls_transport_of	1	1	0	First protein controls a reaction that changes the cellular location of the second protein	binary value	1	1
-pathcom_controls_transport_of_chemical	1	3	0	The protein controls a reaction that changes cellular location of the small molecule	binary value	1	1
-pathcom_in_complex_with	1	1	1	Proteins are participants of the same molecular interaction	binary value	1	1
-pathcom_neighbor_of	1	1	1	Proteins are participants or controlers of the same interaction	binary value	1	1
-pathcom_pathway	2	1	0	Membership of gene in a pathway	binary value	1	1
-pathcom_reacts_with	3	3	1	Small molecules are input to a biochemical reaction	binary value	1	1
-pathcom_used_to_produce	3	3	0	A reaction consumes a small molecule to produce another small molecule	binary value	1	1
-pfam_domains	2	1	0	Pfam protein domains found in protein sequences as scored by HMMER	negative log 10 of E-value, expected number of local alignments with a given score that would be found in random sequences of the same length as the query and database	100	2
-PPI_association	1	1	1	Interaction between molecules that may participate in formation of one, but possibly more, physical complexes. Often describes a set of molecules that are co-purified in a single pull-down or coimmunoprecipitation but might participate in formation of distinct physical complexes sharing a common bait.	binary value	1	1
-PPI_colocalization	1	1	1	Coincident occurrence of molecules in a given subcellular fraction observed with a low resolution methodology from which a physical interaction among those molecules cannot be inferred.	binary value	1	1
-PPI_complex	2	1	0	Genes associated as being a part of the same given complex	binary value	1	1
-PPI_direct_interaction	1	1	1	Interaction between molecules that are in direct contact with each other.	binary value	1	1
-PPI_genetic_interaction	1	1	1	An effect in which two genetic perturbations, when combined, result in a phenotype that does not appear to be merely explained by the superimposition or addition of effects of the original perturbations. ab (not=) E.	binary value	1	1
-PPI_hub	1	1	0	Genes which are associated with the given PPI hub protein	binary value	1	1
-PPI_negative	1	1	1	Particular interaction has been explicitly shown not to occur under the described conditions.	binary value	1	1
-PPI_physical_association	1	1	1	Interaction between molecules within the same physical complex. Often identified under conditions which suggest that the molecules are in close proximity but not necessarily in direct contact with each other.	binary value	1	1
-reactome_curated	2	1	0	Curated evidence comes from experimental or computational analysis that can be traced back to a specific literature citation.  This is distinct from 'reactome_inferred' which are automatically assigned from electronic annotations.	Binary value indicating that the gene was annotated for reactome pathway	1	1
-reactome_hierarchy	2	2	0	parent-->child relationship between pathways	Binary value indicating relationship exists	1	1
-reactome_inferred	2	1	0	uncurated 'IEA' evidence codes which are automatically assigned from electronic annotations.  This is distinct from more reliable 'reactome_curated' evidences which can be traced back to specific literature citations.	Binary value indicating that the gene was annotated for reactome pathway	1	1
-reactome_PPI_direct_complex	1	1	1	interactors are directly in the same complex within a pathway, i.e. w/o further nested complexes. Stronger evidence than 'indirect_complex', 'reaction', 'neighbouring_reaction'.	Binary value indicating that the pair of genes were found with this type of interaction within a pathway	1	1
-reactome_PPI_indirect_complex	1	1	1	interactors in different subcomplexes of a complex within a pathway. Relationship stronger than 'reaction', 'neighbouring_reaction', but not as strong as 'direct_complex'.	Binary value indicating that the pair of genes were found with this type of interaction within a pathway	1	1
-reactome_PPI_neighbouring_reaction	1	1	0	interactor participate in 2 'consecutive' reactions, i.e. when one reaction produces an input or a catalyst for another reaction. Relationship not as strong as 'direct_complex', 'indirect_complex', or 'reaction'.	Binary value indicating that the pair of genes were found with this type of interaction within a pathway	1	1
-reactome_PPI_reaction	1	1	1	interactors participate in the same reaction, but the interactors do not form a complex. Relationship stronger than 'neighbouring_reaction', but not as strong as 'direct_complex' or 'indirect_complex'.	Binary value indicating that the pair of genes were found with this type of interaction within a pathway	1	1
-SILAC_phosphoproteomics	2	1	0	Genes associated with phosphoproteomic changes in a given experiment	binary value	1	1
-STRING_coexpression	1	1	1	Two genes that are co-expressed in the same or in other species (transferred by homology).	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
-STRING_cooccurrance	1	1	1	Presence or absence of linked proteins across species	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
-STRING_database	1	1	1	Significant protein interaction groups, gathered from curated databases	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
-STRING_experimental	1	1	1	Significant protein interaction datasets, gathered from other protein-protein interaction databases	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
-STRING_fusion	1	1	1	Individual gene fusion events per species	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
-STRING_neighborhood	1	1	1	Runs of genes that occur repeatedly in close neighborhood in (prokaryotic) genomes	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
-STRING_textmining	1	1	1	Significant protein interaction groups, extracted from the abstracts of scientific literature	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
-TargetScan_microRNA	2	1	0	Genes predicted to be targets for the given microRNA	binary value	1	1
+achilles_genetic_fitness	Property	Gene	0	Genes that effect cell survival in a given cell line	binary value	1	1
+allen_brain_atlas_signature	Property	Gene	0	Genes which were shown to be differentially regulated in a region of the brain	binary value	1	1
+blastp_homology	Gene	Gene	1	protein sequence similarity as measured by basic local alignment search tool 	negative log 10 of E-value, expected number of local alignments with a given score that would be found in random sequences of the same length as the query and database	100	2
+enrichr_cell_signature	Property	Gene	0	Genes associated with a given cancer cell line	binary value	1	1
+enrichr_ChIP_gene_set	Property	Gene	0	Genes assocuated with a given ChIP or histone modification experiment  	binary value	1	1
+enrichr_pathway	Property	Gene	0	Membership of gene in a pathway	binary value	1	1
+enrichr_perturbation_set	Property	Gene	0	Genes which were shown to be differentially regulated by a given perturbagen 	binary value	1	1
+enrichr_phenotype_signature	Property	Gene	0	Genes associated with a given genotype or phenotype	binary value	1	1
+enrichr_tissue_signature	Property	Gene	0	Genes associate with a given tissue type	binary value	1	1
+ESCAPE_gene_set	Property	Gene	0	Embryonic Stem Cell Atlas from Pluripotency Evidence (ESCAPE) gene sets integrating data from many recent diverse high-throughput studies including: gene expression microarrays, RNA-seq, ChIP-chip/seq, genome-wide inhibitory RNA (RNAi) screens, immunoprecipitation followed by mass spectrometry (IP-MS) proteomics and phosphoproteomics	binary value	1	1
+genesigdb_gene_signature	Property	Gene	0	Traceable, standardized, annotated gene signatures which have been manually curated from publications that are indexed in PubMed	binary value	1	1
+GEO_expression_set	Property	Gene	0	Gene expression values from GEO	binary value	1	1
+go_curated_evidence	Property	Gene	0	Curated evidence includes experimentally inferred (expression pattern, mutant phenotype, direct assay, physical or genetic interaction) as well as computational analysis inferred (sequence based, analysis of hierarchy).  This is separate from uncurated "IEA" evidence codes which are automatically assigned from Electronic Annotations.	Binary value indicating that gene had curated annotation for GO term	1	1
+go_hierarchy	Property	Property	0	relationship between go terms	Binary value indicating relationship exists	1	1
+go_inferred_evidence	Property	Gene	0	uncurated "IEA" evidence codes which are automatically assigned from Electronic Annotations.  This is distinct from more reliable Curated evidence includes experimentally inferred (expression pattern, mutant phenotype, direct assay, physical or genetic interaction) as well as computational analysis inferred (sequence based, analysis of hierarchy).	Binary value indicating that gene had automatically inferred from electronic annotation evidence for GO term	1	1
+HMDB_metabolite_signatures	Property	Gene	0	Genes associated with a given metabolite	binary value	1	1
+hn_CE_CC	Gene	Gene	1	Co-citation of worm genes	log likelihood value	10	0
+hn_CE_CX	Gene	Gene	1	Co-expression among worm genes	log likelihood value	10	0
+hn_CE_GT	Gene	Gene	1	Worm genetic interactions	log likelihood value	10	0
+hn_CE_LC	Gene	Gene	1	Literature curated worm protein physical interactions	log likelihood value	10	0
+hn_CE_YH	Gene	Gene	1	High-throughput yeast 2-hybrid assays among worm genes	log likelihood value	10	0
+hn_DM_PI	Gene	Gene	1	Fly protein physical interactions	log likelihood value	10	0
+hn_HS_CC	Gene	Gene	1	Co-citation of human genes	log likelihood value	10	0
+hn_HS_CX	Gene	Gene	1	Co-expression among human genes	log likelihood value	10	0
+hn_HS_DC	Gene	Gene	1	Co-occurrence of domains among human proteins	log likelihood value	10	0
+hn_HS_GN	Gene	Gene	1	Gene neighbourhoods of bacterial and archaeal orthologs of human genes	log likelihood value	10	0
+hn_HS_LC	Gene	Gene	1	Literature curated human protein physical interactions	log likelihood value	10	0
+hn_HS_MS	Gene	Gene	1	human protein complexes from affinity purification/mass spectrometry	log likelihood value	10	0
+hn_HS_PG	Gene	Gene	1	Co-inheritance of bacterial and archaeal orthologs of human genes	log likelihood value	10	0
+hn_HS_YH	Gene	Gene	1	High-throughput yeast 2-hybrid assays among human genes	log likelihood value	10	0
+hn_IntNet	Gene	Gene	1	Integrated network (HumanNet)	log likelihood value	10	0
+hn_SC_CC	Gene	Gene	1	Co-citation of yeast genes	log likelihood value	10	0
+hn_SC_CX	Gene	Gene	1	Co-expression among yeast genes	log likelihood value	10	0
+hn_SC_GT	Gene	Gene	1	Yeast genetic interactions	log likelihood value	10	0
+hn_SC_LC	Gene	Gene	1	Literature curated yeast protein physical interactions	log likelihood value	10	0
+hn_SC_MS	Gene	Gene	1	Yeast protein complexes from affinity purification/mass spectrometry	log likelihood value	10	0
+hn_SC_TS	Gene	Gene	1	Yeast protein interactions inferred from tertiary structures of complexes	log likelihood value	10	0
+hn_SC_YH	Gene	Gene	1	High-throughput yeast 2-hybrid assays among yeast genes	log likelihood value	10	0
+KEA_kinase_signatures	Property	Gene	0	Genes associated with a given kinase	binary value	1	1
+kegg_pathway	Property	Gene	0	Each pathway map contains a network of molecular interactions and reactions and is designed to link genes in the genome to gene products (mostly proteins) in the pathway	Binary value indicating that the gene has a known role in kegg pathway	1	1
+LINCS_cell_type	Property	Property	0	Cell type from LINCS experiment	binary value	1	1
+LINCS_down_set	Property	Gene	0	Genes which were shown to be differentially down regulated after treatment with a given perturbagen	binary value	1	1
+LINCS_down_signature	Property	Gene	0	Genes which were shown to be differentially down regulated after treatment with a given perturbagen	Robust z-scores for each profile relative to population control	100	2.5
+LINCS_perturbagen	Property	Property	0	Perturbagen from LINCS experiment	binary value	1	1
+LINCS_perturbagen_dose	Property	Property	0	Perturbagen dose from LINCS experiment	binary value	1	1
+LINCS_perturbagen_time	Property	Property	0	Perturbagen time from LINCS experiment	binary value	1	1
+LINCS_perturbagen_type	Property	Property	0	Perturbagen type from LINCS experiment	binary value	1	1
+LINCS_up_set	Property	Gene	0	Genes which were shown to be differentially up regulated after treatment with a given perturbagen	binary value	1	1
+LINCS_up_signature	Property	Gene	0	Genes which were shown to be differentially up regulated after treatment with a given perturbagen	Robust z-scores for each profile relative to population control	100	2.5
+msigdb_c2_cgp	Property	Gene	0	Gene sets represent expression signatures of genetic and chemical perturbations. A number of these gene sets come in pairs: an xxx_UP (xxx_DN) gene set representing genes induced (repressed) by the perturbation	1 if there is an edge from the gene set's node to the gene	1	1
+msigdb_c3_mir	Property	Gene	0	Gene sets that contain genes that share a 3'-UTR microRNA binding motif.	1 if there is an edge from the gene set's node to the gene	1	1
+msigdb_c4_cgn	Property	Gene	0	Gene sets defined by expression neighborhoods centered on 380 cancer-associated genes (Brentani, Caballero et al. 2003). This collection is identical to that previously reported in (Subramanian, Tamayo et al. 2005).	1 if there is an edge from the gene set's node to the gene	1	1
+msigdb_c4_cm	Property	Gene	0	Gene sets defined by Segal et al. 2004. Briefly, the authors compiled gene sets ('modules') from a variety of resources such as KEGG, GO, and others. By mining a large compendium of cancer-related microarray data, they identified 456 such modules as significantly changed in a variety of cancer conditions.	1 if there is an edge from the gene set's node to the gene	1	1
+msigdb_c6_all	Property	Gene	0	Gene sets represent signatures of cellular pathways which are often dis-regulated in cancer. The majority of signatures were generated directly from microarray data from NCBI GEO or from internal unpublished profiling experiments which involved perturbation of known cancer genes.	1 if there is an edge from the gene set's node to the gene	1	1
+msigdb_c7_all	Property	Gene	0	Gene sets that represent cell states and perturbations within the immune system. The signatures were generated by manual curation of published studies in human and mouse immunology. For each study, pairwise comparisons of relevant classes were made and genes ranked by mutual information. Gene sets correspond to top or bottom genes (FDR < 0.25 or maximum of 200 genes) for each comparison. This resource is generated as part of the Human Immunology Project Consortium	1 if there is an edge from the gene set's node to the gene	1	1
+panther_classification	Property	Gene	0	Proteins classfied using PANTHER (Protein ANalysis THrough Evolutionary Relationships) Classification System	binary value	1	1
+pathcom_catalysis_precedes	Gene	Gene	0	First protein controls a reaction whose output molecule is input to another reaction controled by the second protein	binary value	1	1
+pathcom_chemical_affects	Molecule	Gene	0	A small molecule has an effect on the protein state	binary value	1	1
+pathcom_consumption_controlled_by	Molecule	Gene	0	The small molecule is consumed by a reaction that is controled by a protein	binary value	1	1
+pathcom_controls_expression_of	Gene	Gene	0	First protein controls a conversion or a template reaction that changes expression of the second protein	binary value	1	1
+pathcom_controls_phosphorylation_of	Gene	Gene	0	First protein controls a reaction that changes the phosphorylation status of the second protein	binary value	1	1
+pathcom_controls_production_of	Gene	Molecule	0	The protein controls a reaction of which the small molecule is an output	binary value	1	1
+pathcom_controls_state_change_of	Gene	Gene	0	First protein controls a reaction that changes the state of the second protein	binary value	1	1
+pathcom_controls_transport_of	Gene	Gene	0	First protein controls a reaction that changes the cellular location of the second protein	binary value	1	1
+pathcom_controls_transport_of_chemical	Gene	Molecule	0	The protein controls a reaction that changes cellular location of the small molecule	binary value	1	1
+pathcom_in_complex_with	Gene	Gene	1	Proteins are participants of the same molecular interaction	binary value	1	1
+pathcom_neighbor_of	Gene	Gene	1	Proteins are participants or controlers of the same interaction	binary value	1	1
+pathcom_pathway	Property	Gene	0	Membership of gene in a pathway	binary value	1	1
+pathcom_reacts_with	Molecule	Molecule	1	Small molecules are input to a biochemical reaction	binary value	1	1
+pathcom_used_to_produce	Molecule	Molecule	0	A reaction consumes a small molecule to produce another small molecule	binary value	1	1
+pfam_domains	Property	Gene	0	Pfam protein domains found in protein sequences as scored by HMMER	negative log 10 of E-value, expected number of local alignments with a given score that would be found in random sequences of the same length as the query and database	100	2
+PPI_association	Gene	Gene	1	Interaction between molecules that may participate in formation of one, but possibly more, physical complexes. Often describes a set of molecules that are co-purified in a single pull-down or coimmunoprecipitation but might participate in formation of distinct physical complexes sharing a common bait.	binary value	1	1
+PPI_colocalization	Gene	Gene	1	Coincident occurrence of molecules in a given subcellular fraction observed with a low resolution methodology from which a physical interaction among those molecules cannot be inferred.	binary value	1	1
+PPI_complex	Property	Gene	0	Genes associated as being a part of the same given complex	binary value	1	1
+PPI_direct_interaction	Gene	Gene	1	Interaction between molecules that are in direct contact with each other.	binary value	1	1
+PPI_genetic_interaction	Gene	Gene	1	An effect in which two genetic perturbations, when combined, result in a phenotype that does not appear to be merely explained by the superimposition or addition of effects of the original perturbations. ab (not=) E.	binary value	1	1
+PPI_hub	Gene	Gene	0	Genes which are associated with the given PPI hub protein	binary value	1	1
+PPI_negative	Gene	Gene	1	Particular interaction has been explicitly shown not to occur under the described conditions.	binary value	1	1
+PPI_physical_association	Gene	Gene	1	Interaction between molecules within the same physical complex. Often identified under conditions which suggest that the molecules are in close proximity but not necessarily in direct contact with each other.	binary value	1	1
+reactome_curated	Property	Gene	0	Curated evidence comes from experimental or computational analysis that can be traced back to a specific literature citation.  This is distinct from 'reactome_inferred' which are automatically assigned from electronic annotations.	Binary value indicating that the gene was annotated for reactome pathway	1	1
+reactome_hierarchy	Property	Property	0	parent-->child relationship between pathways	Binary value indicating relationship exists	1	1
+reactome_inferred	Property	Gene	0	uncurated 'IEA' evidence codes which are automatically assigned from electronic annotations.  This is distinct from more reliable 'reactome_curated' evidences which can be traced back to specific literature citations.	Binary value indicating that the gene was annotated for reactome pathway	1	1
+reactome_PPI_direct_complex	Gene	Gene	1	interactors are directly in the same complex within a pathway, i.e. w/o further nested complexes. Stronger evidence than 'indirect_complex', 'reaction', 'neighbouring_reaction'.	Binary value indicating that the pair of genes were found with this type of interaction within a pathway	1	1
+reactome_PPI_indirect_complex	Gene	Gene	1	interactors in different subcomplexes of a complex within a pathway. Relationship stronger than 'reaction', 'neighbouring_reaction', but not as strong as 'direct_complex'.	Binary value indicating that the pair of genes were found with this type of interaction within a pathway	1	1
+reactome_PPI_neighbouring_reaction	Gene	Gene	0	interactor participate in 2 'consecutive' reactions, i.e. when one reaction produces an input or a catalyst for another reaction. Relationship not as strong as 'direct_complex', 'indirect_complex', or 'reaction'.	Binary value indicating that the pair of genes were found with this type of interaction within a pathway	1	1
+reactome_PPI_reaction	Gene	Gene	1	interactors participate in the same reaction, but the interactors do not form a complex. Relationship stronger than 'neighbouring_reaction', but not as strong as 'direct_complex' or 'indirect_complex'.	Binary value indicating that the pair of genes were found with this type of interaction within a pathway	1	1
+SILAC_phosphoproteomics	Property	Gene	0	Genes associated with phosphoproteomic changes in a given experiment	binary value	1	1
+STRING_coexpression	Gene	Gene	1	Two genes that are co-expressed in the same or in other species (transferred by homology).	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
+STRING_cooccurrance	Gene	Gene	1	Presence or absence of linked proteins across species	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
+STRING_database	Gene	Gene	1	Significant protein interaction groups, gathered from curated databases	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
+STRING_experimental	Gene	Gene	1	Significant protein interaction datasets, gathered from other protein-protein interaction databases	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
+STRING_fusion	Gene	Gene	1	Individual gene fusion events per species	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
+STRING_neighborhood	Gene	Gene	1	Runs of genes that occur repeatedly in close neighborhood in (prokaryotic) genomes	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
+STRING_textmining	Gene	Gene	1	Significant protein interaction groups, extracted from the abstracts of scientific literature	STRING score computed by combining the probabilities from the different evidence channels, correcting for the probability of randomly observing an interaction	999	1
+TargetScan_microRNA	Property	Gene	0	Genes predicted to be targets for the given microRNA	binary value	1	1
