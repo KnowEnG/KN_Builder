@@ -209,4 +209,4 @@ def pretty_name(orig_name, endlen=63):
         str: string after formatting changes
     """
     orig_name = re.sub('[^a-zA-Z0-9]', '_', orig_name)
-    return orig_name[0:endlen]
+    return orig_name[0:endlen].upper()
