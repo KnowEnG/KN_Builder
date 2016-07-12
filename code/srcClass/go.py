@@ -84,8 +84,7 @@ class Go(SrcClass):
             if ' ' not in label or 'Reference' in label:
                 continue
             if label == 'Canis lupus familiaris':
-                label = label.replace('lupus ', '')
-            label = ' '.join(label.split(' ')[:2])
+                label = 'Canis familiaris'
             go_dict[label] = resource['id']
         for species in sp_dict:
             species = species.capitalize().replace('_', ' ')
@@ -187,12 +186,14 @@ class Go(SrcClass):
             str: The url needed to fetch the file corresponding to the alias.
         """
         if alias == 'obo_map':
-            url = 'http://purl.obolibrary.org/obo/go.obo'
-        elif alias == 'goa_human':
-                    url = self.url_base + alias + '.gaf.gz'
-        else:
-            url = self.url_base + 'gene_association.' + alias + '.gz'
-        return url
+            return 'http://purl.obolibrary.org/obo/go.obo'
+        go_url = self.url_base + 'go_annotation_metadata.all.json'
+        go_resp = urllib.request.urlopen(go_url).readall().decode()
+        go_resources = json.loads(go_resp)
+        go_dict = dict()
+        for resource in go_resources['resources']:
+            if resource['id'] == alias:
+                return self.url_base + resource['gaf_filename']
 
     def is_map(self, alias):
         """Return a boolean representing if the provided alias is used for
