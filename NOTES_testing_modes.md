@@ -227,8 +227,8 @@ python3 code/workflow_utilities.py CHECK -su \
 ```
 
 ## run parse pipeline
-## local time: 58 min (no enrichr - website down)
-## docker time: 60 min (no enrichr - website down)
+## local time: 8hrs 30min (no enrichr - website down)
+## docker time: 9hrs 45min (no enrichr - website down)
 ## chronos time: 30 min (no enrichr - website down)
 ```
 python3 code/workflow_utilities.py CHECK \
@@ -239,8 +239,8 @@ python3 code/workflow_utilities.py CHECK \
 ```
 
 ## run import pipeline
-## local time: 9 min
-## docker time: 11 min
+## local time: 1hr 5min
+## docker time: 1hr 30min
 ## chronos time: 40 min
 ```
 python3 code/workflow_utilities.py IMPORT \
