@@ -36,7 +36,7 @@ def deploy_container(args=None):
                                 'dockerfiles', 'marathon', 'nginx.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
-    deploy_dict["id"] = "p1nginx-" + args.nginx_port
+    deploy_dict["id"] = os.path.basename(args.nginx_dir)
     if args.nginx_curl:
         deploy_dict["constraints"] = [["hostname", "CLUSTER", args.nginx_curl]]
     else:

@@ -6,15 +6,17 @@
 KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
 KNP_WORKING_DIR='/workspace/knowtmp/project1'
 KNP_STORAGE_DIR='/mnt/knowstorage/project1'
-KNP_DATA_PATH='data_6sp'
-KNP_LOGS_PATH='logs_6sp'
+KNP_DB_DIR=$KNP_STORAGE_DIR
+KNP_BUILD_NAME='representative'
+KNP_DATA_PATH='data_'$KNP_BUILD_NAME
+KNP_LOGS_PATH='logs_'$KNP_BUILD_NAME
 KNP_ENS_SPECIES='REPRESENTATIVE'
 
 KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
 
 KNP_MYSQL_HOST='knowcluster05.dyndns.org'
 KNP_MYSQL_PORT='3307'
-KNP_MYSQL_DIR='/mnt/knowtmp/project1/p1_mysql-3307'
+KNP_MYSQL_DIR=$KNP_DB_DIR'/p1_mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
 KNP_MYSQL_CONF='build_conf/'
 KNP_MYSQL_MEM='10000'
 KNP_MYSQL_CPU='2.0'
@@ -23,20 +25,20 @@ KNP_MYSQL_CONSTRAINT_URL='knowcluster05.dyndns.org'
 
 KNP_REDIS_HOST='knowcluster07.dyndns.org'
 KNP_REDIS_PORT='6380'
-KNP_REDIS_DIR='/mnt/knowtmp/project1/p1_redis-6380'
+KNP_REDIS_DIR=$KNP_DB_DIR'/p1_redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
 KNP_REDIS_MEM='8000'
 KNP_REDIS_CPU='2.0'
 KNP_REDIS_PASS='KnowEnG'
 KNP_REDIS_CONSTRAINT_URL='knowcluster07.dyndns.org'
 
 KNP_NGINX_PORT='8081'
-KNP_NGINX_DIR='/mnt/knowtmp/project1/p1_nginx-6sp'
+KNP_NGINX_DIR=$KNP_DB_DIR'/p1_nginx-'$KNP_NGINX_PORT'-'$KNP_BUILD_NAME
 KNP_NGINX_CONF='autoindex/'
 KNP_NGINX_CONSTRAINT_URL='knowcluster03.dyndns.org'
 
 KNP_NEO4J_PORT='7475'
-KNP_NEO4J_DIR='/mnt/knowstorage/project1/p1_neo4j-7475'
-
+KNP_NEO4J_DIR=$KNP_DB_DIR'/p1_neo4j-'$KNP_NEO4J_PORT'-'$KNP_BUILD_NAME
+KNP_NEO4J_NAME=$(basename $KNP_NEO4J_DIR)
 ```
 
 ## add symlinks
@@ -177,30 +179,6 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
     GRANT SELECT ON KnowNet.* TO 'KNviewer';"
 ```
 
-# cleanup
-## move databases to knowstorage
-stop the marathon redis and mysql jobs
-```
-KNP_STORAGE_MYSQL=$KNP_STORAGE_DIR'/p1_mysql-3307'
-KNP_STORAGE_REDIS=$KNP_STORAGE_DIR'/p1_redis-6380'
-mv $KNP_MYSQL_DIR $KNP_STORAGE_MYSQL
-mv $KNP_REDIS_DIR $KNP_STORAGE_REDIS
-```
-start new marathon redis and mysql jobs
-```
-python3 code/mysql_utilities.py \
-    -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
-    -mym $KNP_MYSQL_MEM -myc $KNP_MYSQL_CPU \
-    -myd $KNP_STORAGE_MYSQL -mycf $KNP_MYSQL_CONF \
-    -myps $KNP_MYSQL_PASS -mycu $KNP_MYSQL_CONSTRAINT_URL \
-    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
-python3 code/redis_utilities.py \
-    -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
-    -rm $KNP_REDIS_MEM -rc $KNP_REDIS_CPU \
-    -rd $KNP_STORAGE_REDIS -rps $KNP_REDIS_PASS -rcu $KNP_REDIS_CONSTRAINT_URL\
-    -m $KNP_MARATHON_URL -cd $KNP_CLOUD_DIR -wd $KNP_WORKING_DIR
-```
-
 ## neo4j setup
 ### start neo4j server if it is not running
 ```
@@ -210,7 +188,7 @@ mkdir $KNP_NEO4J_DIR/data
 mkdir $KNP_NEO4J_DIR/shared
 docker run -dt --restart=always --name hdfs sequenceiq/hadoop-docker:latest /etc/bootstrap.sh -bash
 docker run -d --restart=always --name mazerunner --link hdfs:hdfs kbastani/neo4j-graph-analytics:latest
-docker run -dt --restart=always --name p1_neo4j-$KNP_NEO4J_PORT \
+docker run -dt --restart=always --name $KNP_NEO4J_NAME \
     -p $KNP_NEO4J_PORT:7474 --link mazerunner:mazerunner --link hdfs:hdfs \
     -v $KNP_NEO4J_DIR/data:/opt/data -v $KNP_NEO4J_DIR/shared:/shared \
     kbastani/docker-neo4j
@@ -270,11 +248,11 @@ sort -u $KNP_NEO4J_DIR/shared/neo4j.edge_meta.dmp > \
 
 #### remove old database
 ```
-docker exec p1_neo4j-$KNP_NEO4J_PORT rm -rf /opt/data/graph.db
+docker exec $KNP_NEO4J_NAME rm -rf /opt/data/graph.db
 ```
 #### insert uniq nodes and production edges (time: 7m)
 ```
-docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-import \
+docker exec $KNP_NEO4J_NAME /var/lib/neo4j/bin/neo4j-import \
     --into /opt/data/graph.db --nodes /shared/neo4j.species.txt \
     --nodes /shared/neo4j.nodes.txt \
     --relationships /shared/neo4j.species_edges.txt \
@@ -283,11 +261,11 @@ docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-import \
 #### add meta_data to nodes and edges (skipped)
 ```
 cp $KNP_WORKING_DIR/code/neo4j/import.cypher $KNP_NEO4J_DIR/shared/
-docker exec p1_neo4j-$KNP_NEO4J_PORT /var/lib/neo4j/bin/neo4j-shell \
+docker exec $KNP_NEO4J_NAME /var/lib/neo4j/bin/neo4j-shell \
     -path /opt/data/graph.db -file /shared/import.cypher
 ```
 #### start new database 
 ```
-docker restart p1_neo4j-$KNP_NEO4J_PORT
+docker restart $KNP_NEO4J_NAME
 ```
 

@@ -6,15 +6,17 @@
 KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
 KNP_WORKING_DIR='/workspace/knowtmp/project1'
 KNP_STORAGE_DIR='/mnt/knowstorage/project1'
-KNP_DATA_PATH='data_rep_vert_metazoa'
-KNP_LOGS_PATH='logs_rep_vert_metazoa'
+KNP_DB_DIR=$KNP_STORAGE_DIR
+KNP_BUILD_NAME='rep_vert_metazoa'
+KNP_DATA_PATH='data_'$KNP_BUILD_NAME
+KNP_LOGS_PATH='logs_'$KNP_BUILD_NAME
 KNP_ENS_SPECIES='REPRESENTATIVE,,METAZOA,,VERTEBRATES'
 
 KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
 
 KNP_MYSQL_HOST='knowcluster05.dyndns.org'
 KNP_MYSQL_PORT='3308'
-KNP_MYSQL_DIR='/mnt/knowstorage/project1/p1_mysql-3308'
+KNP_MYSQL_DIR=$KNP_DB_DIR'/p1_mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
 KNP_MYSQL_CONF='build_conf/'
 KNP_MYSQL_MEM='35000'
 KNP_MYSQL_CPU='4.0'
@@ -23,17 +25,19 @@ KNP_MYSQL_CONSTRAINT_URL='knowcluster05.dyndns.org'
 
 KNP_REDIS_HOST='knowcluster07.dyndns.org'
 KNP_REDIS_PORT='6381'
-KNP_REDIS_DIR='/mnt/knowstorage/project1/p1_redis-6381'
+KNP_REDIS_DIR=$KNP_DB_DIR'/p1_redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
 KNP_REDIS_MEM='25000'
 KNP_REDIS_CPU='4.0'
 KNP_REDIS_PASS='KnowEnG'
 KNP_REDIS_CONSTRAINT_URL='knowcluster07.dyndns.org'
 
 KNP_NGINX_PORT='8081'
-KNP_NGINX_DIR='/mnt/knowtmp/project1/p1_nginx-6sp'
+KNP_NGINX_DIR=$KNP_DB_DIR'/p1_nginx-'$KNP_NGINX_PORT'-'$KNP_BUILD_NAME
 KNP_NGINX_CONF='autoindex/'
 KNP_NGINX_CONSTRAINT_URL='knowcluster03.dyndns.org'
 
+KNP_NEO4J_PORT='7475'
+KNP_NEO4J_DIR=$KNP_DB_DIR'/p1_neo4j-'$KNP_NEO4J_PORT'-'$KNP_BUILD_NAME
 ```
 
 ## add symlinks
@@ -58,15 +62,6 @@ make html
 ```
 ```
 cd $KNP_WORKING_DIR/KnowNet_Pipeline
-```
-
-
-## clear any existing files
-```
-rm -r $KNP_LOGS_PATH/*
-rm -r $KNP_DATA_PATH/*
-rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
-rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
 ```
 
 ## MySQL setup
@@ -129,6 +124,15 @@ for c in $KNP_CHRONOS_URL ; do
 done;
 ```
 
+
+## clear any existing files
+```
+rm -r $KNP_LOGS_PATH/*
+rm -r $KNP_DATA_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
+```
+
 ## run setup pipeline (time: 4hr 15min)
 ```set fetch usage to 25GB in components.json```
 ```
@@ -175,4 +179,94 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
     -P $KNP_MYSQL_PORT --execute \
     "CREATE USER 'KNviewer' IDENTIFIED BY 'dbdev249'; \
     GRANT SELECT ON KnowNet.* TO 'KNviewer';"
+```
+
+## neo4j setup
+### start neo4j server if it is not running
+```
+
+mkdir $KNP_NEO4J_DIR
+mkdir $KNP_NEO4J_DIR/data
+mkdir $KNP_NEO4J_DIR/shared
+docker run -dt --restart=always --name hdfs sequenceiq/hadoop-docker:latest /etc/bootstrap.sh -bash
+docker run -d --restart=always --name mazerunner --link hdfs:hdfs kbastani/neo4j-graph-analytics:latest
+docker run -dt --restart=always --name $KNP_NEO4J_NAME \
+    -p $KNP_NEO4J_PORT:7474 --link mazerunner:mazerunner --link hdfs:hdfs \
+    -v $KNP_NEO4J_DIR/data:/opt/data -v $KNP_NEO4J_DIR/shared:/shared \
+    kbastani/docker-neo4j
+```
+
+### dump data from MySQL for species
+```
+mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
+    --execute "SELECT DISTINCT taxon AS taxonQID, sp_abbrev AS abbrev, \
+    sp_sciname AS sci_name, \"Species\" AS QLABEL FROM KnowNet.species s" | \
+    sed 's/QID/:ID(Species)/g' | sed 's/QLABEL/:LABEL/g' > \
+    $KNP_NEO4J_DIR/shared/neo4j.species.txt;
+```
+### dump data from MySQL for nodes
+```
+mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
+    --execute "SELECT DISTINCT UCASE(node_id) AS node_idQID, n_alias AS alias, \
+    n_type AS QLABEL FROM KnowNet.node n " | sed 's/QID/:ID(Node)/g' | \
+    sed 's/QLABEL/:LABEL/g' > $KNP_NEO4J_DIR/shared/neo4j.nodes.txt;
+```
+### dump data from MySQL for node-species relationships
+```
+mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
+    --execute "SELECT DISTINCT UCASE(n.node_id) AS QSTART_ID, taxon AS QEND_ID, \
+    \"InGenome\" AS QTYPE FROM KnowNet.node_species ns, KnowNet.node n \
+    WHERE n.node_id=ns.node_id AND n.n_type = 'Gene' " | \
+    sed 's/QSTART_ID/:START_ID(Node)/g' | sed 's/QEND_ID/:END_ID(Species)/g' | \
+    sed 's/QTYPE/:TYPE/g' > $KNP_NEO4J_DIR/shared/neo4j.species_edges.txt;
+```
+### format data from unique.edge.txt for edges
+```
+awk -v OFS="\t" 'BEGIN { print ":START_ID(Node)", \
+    ":END_ID(Node)", "weight", ":TYPE" }; \
+    { print toupper($1), toupper($2), $4, $3 }; END {}'\
+    $KNP_STORAGE_DIR/$KNP_DATA_PATH/unique.edge.txt > \
+    $KNP_NEO4J_DIR/shared/neo4j.edges.txt
+```
+### format data from unique.node_meta for node_meta (skipped)
+```
+awk -v OFS="\t" 'BEGIN { print "node_id", "n_type_desc", "info_type", \
+    "info_desc" }; { print toupper($1), "Property", $2, $3 }; END {}'\
+    $KNP_STORAGE_DIR/$KNP_DATA_PATH/unique.node_meta.txt > \
+    $KNP_NEO4J_DIR/shared/neo4j.node_meta.txt
+```
+### dump data from MySQL for edge_meta (skipped)
+```
+mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT --quick \
+    --execute "SELECT DISTINCT UCASE(s.n1_id), UCASE(s.n2_id), s.et_name, em.info_type, \
+    em.info_desc FROM KnowNet.status s, KnowNet.edge_meta em, \
+    KnowNet.edge_type et WHERE s.line_hash = em.line_hash \
+    AND s.status_desc = 'mapped'; " > $KNP_NEO4J_DIR/shared/neo4j.edge_meta.dmp
+sort -u $KNP_NEO4J_DIR/shared/neo4j.edge_meta.dmp > \
+    $KNP_NEO4J_DIR/shared/neo4j.edge_meta.txt
+```
+
+### import data
+
+#### remove old database
+```
+docker exec $KNP_NEO4J_NAME rm -rf /opt/data/graph.db
+```
+#### insert uniq nodes and production edges (time: 7m)
+```
+docker exec $KNP_NEO4J_NAME /var/lib/neo4j/bin/neo4j-import \
+    --into /opt/data/graph.db --nodes /shared/neo4j.species.txt \
+    --nodes /shared/neo4j.nodes.txt \
+    --relationships /shared/neo4j.species_edges.txt \
+    --relationships /shared/neo4j.edges.txt --delimiter "TAB"
+```
+#### add meta_data to nodes and edges (skipped)
+```
+cp $KNP_WORKING_DIR/code/neo4j/import.cypher $KNP_NEO4J_DIR/shared/
+docker exec $KNP_NEO4J_NAME /var/lib/neo4j/bin/neo4j-shell \
+    -path /opt/data/graph.db -file /shared/import.cypher
+```
+#### start new database 
+```
+docker restart $KNP_NEO4J_NAME
 ```

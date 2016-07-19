@@ -37,7 +37,7 @@ def deploy_container(args=None):
                                 'dockerfiles', 'marathon', 'redis.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
-    deploy_dict["id"] = "p1redis-" + args.redis_port
+    deploy_dict["id"] = os.path.basename(args.redis_dir)
     deploy_dict["cmd"] ="redis-server --appendonly yes --requirepass " + \
                         args.redis_pass
     deploy_dict["cpus"] = float(args.redis_cpu)

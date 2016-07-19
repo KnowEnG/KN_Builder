@@ -42,7 +42,7 @@ def deploy_container(args=None):
     template_job = os.path.join(args.working_dir, args.code_path, 'dockerfiles', 'marathon', 'mysql.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
-    deploy_dict["id"] = "p1mysql-" + args.mysql_port
+    deploy_dict["id"] = os.path.basename(args.mysql_dir)
     deploy_dict["cpus"] = float(args.mysql_cpu)
     deploy_dict["mem"] = int(args.mysql_mem)
     if args.mysql_curl:
