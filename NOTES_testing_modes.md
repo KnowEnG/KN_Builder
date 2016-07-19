@@ -215,9 +215,9 @@ rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/!(*mysql)
 ```
 
 ## run setup pipeline 
-### local time: 2hrs 12min
-### docker time: 2hrs 17min
-### chronos time: 2hrs
+## local time: 2hrs 12min
+## docker time: 2hrs 17min
+## chronos time: 2hrs
 ```
 python3 code/workflow_utilities.py CHECK -su \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
@@ -227,9 +227,9 @@ python3 code/workflow_utilities.py CHECK -su \
 ```
 
 ## run parse pipeline
-### local time: 8hrs 30min (no enrichr - website down)
-### docker time: 9hrs 45min (no enrichr - website down)
-### chronos time: 30 min (no enrichr - website down)
+## local time: 8hrs 30min (no enrichr - website down)
+## docker time: 9hrs 45min (no enrichr - website down)
+## chronos time: 30 min (no enrichr - website down)
 ```
 python3 code/workflow_utilities.py CHECK \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
@@ -239,9 +239,9 @@ python3 code/workflow_utilities.py CHECK \
 ```
 
 ## run import pipeline
-### local time: 1hr 5min
-### docker time: 1hr 30min
-### chronos time: 40 min
+## local time: 1hr 5min
+## docker time: 1hr 30min
+## chronos time: 40 min
 ```
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \

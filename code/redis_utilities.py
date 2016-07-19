@@ -150,16 +150,17 @@ def conv_gene(rdb, foreign_key, hint, taxid):
         if hint in taxid_hint[1] and len(hint):
             hint_match.append(taxid_hint_key)
     if both_match:
-        both_ens_ids = list(set(rdb.mget(both_match)))
-        return both_ens_ids[0].decode()
+        both_ens_ids = set(rdb.mget(both_match))
+        if len(both_ens_ids) == 1:
+            return both_ens_ids.pop().decode()
     if taxid_match:
-        taxid_ens_ids = list(set(rdb.mget(taxid_match)))
+        taxid_ens_ids = set(rdb.mget(taxid_match))
         if len(taxid_ens_ids) == 1:
-            return taxid_ens_ids[0].decode()
+            return taxid_ens_ids.pop().decode()
     if hint_match:
-        hint_ens_ids = list(set(rdb.mget(hint_match)))
+        hint_ens_ids = set(rdb.mget(hint_match))
         if len(hint_ens_ids) == 1:
-            return hint_ens_ids[0].decode()
+            return hint_ens_ids.pop().decode()
     return 'unmapped-many'
 
 def import_mapping(map_dict, args=None):
