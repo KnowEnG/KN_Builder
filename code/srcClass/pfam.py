@@ -217,7 +217,7 @@ class Pfam(SrcClass):
         n_type = 'Property'
         n2type = 'gene'
         n1hint = 'Pfam/Family'
-        n2hint = 'UniProt/Ensembl_GeneID'
+        n2hint = 'ENSEMBL_STABLE_ID'
         et_hint = 'pfam_domains'
         n1spec = '0'
         map_dict = dict()
