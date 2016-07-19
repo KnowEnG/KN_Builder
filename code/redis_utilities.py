@@ -127,6 +127,9 @@ def conv_gene(rdb, foreign_key, hint, taxid):
         str: result of seaching for gene in redis DB
     """
     hint = hint.upper()
+    #use ensembl internal uniprot mappings
+    if hint == 'UNIPROT' or hint == 'UNIPROTKB':
+        hint = 'UNIPROT_GN'
     foreign_key = foreign_key.upper()
     unique = rdb.get('unique::' + foreign_key)
     if unique is None:
