@@ -369,7 +369,7 @@ class Go(SrcClass):
                     et_hint = 'go_inferred_evidence'
 
                 n2_id = raw[1]
-                n2hint = 'UniProt/Ensembl_GeneID'
+                n2hint = raw[0]
                 for idx in range(1, 3):  # loop twice
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1_id, n1hint, n1type, n1spec,\
@@ -378,7 +378,6 @@ class Go(SrcClass):
                     edge_writer.writerow([chksm, n1_id, n1hint, n1type, n1spec, \
                         n2_id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
                     n2_id = raw[2]
-                    n2hint = 'Any'
 
                 e_meta_writer.writerow([chksm, info_type1, reference])
                 e_meta_writer.writerow([chksm, info_type2, anno_evidence])
