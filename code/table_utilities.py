@@ -54,14 +54,15 @@ def main(chunkfile, version_json, args=None):
     This takes the path to a chunked (see fetch_utilities.chunk)  raw_line file
     and it's correpsonding version_json (source.alias.json) and runs the
     source specific table command (see SrcClass.table) if the alias is a data
-    file. If it is a mapping file, it does nothing.
+    file. If it is a mapping file, it does nothing:
+
         raw_line (line_hash, line_num, file_id, raw_line)
-        table_file (line_hash, n1name, n1hint, n1type, n1spec,
-                    n2name, n2hint, n2type, n2spec, et_hint, score,
+        table_file (line_hash, n1name, n1hint, n1type, n1spec,\
+                    n2name, n2hint, n2type, n2spec, et_hint, score,\
                     table_hash)
         edge_meta (line_hash, info_type, info_desc)
-        node_meta (node_id, 
-                   info_type (evidence, relationship, experiment, or link), 
+        node_meta (node_id, \
+                   info_type (evidence, relationship, experiment, or link), \
                    info_desc (text))
         node (node_id, n_alias, n_type)
 

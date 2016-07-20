@@ -394,23 +394,22 @@ def get_file_meta(file_id, args=None):
     "source.alias") present locally in the MySQL database from a previous run
     of the pipeline. It formats this output as a dicionary, which will always
     contain the following keys:
-        'file_id' (str):        "source.alias" which is the key
-                                used in SQL raw_file table
-        'file_exists' (bool):   boolean if the file with the above file_id
-                                exists in the SQL raw_file table
+    'file_id' (str):        "source.alias" which is the key \
+                            used in SQL raw_file table
+    'file_exists' (bool):   boolean if the file with the above file_id \
+                            exists in the SQL raw_file table
     and will additionally contain the following keys if file_exists is True:
-        'size' (int):           size of file in bytes
-        'date' (float):         time of last modification time of file in
-                                seconds
-                                since the epoch
-        'version' (str):        the remote version of the source
+    'size' (int):           size of file in bytes
+    'date' (float):         time of last modification time of file in \
+                            seconds since the epoch
+    'version' (str):        the remote version of the source
 
-        Args:
-            file_id (str):  The file_id for the raw_file in the format of
-                            "source.alias"
+    Args:
+        file_id (str):  The file_id for the raw_file in the format of \
+                        "source.alias"
 
-        Returns:
-            dict: The file_meta information for a given source alias.
+    Returns:
+        dict: The file_meta information for a given source alias.
     """
     if args is None:
         args=cf.config_args()
