@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `node_meta` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `node_species` (
-  `node_id` varchar(128) NOT NULL,
+  `node_id` varchar(64) NOT NULL,
   `taxon` int(11) NOT NULL,
   PRIMARY KEY (`node_id`,`taxon`),
   KEY `taxon` (`taxon`)

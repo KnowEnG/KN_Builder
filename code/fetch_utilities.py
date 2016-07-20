@@ -175,7 +175,7 @@ def format_raw_line(filename):
     This takes the path to a file and reads through the file, adding three tab
     separated columns to the beginning, saving to disk, and then returning the
     output file path. Output looks like:
-    raw_lines table (line_chksum, line num, source_alias, raw_line)
+    raw_lines table (line_hash, line_num, file_id, line_str)
 
     Args:
         filename (str): the file to convert to raw_line table format
