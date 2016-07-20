@@ -199,14 +199,15 @@ class Blast(SrcClass):
         """Uses the provided raw_line file to produce a 2table_edge file, an
         edge_meta file, and a node_meta file (only for property nodes).
 
-        This returns noting but produces the 2table formatted files from the
+        This returns noting but produces the table formatted files from the
         provided raw_line file:
-            raw_line table (file, line num, line_chksum, raw_line)
-            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
-                            n2name, n2hint, n2type, n2spec, et_hint, score)
-            edge_meta (line_cksum, info_type, info_desc)
-            node_meta (line_cksum, node_num (1 or 2),
-                       info_type (evidence, relationship, experiment, or link),
+            raw_line (line_hash, line_num, file_id, raw_line)
+            table_file (raw_line_cksum, n1name, n1hint, n1type, n1spec,
+                        n2name, n2hint, n2type, n2spec, et_hint, score,
+                        tableline_cksum)
+            edge_meta (line_hash, info_type, info_desc)
+            node_meta (node_id, 
+                       info_type (evidence, relationship, experiment, or link), 
                        info_desc (text))
 
         Args:
