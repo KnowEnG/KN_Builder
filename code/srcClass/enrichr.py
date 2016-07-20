@@ -239,7 +239,7 @@ class Enrichr(SrcClass):
 
     def table(self, raw_line, version_dict):
         """Uses the provided raw_line file to produce a 2table_edge file, an
-        edge_meta file, and a node_meta file (only for property nodes).
+        edge_meta file, a node and/or node_meta file (only for property nodes).
 
         This returns noting but produces the table formatted files from the
         provided raw_line file:
@@ -251,6 +251,7 @@ class Enrichr(SrcClass):
             node_meta (node_id, 
                     info_type (evidence, relationship, experiment, or link), 
                     info_desc (text))
+            node (node_id, n_alias, n_type)
 
         Args:
             raw_line(str): The path to the raw_line file
@@ -264,7 +265,6 @@ class Enrichr(SrcClass):
         table_file = raw_line.replace('raw_line', 'table')
         n_meta_file = raw_line.replace('raw_line', 'node_meta')
         node_file = raw_line.replace('raw_line', 'node')
-        #e_meta_file = raw_line.replace('raw_line','edge_meta')
 
         #static column values
         alias = version_dict['alias']

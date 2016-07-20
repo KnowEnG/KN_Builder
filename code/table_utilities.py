@@ -63,6 +63,7 @@ def main(chunkfile, version_json, args=None):
         node_meta (node_id, 
                    info_type (evidence, relationship, experiment, or link), 
                    info_desc (text))
+        node (node_id, n_alias, n_type)
 
     Args:
         version_json (str): path to a chunk file in raw_line format

@@ -191,7 +191,7 @@ class Biogrid(SrcClass):
 
     def table(self, raw_line, version_dict):
         """Uses the provided raw_line file to produce a table file, an
-        edge_meta file, and a node_meta file (only for property nodes).
+        edge_meta file, a node and/or node_meta file (only for property nodes).
 
         This returns noting but produces the table formatted files from the
         provided raw_line file:
@@ -203,6 +203,7 @@ class Biogrid(SrcClass):
             node_meta (node_id, 
                     info_type (evidence, relationship, experiment, or link), 
                     info_desc (text))
+            node (node_id, n_alias, n_type)
 
         Args:
             raw_line(str): The path to the raw_lines file
