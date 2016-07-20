@@ -56,9 +56,9 @@ def main(chunkfile, version_json, args=None):
     source specific table command (see SrcClass.table) if the alias is a data
     file. If it is a mapping file, it does nothing.
         raw_line (line_hash, line_num, file_id, raw_line)
-        table_file (raw_line_cksum, n1name, n1hint, n1type, n1spec,
+        table_file (line_hash, n1name, n1hint, n1type, n1spec,
                     n2name, n2hint, n2type, n2spec, et_hint, score,
-                    tableline_cksum)
+                    table_hash)
         edge_meta (line_hash, info_type, info_desc)
         node_meta (node_id, 
                    info_type (evidence, relationship, experiment, or link), 

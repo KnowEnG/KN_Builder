@@ -201,13 +201,13 @@ class Pathcom(SrcClass):
         This returns noting but produces the table formatted files from the
         provided raw_line file:
             raw_line (line_hash, line_num, file_id, raw_line)
-            table_file (raw_line_cksum, n1name, n1hint, n1type, n1spec,
-                        n2name, n2hint, n2type, n2spec, et_hint, score,
-                        tableline_cksum)
+            table_file (line_hash, n1name, n1hint, n1type, n1spec,
+                     n2name, n2hint, n2type, n2spec, et_hint, score,
+                     table_hash)
             edge_meta (line_hash, info_type, info_desc)
             node_meta (node_id, 
-                       info_type (evidence, relationship, experiment, or link), 
-                       info_desc (text))
+                    info_type (evidence, relationship, experiment, or link), 
+                    info_desc (text))
 
         Args:
             raw_line(str): The path to the raw_line file
