@@ -6,7 +6,7 @@ KnowNet Pipeline Data Formats
 .. _file-metadata-label:
 
 file_metadata (produced by check_utilities and updated by fetch_utilities)
--------------
+------------------------------------------------------------------------------
 ::
     'alias' (str):              the alias name
     'alias_info' (str):         a short string with information
@@ -38,7 +38,7 @@ file_metadata (produced by check_utilities and updated by fetch_utilities)
     'source' (str):             the source name
 
 rawline (produced by fetch_utilities)
--------
+------------------------------------------------------------------------------
 ::
     'line_hash' (str):  md5 checksum of line_str field
     'line num' (int):   line number in downloaded file
@@ -46,7 +46,7 @@ rawline (produced by fetch_utilities)
     'line_str' (str):   original line string from downloaded source
 
 table (produced by table_utilities)
-----
+------------------------------------------------------------------------------
 ::
     'line_hash' (str):  md5 checksum of original line string from source
     'n1name' (str):     node 1 name to map from original source
@@ -64,28 +64,28 @@ table (produced by table_utilities)
     'table_hash' (str): md5 checksum of raw edge generated from source line
 
 edge_meta (produced by table_utilities)
----------
+------------------------------------------------------------------------------
 ::
     'line_hash' (str):  md5 checksum of original line string from source
     'info_type' (str):  type of metadate: 'reference', 'experiment', etc
     'info_desc' (str):  description string of metadata
 
 node_meta (produced by table_utilities)
----------
+------------------------------------------------------------------------------
 ::
     'node_id' (str):    mapped node identifier
     'info_type' (str):  type of metadata ('alt_alias', 'link', etc)
     'info_desc' (str):  description string of metadata
 
 node (produced by table_utilities)
----------
+------------------------------------------------------------------------------
 ::
     'node_id' (str):    node identifier
     'n_alias' (str):    alternate name for node
     'n_type' (str):     type of node ('Gene', 'Property')
 
 edge (produced by conv_utilities)
-----
+------------------------------------------------------------------------------
 ::
     'n1_id' (str):      node 1 mapped identifier
     'n2_id' (str):      node 2 mapped identifier
@@ -94,14 +94,14 @@ edge (produced by conv_utilities)
     'edge_hash' (str):  md5 checksum of mapped edge
 
 edge2line (produced by conv_utilities)
-----
+------------------------------------------------------------------------------
 ::
     'edge_hash' (str):  md5 checksum of mapped edge
     'line_hash' (str):  md5 checksum of original line string from source
 
 
 status (produced by conv_utilities)
-----
+------------------------------------------------------------------------------
 ::
     'table_hash' (str):     md5 checksum of raw edge generated from source line
     'n1_id' (str):          node 1 mapped identifier

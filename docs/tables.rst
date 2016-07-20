@@ -3,10 +3,8 @@
 KnowNet MySQL TABLE Formats
 *****************************
 
-.. _all_mappings-label:
-
 all_mappings
--------
+-------------
 ::
     'dbprimary_acc' varchar(512) DEFAULT NULL:      primary accession number of
                                                     gene from db_name 
@@ -24,7 +22,7 @@ all_mappings
     'species' varchar(255) DEFAULT NULL:            species that gene belongs to
 
 edge
-----
+-------------
 ::
     'n1_id' varchar(64) NOT NULL:       node 1 mapped identifier
     'n2_id' varchar(64) NOT NULL:       node 2 mapped identifier
@@ -36,7 +34,7 @@ edge
     KEY 'et_name' ('et_name')
 
 edge2line
-----
+-------------
 ::
     'edge_hash' varchar(40) NOT NULL:   md5 checksum of mapped edge
     'line_hash' varchar(40) NOT NULL:   md5 checksum of original line string
@@ -44,7 +42,7 @@ edge2line
     PRIMARY KEY ('edge_hash', 'line_hash')
 
 edge_meta
----------
+-------------
 ::
     'line_hash' varchar(40) NOT NULL:   md5 checksum of original line string
                                         from source
@@ -54,7 +52,7 @@ edge_meta
     PRIMARY KEY ('line_hash','info_type','info_desc')
 
 edge_type
----------
+-------------
 ::
     'et_name' varchar(80) NOT NULL:     name of edge type
     'n1_type' varchar(12) NOT NULL:     type of node 1 ('Gene', 'Property')
@@ -70,7 +68,7 @@ edge_type
     KEY ('n2_type')
 
 node
----------
+-------------
 ::
     'node_id' varchar(64) NOT NULL:         node identifier
     'n_alias' varchar(512) DEFAULT NULL:    alternate name for node
@@ -78,7 +76,7 @@ node
     PRIMARY KEY ('node_id')
 
 node_meta
----------
+-------------
 ::
     'node_id' varchar(64) NOT NULL:     mapped node identifier
     'info_type' varchar(80) NOT NULL:   type of metadata ('alt_alias', 'link', 
@@ -87,7 +85,7 @@ node_meta
     PRIMARY KEY ('node_id','info_type','info_desc')
 
 node_species
----------
+-------------
 ::
     'node_id' varchar(64) NOT NULL:     mapped node identifier
     'taxon' int(11) NOT NULL:           taxon id of node species, 0 if property
@@ -95,7 +93,7 @@ node_species
     KEY 'taxon' ('taxon')
 
 node_type
----------
+-------------
 ::
     'n_type' varchar(12) NOT NULL:  type of node ('Gene', 'Property')
     'n_type_desc' text:             description of node type
@@ -121,7 +119,7 @@ raw_file
     PRIMARY KEY ('file_id')
 
 raw_line
--------
+-------------
 ::
     'line_hash' varchar(40) NOT NULL:   md5 checksum of rawline field
     'line num' int(11) NOT NULL:        line number in downloaded file
@@ -130,7 +128,7 @@ raw_line
     'line_str' text NOT NULL:           original line string from downloaded source
 
 species
-----
+-------------
 ::
   'taxon' int(11) NOT NULL:                     taxon id of organism species
   'sp_abbrev' varchar(8) DEFAULT NULL:          abbreviated name of species
@@ -139,8 +137,8 @@ species
                                                 scientific name
   PRIMARY KEY ('taxon')
 
-status (produced by conv_utilities)
-----
+status
+-------------
 ::
     'table_hash' varchar(40) NOT NULL:      md5 checksum of raw edge generated
                                             from source line

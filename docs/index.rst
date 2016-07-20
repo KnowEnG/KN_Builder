@@ -12,6 +12,7 @@ Welcome to KnowNet's documentation!
    tutorial
    modules
    formats
+   tables
 
 Indices and tables
 ==================
