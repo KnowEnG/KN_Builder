@@ -169,6 +169,3 @@ status
     KEY ('status_desc')
     KEY ('et_name')
 
-schema
-______
-:download:`MySQL Schema <_static/KnowNet_Schema.pdf>`
