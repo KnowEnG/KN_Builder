@@ -103,6 +103,7 @@ node_species
 node_type
 ---------
 ::
+
     'n_type' varchar(12) NOT NULL:  type of node ('Gene', 'Property')
     'n_type_desc' text:             description of node type
     PRIMARY KEY ('n_type')
