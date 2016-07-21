@@ -1,10 +1,7 @@
 .. _tables-ref:
 
-KnowNet MySQL TABLE Formats
-*****************************
-schema
-______
-:download:`MySQL Schema <_static/KnowNet_Schema.pdf>`
+KnowNet MySQL Table Formats
+***************************
 
 all_mappings
 ------------
@@ -171,3 +168,7 @@ status
     PRIMARY KEY ('table_hash')
     KEY ('status_desc')
     KEY ('et_name')
+
+schema
+______
+:download:`MySQL Schema <_static/KnowNet_Schema.pdf>`
