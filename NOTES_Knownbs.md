@@ -4,7 +4,7 @@
 ## Set environment variables
 ```
 KNP_CHRONOS_URL='knownbs.dyndns.org:4400'
-KNP_WORKING_DIR='/workspace/storage/project1/KnowNet_Pipeline'
+KNP_WORKING_DIR='/workspace/storage/project1'
 KNP_STORAGE_DIR=''
 KNP_DB_DIR=$KNP_WORKING_DIR
 KNP_BUILD_NAME='representative'
@@ -16,7 +16,7 @@ KNP_MARATHON_URL='knownbs.dyndns.org:8080/v2/apps'
 
 KNP_MYSQL_HOST='knownbs.dyndns.org'
 KNP_MYSQL_PORT='3307'
-KNP_MYSQL_DIR=$KNP_DB_DIR'/p1_mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
+KNP_MYSQL_DIR=$KNP_DB_DIR'/p1mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
 KNP_MYSQL_CONF='build_conf/'
 KNP_MYSQL_MEM='10000'
 KNP_MYSQL_CPU='2.0'
@@ -25,18 +25,18 @@ KNP_MYSQL_CONSTRAINT_URL=''
 
 KNP_REDIS_HOST='knownbs.dyndns.org'
 KNP_REDIS_PORT='6380'
-KNP_REDIS_DIR=$KNP_DB_DIR'/p1_redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
+KNP_REDIS_DIR=$KNP_DB_DIR'/p1redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
 KNP_REDIS_MEM='8000'
 KNP_REDIS_CPU='2.0'
 KNP_REDIS_PASS='KnowEnG'
 KNP_REDIS_CONSTRAINT_URL=''
 
 KNP_NGINX_PORT='8282'
-KNP_NGINX_DIR=$KNP_DB_DIR'/p1_nginx-'$KNP_NGINX_PORT'-'$KNP_BUILD_NAME
+KNP_NGINX_DIR=$KNP_DB_DIR'/p1nginx-'$KNP_NGINX_PORT'-'$KNP_BUILD_NAME
 KNP_NGINX_CONF='autoindex/'
 
 KNP_NEO4J_PORT='7475'
-KNP_NEO4J_DIR=$KNP_DB_DIR'/p1_neo4j-'$KNP_NEO4J_PORT'-'$KNP_BUILD_NAME
+KNP_NEO4J_DIR=$KNP_DB_DIR'/p1neo4j-'$KNP_NEO4J_PORT'-'$KNP_BUILD_NAME
 
 ```
 
@@ -71,7 +71,8 @@ python3 code/mysql_utilities.py \
     -mym $KNP_MYSQL_MEM -myc $KNP_MYSQL_CPU \
     -myd $KNP_MYSQL_DIR -mycf $KNP_MYSQL_CONF \
     -myps $KNP_MYSQL_PASS -mycu $KNP_MYSQL_CONSTRAINT_URL \
-    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH \
+    -lp $KNP_LOGS_PATH
 ```
 
 ### empty MySQL database if it is running
@@ -87,7 +88,7 @@ python3 code/redis_utilities.py \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -rm $KNP_REDIS_MEM -rc $KNP_REDIS_CPU \
     -rd $KNP_REDIS_DIR -rps $KNP_REDIS_PASS -rcu $KNP_REDIS_CONSTRAINT_URL\
-    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR -lp $KNP_LOGS_PATH
 ```
 ### empty Redis database if it is running
 ```
@@ -100,10 +101,11 @@ redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS BGREWRITEAOF
 ```
 mkdir $KNP_NGINX_DIR
 mkdir $KNP_NGINX_DIR/docs/
+mkdir $KNP_NGINX_DIR/data/
 python3 code/nginx_utilities.py \
     -ngp $KNP_NGINX_PORT \
     -ngd $KNP_NGINX_DIR -ngcf $KNP_NGINX_CONF \
-    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR -lp $KNP_LOGS_PATH
 ```
 
 ## clear the chronos queue

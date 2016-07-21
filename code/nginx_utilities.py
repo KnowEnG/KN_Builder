@@ -42,7 +42,8 @@ def deploy_container(args=None):
     else:
         deploy_dict["constraints"] = []
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.nginx_dir
-    docs_path = os.path.join(args.working_dir, 'docs', '_build', 'html')
+    docs_path = os.path.join(args.working_dir, 'KnowNet_Pipeline', 'docs', \
+                            '_build', 'html')
     deploy_dict["container"]["volumes"][1]["hostPath"] = docs_path
     conf_path = os.path.join(args.working_dir, args.code_path, 'nginx', args.nginx_conf)
     deploy_dict["container"]["volumes"][2]["hostPath"] = conf_path
