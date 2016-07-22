@@ -55,13 +55,12 @@ git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
 cd KnowNet_Pipeline/
 ```
 
-## build the documentation
+## clear any existing files
 ```
-cd $KNP_WORKING_DIR/KnowNet_Pipeline/docs/
-make html
-```
-```
-cd $KNP_WORKING_DIR/KnowNet_Pipeline
+rm -r $KNP_LOGS_PATH/*
+rm -r $KNP_DATA_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
 ```
 
 ## MySQL setup
@@ -98,6 +97,15 @@ redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS BGREWRITEAOF
 ```
 
 ## nginx setup
+### build the documentation
+```
+cd $KNP_WORKING_DIR/KnowNet_Pipeline/docs/
+make html
+```
+```
+cd $KNP_WORKING_DIR/KnowNet_Pipeline
+```
+
 ### start nginx server if it is not running
 ```
 mkdir $KNP_NGINX_DIR
@@ -122,15 +130,6 @@ for c in $KNP_CHRONOS_URL ; do
         done;
     done;
 done;
-```
-
-
-## clear any existing files
-```
-rm -r $KNP_LOGS_PATH/*
-rm -r $KNP_DATA_PATH/*
-rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
-rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
 ```
 
 ## run setup pipeline (time: 4hr 15min)
