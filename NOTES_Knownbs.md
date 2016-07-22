@@ -4,7 +4,7 @@
 ## Set environment variables
 ```
 KNP_CHRONOS_URL='knownbs.dyndns.org:4400'
-KNP_WORKING_DIR='/workspace/storage/project1'
+KNP_WORKING_DIR='/mnt/storage/project1'
 KNP_STORAGE_DIR=''
 KNP_DB_DIR=$KNP_WORKING_DIR
 KNP_BUILD_NAME='representative'
@@ -37,7 +37,6 @@ KNP_NGINX_CONF='autoindex/'
 
 KNP_NEO4J_PORT='7475'
 KNP_NEO4J_DIR=$KNP_DB_DIR'/p1neo4j-'$KNP_NEO4J_PORT'-'$KNP_BUILD_NAME
-
 ```
 
 ## add symlinks
