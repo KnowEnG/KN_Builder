@@ -1,7 +1,7 @@
-Examine extra spaces in enrichr
+Examine extra spaces in enrichr, second column is empty always?
 
 Examine lack of line_strs in unique.raw_line (underspecifies columns)
 
 Examine lack of table(?) in db (add to list of imports)
 
-Implement go(?) fix (change hint).
+Implement go(?) fix (change uniprot hint to uniprot_gn). 
