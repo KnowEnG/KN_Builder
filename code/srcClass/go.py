@@ -363,6 +363,7 @@ class Go(SrcClass):
                 if n2spec == '559292': #manually overwrite taxid for Scer
                     n2spec = '4932'
 
+
                 reference = raw[5]
                 anno_evidence = raw[6]
 
@@ -372,6 +373,12 @@ class Go(SrcClass):
 
                 n2_id = raw[1]
                 n2hint = raw[0]
+
+                if n2hint == "UniProtKB":
+                    n2hint = "uniprot_gn"
+                if n1hint == "UniProtKB":
+                    n1hint = "uniprot_gn"
+
                 for idx in range(1, 3):  # loop twice
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1_id, n1hint, n1type, n1spec,\
