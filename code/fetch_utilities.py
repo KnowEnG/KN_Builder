@@ -165,7 +165,7 @@ def chunk(filename, total_lines, args, chunksize=500000):
                     if j == num_lines and i < num_chunks:
                         break
             u_chunk_file = curr_chunk.replace('raw_line', 'unique.raw_line')
-            tu.csu(curr_chunk, u_chunk_file, [1,2,3])
+            tu.csu(curr_chunk, u_chunk_file)
     return num_chunks
 
 def format_raw_line(filename):
