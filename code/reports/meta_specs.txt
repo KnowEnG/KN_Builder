@@ -1,0 +1,21 @@
+ngenes
+nprop
+nedges
+list of all genes
+*degree distrib
+*score distrib
+*unmapped stats
+
+pipeline run
+	commit
+	command line
+	date ran
+	alias remote urls and checksums (maybe also release version)
+
+network_extractor
+	commit
+	command line
+	date ran
+
+Maybe for describing commits use this (e.g. r999.25008be):
+printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
