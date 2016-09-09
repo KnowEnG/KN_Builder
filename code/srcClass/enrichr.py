@@ -315,6 +315,8 @@ class Enrichr(SrcClass):
                     n_writer.writerow([n1_kn_name, n1_kn_name, n_type])
                 for n2_id in raw[1:]:
                     n2_id = n2_id.split(',')[0]
+                    if n2_id == '':
+                        continue
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1_kn_name, n1hint, n1type, n1spec,\
                         n2_id, n2hint, n2type, n2spec, et_hint,\
