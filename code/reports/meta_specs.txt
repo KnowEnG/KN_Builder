@@ -6,6 +6,7 @@ nedges
 *unmapped stats
 
 list of all genes
+	with human-readable synonyms
 
 pipeline run
 	commit
