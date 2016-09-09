@@ -1,10 +1,11 @@
 ngenes
 nprop
 nedges
-list of all genes
 *degree distrib
 *score distrib
 *unmapped stats
+
+list of all genes
 
 pipeline run
 	commit
