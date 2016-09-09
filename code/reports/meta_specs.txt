@@ -12,7 +12,8 @@ pipeline run
 	commit
 	command line
 	date ran
-	alias remote urls and checksums (maybe also release version)
+
+alias remote urls and checksums (maybe also release version)
 
 network_extractor
 	commit
