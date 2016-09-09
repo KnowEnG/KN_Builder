@@ -19,3 +19,6 @@ network_extractor
 
 Maybe for describing commits use this (e.g. r999.25008be):
 printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+
+Format: .../edge_type.species/cleaned_edge_file
+N1	N2	wt	et	source_file_ID	source_file_line
