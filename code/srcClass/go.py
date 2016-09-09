@@ -363,7 +363,6 @@ class Go(SrcClass):
                 if n2spec == '559292': #manually overwrite taxid for Scer
                     n2spec = '4932'
 
-
                 reference = raw[5]
                 anno_evidence = raw[6]
 
