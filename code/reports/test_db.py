@@ -5,6 +5,12 @@ import subprocess
 import glob
 import sqlite3
 
+# Requirements:
+#   list of all genes
+#   degree distrib
+#   score distrib
+#   unmapped stats
+
 p = subprocess.Popen(["mysql", "-hknownbs.dyndns.org", "-P3307", "-uKNviewer", "-pdbdev249", "-DKnowNet", "-eSELECT s.status_desc, s.n1_id, s.n2_id, s.table_hash FROM status s WHERE status = 'unmapped';"], stdout=subprocess.PIPE, universal_newlines=True)
 
 conn = sqlite3.connect(":memory:")
