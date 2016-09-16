@@ -1,9 +1,9 @@
 ngenes
 nprop
 nedges
-*degree distrib
-*score distrib
-*unmapped stats
+degree distrib
+score distrib
+unmapped stats
 
 list of all genes
 	with human-readable synonyms
