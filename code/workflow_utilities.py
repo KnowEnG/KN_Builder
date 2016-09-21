@@ -46,6 +46,7 @@ from argparse import ArgumentParser
 import config_utilities as cf
 import mysql_utilities as db
 import job_utilities as ju
+import socket
 
 DEFAULT_START_STEP = 'CHECK'
 POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE', 'MAP', 'IMPORT']
@@ -519,6 +520,7 @@ def main():
     args = main_parse_args()
     stage = 'PARSE'
     init_job = ''
+    print(socket.gethostname())
     if args.dependencies == "":
 
         if args.setup:
