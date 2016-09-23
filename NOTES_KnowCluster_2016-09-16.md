@@ -4,10 +4,11 @@
 ## Set environment variables
 ```
 KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
-KNP_WORKING_DIR='/mnt/storage-pool/shared/Knowledge_Network/'
+KNP_CODE_DIR='/mnt/backup/project1/'
+KNP_WORKING_DIR=$KNP_CODE_DIR'/KN-6rep-1609/'
 KNP_STORAGE_DIR="$KNP_WORKING_DIR"
 KNP_DB_DIR="$KNP_WORKING_DIR"
-KNP_BUILD_NAME='rep6'
+KNP_BUILD_NAME='rep6-1609'
 KNP_DATA_PATH='data_'$KNP_BUILD_NAME
 KNP_LOGS_PATH='logs_'$KNP_BUILD_NAME
 KNP_ENS_SPECIES='REPRESENTATIVE'
@@ -43,13 +44,14 @@ KNP_NEO4J_NAME=$(basename $KNP_NEO4J_DIR)
 
 ## add symlinks
 ```
-mkdir -p /mnt/storage-pool/shared
-ln -s /workspace/storage-pool-shared/Knowledge_Network /mnt/storage-pool/shared/Knowledge_Network
+mkdir -p /mnt/backup
+ln -s /workspace/backup-project1 /mnt/backup/project1
+ln -s ../KnowNet_Pipeline "$KNP_WORKING_DIR"
 ```
 
 ## copy pipeline code
 ```
-cd $KNP_WORKING_DIR
+cd "$KNP_CODE_DIR"
 git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
 ```
 ```

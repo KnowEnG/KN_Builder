@@ -103,6 +103,7 @@ def main_parse_args():
     args.config_opts = " ".join(config_opts)
     args.workflow_opts = " ".join(workflow_opts)
     args.working_dir = args.working_dir.rstrip('/')
+    args.storage_dir = args.storage_dir.rstrip('/')
     return args
 
 
