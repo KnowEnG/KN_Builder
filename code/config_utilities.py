@@ -39,7 +39,7 @@ import os
 import re
 import socket
 
-print(socket.gethostname())
+print("Running on", socket.gethostname())
 
 DEFAULT_CHRONOS_URL = 'knowcluster01.dyndns.org:8888'
 DEFAULT_MARATHON_URL = 'knowcluster01.dyndns.org:8080/v2/apps'
