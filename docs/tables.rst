@@ -4,7 +4,7 @@ KnowNet MySQL TABLE Formats
 *****************************
 schema
 ______
-:download:`MySQL Schema <_static/KnowNet_Schema.pdf>`
+:download:`KnowNet Schema <_static/KnowNet_Schema.pdf>`
 
 all_mappings
 ------------
