@@ -16,7 +16,7 @@ KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
 
 KNP_MYSQL_HOST='knowcluster05.dyndns.org'
 KNP_MYSQL_PORT='3307'
-KNP_MYSQL_DIR=$KNP_DB_DIR'/p1_mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
+KNP_MYSQL_DIR=$KNP_DB_DIR'/p1mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
 KNP_MYSQL_CONF='build_conf/'
 KNP_MYSQL_MEM='10000'
 KNP_MYSQL_CPU='2.0'
@@ -25,19 +25,19 @@ KNP_MYSQL_CONSTRAINT_URL='knowcluster05.dyndns.org'
 
 KNP_REDIS_HOST='knowcluster07.dyndns.org'
 KNP_REDIS_PORT='6380'
-KNP_REDIS_DIR=$KNP_DB_DIR'/p1_redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
+KNP_REDIS_DIR=$KNP_DB_DIR'/p1redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
 KNP_REDIS_MEM='8000'
 KNP_REDIS_CPU='2.0'
 KNP_REDIS_PASS='KnowEnG'
 KNP_REDIS_CONSTRAINT_URL='knowcluster07.dyndns.org'
 
 KNP_NGINX_PORT='8081'
-KNP_NGINX_DIR=$KNP_DB_DIR'/p1_nginx-'$KNP_NGINX_PORT'-'$KNP_BUILD_NAME
+KNP_NGINX_DIR=$KNP_DB_DIR'/p1nginx-'$KNP_NGINX_PORT'-'$KNP_BUILD_NAME
 KNP_NGINX_CONF='autoindex/'
 KNP_NGINX_CONSTRAINT_URL='knowcluster03.dyndns.org'
 
 KNP_NEO4J_PORT='7475'
-KNP_NEO4J_DIR=$KNP_DB_DIR'/p1_neo4j-'$KNP_NEO4J_PORT'-'$KNP_BUILD_NAME
+KNP_NEO4J_DIR=$KNP_DB_DIR'/p1neo4j-'$KNP_NEO4J_PORT'-'$KNP_BUILD_NAME
 KNP_NEO4J_NAME=$(basename $KNP_NEO4J_DIR)
 ```
 
@@ -56,13 +56,12 @@ git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
 cd KnowNet_Pipeline/
 ```
 
-## build the documentation
+## clear any existing files
 ```
-cd $KNP_WORKING_DIR/KnowNet_Pipeline/docs/
-make html
-```
-```
-cd $KNP_WORKING_DIR/KnowNet_Pipeline
+rm -r $KNP_LOGS_PATH/*
+rm -r $KNP_DATA_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
 ```
 
 ## MySQL setup
@@ -74,7 +73,7 @@ python3 code/mysql_utilities.py \
     -myd $KNP_MYSQL_DIR -mycf $KNP_MYSQL_CONF \
     -myps $KNP_MYSQL_PASS -mycu $KNP_MYSQL_CONSTRAINT_URL \
     -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR \
-    -sd $KNP_STORAGE_DIR -dp $KNP_DATA_PATH
+    -sd $KNP_STORAGE_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH
 ```
 
 ### empty MySQL database if it is running
@@ -90,7 +89,7 @@ python3 code/redis_utilities.py \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -rm $KNP_REDIS_MEM -rc $KNP_REDIS_CPU \
     -rd $KNP_REDIS_DIR -rps $KNP_REDIS_PASS -rcu $KNP_REDIS_CONSTRAINT_URL\
-    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR -lp $KNP_LOGS_PATH
 ```
 ### empty Redis database if it is running
 ```
@@ -99,6 +98,15 @@ redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS BGREWRITEAOF
 ```
 
 ## nginx setup
+### build the documentation
+```
+cd $KNP_WORKING_DIR/KnowNet_Pipeline/docs/
+make html
+```
+```
+cd $KNP_WORKING_DIR/KnowNet_Pipeline
+```
+
 ### start nginx server if it is not running
 ```
 mkdir $KNP_NGINX_DIR
@@ -107,7 +115,7 @@ mkdir $KNP_NGINX_DIR/docs/
 python3 code/nginx_utilities.py \
     -ngp $KNP_NGINX_PORT -ncu $KNP_NGINX_CONSTRAINT_URL \
     -ngd $KNP_NGINX_DIR -ngcf $KNP_NGINX_CONF \
-    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR -lp $KNP_LOGS_PATH
 ```
 
 ## clear the chronos queue
@@ -123,14 +131,6 @@ for c in $KNP_CHRONOS_URL ; do
         done;
     done;
 done;
-```
-
-## clear any existing files
-```
-rm -r $KNP_LOGS_PATH/*
-rm -r $KNP_DATA_PATH/*
-rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
-rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
 ```
 
 ## run setup pipeline (time: 2hr 30min)

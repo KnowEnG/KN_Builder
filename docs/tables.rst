@@ -5,6 +5,7 @@ KnowNet MySQL TABLE Formats
 schema
 ______
 :download:`KnowNet Schema <_static/KnowNet_Schema.pdf>`
+=======
 
 all_mappings
 ------------
@@ -106,6 +107,7 @@ node_species
 node_type
 ---------
 ::
+
     'n_type' varchar(12) NOT NULL:  type of node ('Gene', 'Property')
     'n_type_desc' text:             description of node type
     PRIMARY KEY ('n_type')
@@ -171,3 +173,4 @@ status
     PRIMARY KEY ('table_hash')
     KEY ('status_desc')
     KEY ('et_name')
+

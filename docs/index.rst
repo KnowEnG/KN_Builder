@@ -14,6 +14,8 @@ Welcome to KnowNet's documentation!
    formats
    tables
 
+* :download:`KnowNet MySQL Schema <_static/KnowNet_Schema.pdf>`
+
 Indices and tables
 ==================
 

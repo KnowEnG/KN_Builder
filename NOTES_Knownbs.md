@@ -4,7 +4,7 @@
 ## Set environment variables
 ```
 KNP_CHRONOS_URL='knownbs.dyndns.org:4400'
-KNP_WORKING_DIR='/workspace/storage/project1/KnowNet_Pipeline'
+KNP_WORKING_DIR='/mnt/storage/project1'
 KNP_STORAGE_DIR=''
 KNP_DB_DIR=$KNP_WORKING_DIR
 KNP_BUILD_NAME='representative'
@@ -16,7 +16,7 @@ KNP_MARATHON_URL='knownbs.dyndns.org:8080/v2/apps'
 
 KNP_MYSQL_HOST='knownbs.dyndns.org'
 KNP_MYSQL_PORT='3307'
-KNP_MYSQL_DIR=$KNP_DB_DIR'/p1_mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
+KNP_MYSQL_DIR=$KNP_DB_DIR'/p1mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
 KNP_MYSQL_CONF='build_conf/'
 KNP_MYSQL_MEM='10000'
 KNP_MYSQL_CPU='2.0'
@@ -25,19 +25,19 @@ KNP_MYSQL_CONSTRAINT_URL=''
 
 KNP_REDIS_HOST='knownbs.dyndns.org'
 KNP_REDIS_PORT='6380'
-KNP_REDIS_DIR=$KNP_DB_DIR'/p1_redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
+KNP_REDIS_DIR=$KNP_DB_DIR'/p1redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
 KNP_REDIS_MEM='8000'
 KNP_REDIS_CPU='2.0'
 KNP_REDIS_PASS='KnowEnG'
 KNP_REDIS_CONSTRAINT_URL=''
 
-KNP_NGINX_PORT='8282'
-KNP_NGINX_DIR=$KNP_DB_DIR'/p1_nginx-'$KNP_NGINX_PORT'-'$KNP_BUILD_NAME
+KNP_NGINX_PORT='8081'
+KNP_NGINX_DIR=$KNP_DB_DIR'/p1nginx-'$KNP_NGINX_PORT'-'$KNP_BUILD_NAME
 KNP_NGINX_CONF='autoindex/'
 
 KNP_NEO4J_PORT='7475'
-KNP_NEO4J_DIR=$KNP_DB_DIR'/p1_neo4j-'$KNP_NEO4J_PORT'-'$KNP_BUILD_NAME
-
+KNP_NEO4J_DIR=$KNP_DB_DIR'/p1neo4j-'$KNP_NEO4J_PORT'-'$KNP_BUILD_NAME
+KNP_NEO4J_NAME=p1neo4j'-'$KNP_NEO4J_PORT'-'$KNP_BUILD_NAME
 ```
 
 ## add symlinks
@@ -54,13 +54,12 @@ git clone https://github.com/KnowEnG/KnowNet_Pipeline.git
 cd KnowNet_Pipeline/
 ```
 
-## build the documentation
+## clear any existing files
 ```
-cd $KNP_WORKING_DIR/KnowNet_Pipeline/docs/
-make html
-```
-```
-cd $KNP_WORKING_DIR/KnowNet_Pipeline
+rm -r $KNP_LOGS_PATH/*
+rm -r $KNP_DATA_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
 ```
 
 ## MySQL setup
@@ -71,7 +70,8 @@ python3 code/mysql_utilities.py \
     -mym $KNP_MYSQL_MEM -myc $KNP_MYSQL_CPU \
     -myd $KNP_MYSQL_DIR -mycf $KNP_MYSQL_CONF \
     -myps $KNP_MYSQL_PASS -mycu $KNP_MYSQL_CONSTRAINT_URL \
-    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH \
+    -lp $KNP_LOGS_PATH
 ```
 
 ### empty MySQL database if it is running
@@ -87,7 +87,7 @@ python3 code/redis_utilities.py \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -rm $KNP_REDIS_MEM -rc $KNP_REDIS_CPU \
     -rd $KNP_REDIS_DIR -rps $KNP_REDIS_PASS -rcu $KNP_REDIS_CONSTRAINT_URL\
-    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR -lp $KNP_LOGS_PATH
 ```
 ### empty Redis database if it is running
 ```
@@ -96,14 +96,23 @@ redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS BGREWRITEAOF
 ```
 
 ## nginx setup
+### build the documentation
+```
+cd $KNP_WORKING_DIR/KnowNet_Pipeline/docs/
+make html
+```
+```
+cd $KNP_WORKING_DIR/KnowNet_Pipeline
+```
 ### start nginx server if it is not running
 ```
 mkdir $KNP_NGINX_DIR
 mkdir $KNP_NGINX_DIR/docs/
+mkdir $KNP_NGINX_DIR/data/
 python3 code/nginx_utilities.py \
     -ngp $KNP_NGINX_PORT \
     -ngd $KNP_NGINX_DIR -ngcf $KNP_NGINX_CONF \
-    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR
+    -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR -lp $KNP_LOGS_PATH
 ```
 
 ## clear the chronos queue
@@ -121,15 +130,7 @@ for c in $KNP_CHRONOS_URL ; do
 done;
 ```
 
-## clear any existing files
-```
-rm -r $KNP_LOGS_PATH/*
-rm -r $KNP_DATA_PATH/*
-rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
-rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
-```
-
-## run setup pipeline
+## run setup pipeline (1hr 25min)
 ```
 python3 code/workflow_utilities.py CHECK -su \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
@@ -139,7 +140,7 @@ python3 code/workflow_utilities.py CHECK -su \
     -sd $KNP_STORAGE_DIR -es $KNP_ENS_SPECIES
 ```
 
-## run parse pipeline
+## run parse pipeline (4hr)
 ```
 python3 code/workflow_utilities.py CHECK \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
@@ -149,7 +150,7 @@ python3 code/workflow_utilities.py CHECK \
     -sd $KNP_STORAGE_DIR
 ```
 
-## run import pipeline
+## run import pipeline (2hr)
 ```
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
@@ -158,7 +159,7 @@ python3 code/workflow_utilities.py IMPORT \
     -sd $KNP_STORAGE_DIR
 ```
 
-## create report of results
+## create report of results (30min)
 ```
 code/reports/enumerate_files.sh $KNP_WORKING_DIR/$KNP_DATA_PATH COUNTS $KNP_MYSQL_HOST \
     $KNP_REDIS_HOST $KNP_MYSQL_PORT $KNP_REDIS_PORT > tests/KN03-NBS-build.$KNP_DATA_PATH.pipe
@@ -177,13 +178,12 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
 ## neo4j setup
 ### start neo4j server if it is not running
 ```
-
 mkdir $KNP_NEO4J_DIR
 mkdir $KNP_NEO4J_DIR/data
 mkdir $KNP_NEO4J_DIR/shared
 docker run -dt --restart=always --name hdfs sequenceiq/hadoop-docker:latest /etc/bootstrap.sh -bash
 docker run -d --restart=always --name mazerunner --link hdfs:hdfs kbastani/neo4j-graph-analytics:latest
-docker run -dt --restart=always --name $KNP_NEO4J_NAME \
+docker run -dt --restart=always --name \
     -p $KNP_NEO4J_PORT:7474 --link mazerunner:mazerunner --link hdfs:hdfs \
     -v $KNP_NEO4J_DIR/data:/opt/data -v $KNP_NEO4J_DIR/shared:/shared \
     kbastani/docker-neo4j
@@ -218,7 +218,7 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
 awk -v OFS="\t" 'BEGIN { print ":START_ID(Node)", \
     ":END_ID(Node)", "weight", ":TYPE" }; \
     { print toupper($1), toupper($2), $4, $3 }; END {}'\
-    $KNP_STORAGE_DIR/$KNP_DATA_PATH/unique.edge.txt > \
+    $KNP_WORKING_DIR/$KNP_DATA_PATH/unique.edge.txt > \
     $KNP_NEO4J_DIR/shared/neo4j.edges.txt
 ```
 ### format data from unique.node_meta for node_meta (skipped)
@@ -245,7 +245,7 @@ sort -u $KNP_NEO4J_DIR/shared/neo4j.edge_meta.dmp > \
 ```
 docker exec $KNP_NEO4J_NAME rm -rf /opt/data/graph.db
 ```
-#### insert uniq nodes and production edges (time: 7m)
+#### insert uniq nodes and production edges (time: 5m)
 ```
 docker exec $KNP_NEO4J_NAME /var/lib/neo4j/bin/neo4j-import \
     --into /opt/data/graph.db --nodes /shared/neo4j.species.txt \
@@ -274,109 +274,3 @@ cat $KNP_REDIS_DIR/appendonly.aof | gzip > $KNP_NGINX_DIR/data/appendonly.aof.gz
 cd $KNP_WORKING_DIR
 tar czvf $KNP_NGINX_DIR/data/KnowNet.tgz $(basename $KNP_WORKING_DIR)
 ```
-
-## Set environment variables
-```
-KNP_WORKING_DIR='/workspace/KnowNet_0.3/KnowNet_Pipeline'
-KNP_DATA_PATH='data_representative'
-KNP_LOGS_PATH='logs_representative'
-KNP_ENS_SPECIES='REPRESENTATIVE'
-
-KNP_MYSQL_HOST='knownet.dyndns.org'
-KNP_MYSQL_PORT='3306'
-KNP_MYSQL_DIR='/project1/KnowNet_0.3/p1_mysql'
-KNP_MYSQL_CONF='build_conf/'
-KNP_MYSQL_PASS='KnowEnG'
-KNP_MYSQL_MEM='4G'
-
-KNP_REDIS_HOST='knownet.dyndns.org'
-KNP_REDIS_PORT='6379'
-KNP_REDIS_DIR='/project1/KnowNet_0.3/p1_redis'
-KNP_REDIS_PASS='KnowEnG'
-KNP_REDIS_MEM='2G'
-
-
-KNP_NGINX_HOST='knownbs.dyndns.org'
-KNP_NGINX_PORT='8282'
-KNP_NGINX_DIR='/project1/KnowNet_0.3/p1_nginx'
-KNP_NGINX_CONF='autoindex/'
-KNP_NGINX_HOST2='knowcluster03.dyndns.org'
-KNP_NGINX_PORT2='8081'
-```
-
-## symlink directory
-```
-ln -s /workspace/ /project1
-```
-## Download the data
-### Download KnowNet_Pipeline directory
-```
-mkdir $KNP_WORKING_DIR
-cd $KNP_WORKING_DIR
-wget $KNP_NGINX_HOST:$KNP_NGINX_PORT/data/KnowNet.tgz
-tar xzvf KnowNet.tgz
-```
-### Download Redis data (from knownbs - 6 species)
-```
-mkdir $KNP_REDIS_DIR && cd $KNP_REDIS_DIR
-wget $KNP_NGINX_HOST:$KNP_NGINX_PORT/data/appendonly.aof.gz
-gunzip -d appendonly.aof.gz
-```
-### Download Redis data (from knowcluster - human only)
-```
-mkdir $KNP_REDIS_DIR && cd $KNP_REDIS_DIR
-wget $KNP_NGINX_HOST2:$KNP_NGINX_PORT2/data/appendonly.aof
-```
-### Download MySQL data
-```
-mkdir $KNP_MYSQL_DIR && cd $KNP_WORKING_DIR
-wget $KNP_NGINX_HOST:$KNP_NGINX_PORT/data/KnowNet.dump.sql.gz
-```
-
-## MySQL setup 
-### start MySQL database if it is not running
-```
-docker run -d --restart=on-failure:5 --name p1_mysql-$KNP_MYSQL_PORT \
-    -e MYSQL_ROOT_PASSWORD=$KNP_MYSQL_PASS -p $KNP_MYSQL_PORT:3306 \
-    -m $KNP_MYSQL_MEM -v $KNP_MYSQL_DIR:/var/lib/mysql \
-    -v $KNP_CLOUD_DIR/code/mysql/$KNP_MYSQL_CONF:/etc/mysql/conf.d/ mysql
-```
-
-### empty MySQL database if it is running
-```
-mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
-        -P $KNP_MYSQL_PORT --execute "drop database KnowNet;"
-```
-
-### load the downloaded data
-```
-cd $KNP_WORKING_DIR
-mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
-    -P $KNP_MYSQL_PORT -e "CREATE DATABASE KnowNet;"
-gunzip < KnowNet.dump.sql.gz | mysql -h $KNP_MYSQL_HOST -uroot \
-    -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT KnowNet
-```
-
-## Redis setup
-### start Redis database if it is not running
-```
-docker run -d --restart=on-failure:5 --name p1_redis-$KNP_REDIS_PORT \
-    -m $KNP_REDIS_MEM -p $KNP_REDIS_PORT:6379 -v $KNP_REDIS_DIR:/data \
-    redis redis-server --appendonly yes --requirepass $KNP_REDIS_PASS
-```
-### restart the Redis database if it is running
-```
-docker restart p1_redis-$KNP_REDIS_PORT
-```
-
-## nginx setup
-### start nginx server if it is not running
-```
-docker run -d --restart=on-failure:5 --name p1_nginx-$KNP_NGINX_PORT \
-    -p $KNP_NGINX_PORT:80 \
-    -v $KNP_NGINX_DIR:/usr/share/nginx/html \
-    -v $KNP_CLOUD_DIR/docs/_build/html/:/usr/share/nginx/html/docs \
-    -v $KNP_CLOUD_DIR/code/nginx/$KNP_NGINX_CONF:/etc/nginx/conf.d/ \
-    nginx
-
-

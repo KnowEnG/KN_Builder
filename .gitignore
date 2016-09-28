@@ -1,2 +1,6 @@
 tests/*
+chron_jobs/
+marathon_jobs/
+data*
+logs*
 *.pyc
