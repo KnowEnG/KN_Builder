@@ -1,27 +1,26 @@
-ngenes
-nprop
-nedges
-degree distrib
-score distrib
-unmapped stats
+Output:
+	Meta File: .../edge_type.species/cleaned_meta_file?
+		ngenes
+		nprop
+		nedges
+		degree distrib
+		score distrib
+		unmapped stats
+		list of all genes
+			with human-readable synonyms
+		pipeline run
+			commit
+			command line
+			date ran
+		alias remote urls and checksums (maybe also release version)
+		network_extractor run
+			commit
+			command line
+			date ran
+	
+	Edges File: .../edge_type.species/cleaned_edge_file
+		N1	N2	wt	et	source_file_ID	source_file_line
 
-list of all genes
-	with human-readable synonyms
-
-pipeline run
-	commit
-	command line
-	date ran
-
-alias remote urls and checksums (maybe also release version)
-
-network_extractor
-	commit
-	command line
-	date ran
-
-Maybe for describing commits use this (e.g. r999.25008be):
-printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
-
-Format: .../edge_type.species/cleaned_edge_file
-N1	N2	wt	et	source_file_ID	source_file_line
+Gathers info from mysql database
+Options:
+	
