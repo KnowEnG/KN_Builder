@@ -1,3 +1,20 @@
+Cleans and formats the data in the network to a flat file format.
+
+This will take the information from the database, clean/normalize it, and then
+format it into a flat file that can be more easily used.  It will check if the
+output already exists, get the network data from the mysql database,
+clean/normalize the data, reformat it to the output format, and then write that
+to the output location.
+
+Arguments:
+	edge_type (str): Limits edge types that are retrieved.
+	species (str): The species to create output files for.
+	edge_threshold (float): Limits edges based on weight.
+	mysql host, user, port, password (?): The mysql server to connect to.
+	normalization/cleaning method (str): Specifies how to normalize or clean the data.
+	output format (str): Specifies the output format.
+	output location (str): Directory to put the resulting files.
+
 Output:
 	Meta File: .../edge_type.species/cleaned_meta_file?
 		number of genes
@@ -21,19 +38,3 @@ Output:
 	
 	Edges File: .../edge_type.species/cleaned_edge_file
 		node_1_id	node_2_id	weight	edge_type	source_file_ID	source_file_line
-
-What it does:
-	check if output exists
-	get data from mysql database
-	clean/normalize network data
-	reformat to output
-	write to output location
-
-Options:
-	edge_type
-	species
-	edge_threshold
-	mysql host, user, port, password
-	normalization/cleaning method
-	output format
-	output location
