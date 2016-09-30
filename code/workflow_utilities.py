@@ -172,7 +172,7 @@ def generic_dict(args, ns_parent=None):
             job_dict['TMPLAUNCH'] = ju.chronos_parent_str(args.dependencies.split(",,"))
     else: # next step caller job
         job_dict['TMPLAUNCH'] = ju.chronos_parent_str([ns_parent])
-    if args.storage_dir:
+    if args.storage_dir and args.storage_dir != args.working_dir:
         job_dict['TMPSHAREBOOL'] = 'true'
     else:
         job_dict['TMPSHAREDIR'] = job_dict['TMPWORKDIR']
