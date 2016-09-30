@@ -1,11 +1,11 @@
 Cleans and formats a subnetwork in the KN into a set of flat files for distribution.
 
 Utilities for fetching and cleaning data in the KN mySQL database and then
-formatting it into a set of files that can be easily distributed.  If the output is 
-not already present, queries the mysql database for a particular subnetwork, 
-cleans/normalizes the data using default recommendations, reformats the data and metadata
-into .edge and .json files, and finally writes these files to specificied directory (
-including S3).
+formatting it into a set of files that can be easily distributed.  If the
+output is not already present, queries the mysql database for a particular
+subnetwork, cleans/normalizes the data using default recommendations, reformats
+the data and metadata into .edge and .json files, and finally writes these
+files to specificied directory ( including S3).
 
 Arguments:
 	edge_type (str): Limits edge types that are retrieved.
