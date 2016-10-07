@@ -50,7 +50,7 @@ Output:
 	Nodes File: .../edge_type.species/node_map.json
 		list of all nodes
 			id
-			human-readable symbol
+			human-readable symbol (WikiGene)
 			human-readable desc
 			url_reference
 
