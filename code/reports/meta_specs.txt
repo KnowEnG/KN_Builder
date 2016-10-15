@@ -56,3 +56,10 @@ Output:
 
 	Edge File: .../edge_type.species/cleaned_network.edge
 		node_1_id	node_2_id	weight	edge_type	source_file_ID	source_file_line
+
+MySQL Queries:
+	Edge File:
+		SELECT s.edge_hash, s.n1_id, s.n2_id, s.weight, s.et_name, rl.file_id, rl.line_num FROM status s JOIN node_species n2 ON s.n2_id = n2.node_id JOIN raw_line rl ON s.line_hash = rl.line_hash WHERE s.et_name = 'pfam_domains' AND n2.taxon = 9606 AND s.status = 'production';
+		SELECT s.edge_hash, s.n1_id, s.n2_id, s.weight, s.et_name, rl.file_id, rl.line_num FROM status s JOIN node_species n1 ON s.n1_id = n1.node_id JOIN node_species n2 ON s.n2_id = n2.node_id JOIN raw_line rl ON s.line_hash = rl.line_hash WHERE s.et_name = 'blastp_homology' AND n1.taxon = 9606 AND n2.taxon = 9606 AND s.status = 'production';
+	Nodes File:
+	Meta:
