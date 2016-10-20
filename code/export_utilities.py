@@ -48,9 +48,9 @@ def main():
     db.use_db("KnowNet")
 
     cls, bidir = figure_out_class(db, args.edge_type)
-    edges_fn = 'network.edges'
-    nodes_fn = 'nodes.meta'
-    meta_fn = 'sources.meta'
+    edges_fn = '{}.{}.edge'.format(args.taxon, args.edge_type)
+    nodes_fn = '{}.{}.node_map'.format(args.taxon, args.edge_type)
+    meta_fn = '{}.{}.metadata'.format(args.taxon, args.edge_type)
     bucket_dir = os.path.join(cls, args.species, args.edge_type)
     sync_dir = os.path.join(args.working_dir, args.bucket_name, bucket_dir)
     sync_edges = os.path.join(sync_dir, edges_fn)
