@@ -29,10 +29,12 @@ def convert_genes(db, nodes):
     return db.run("SELECT node_id, n_alias FROM node WHERE node_id IN ('{}')".format("','".join(nodes)))
 
 def get_sources(edges):
-    return list(set(edge[4] for edge in edges))
+    return set(edge[4] for edge in edges)
 
-def get_metadata(db, sources):
-    return {"sources": sources}
+def get_metadata(db, sources, edges, nodes):
+    return {"number_of_edges": len(edges),
+            "number_of_nodes": len(nodes),
+            "sources": [db.run("SELECT file_id, remote_url, remote_date, remote_version, checksum FROM raw_file WHERE file_id = '{}'".format(source))[0] for source in sources]}
 
 def main():
     """
@@ -48,9 +50,9 @@ def main():
     db.use_db("KnowNet")
 
     cls, bidir = figure_out_class(db, args.edge_type)
-    edges_fn = '{}.{}.edge'.format(args.taxon, args.edge_type)
-    nodes_fn = '{}.{}.node_map'.format(args.taxon, args.edge_type)
-    meta_fn = '{}.{}.metadata'.format(args.taxon, args.edge_type)
+    edges_fn = '{}.{}.edge'.format(args.species, args.edge_type)
+    nodes_fn = '{}.{}.node_map'.format(args.species, args.edge_type)
+    meta_fn = '{}.{}.metadata'.format(args.species, args.edge_type)
     bucket_dir = os.path.join(cls, args.species, args.edge_type)
     sync_dir = os.path.join(args.working_dir, args.bucket_name, bucket_dir)
     sync_edges = os.path.join(sync_dir, edges_fn)
@@ -80,7 +82,7 @@ def main():
     nodes_desc = convert_genes(db, nodes)
 
     sources = get_sources(res)
-    metadata = get_metadata(db, sources)
+    metadata = get_metadata(db, sources, res, nodes_desc)
     db.close()
 
 
