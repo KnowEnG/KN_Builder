@@ -110,7 +110,7 @@ def import_ensembl(alias, args=None):
         rdb.sadd(foreign_key, '::'.join([taxid, hint]))
         rdb.set('::'.join([taxid, hint, foreign_key]), ens_id)
         if hint == 'WIKIGENE':
-            rdb.set('::'.join(['stable', ens_id, 'alias']), foreign_key)
+            rdb.set('::'.join(['stable', ens_id.decode(), 'alias']), foreign_key)
 
 def import_gene_nodes(node_table, args=None):
     if args is None:
