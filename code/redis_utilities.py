@@ -117,7 +117,7 @@ def import_gene_nodes(node_table, args=None):
         args=cf.config_args()
     rdb = get_database(args)
     for row in node_table:
-        node_id, node_desc, node_type = node_table
+        node_id, node_desc, node_type = row
         node_id = node_id.upper()
         rdb.set('::'.join(['stable', node_id, 'desc']), node_desc)
         rdb.set('::'.join(['stable', node_id, 'type']), node_type)
@@ -177,6 +177,16 @@ def conv_gene(rdb, foreign_key, hint, taxid):
         if len(hint_ens_ids) == 1:
             return hint_ens_ids.pop().decode()
     return 'unmapped-many'
+
+def node_desc(rdb, stable_id):
+    if stable_id.startswith('unmapped'):
+        return [None, stable_id, stable_id]
+    alias = rdb.get('::'.join(['stable', stable_id, 'alias']), )
+    if alias is None: alias = stable_id
+    desc = rdb.get('::'.join(['stable', stable_id, 'desc']), )
+    if desc is None: desc = stable_id
+    typ = rdb.get('::'.join(['stable', stable_id, 'type']), )
+    return (typ, alias, desc)
 
 def import_mapping(map_dict, args=None):
     """Imports the property mapping data into the Redis database.
