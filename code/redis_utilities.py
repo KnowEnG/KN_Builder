@@ -110,7 +110,14 @@ def import_ensembl(alias, args=None):
         rdb.sadd(foreign_key, '::'.join([taxid, hint]))
         rdb.set('::'.join([taxid, hint, foreign_key]), ens_id)
         if hint == 'WIKIGENE':
-            rdb.set('::'.join(['stable', ens_id.decode(), 'alias']), foreign_key)
+            try:
+                int(rdb.get('::'.join(['stable', ens_id.decode(), 'alias'])))
+            except TypeError:
+                rdb.set('::'.join(['stable', ens_id.decode(), 'alias']), foreign_key)
+            except ValueError:
+                pass
+            else:
+                rdb.set('::'.join(['stable', ens_id.decode(), 'alias']), foreign_key)
 
 def import_gene_nodes(node_table, args=None):
     if args is None:
