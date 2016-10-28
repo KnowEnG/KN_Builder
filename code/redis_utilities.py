@@ -109,6 +109,18 @@ def import_ensembl(alias, args=None):
             rdb.set('unique::' + foreign_key, 'unmapped-many')
         rdb.sadd(foreign_key, '::'.join([taxid, hint]))
         rdb.set('::'.join([taxid, hint, foreign_key]), ens_id)
+        if hint == 'WIKIGENE':
+            rdb.set('::'.join(['stable', ens_id, 'alias']), foreign_key)
+
+def import_gene_nodes(node_table, args=None):
+    if args is None:
+        args=cf.config_args()
+    rdb = get_database(args)
+    for row in node_table:
+        node_id, node_desc, node_type = node_table
+        node_id = node_id.upper()
+        rdb.set('::'.join(['stable', node_id, 'desc']), node_desc)
+        rdb.set('::'.join(['stable', node_id, 'type']), node_type)
 
 def conv_gene(rdb, foreign_key, hint, taxid):
     """Uses the redis database to convert a gene to enesmbl stable id

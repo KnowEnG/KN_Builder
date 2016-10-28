@@ -158,10 +158,12 @@ def import_nodes(version_dict, args=None):
            "ON DUPLICATE KEY UPDATE node_id=node_id")
     tablename = 'KnowNet.node'
     db.insert(tablename, cmd)
+    ret = db.run(cmd)
     cmd = ("SELECT DISTINCT UCASE(gene.stable_id) AS node_id, " + taxid +
            " AS taxon FROM gene ON DUPLICATE KEY UPDATE node_id=node_id")
     tablename = 'KnowNet.node_species'
     db.insert(tablename, cmd)
+    return ret
 
 def query_all_mappings(version_dict, args=None):
     """Creates the all mappings dictionary for the provided alias.

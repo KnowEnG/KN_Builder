@@ -87,7 +87,8 @@ def db_import(version_dict, args=cf.config_args()):
     db.import_ensembl(version_dict['alias'], args)
     db.combine_tables(version_dict['alias'], args)
     db.query_all_mappings(version_dict, args)
-    db.import_nodes(version_dict, args)
+    node_table = db.import_nodes(version_dict, args)
+    ru.import_gene_nodes(node_table, args)
     ru.import_ensembl(version_dict['alias'], args)
     db_name = 'ensembl_' + version_dict['alias']
     mysql_db = db.get_database(db_name, args)
