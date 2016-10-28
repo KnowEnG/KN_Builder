@@ -122,7 +122,10 @@ def import_gene_nodes(node_table, args=None):
         rdb.set('::'.join(['stable', node_id, 'desc']), node_desc)
         rdb.set('::'.join(['stable', node_id, 'type']), node_type)
 
-def conv_gene(rdb, foreign_key, hint, taxid):
+def conv_gene(*args, **kwargs):
+    return node_desc(_conv_gene(*args, **kwargs))
+
+def _conv_gene(rdb, foreign_key, hint, taxid):
     """Uses the redis database to convert a gene to enesmbl stable id
 
     This checks first if there is a unique name for the provided foreign key.
