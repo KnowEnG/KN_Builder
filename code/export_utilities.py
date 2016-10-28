@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 import config_utilities as cf
+import redis_utilities as ru
 import mysql_utilities as mu
 import csv, json
 import boto3, botocore
@@ -25,7 +26,9 @@ def get_nodes(edges):
         ret.add(i[1])
     return ret
 
-def convert_genes(db, nodes):
+def convert_genes(args, nodes):
+    rdb = ru.get_database(args)
+    return [ru.conv_gene(rdb, item, '', args.species) for item in nodes]
     return db.run("SELECT node_id, n_alias FROM node WHERE node_id IN ('{}')".format("','".join(nodes)))
 
 def get_sources(edges):
@@ -79,7 +82,7 @@ def main():
     res = norm_edges(res)
 
     nodes = get_nodes(res)
-    nodes_desc = convert_genes(db, nodes)
+    nodes_desc = convert_genes(args, nodes)
 
     sources = get_sources(res)
     metadata = get_metadata(db, sources, res, nodes_desc)
