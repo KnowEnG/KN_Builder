@@ -48,7 +48,7 @@ import mysql_utilities as db
 import job_utilities as ju
 
 DEFAULT_START_STEP = 'CHECK'
-POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE', 'MAP', 'IMPORT']
+POSSIBLE_STEPS = ['CHECK', 'FETCH', 'TABLE', 'MAP', 'IMPORT', 'EXPORT']
 SETUP_FILES = ['ppi', 'ensembl']
 SPECIAL_MODES = ['LOCAL', 'DOCKER']
 
@@ -509,6 +509,35 @@ def run_import(args):
 
     return 0
 
+def run_export(args):
+    """
+    TODO: Documentation.
+
+    Args:
+        args (Namespace): args as populated namespace from parse_args,
+            specify --step_parameters(-p) as ',,' separated list of files to
+            import or the allowed possible SQL table names: node, node_meta,
+            edge2line, status, or edge_meta. If not specified, by default it
+            will try to import all tables.
+    """
+    export_list = args.step_parameters.split(",,")
+
+    for num, expair in enumerate(export_list):
+        print("\t".join([str(num), expair]))
+
+        species, etype = expair.split('::')
+        jobname = "-".join(["export", expair])
+        jobname = jobname.replace(".", "-")
+        jobdict = generic_dict(args, None)
+        jobdict.update({'TMPJOB': jobname,
+                        'TMPTAXON': species,
+                        'TMPETYPE': etype,
+                        'TMPS3': args.bucket
+                       })
+        ju.run_job_step(args, "exporter", jobdict)
+
+    return 0
+
 def main():
     """Runs the 'start_step' step of the main or args.setup pipeline on the
     args.chronos location, and all subsequent steps if not args.one_step
@@ -552,6 +581,8 @@ def main():
             run_map(args)
         elif args.start_step == 'IMPORT':
             run_import(args)
+        elif args.start_step == 'EXPORT':
+            run_export(args)
         else:
             print(args.start_step + ' is an unacceptable start_step.  Must be ' +
                   str(POSSIBLE_STEPS))

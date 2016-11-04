@@ -71,6 +71,8 @@ DEFAULT_NGINX_PORT = '8080'
 DEFAULT_NGINX_DIR = os.path.join(DEFAULT_WORKING_DIR, 'p1_nginx')
 DEFAULT_NGINX_CONF = 'autoindex/'
 
+DEFAULT_S3_BUCKET = 'KNsample'
+
 
 def add_config_args(parser):
     """Add global configuation options to command line arguments.
@@ -114,6 +116,7 @@ def add_config_args(parser):
     --test_mode	    |   	|-tm	|run in test mode by only printing command, defaults to False
     --ens_species   |str    |-es    |',,' separated ensembl species to run in setup pipeline
     --force_fetch   |	    |-ff	|fetch even if file exists and has not changed from last run
+    --bucket|str|-b|S3 bucket to sync output
 
 
 
@@ -186,6 +189,8 @@ def add_config_args(parser):
                         help=',, separated list of ensembl species to run in setup pipeline' )
     parser.add_argument('-ff', '--force_fetch', action='store_true', default=False,
                         help='fetch even if file exists and has not changed from last run', )
+    parser.add_argument('-b', '--bucket', default=DEFAULT_S3_BUCKET,
+                        help='S3 bucket to sync output', )
 
     return parser
 
