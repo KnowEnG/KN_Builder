@@ -528,11 +528,11 @@ def run_export(args):
         species, etype = expair.split('::')
         jobname = "-".join(["export", expair])
         jobname = jobname.replace(".", "-")
+        jobname = jobname.replace("::", "--")
         jobdict = generic_dict(args, None)
         jobdict.update({'TMPJOB': jobname,
                         'TMPTAXON': species,
                         'TMPETYPE': etype,
-                        'TMPS3': args.bucket
                        })
         ju.run_job_step(args, "exporter", jobdict)
 
