@@ -25,7 +25,7 @@
         "TMPMEM": "2000",
         "TMPCPUS": "0.5",
         "TMPPRIOR": "true",
-        "TMPCMD": "sh -c '{ cd /TMPWORKDIR/TMPCODEPATH/ && python export_utilities.py -s TMPTAXON -e TMPETYPE -b KNsample TMPOPTS } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
+        "TMPCMD": "sh -c '{ cd /TMPWORKDIR/TMPCODEPATH/ && python export_utilities.py -s TMPTAXON -e TMPETYPE -b KNsample TMPOPTS ; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
     },
     "fetcher": {
         "TMPIMG": "cblatti3/py3_redis_mysql:0.2",
