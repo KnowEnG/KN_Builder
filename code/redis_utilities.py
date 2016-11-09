@@ -129,8 +129,9 @@ def import_gene_nodes(node_table, args=None):
         rdb.set('::'.join(['stable', node_id, 'desc']), node_desc)
         rdb.set('::'.join(['stable', node_id, 'type']), node_type)
 
-def conv_gene(*args, **kwargs):
-    return node_desc(_conv_gene(*args, **kwargs))
+def conv_gene(rdb, foreign_key, hint, taxid):
+    stable_id = _conv_gene(rdb, foreign_key, hint, taxid)
+    return (foreign_key, stable_id) + node_desc(rdb, stable_id)
 
 def _conv_gene(rdb, foreign_key, hint, taxid):
     """Uses the redis database to convert a gene to enesmbl stable id
@@ -191,11 +192,15 @@ def _conv_gene(rdb, foreign_key, hint, taxid):
 def node_desc(rdb, stable_id):
     if stable_id.startswith('unmapped'):
         return [None, stable_id, stable_id]
-    alias = rdb.get('::'.join(['stable', stable_id, 'alias']), )
+    alias = rdb.get('::'.join(['stable', stable_id, 'alias']))
     if alias is None: alias = stable_id
-    desc = rdb.get('::'.join(['stable', stable_id, 'desc']), )
+    else: alias = alias.decode()
+    desc = rdb.get('::'.join(['stable', stable_id, 'desc']))
     if desc is None: desc = stable_id
-    typ = rdb.get('::'.join(['stable', stable_id, 'type']), )
+    else: desc = desc.decode()
+    typ = rdb.get('::'.join(['stable', stable_id, 'type']))
+    if typ is None: pass
+    else: typ = typ.decode()
     return (typ, alias, desc)
 
 def import_mapping(map_dict, args=None):

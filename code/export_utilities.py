@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 import config_utilities as cf
 import redis_utilities as ru
 import mysql_utilities as mu
+import sanitize_utilities as su
 import csv, json
-import boto3, botocore
 import os
 
 def get_gg(db, et, taxon = 9606):
@@ -16,7 +16,14 @@ def get_pg(db, et, taxon = 9606):
 def figure_out_class(db, et):
     return db.run("SELECT n1_type, bidir FROM edge_type WHERE et_name = '{}'".format(et))[0]
 
-def norm_edges(edges):
+def norm_edges(edges, args): #TODO: only do certain things if asked by options.
+    if args.make_unweighted:
+        edges = su.make_network_unwieghted(edges, 2)
+    if args.make_undirected:
+        edges = su.make_network_undirected(edges)
+    edges = su.sort_network(edges)
+    edges = su.drop_duplicates_by_type_or_node(edges)
+    edges = normalize_network_by_type(edges, 3, 2)
     return edges
 
 def get_nodes(edges):
@@ -44,7 +51,7 @@ def main():
     """
     parser = ArgumentParser()
     parser = cf.add_config_args(parser)
-    parser.add_argument("-b", "--bucket_name", help="Name of the S3 bucket")
+    parser = su.add_config_args(parser)
     parser.add_argument("-e", "--edge_type", help="Edge type")
     parser.add_argument("-s", "--species", help="Species")
     args = parser.parse_args()
@@ -57,29 +64,17 @@ def main():
     nodes_fn = '{}.{}.node_map'.format(args.species, args.edge_type)
     meta_fn = '{}.{}.metadata'.format(args.species, args.edge_type)
     bucket_dir = os.path.join(cls, args.species, args.edge_type)
-    sync_dir = os.path.join(args.working_dir, args.bucket_name, bucket_dir)
+    sync_dir = os.path.join(args.working_dir, args.bucket, bucket_dir)
     sync_edges = os.path.join(sync_dir, edges_fn)
     sync_nodes = os.path.join(sync_dir, nodes_fn)
     sync_meta = os.path.join(sync_dir, meta_fn)
-    bucket_edges = os.path.join(bucket_dir, edges_fn)
-    bucket_nodes = os.path.join(bucket_dir, nodes_fn)
-    bucket_meta = os.path.join(bucket_dir, meta_fn)
 
-    s3 = boto3.resource('s3')
-    s3edges = s3.Object(args.bucket_name, bucket_edges)
-    s3nodes = s3.Object(args.bucket_name, bucket_nodes)
-    s3meta = s3.Object(args.bucket_name, bucket_meta)
-
-    if not args.force_fetch:
-        try:
-            if s3edges.content_length > 0 and s3nodes.content_length > 0 and s3meta.content_length > 0:
-                return
-        except botocore.exceptions.ClientError as e: #Maybe check to make sure the error is not found?
-            pass
+    if not args.force_fetch: #TODO: Check locally for files already existing.
+        pass
 
     get = get_gg if cls == 'Gene' else get_pg
     res = get(db, args.edge_type)
-    res = norm_edges(res)
+    res = norm_edges(res, args)
 
     nodes = get_nodes(res)
     nodes_desc = convert_genes(args, nodes)
@@ -88,20 +83,15 @@ def main():
     metadata = get_metadata(db, sources, res, nodes_desc)
     db.close()
 
-
     os.makedirs(sync_dir, exist_ok=True)
     with open(sync_edges, 'w') as f:
-        csvr = csv.writer(f)
+        csvr = csv.writer(f, delimiter='\t')
         csvr.writerows(res)
     with open(sync_nodes, 'w') as f:
-        csvr = csv.writer(f)
+        csvr = csv.writer(f), delimiter='\t'
         csvr.writerows(nodes_desc)
     with open(sync_meta, 'w') as f:
         json.dump(metadata, f)
-
-    s3edges.upload_file(sync_edges)
-    s3nodes.upload_file(sync_nodes)
-    s3meta.upload_file(sync_meta)
 
 if __name__ == "__main__":
     main()
