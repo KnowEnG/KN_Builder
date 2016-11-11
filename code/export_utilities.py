@@ -54,6 +54,7 @@ def main():
     parser = su.add_config_args(parser)
     parser.add_argument("-e", "--edge_type", help="Edge type")
     parser.add_argument("-s", "--species", help="Species")
+    parser.add_argument("-ms", "--min_size", help="Minimum number of nodes", default=1000)
     args = parser.parse_args()
 
     db = mu.get_database(args = args)
@@ -75,6 +76,10 @@ def main():
     get = get_gg if cls == 'Gene' else get_pg
     res = get(db, args.edge_type)
     res = norm_edges(res, args)
+
+    if len(res) < args.min_size:
+        print("Network has too few edges.  Refusing to write.")
+        exit(0)
 
     nodes = get_nodes(res)
     nodes_desc = convert_genes(args, nodes)
