@@ -23,6 +23,8 @@ def norm_edges(edges, args):
         edges = su.make_network_undirected(edges)
     edges = su.sort_network(edges)
     edges = su.drop_duplicates_by_type_or_node(edges, 0, 1, 3)
+    if args.make_undirected: #TODO: less important, yes, no, auto
+    	edges = su.upper_triangle(edges, 0, 1)
     edges = su.normalize_network_by_type(edges, 3, 2) #TODO: none, all, type
     return edges
 

@@ -236,3 +236,7 @@ def normalize_network_by_type(n_df, typ, wgt): #NEW, UNDOC
         sums[i[typ]] += i[wgt]
 
     return [i[:wgt] + ("{:.6g}".format(i[wgt]/sums[i[typ]]),) + i[wgt+1:] for i in n_df]
+
+
+def upper_triangle(n_df, n1, n2):
+   return [edge for edge in n_df if edge[n1] < edge[n2]]
