@@ -4,11 +4,11 @@
 ## Set environment variables
 ```
 KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
-KNP_CODE_DIR='/mnt/backup/project1/'
-KNP_WORKING_DIR=$KNP_CODE_DIR'/KN-6rep-1609/'
+KNP_CODE_DIR='/mnt/backup/knowdata/KnowNets/KnowNet_0.3/KN-6rep-1611/'
+KNP_WORKING_DIR=$KNP_CODE_DIR'/'
 KNP_STORAGE_DIR="$KNP_WORKING_DIR"
 KNP_DB_DIR="$KNP_WORKING_DIR"
-KNP_BUILD_NAME='rep6-1609'
+KNP_BUILD_NAME='rep6-1611'
 KNP_DATA_PATH='data_'$KNP_BUILD_NAME
 KNP_LOGS_PATH='logs_'$KNP_BUILD_NAME
 KNP_ENS_SPECIES='REPRESENTATIVE'
@@ -45,8 +45,7 @@ KNP_NEO4J_NAME=$(basename $KNP_NEO4J_DIR)
 ## add symlinks
 ```
 mkdir -p /mnt/backup
-ln -s /workspace/backup-project1 /mnt/backup/project1
-ln -s ../KnowNet_Pipeline "$KNP_WORKING_DIR"
+ln -s /workspace/knowdata /mnt/backup/
 ```
 
 ## copy pipeline code
@@ -124,7 +123,7 @@ python3 code/nginx_utilities.py \
 ```
 for c in $KNP_CHRONOS_URL ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep '"name"' | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
-    for s in 'map-' 'table-' 'check-' 'fetch-' 'import-' 'KN_starter' ; do
+    for s in 'map-' 'table-' 'check-' 'fetch-' 'import-' 'KN_starter' 'export-' ; do
         echo $s
         for i in `grep "$s" /tmp/t.txt  `; do
             CMD="curl -L -X DELETE $c/scheduler/job/$i";

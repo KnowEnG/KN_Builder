@@ -23,7 +23,7 @@ def norm_edges(edges, args): #TODO: only do certain things if asked by options.
         edges = su.make_network_undirected(edges)
     edges = su.sort_network(edges)
     edges = su.drop_duplicates_by_type_or_node(edges)
-    edges = normalize_network_by_type(edges, 3, 2)
+    edges = su.normalize_network_by_type(edges, 3, 2)
     return edges
 
 def get_nodes(edges):
@@ -88,7 +88,7 @@ def main():
         csvr = csv.writer(f, delimiter='\t')
         csvr.writerows(res)
     with open(sync_nodes, 'w') as f:
-        csvr = csv.writer(f), delimiter='\t'
+        csvr = csv.writer(f, delimiter='\t')
         csvr.writerows(nodes_desc)
     with open(sync_meta, 'w') as f:
         json.dump(metadata, f)

@@ -236,4 +236,4 @@ def normalize_network_by_type(n_df, typ, wgt): #NEW, UNDOC
     for i in n_df:
         sums[i[typ]] += i[wgt]
 
-    return [i[:wgt] + [i[wgt]/sums[i[typ]]] + i[wgt+1:] for i in n_df]
+    return [i[:wgt] + (i[wgt]/sums[i[typ]],) + i[wgt+1:] for i in n_df]

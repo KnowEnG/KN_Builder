@@ -191,7 +191,7 @@ def _conv_gene(rdb, foreign_key, hint, taxid):
 
 def node_desc(rdb, stable_id):
     if stable_id.startswith('unmapped'):
-        return [None, stable_id, stable_id]
+        return (None, stable_id, stable_id)
     alias = rdb.get('::'.join(['stable', stable_id, 'alias']))
     if alias is None: alias = stable_id
     else: alias = alias.decode()
