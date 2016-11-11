@@ -16,14 +16,14 @@ def get_pg(db, et, taxon = 9606):
 def figure_out_class(db, et):
     return db.run("SELECT n1_type, bidir FROM edge_type WHERE et_name = '{}'".format(et))[0]
 
-def norm_edges(edges, args): #TODO: only do certain things if asked by options.
+def norm_edges(edges, args):
     if args.make_unweighted:
         edges = su.make_network_unwieghted(edges, 2)
-    if args.make_undirected:
+    if args.make_undirected: #TODO: less important, yes, no, auto
         edges = su.make_network_undirected(edges)
     edges = su.sort_network(edges)
-    edges = su.drop_duplicates_by_type_or_node(edges)
-    edges = su.normalize_network_by_type(edges, 3, 2)
+    edges = su.drop_duplicates_by_type_or_node(edges, 0, 1, 3)
+    edges = su.normalize_network_by_type(edges, 3, 2) #TODO: none, all, type
     return edges
 
 def get_nodes(edges):

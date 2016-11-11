@@ -174,10 +174,10 @@ def sort_network(n_df): #NEW, UNDOC
     Returns:
         pandas.DataFrame: the modified dataframe
     """
-    return sorted(n_df)
+    return sorted(n_df, reverse=True)
 
 
-def drop_duplicates_by_type_or_node(n_df): #NEW, UNDOC
+def drop_duplicates_by_type_or_node(n_df, n1, n2, typ): #NEW, UNDOC
     """
     Drop the duplicates in the network, by type or by node.
 
@@ -203,10 +203,9 @@ def drop_duplicates_by_type_or_node(n_df): #NEW, UNDOC
     new_n_df = []
 
     for row in n_df:
-        ix = row[0]
-        nd1_val = row[1]
-        nd2_val = row[2]
-        type_val = row[4]
+        nd1_val = row[n1]
+        nd2_val = row[n2]
+        type_val = row[typ]
         nodes_differ = nd1_val != prev_nd1_val or nd2_val != prev_nd2_val
         type_differs = type_val != prev_type_val
         if (DROP_DUPLICATES_METHOD == 'node' and nodes_differ) or (nodes_differ or type_differs):
