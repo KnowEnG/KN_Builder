@@ -216,6 +216,11 @@ def import_mapping(map_dict, args=None):
         args=cf.config_args()
     rdb = get_database(args)
     for orig_id in map_dict:
+        KN_id, KN_name = map_dict[orig_id].split('::')
+        rdb.set('::'.join(['stable', KN_id, 'type']), "Property")
+        rdb.set('::'.join(['stable', KN_id, 'desc']), KN_name)
+        rdb.set('::'.join(['stable', KN_id, 'alias']), KN_id)
+        
         rkey = rdb.getset('property::' + orig_id, map_dict[orig_id])
         if rkey is not None and rkey != map_dict[orig_id]:
             rdb.set('property::' + orig_id, 'unmapped-many')
