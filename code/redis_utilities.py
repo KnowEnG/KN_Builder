@@ -21,10 +21,10 @@ import subprocess
 def deploy_container(args=None):
     """Deplays a container with marathon running Redis using the specified
     args.
-    
-    This replaces the placeholder args in the json describing how to deploy a 
+
+    This replaces the placeholder args in the json describing how to deploy a
     container running Redis with those supplied in the users arguements.
-    
+
     Args:
         args (Namespace): args as populated namespace or 'None' for defaults
     """
@@ -33,7 +33,7 @@ def deploy_container(args=None):
     deploy_dir = os.path.join(args.working_dir, args.logs_path, 'marathon_jobs')
     if not os.path.exists(deploy_dir):
         os.makedirs(deploy_dir)
-    template_job = os.path.join(args.working_dir, args.code_path, 
+    template_job = os.path.join(args.working_dir, args.code_path,
                                 'dockerfiles', 'marathon', 'redis.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
@@ -129,6 +129,29 @@ def import_gene_nodes(node_table, args=None):
         rdb.set('::'.join(['stable', node_id, 'desc']), node_desc)
         rdb.set('::'.join(['stable', node_id, 'type']), node_type)
 
+def import_node_meta(nmfile, args=None):
+    if args is None:
+        args=cf.config_args()
+    rdb = get_database(args)
+    with open(nmfile) as infile:
+        reader = csv.reader(infile, delimiter='\t')
+        for row in reader:
+            node_id, nm_type, nm_value = row
+            node_type = 'Property'
+            node_alias = KN_node_id
+            node_desc = KN_node_id
+            if(nm_type == 'orig_id'):
+                node_alias = nm_value
+            if(nm_type == 'orig_desc'):
+                node_desc = nm_value
+            rdb.set('::'.join(['stable', node_id, 'type']), node_type)
+            rkey = rdb.getset('::'.join(['stable', node_id, 'alias']), node_alias)
+            if rkey is not None and rkey != node_alias:
+                rdb.set('::'.join(['stable', node_id, 'alias']), rkey)
+            rkey = rdb.getset('::'.join(['stable', node_id, 'desc']), node_desc)
+            if rkey is not None and rkey != node_desc:
+                rdb.set('::'.join(['stable', node_id, 'desc']), rkey)
+
 def get_gene_info(rdb, foreign_key, hint, taxid):
     stable_id = conv_gene(rdb, foreign_key, hint, taxid)
     return (foreign_key, stable_id) + node_desc(rdb, stable_id)
@@ -216,11 +239,12 @@ def import_mapping(map_dict, args=None):
         args=cf.config_args()
     rdb = get_database(args)
     for orig_id in map_dict:
-        KN_id, KN_name = map_dict[orig_id].split('::')
-        rdb.set('::'.join(['stable', KN_id, 'type']), "Property")
-        rdb.set('::'.join(['stable', KN_id, 'desc']), KN_name)
-        rdb.set('::'.join(['stable', KN_id, 'alias']), KN_id)
-        
+        KNvals = map_dict[orig_id].split('::')
+        rdb.set('::'.join(['stable', KNvals[0], 'type']), "Property")
+        rdb.set('::'.join(['stable', KNvals[0], 'alias']), orig_id)
+        if len(KNvals)>1:
+            rdb.set('::'.join(['stable', KNvals[0], 'desc']), KNvals[1])
+
         rkey = rdb.getset('property::' + orig_id, map_dict[orig_id])
         if rkey is not None and rkey != map_dict[orig_id]:
             rdb.set('property::' + orig_id, 'unmapped-many')
@@ -228,15 +252,15 @@ def import_mapping(map_dict, args=None):
 
 def main():
     """Deploy a Redis container using marathon with the provided command line
-    arguements. 
-    
-    This uses the provided command line arguments and the defaults found in 
+    arguements.
+
+    This uses the provided command line arguments and the defaults found in
     config_utilities to launch a Redis docker container using marathon.
     """
     parser = ArgumentParser()
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
     deploy_container(args)
-    
+
 if __name__ == "__main__":
     main()

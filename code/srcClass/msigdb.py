@@ -259,9 +259,6 @@ class Msigdb(SrcClass):
         et_hint = source + '_' + alias.replace(".", "_")
         score = 1
 
-        info_type1 = 'alt_alias'
-        info_type2 = 'link'
-
         with open(raw_line, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
             open(n_meta_file, 'w') as n_meta, \
@@ -283,8 +280,8 @@ class Msigdb(SrcClass):
                 n1_kn_id = cf.pretty_name('msig_' + n1_chksum)
                 n1_kn_name = cf.pretty_name('msig_' + n1_orig_name)
                 n1hint = n1_kn_name
-                n_meta_writer.writerow([n1_kn_id, info_type1, n1_orig_name])
-                n_meta_writer.writerow([n1_kn_id, info_type2, n1_url])
+                n_meta_writer.writerow([n1_kn_id, 'orig_desc', n1_orig_name])
+                n_meta_writer.writerow([n1_kn_id, 'link', n1_url])
                 n_writer.writerow([n1_kn_id, n1_kn_name, n_type])
                 for n2_id in raw[2:]:
                     hasher = hashlib.md5()

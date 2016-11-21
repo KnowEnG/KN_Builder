@@ -235,7 +235,6 @@ class Pathcom(SrcClass):
         n3hint = 'unknown'
         n3spec = 'unknown'
         score = '1'
-        info_type = 'alt_alias'
         n_type = 'Property'
 
         with open(raw_line, encoding='utf-8') as infile, \
@@ -273,7 +272,7 @@ class Pathcom(SrcClass):
                 if n3id:
                     kn_n3id = cf.pretty_name('paco_' + n3id)
                     n_writer.writerow([kn_n3id, kn_n3id, n_type])
-                    n_meta_writer.writerow([kn_n3id, info_type, n3id])
+                    n_meta_writer.writerow([kn_n3id, 'orig_id', n3id])
                     for node in [n1id, n2id]:
                         hasher = hashlib.md5()
                         hasher.update('\t'.join([chksm, kn_n3id, n3hint, n3_type,

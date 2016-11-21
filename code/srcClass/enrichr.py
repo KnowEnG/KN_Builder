@@ -285,7 +285,6 @@ class Enrichr(SrcClass):
             n2hint = 'HGNC'
         (et_hint, node_prefix) = self.aliases[alias].split('::')
         score = 1
-        info_type = 'alt_alias'
 
         if alias == 'PPI_Hub_Proteins':
             n1type = 'gene'
@@ -311,7 +310,7 @@ class Enrichr(SrcClass):
                 n1_kn_name = n1_orig_name
                 if alias != 'PPI_Hub_Proteins':
                     n1_kn_name = cf.pretty_name(node_prefix + '_'+ n1_orig_name)
-                    n_meta_writer.writerow([n1_kn_name, info_type, n1_orig_name])
+                    n_meta_writer.writerow([n1_kn_name, 'orig_desc', n1_orig_name])
                     n_writer.writerow([n1_kn_name, n1_kn_name, n_type])
                 for n2_id in raw[1:]:
                     n2_id = n2_id.split(',')[0]

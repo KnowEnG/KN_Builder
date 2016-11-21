@@ -254,7 +254,6 @@ class Kegg(SrcClass):
         src = filename.split('.')[0]
         alias = filename.split('.')[1]
         map_dict = dict()
-        info_type = "alt_alias"
         n1_type = 'Property'
         n_meta_file = filename.replace('raw_line', 'node_meta')
         node_file = filename.replace('raw_line', 'node')
@@ -277,8 +276,8 @@ class Kegg(SrcClass):
                     kn_name = cf.pretty_name(src + '_' + orig_name)
                     map_dict[orig_id] = kn_id + '::' + kn_name
                     n_writer.writerow([kn_id, kn_name, n1_type])
-                    n_meta_writer.writerow([kn_id, info_type, orig_name])
-                    n_meta_writer.writerow([kn_id, info_type, orig_id])
+                    n_meta_writer.writerow([kn_id, 'orig_desc', orig_name])
+                    n_meta_writer.writerow([kn_id, 'orig_id', orig_id])
             outfile = node_file.replace('node', 'unique.node')
             tu.csu(node_file, outfile)
             outfile = n_meta_file.replace('node_meta', 'unique.node_meta')

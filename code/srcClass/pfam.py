@@ -223,7 +223,6 @@ class Pfam(SrcClass):
         et_hint = 'pfam_domains'
         n1spec = '0'
         map_dict = dict()
-        info_type = "alt_alias"
         src = self.name
 
         ###Map the file name
@@ -258,8 +257,8 @@ class Pfam(SrcClass):
                 kn_name = cf.pretty_name(src + '_' + orig_name)
                 map_dict[orig_id] = kn_id + '::' + kn_name
                 n_writer.writerow([kn_id, kn_name, n_type])
-                n_meta_writer.writerow([kn_id, info_type, orig_name])
-                n_meta_writer.writerow([kn_id, info_type, orig_id])
+                n_meta_writer.writerow([kn_id, 'orig_desc', orig_name])
+                n_meta_writer.writerow([kn_id, 'orig_id', orig_id])
                 n2orig = raw[2]
                 evalue = raw[4]
                 evalue = float(evalue)
