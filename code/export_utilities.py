@@ -6,10 +6,10 @@ import sanitize_utilities as su
 import csv, json
 import os
 
-def get_gg(db, et, taxon = 9606):
+def get_gg(db, et, taxon):
     return db.run("SELECT s.n1_id, s.n2_id, s.weight, s.et_name, rl.file_id, rl.line_num FROM status s JOIN node_species n1 ON s.n1_id = n1.node_id JOIN node_species n2 ON s.n2_id = n2.node_id JOIN raw_line rl ON s.line_hash = rl.line_hash WHERE s.et_name = '{}' AND n1.taxon = {} AND n2.taxon = {} AND s.status = 'production';".format(et, taxon, taxon))
 
-def get_pg(db, et, taxon = 9606):
+def get_pg(db, et, taxon):
     return db.run("SELECT s.n1_id, s.n2_id, s.weight, s.et_name, rl.file_id, rl.line_num FROM status s JOIN node_species n2 ON s.n2_id = n2.node_id JOIN raw_line rl ON s.line_hash = rl.line_hash WHERE s.et_name = '{}' AND n2.taxon = {} AND s.status = 'production';".format(et, taxon))
 
 
@@ -37,7 +37,7 @@ def get_nodes(edges):
 
 def convert_genes(args, nodes):
     rdb = ru.get_database(args)
-    return [ru.conv_gene(rdb, item, '', args.species) for item in nodes]
+    return [ru.get_gene_info(rdb, item, '', args.species) for item in nodes]
     return db.run("SELECT node_id, n_alias FROM node WHERE node_id IN ('{}')".format("','".join(nodes)))
 
 def get_sources(edges):
@@ -76,7 +76,7 @@ def main():
         pass
 
     get = get_gg if cls == 'Gene' else get_pg
-    res = get(db, args.edge_type)
+    res = get(db, args.edge_type, args.species)
     res = norm_edges(res, args)
 
     if len(res) < args.min_size:

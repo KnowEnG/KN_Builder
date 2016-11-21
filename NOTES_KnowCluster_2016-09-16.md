@@ -24,6 +24,12 @@ KNP_MYSQL_CPU='2.0'
 KNP_MYSQL_PASS='KnowEnG'
 KNP_MYSQL_CONSTRAINT_URL='knowcluster07.dyndns.org'
 
+KNP_MYSQL_HOST='knownbs.cxtvettjrq71.us-west-2.rds.amazonaws.com'
+KNP_MYSQL_USER='blatti'
+KNP_MYSQL_PASS='knowdev249'
+KNP_MYSQL_PORT='3306'
+KNP_MYSQL_DB='KnowNet'
+
 KNP_REDIS_HOST='knowcluster06.dyndns.org'
 KNP_REDIS_PORT='6379'
 KNP_REDIS_DIR=$KNP_DB_DIR'/p1redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
@@ -72,14 +78,14 @@ python3 code/mysql_utilities.py \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -mym $KNP_MYSQL_MEM -myc $KNP_MYSQL_CPU \
     -myd $KNP_MYSQL_DIR -mycf $KNP_MYSQL_CONF \
-    -myps $KNP_MYSQL_PASS -mycu $KNP_MYSQL_CONSTRAINT_URL \
+    -myps $KNP_MYSQL_PASS -myu $KNP_MYSQL_USER -mycu $KNP_MYSQL_CONSTRAINT_URL \
     -m $KNP_MARATHON_URL -wd $KNP_WORKING_DIR \
     -sd $KNP_STORAGE_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH
 ```
 
 ### empty MySQL database if it is running
 ```
-mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
+mysql -h $KNP_MYSQL_HOST -u $KNP_MYSQL_USER -p$KNP_MYSQL_PASS \
         -P $KNP_MYSQL_PORT --execute "drop database KnowNet;"
 ```
 
@@ -138,6 +144,7 @@ done;
 ```
 python3 code/workflow_utilities.py CHECK -su \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
+    -myps $KNP_MYSQL_PASS -myu $KNP_MYSQL_USER \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
     -c $KNP_CHRONOS_URL \
@@ -148,6 +155,7 @@ python3 code/workflow_utilities.py CHECK -su \
 ```
 python3 code/workflow_utilities.py CHECK \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
+    -myps $KNP_MYSQL_PASS -myu $KNP_MYSQL_USER \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
     -c $KNP_CHRONOS_URL \
@@ -158,10 +166,33 @@ python3 code/workflow_utilities.py CHECK \
 ```
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
+    -myps $KNP_MYSQL_PASS -myu $KNP_MYSQL_USER \
     -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
     -c $KNP_CHRONOS_URL \
     -sd $KNP_STORAGE_DIR
 ```
+
+## run export pipeline (time )
+```
+python3 code/workflow_utilities.py EXPORT \
+    -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
+    -myps $KNP_MYSQL_PASS -myu $KNP_MYSQL_USER \
+    -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
+    -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
+    -c $KNP_CHRONOS_URL \
+    -sd $KNP_STORAGE_DIR -es $KNP_ENS_SPECIES \
+    -p "$(mysql -h$KNP_MYSQL_HOST -p$KNP_MYSQL_PASS -P$KNP_MYSQL_PORT -DKnowNet -e "\
+        SELECT ns2.taxon, e.et_name \
+        FROM edge e, node_species ns2 \
+        WHERE e.n2_id=ns2.node_id \
+        AND COUNT(1) > 500 \
+        GROUP BY ns2.taxon, e.et_name" \
+        | tail -n+2 \
+        | sed -e 's/\t/::/g' \
+        | sed -e ':a;N;$!ba;s/\n/,,/g')"
+```
+
+
 
 ## create report of results
 ```
@@ -174,7 +205,7 @@ git push
 ```
 ## create user
 ```
-mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS \
+mysql -h $KNP_MYSQL_HOST -u$KNP_MYSQL_USER -p$KNP_MYSQL_PASS \
     -P $KNP_MYSQL_PORT --execute \
     "CREATE USER 'KNviewer' IDENTIFIED BY 'dbdev249'; \
     GRANT SELECT ON KnowNet.* TO 'KNviewer';"
@@ -197,7 +228,7 @@ docker run -dt --restart=always --name $KNP_NEO4J_NAME \
 
 ### dump data from MySQL for species
 ```
-mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
+mysql -h $KNP_MYSQL_HOST -u$KNP_MYSQL_USER -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     --execute "SELECT DISTINCT taxon AS taxonQID, sp_abbrev AS abbrev, \
     sp_sciname AS sci_name, \"Species\" AS QLABEL FROM KnowNet.species s" | \
     sed 's/QID/:ID(Species)/g' | sed 's/QLABEL/:LABEL/g' > \
@@ -205,14 +236,14 @@ mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
 ```
 ### dump data from MySQL for nodes
 ```
-mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
+mysql -h $KNP_MYSQL_HOST -u$KNP_MYSQL_USER -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     --execute "SELECT DISTINCT UCASE(node_id) AS node_idQID, n_alias AS alias, \
     n_type AS QLABEL FROM KnowNet.node n " | sed 's/QID/:ID(Node)/g' | \
     sed 's/QLABEL/:LABEL/g' > $KNP_NEO4J_DIR/shared/neo4j.nodes.txt;
 ```
 ### dump data from MySQL for node-species relationships
 ```
-mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
+mysql -h $KNP_MYSQL_HOST -u$KNP_MYSQL_USER -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT \
     --execute "SELECT DISTINCT UCASE(n.node_id) AS QSTART_ID, taxon AS QEND_ID, \
     \"InGenome\" AS QTYPE FROM KnowNet.node_species ns, KnowNet.node n \
     WHERE n.node_id=ns.node_id AND n.n_type = 'Gene' " | \
@@ -236,7 +267,7 @@ awk -v OFS="\t" 'BEGIN { print "node_id", "n_type_desc", "info_type", \
 ```
 ### dump data from MySQL for edge_meta (skipped)
 ```
-mysql -h $KNP_MYSQL_HOST -uroot -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT --quick \
+mysql -h $KNP_MYSQL_HOST -u$KNP_MYSQL_USER -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT --quick \
     --execute "SELECT DISTINCT UCASE(s.n1_id), UCASE(s.n2_id), s.et_name, em.info_type, \
     em.info_desc FROM KnowNet.status s, KnowNet.edge_meta em, \
     KnowNet.edge_type et WHERE s.line_hash = em.line_hash \

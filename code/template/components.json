@@ -22,7 +22,7 @@
     },
     "exporter": {
         "TMPIMG": "cblatti3/py3_skl_redis_mysql_s3:0.1",
-        "TMPMEM": "12000",
+        "TMPMEM": "6000",
         "TMPCPUS": "0.5",
         "TMPPRIOR": "true",
         "TMPCMD": "sh -c '{ cd /TMPWORKDIR/TMPCODEPATH/ && python3 export_utilities.py -s TMPTAXON -e TMPETYPE -b KNsample TMPOPTS ; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
