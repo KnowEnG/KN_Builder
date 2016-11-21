@@ -501,8 +501,8 @@ class MySQL(object):
         for table in import_tables:
             tablefile = os.path.join(mysql_dir, table)
             self.import_table('KnowNet', tablefile, '--ignore')
-        self.cursor.execute("SET @@GLOBAL.SQL_MODE = REPLACE(@@SQL_MODE, " + \
-                            "'NO_ZERO_DATE', '')")
+        #self.cursor.execute("SET @@GLOBAL.SQL_MODE = REPLACE(@@SQL_MODE, " + \
+        #                    "'NO_ZERO_DATE', '')")
         self.conn.commit()
 
     def create_db(self, database):
