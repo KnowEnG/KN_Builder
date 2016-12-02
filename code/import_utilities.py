@@ -14,6 +14,7 @@ Contains module functions::
 
 import config_utilities as cf
 import mysql_utilities as mu
+import redis_utilities as ru
 import json
 import os
 import csv
@@ -247,6 +248,7 @@ def import_nodemeta(nmfile, args=None):
     table = 'node_meta'
     dup_cmd = 'node_meta.node_id = node_meta.node_id'
     ld_cmd = ''
+    ru.import_node_meta(nmfile, args)
     import_file(nmfile, table, ld_cmd, dup_cmd, args)
 
 def import_pnode(filename, args=None):
