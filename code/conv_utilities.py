@@ -46,9 +46,9 @@ def main(tablefile, args=None):
 
     This takes the path to an tablefile (see table_utilities.main) and maps
     the nodes in it using the Redis DB. It then outputs a status files in
-    the format (table_hash, n1, n2, edge_type, weight, edge_hash, line_hash, 
-    status, status_desc), where status is production if both nodes mapped and 
-    unmapped otherwise. It also outpus an edge file which all rows where status 
+    the format (table_hash, n1, n2, edge_type, weight, edge_hash, line_hash,
+    status, status_desc), where status is production if both nodes mapped and
+    unmapped otherwise. It also outpus an edge file which all rows where status
     is production, in the format (edge_hash, n1, n2, edge_type, weight), and
     and edge2line file in the formate (edge_hash, line_hash).
 
@@ -139,8 +139,8 @@ def map_list(namefile, args=None):
         writer = csv.writer(n_map, delimiter = '\t', lineterminator='\n')
         for line in reader:
             orig = line[0]
-            mapped = ru.conv_gene(rdb, orig, args.source_hint, args.taxon)
-            writer.writerow([mapped, orig])
+            mapped = ru.get_node_info(rdb, orig, args.source_hint, args.taxon)
+            writer.writerow(mapped + (orig,))
 
 def main_parse_args():
     """Processes command line arguments.

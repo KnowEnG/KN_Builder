@@ -105,7 +105,7 @@ def import_ensembl(alias, args=None):
         ens_id = map_dict[key].encode().upper()
         foreign_key = foreign_key.upper()
         rkey = rdb.getset('unique::' + foreign_key, ens_id)
-        if rkey is not None and rkey != ens_id:
+        if rkey is not None and rkey.decode() != ens_id:
             rdb.set('unique::' + foreign_key, 'unmapped-many')
         rdb.sadd(foreign_key, '::'.join([taxid, hint]))
         rdb.set('::'.join([taxid, hint, foreign_key]), ens_id)
@@ -146,14 +146,21 @@ def import_node_meta(nmfile, args=None):
                 node_desc = nm_value
             rdb.set('::'.join(['stable', node_id, 'type']), node_type)
             rkey = rdb.getset('::'.join(['stable', node_id, 'alias']), node_alias)
-            if rkey is not None and rkey != node_alias:
+            if rkey is not None and rkey.decode() != node_alias:
                 rdb.set('::'.join(['stable', node_id, 'alias']), rkey)
             rkey = rdb.getset('::'.join(['stable', node_id, 'desc']), node_desc)
-            if rkey is not None and rkey != node_desc:
+            if rkey is not None and rkey.decode() != node_desc:
                 rdb.set('::'.join(['stable', node_id, 'desc']), rkey)
 
-def get_gene_info(rdb, foreign_key, hint, taxid):
-    stable_id = conv_gene(rdb, foreign_key, hint, taxid)
+def get_node_info(rdb, foreign_key, hint, taxid):
+    ntype = rdb.get('::'.join(['stable', foreign_key, 'type']))
+    stable_id = None
+    if ntype is None:
+        stable_id = conv_gene(rdb, foreign_key, hint, taxid)
+    else if ntype.decode() == "Gene":
+        stable_id = conv_gene(rdb, foreign_key, hint, taxid)
+    else if ntype.decode() == "Property":
+        stable_id = foreign_key
     return (foreign_key, stable_id) + node_desc(rdb, stable_id)
 
 def conv_gene(rdb, foreign_key, hint, taxid):
@@ -246,7 +253,7 @@ def import_mapping(map_dict, args=None):
             rdb.set('::'.join(['stable', KNvals[0], 'desc']), KNvals[1])
 
         rkey = rdb.getset('property::' + orig_id, map_dict[orig_id])
-        if rkey is not None and rkey != map_dict[orig_id]:
+        if rkey is not None and rkey.decode() != map_dict[orig_id]:
             rdb.set('property::' + orig_id, 'unmapped-many')
         rdb.sadd(orig_id, map_dict[orig_id])
 

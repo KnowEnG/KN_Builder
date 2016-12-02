@@ -18,14 +18,20 @@ def figure_out_class(db, et):
 
 def norm_edges(edges, args):
     if args.make_unweighted:
-        edges = su.make_network_unwieghted(edges, 2)
+        edges = su.make_network_unweighted(edges, 2)
+        print("UnweightedLines: " + str(len(edges)))
     if args.make_undirected: #TODO: less important, yes, no, auto
         edges = su.make_network_undirected(edges)
+        print("UndirectedLines: " + str(len(edges)))
     edges = su.sort_network(edges)
+    print("SortedLines: " + str(len(edges)))
     edges = su.drop_duplicates_by_type_or_node(edges, 0, 1, 3)
+    print("DeDuplicatedEdges: " + str(len(edges)))
     if args.make_undirected: #TODO: less important, yes, no, auto
-    	edges = su.upper_triangle(edges, 0, 1)
+        edges = su.upper_triangle(edges, 0, 1)
+        print("UpperTriangleEdges: " + str(len(edges)))
     edges = su.normalize_network_by_type(edges, 3, 2) #TODO: none, all, type
+    print("NormalizedEdges: " + str(len(edges)))
     return edges
 
 def get_nodes(edges):
@@ -35,9 +41,9 @@ def get_nodes(edges):
         ret.add(i[1])
     return ret
 
-def convert_genes(args, nodes):
+def convert_nodes(args, nodes):
     rdb = ru.get_database(args)
-    return [ru.get_gene_info(rdb, item, '', args.species) for item in nodes]
+    return [ru.get_node_info(rdb, item, '', args.species) for item in nodes]
     return db.run("SELECT node_id, n_alias FROM node WHERE node_id IN ('{}')".format("','".join(nodes)))
 
 def get_sources(edges):
@@ -56,7 +62,6 @@ def main():
     parser = su.add_config_args(parser)
     parser.add_argument("-e", "--edge_type", help="Edge type")
     parser.add_argument("-s", "--species", help="Species")
-    parser.add_argument("-ms", "--min_size", help="Minimum number of nodes", default=1000)
     args = parser.parse_args()
 
     db = mu.get_database(args = args)
@@ -77,14 +82,14 @@ def main():
 
     get = get_gg if cls == 'Gene' else get_pg
     res = get(db, args.edge_type, args.species)
+    print("ProductionLines: " + str(len(res)))
+    if cls == 'Property':
+        # TODO: remove small properties
+        pass
     res = norm_edges(res, args)
 
-    if len(res) < args.min_size:
-        print("Network has too few edges.  Refusing to write.")
-        exit(0)
-
     nodes = get_nodes(res)
-    nodes_desc = convert_genes(args, nodes)
+    nodes_desc = convert_nodes(args, nodes)
 
     sources = get_sources(res)
     metadata = get_metadata(db, sources, res, nodes_desc)
