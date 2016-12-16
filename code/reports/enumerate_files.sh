@@ -1,16 +1,20 @@
+set -eu
+
 # default parameter values
-KNP_LOCAL_DIR='/workspace/apps/KnowNet_Pipeline'
-KNP_DATA_PATH='local_pipe'
-KNP_MYSQL_HOST='knowcharles.dyndns.org'
-KNP_MYSQL_PORT='3306'
-KNP_REDIS_HOST='knowcharles.dyndns.org'
-KNP_REDIS_PORT='6379'
-KNP_CHRONOS_URL='mmaster01.cse.illinois.edu:4400'
+#KNP_DATA_PATH='local_pipe'
+#KNP_MYSQL_HOST='knowcharles.dyndns.org'
+#KNP_MYSQL_PORT='3306'
+#KNP_MYSQL_USER='root'
+#KNP_MYSQL_PASS='KnowEnG'
+#KNP_REDIS_HOST='knowcharles.dyndns.org'
+#KNP_REDIS_PORT='6379'
+#KNP_REDIS_PASS='KnowEnG'
+VERBOSE='COUNTS'
+
 KNP_FILE_TYPE="*json"
 KNP_SRC='dip'
 KNP_ALIAS='PPI'
 KNP_CHUNK='1'
-VERBOSE='COUNTS'
 
 # command line parameters
 KNP_DATA_PATH=$1
@@ -21,9 +25,9 @@ KNP_MYSQL_PORT=$5
 KNP_REDIS_PORT=$6
 
 shopt -s extglob
+
 FILE_CTR=0
 echo -e "tnum\ttype\tsnum\tsource\tfile\tempty\ttime\tlines"
-
 for KNP_FILE_TYPE in "*/file_metadata.json" "*/*.*.txt" "*.json" \
     "*/!(*file_metadata).json" "*/!(*unique).raw_line.*" "*/!(*unique).node.*" \
     "*/*.unique.node.*" "*/!(*unique).node_meta.*" "*/*.unique.node_meta.*" \
@@ -80,10 +84,10 @@ for KNP_FILE_TYPE in "*/file_metadata.json" "*/*.*.txt" "*.json" \
     echo ""
 done;
 echo ""
-CMD="redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a KnowEnG  info | grep keys= | cut -f1 -d',' |  cut -f2 -d':'"
+CMD="redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS info | grep keys= | cut -f1 -d',' |  cut -f2 -d':'"
     echo -n Redis Keys$'\t'
     eval "$CMD"
-CMD='mysql -h '$KNP_MYSQL_HOST' --port '$KNP_MYSQL_PORT'  -uroot -pKnowEnG --execute "
+CMD='mysql -h '$KNP_MYSQL_HOST' --port '$KNP_MYSQL_PORT'  -u'$KNP_MYSQL_USER' -p'$KNP_MYSQL_PASS' --execute "
     SELECT \"species\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.species ;
     SELECT \"edge_type\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.edge_type UNION
     SELECT \"node_type\" AS table_name, COUNT(*) AS exact_row_count FROM KnowNet.node_type UNION
@@ -100,4 +104,4 @@ CMD='mysql -h '$KNP_MYSQL_HOST' --port '$KNP_MYSQL_PORT'  -uroot -pKnowEnG --exe
 "'
     echo MySQL Tables
     eval "$CMD"
-    
+

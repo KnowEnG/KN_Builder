@@ -134,13 +134,13 @@ def map_list(namefile, args=None):
         args=main_parse_args()
     rdb = ru.get_database(args)
     with open(namefile, 'r') as infile, \
-        open(os.path.splitext(namefile)[0] + '.mapped.txt', 'w') as n_map:
+        open(os.path.splitext(namefile)[0] + '.node_map.txt', 'w') as n_map:
         reader = csv.reader(infile, delimiter = '\t')
         writer = csv.writer(n_map, delimiter = '\t', lineterminator='\n')
         for line in reader:
             orig = line[0]
             mapped = ru.get_node_info(rdb, orig, args.source_hint, args.taxon)
-            writer.writerow(mapped + (orig,))
+            writer.writerow(mapped)
 
 def main_parse_args():
     """Processes command line arguments.

@@ -17,6 +17,7 @@ import json
 import os
 from argparse import ArgumentParser
 import subprocess
+import csv
 
 def deploy_container(args=None):
     """Deplays a container with marathon running Redis using the specified
@@ -102,7 +103,7 @@ def import_ensembl(alias, args=None):
     for key in map_dict:
         (taxid, _, _, hint, foreign_key) = key.split('::')
         hint = hint.upper()
-        ens_id = map_dict[key].encode().upper()
+        ens_id = map_dict[key].upper()
         foreign_key = foreign_key.upper()
         rkey = rdb.getset('unique::' + foreign_key, ens_id)
         if rkey is not None and rkey.decode() != ens_id:
@@ -111,13 +112,13 @@ def import_ensembl(alias, args=None):
         rdb.set('::'.join([taxid, hint, foreign_key]), ens_id)
         if hint == 'WIKIGENE':
             try:
-                int(rdb.get('::'.join(['stable', ens_id.decode(), 'alias'])))
+                int(rdb.get('::'.join(['stable', ens_id, 'alias'])))
             except TypeError:
-                rdb.set('::'.join(['stable', ens_id.decode(), 'alias']), foreign_key)
+                rdb.set('::'.join(['stable', ens_id, 'alias']), foreign_key)
             except ValueError:
                 pass
             else:
-                rdb.set('::'.join(['stable', ens_id.decode(), 'alias']), foreign_key)
+                rdb.set('::'.join(['stable', ens_id, 'alias']), foreign_key)
 
 def import_gene_nodes(node_table, args=None):
     if args is None:
@@ -138,18 +139,20 @@ def import_node_meta(nmfile, args=None):
         for row in reader:
             node_id, nm_type, nm_value = row
             node_type = 'Property'
-            node_alias = KN_node_id
-            node_desc = KN_node_id
+            node_alias = node_id
+            node_desc = node_id
             if(nm_type == 'orig_id'):
                 node_alias = nm_value
-            if(nm_type == 'orig_desc'):
+            elif(nm_type == 'orig_desc'):
                 node_desc = nm_value
+            else:
+                continue
             rdb.set('::'.join(['stable', node_id, 'type']), node_type)
             rkey = rdb.getset('::'.join(['stable', node_id, 'alias']), node_alias)
-            if rkey is not None and rkey.decode() != node_alias:
+            if rkey is not None and rkey.decode() != node_alias and rkey.decode() != node_id:
                 rdb.set('::'.join(['stable', node_id, 'alias']), rkey)
             rkey = rdb.getset('::'.join(['stable', node_id, 'desc']), node_desc)
-            if rkey is not None and rkey.decode() != node_desc:
+            if rkey is not None and rkey.decode() != node_desc and rkey.decode() != node_id:
                 rdb.set('::'.join(['stable', node_id, 'desc']), rkey)
 
 def get_node_info(rdb, foreign_key, hint, taxid):
@@ -157,9 +160,9 @@ def get_node_info(rdb, foreign_key, hint, taxid):
     stable_id = None
     if ntype is None:
         stable_id = conv_gene(rdb, foreign_key, hint, taxid)
-    else if ntype.decode() == "Gene":
+    elif ntype.decode() == "Gene":
         stable_id = conv_gene(rdb, foreign_key, hint, taxid)
-    else if ntype.decode() == "Property":
+    elif ntype.decode() == "Property":
         stable_id = foreign_key
     return (foreign_key, stable_id) + node_desc(rdb, stable_id)
 

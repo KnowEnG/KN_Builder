@@ -248,7 +248,6 @@ def import_nodemeta(nmfile, args=None):
     table = 'node_meta'
     dup_cmd = 'node_meta.node_id = node_meta.node_id'
     ld_cmd = ''
-    ru.import_node_meta(nmfile, args)
     import_file(nmfile, table, ld_cmd, dup_cmd, args)
 
 def import_pnode(filename, args=None):
@@ -381,6 +380,5 @@ if __name__ == "__main__":
         raise ValueError("ERROR: 'importfile' must contain one of "+\
                          ','.join(merge_keys))
     import_file(args.importfile, table, ld_cmd, dup_cmd, args)
-    #import_file_nokeys(args.importfile, table, ld_cmd, args)
-    #if table == 'status':
-    #    import_production_edges(args)
+    if table == 'node_meta':
+        ru.import_node_meta(args.importfile, args)

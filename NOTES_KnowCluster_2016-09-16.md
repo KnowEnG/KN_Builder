@@ -13,6 +13,7 @@ KNP_DATA_PATH='data_'$KNP_BUILD_NAME
 KNP_LOGS_PATH='logs_'$KNP_BUILD_NAME
 KNP_ENS_SPECIES='REPRESENTATIVE'
 
+KNP_BUCKET='KNsample'
 KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
 
 KNP_MYSQL_HOST='knowcluster07.dyndns.org'
@@ -24,18 +25,18 @@ KNP_MYSQL_CPU='2.0'
 KNP_MYSQL_PASS='KnowEnG'
 KNP_MYSQL_CONSTRAINT_URL='knowcluster07.dyndns.org'
 
-KNP_MYSQL_HOST='knownbs.cxtvettjrq71.us-west-2.rds.amazonaws.com'
-KNP_MYSQL_USER='blatti'
-KNP_MYSQL_PASS='knowdev249'
-KNP_MYSQL_PORT='3306'
-KNP_MYSQL_DB='KnowNet'
+export KNP_MYSQL_HOST='knownbs.cxtvettjrq71.us-west-2.rds.amazonaws.com'
+export KNP_MYSQL_USER='blatti'
+export KNP_MYSQL_PASS='knowdev249'
+export KNP_MYSQL_PORT='3306'
+export KNP_MYSQL_DB='KnowNet'
 
-KNP_REDIS_HOST='knowcluster06.dyndns.org'
-KNP_REDIS_PORT='6379'
+export KNP_REDIS_HOST='knowcluster06.dyndns.org'
+export KNP_REDIS_PORT='6379'
 KNP_REDIS_DIR=$KNP_DB_DIR'/p1redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
 KNP_REDIS_MEM='8000'
 KNP_REDIS_CPU='2.0'
-KNP_REDIS_PASS='KnowEnG'
+export KNP_REDIS_PASS='KnowEnG'
 KNP_REDIS_CONSTRAINT_URL='knowcluster06.dyndns.org'
 
 KNP_NGINX_PORT='8081'
@@ -129,7 +130,7 @@ python3 code/nginx_utilities.py \
 ```
 for c in $KNP_CHRONOS_URL ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep '"name"' | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
-    for s in 'map-' 'table-' 'check-' 'fetch-' 'import-' 'KN_starter' 'export-' ; do
+    for s in 'export-' 'map-' 'table-' 'check-' 'fetch-' 'import-' 'KN_starter'  ; do
         echo $s
         for i in `grep "$s" /tmp/t.txt  `; do
             CMD="curl -L -X DELETE $c/scheduler/job/$i";
@@ -162,18 +163,30 @@ python3 code/workflow_utilities.py CHECK \
     -sd $KNP_STORAGE_DIR
 ```
 
-## run import pipeline (time: 2hr 45min) 
+## run import pipeline (time: 2hr 45min)
 ```
 python3 code/workflow_utilities.py IMPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -myps $KNP_MYSQL_PASS -myu $KNP_MYSQL_USER \
+    -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
     -c $KNP_CHRONOS_URL \
     -sd $KNP_STORAGE_DIR
 ```
 
-## run export pipeline (time )
+## run export pipeline (time: )
 ```
+mkdir $KNP_WORKING_DIR/$KNP_BUCKET
+cp code/mysql/edge_type.txt $KNP_WORKING_DIR/$KNP_BUCKET
+head -n-1 code/mysql/species.txt > $KNP_WORKING_DIR/$KNP_BUCKET/species.txt
+mysql -h$KNP_MYSQL_HOST -p$KNP_MYSQL_PASS -u$KNP_MYSQL_USER -P$KNP_MYSQL_PORT -DKnowNet -e "\
+   SELECT et.n1_type, ns2.taxon, e.et_name, count(1) \
+   FROM edge e, edge_type et, node_species ns2 \
+   WHERE e.et_name=et.et_name \
+   AND e.n2_id=ns2.node_id \
+   GROUP BY et.n1_type, ns2.taxon, e.et_name \
+   HAVING COUNT(1) > 500" \
+   > $KNP_WORKING_DIR/$KNP_BUCKET/directories.txt
 python3 code/workflow_utilities.py EXPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -myps $KNP_MYSQL_PASS -myu $KNP_MYSQL_USER \
@@ -181,15 +194,28 @@ python3 code/workflow_utilities.py EXPORT \
     -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
     -c $KNP_CHRONOS_URL \
     -sd $KNP_STORAGE_DIR -es $KNP_ENS_SPECIES \
-    -p "$(mysql -h$KNP_MYSQL_HOST -p$KNP_MYSQL_PASS -P$KNP_MYSQL_PORT -DKnowNet -e "\
-        SELECT ns2.taxon, e.et_name \
-        FROM edge e, node_species ns2 \
-        WHERE e.n2_id=ns2.node_id \
-        AND COUNT(1) > 500 \
-        GROUP BY ns2.taxon, e.et_name" \
-        | tail -n+2 \
+    -p "$(tail -n+2 $KNP_WORKING_DIR/$KNP_BUCKET/directories.txt \
+        | cut -f2,3 \
         | sed -e 's/\t/::/g' \
         | sed -e ':a;N;$!ba;s/\n/,,/g')"
+
+cd $KNP_WORKING_DIR/$KNP_BUCKET
+mkdir -p ../KNsample2/
+cp species.txt ../KNsample2
+cp edge_type.txt ../KNsample2
+head -n1 directories.txt > ../KNsample2/directories.txt
+awk -v x=125000 '$4 >= x' directories.txt | grep "^Gene" >> ../KNsample2/directories.txt
+awk -v x=4000 '$4 >= x' directories.txt | grep "^Property" >> ../KNsample2/directories.txt
+for line in `tail -n +2 ../KNsample2/directories.txt | sed 's#\t#/#g'` ; do
+    echo $line;
+    CLASS=$(echo $line | cut -f1 -d/)
+    TAXON=$(echo $line | cut -f2 -d/)
+    ETYPE=$(echo $line | cut -f3 -d/)
+    mkdir -p ../KNsample2/$CLASS/$TAXON/$ETYPE
+    cp $CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.edge ../KNsample2/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.edge
+    cp $CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.node_map ../KNsample2/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.node_map
+    cp $CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.metadata ../KNsample2/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.metadata
+done
 ```
 
 
@@ -296,7 +322,7 @@ cp $KNP_WORKING_DIR/code/neo4j/import.cypher $KNP_NEO4J_DIR/shared/
 docker exec $KNP_NEO4J_NAME /var/lib/neo4j/bin/neo4j-shell \
     -path /opt/data/graph.db -file /shared/import.cypher
 ```
-#### start new database 
+#### start new database
 ```
 docker restart $KNP_NEO4J_NAME
 ```

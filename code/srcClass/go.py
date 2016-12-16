@@ -320,7 +320,6 @@ class Go(SrcClass):
         n1type = 'property'
         n1spec = '0'
         n2type = 'gene'
-        score = 1
 
         info_type1 = 'reference'
         info_type2 = 'evidence'
@@ -365,9 +364,10 @@ class Go(SrcClass):
                 reference = raw[5]
                 anno_evidence = raw[6]
 
-                et_hint = 'go_curated_evidence'
+                score = 2
+                et_hint = 'gene_ontology'
                 if anno_evidence == 'IEA':
-                    et_hint = 'go_inferred_evidence'
+                    score = 1
 
                 n2_id = raw[1]
                 n2hint = raw[0]

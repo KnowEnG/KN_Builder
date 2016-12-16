@@ -296,7 +296,6 @@ def main(version_json, args=None):
         map_file = os.path.splitext(newfile)[0] + '.json'
         with open(map_file, 'w') as outfile:
             json.dump(map_dict, outfile, indent=4, sort_keys=True)
-        ru.import_mapping(map_dict, args)
     else:
         #raw_line = format_raw_line(newfile)
         num_chunks = chunk(newfile, line_count, args, mySrc.chunk_size)
