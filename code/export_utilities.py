@@ -44,7 +44,6 @@ def get_nodes(edges):
 def convert_nodes(args, nodes):
     rdb = ru.get_database(args)
     return [ru.get_node_info(rdb, item, '', args.species) for item in nodes]
-    return db.run("SELECT node_id, n_alias FROM node WHERE node_id IN ('{}')".format("','".join(nodes)))
 
 def get_sources(edges):
     return set(edge[4] for edge in edges)
@@ -97,11 +96,11 @@ def main():
 
     os.makedirs(sync_dir, exist_ok=True)
     with open(sync_edges, 'w') as f:
-        csvr = csv.writer(f, delimiter='\t')
-        csvr.writerows(res)
+        csvw = csv.writer(f, delimiter='\t')
+        csvw.writerows(res)
     with open(sync_nodes, 'w') as f:
-        csvr = csv.writer(f, delimiter='\t')
-        csvr.writerows(nodes_desc)
+        csvw = csv.writer(f, delimiter='\t')
+        csvw.writerows(nodes_desc)
     with open(sync_meta, 'w') as f:
         json.dump(metadata, f)
 
