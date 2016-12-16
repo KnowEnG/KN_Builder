@@ -66,10 +66,9 @@ cd KnowNet_Pipeline/
 
 ## clear any existing files
 ```
-rm -r $KNP_LOGS_PATH/*
-rm -r $KNP_DATA_PATH/*
 rm -r $KNP_STORAGE_DIR/$KNP_LOGS_PATH/*
 rm -r $KNP_STORAGE_DIR/$KNP_DATA_PATH/*
+rm -r $KNP_STORAGE_DIR/$KNP_BUCKET/*
 ```
 
 ## MySQL setup
