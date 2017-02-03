@@ -16,14 +16,14 @@ KNP_ENS_SPECIES='REPRESENTATIVE'
 KNP_BUCKET='KNsample'
 KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
 
-KNP_MYSQL_HOST='knowcluster07.dyndns.org'
-KNP_MYSQL_PORT='3306'
-KNP_MYSQL_DIR=$KNP_DB_DIR'/p1mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
-KNP_MYSQL_CONF='build_conf/'
-KNP_MYSQL_MEM='10000'
-KNP_MYSQL_CPU='2.0'
-KNP_MYSQL_PASS='KnowEnG'
-KNP_MYSQL_CONSTRAINT_URL='knowcluster07.dyndns.org'
+# KNP_MYSQL_HOST='knowcluster07.dyndns.org'
+# KNP_MYSQL_PORT='3306'
+# KNP_MYSQL_DIR=$KNP_DB_DIR'/p1mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
+# KNP_MYSQL_CONF='build_conf/'
+# KNP_MYSQL_MEM='10000'
+# KNP_MYSQL_CPU='2.0'
+# KNP_MYSQL_PASS='KnowEnG'
+# KNP_MYSQL_CONSTRAINT_URL='knowcluster07.dyndns.org'
 
 export KNP_MYSQL_HOST='knownbs.cxtvettjrq71.us-west-2.rds.amazonaws.com'
 export KNP_MYSQL_USER='blatti'
@@ -33,10 +33,10 @@ export KNP_MYSQL_DB='KnowNet'
 
 export KNP_REDIS_HOST='knowcluster06.dyndns.org'
 export KNP_REDIS_PORT='6379'
+export KNP_REDIS_PASS='KnowEnG'
 KNP_REDIS_DIR=$KNP_DB_DIR'/p1redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
 KNP_REDIS_MEM='8000'
 KNP_REDIS_CPU='2.0'
-export KNP_REDIS_PASS='KnowEnG'
 KNP_REDIS_CONSTRAINT_URL='knowcluster06.dyndns.org'
 
 KNP_NGINX_PORT='8081'
@@ -74,7 +74,7 @@ rm -r $KNP_STORAGE_DIR/$KNP_BUCKET/*
 ## MySQL setup
 ### start MySQL database if it is not running
 ```
-python3 code/mysql_utilities.py \
+# python3 code/mysql_utilities.py \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -mym $KNP_MYSQL_MEM -myc $KNP_MYSQL_CPU \
     -myd $KNP_MYSQL_DIR -mycf $KNP_MYSQL_CONF \
@@ -129,7 +129,7 @@ python3 code/nginx_utilities.py \
 ```
 for c in $KNP_CHRONOS_URL ; do
     curl -L -X GET $c/scheduler/jobs | sed 's#,#\n#g' | sed 's#\[##g' | grep '"name"' | sed 's#{"name":"##g' | sed 's#"##g' > /tmp/t.txt
-    for s in 'export-' 'map-' 'table-' 'check-' 'fetch-' 'import-' 'KN_starter'  ; do
+    for s in 'export-' 'import-' 'map-' 'table-' 'fetch-' 'check-' 'KN_starter'  ; do
         echo $s
         for i in `grep "$s" /tmp/t.txt  `; do
             CMD="curl -L -X DELETE $c/scheduler/job/$i";
@@ -177,15 +177,38 @@ python3 code/workflow_utilities.py IMPORT \
 ```
 mkdir $KNP_WORKING_DIR/$KNP_BUCKET
 cp code/mysql/edge_type.txt $KNP_WORKING_DIR/$KNP_BUCKET
+
+## add gene maps
 head -n-1 code/mysql/species.txt > $KNP_WORKING_DIR/$KNP_BUCKET/species.txt
+for TAXON in `cut -f1 $KNP_WORKING_DIR/$KNP_BUCKET/species.txt `; do
+    echo $TAXON;
+    mkdir -p $KNP_WORKING_DIR/$KNP_BUCKET/Species/$TAXON;
+    mysql -h$KNP_MYSQL_HOST -u$KNP_MYSQL_USER -p$KNP_MYSQL_PASS -P$KNP_MYSQL_PORT -D$KNP_MYSQL_DB -e "\
+        SELECT ns.node_id \
+        FROM node_species ns \
+        WHERE ns.taxon = $TAXON \
+        ORDER BY ns.node_id" \
+        | tail -n +2 > $KNP_WORKING_DIR/$KNP_BUCKET/Species/$TAXON/$TAXON.glist;
+        python3 code/conv_utilities.py -mo LIST \
+            -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
+            $KNP_WORKING_DIR/$KNP_BUCKET/Species/$TAXON/$TAXON.glist;
+        rm $KNP_WORKING_DIR/$KNP_BUCKET/Species/$TAXON/$TAXON.glist;
+done
+
+## add subnetworks
 mysql -h$KNP_MYSQL_HOST -p$KNP_MYSQL_PASS -u$KNP_MYSQL_USER -P$KNP_MYSQL_PORT -DKnowNet -e "\
    SELECT et.n1_type, ns2.taxon, e.et_name, count(1) \
    FROM edge e, edge_type et, node_species ns2 \
    WHERE e.et_name=et.et_name \
    AND e.n2_id=ns2.node_id \
-   GROUP BY et.n1_type, ns2.taxon, e.et_name \
-   HAVING COUNT(1) > 500" \
-   > $KNP_WORKING_DIR/$KNP_BUCKET/directories.txt
+   GROUP BY et.n1_type, ns2.taxon, e.et_name" \
+   > $KNP_WORKING_DIR/$KNP_BUCKET/db_contents.txt
+head -n1 $KNP_WORKING_DIR/$KNP_BUCKET/db_contents.txt \
+    > $KNP_WORKING_DIR/$KNP_BUCKET/directories.txt
+awk -v x=125000 '$4 >= x' $KNP_WORKING_DIR/$KNP_BUCKET/db_contents.txt \
+    | grep "^Gene" >> $KNP_WORKING_DIR/$KNP_BUCKET/directories.txt
+awk -v x=4000 '$4 >= x' $KNP_WORKING_DIR/$KNP_BUCKET/db_contents.txt \
+    | grep "^Property" >> $KNP_WORKING_DIR/$KNP_BUCKET/directories.txt
 python3 code/workflow_utilities.py EXPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -myps $KNP_MYSQL_PASS -myu $KNP_MYSQL_USER \
@@ -198,25 +221,26 @@ python3 code/workflow_utilities.py EXPORT \
         | sed -e 's/\t/::/g' \
         | sed -e ':a;N;$!ba;s/\n/,,/g')"
 
-cd $KNP_WORKING_DIR/$KNP_BUCKET
-mkdir -p ../KNsample2/
-cp species.txt ../KNsample2
-cp edge_type.txt ../KNsample2
-head -n1 directories.txt > ../KNsample2/directories.txt
-awk -v x=125000 '$4 >= x' directories.txt | grep "^Gene" >> ../KNsample2/directories.txt
-awk -v x=4000 '$4 >= x' directories.txt | grep "^Property" >> ../KNsample2/directories.txt
-for line in `tail -n +2 ../KNsample2/directories.txt | sed 's#\t#/#g'` ; do
-    echo $line;
-    CLASS=$(echo $line | cut -f1 -d/)
-    TAXON=$(echo $line | cut -f2 -d/)
-    ETYPE=$(echo $line | cut -f3 -d/)
-    mkdir -p ../KNsample2/$CLASS/$TAXON/$ETYPE
-    cp $CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.edge ../KNsample2/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.edge
-    cp $CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.node_map ../KNsample2/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.node_map
-    cp $CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.metadata ../KNsample2/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.metadata
-done
-```
+## extract Property node maps
+for CLASS1 in Property; do
+    for line in `grep $CLASS1 $KNP_WORKING_DIR/$KNP_BUCKET/directories.txt | sed 's#\t#/#g'` ; do
+        echo $line;
+        CLASS=$(echo $line | cut -f1 -d/)
+        TAXON=$(echo $line | cut -f2 -d/)
+        ETYPE=$(echo $line | cut -f3 -d/)
+        grep Property $KNP_WORKING_DIR/$KNP_BUCKET/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.node_map > $KNP_WORKING_DIR/$KNP_BUCKET/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.pnode_map
+    done
+done;
 
+# set up your AWS credentials
+mkdir ~/.aws
+echo -e "[default]\naws_access_key_id = ABC\naws_secret_access_key = XYZ" > ~/.aws/credentials
+# modify with your keys
+
+# copy directory to S3 bucket
+pip install awscli
+aws s3 sync --delete $KNP_WORKING_DIR/$KNP_BUCKET s3://$KNP_BUCKET
+```
 
 
 ## create report of results
