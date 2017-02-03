@@ -163,6 +163,13 @@ def import_nodes(version_dict, args=None):
     tablename = 'KnowNet.node_species'
     db.insert(tablename, cmd)
     cmd = ("SELECT DISTINCT UCASE(gene.stable_id) AS node_id, "
+           "'biotype' AS info_type, "
+           "gene.biotype AS info_desc "
+           "FROM gene "
+           "ON DUPLICATE KEY UPDATE node_id=node_id")
+    tablename = 'KnowNet.node_meta'
+    db.insert(tablename, cmd)
+    cmd = ("SELECT DISTINCT UCASE(gene.stable_id) AS node_id, "
            "gene.description AS n_alias, "
            "'Gene' AS n_type_id "
            "FROM gene")
