@@ -14,6 +14,7 @@ import csv
 import hashlib
 import math
 import config_utilities as cf
+import os, json, requests
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -44,31 +45,66 @@ class Blast(SrcClass):
         This calls the SrcClass constructor (see utilities.SrcClass)
         """
         name = 'blast'
-        url_base = 'http://veda.cs.uiuc.edu/blast/'
-        aliases = {"mm9_Atha10": "10090_3702",
-                   "mm9_Scer64": "10090_4932",
-                   "mm9_Cele235": "10090_6239",
-                   "mm9_Dmel5": "10090_7227",
-                   "mm9_hg19": "10090_9606",
-                   "mm9_mm9": "10090_10090",
-                   "hg19_Atha10": "9606_3702",
-                   "hg19_Scer64": "9606_4932",
-                   "hg19_Cele235": "9606_6239",
-                   "hg19_Dmel5": "9606_7227",
-                   "hg19_hg19": "9606_9606",
-                   "Dmel5_Atha10": "7227_3702",
-                   "Dmel5_Scer64": "7227_4932",
-                   "Dmel5_Cele235": "7227_6239",
-                   "Dmel5_Dmel5": "7227_7227",
-                   "Cele235_Atha10": "6239_3702",
-                   "Cele235_Scer64": "6239_4932",
-                   "Cele235_Cele235": "6239_6239",
-                   "Scer64_Atha10": "4932_3702",
-                   "Scer64_Scer64": "4932_4932",
-                   "Atha10_Atha10": "3702_3702"}
+#        url_base = 'http://veda.cs.uiuc.edu/blast/'
+#        aliases = {"mm9_Atha10": "10090_3702",
+#                   "mm9_Scer64": "10090_4932",
+#                   "mm9_Cele235": "10090_6239",
+#                   "mm9_Dmel5": "10090_7227",
+#                   "mm9_hg19": "10090_9606",
+#                   "mm9_mm9": "10090_10090",
+#                   "hg19_Atha10": "9606_3702",
+#                   "hg19_Scer64": "9606_4932",
+#                   "hg19_Cele235": "9606_6239",
+#                   "hg19_Dmel5": "9606_7227",
+#                   "hg19_hg19": "9606_9606",
+#                   "Dmel5_Atha10": "7227_3702",
+#                   "Dmel5_Scer64": "7227_4932",
+#                   "Dmel5_Cele235": "7227_6239",
+#                   "Dmel5_Dmel5": "7227_7227",
+#                   "Cele235_Atha10": "6239_3702",
+#                   "Cele235_Scer64": "6239_4932",
+#                   "Cele235_Cele235": "6239_6239",
+#                   "Scer64_Atha10": "4932_3702",
+#                   "Scer64_Scer64": "4932_4932",
+#                   "Atha10_Atha10": "3702_3702"}
+
+        url_base = 'http://knowcluster06.dyndns.org:8082/'
+        aliases = dict()
         super(Blast, self).__init__(name, url_base, aliases, args)
+        self.aliases = self.get_aliases(args)
         self.sc_max = 100  # may want to load these
         self.sc_min = 2 # may want to load these
+
+    def get_aliases(self, args=cf.config_args()):
+        """Helper function for producing the alias dictionary.
+
+        This returns a dictionary where alias names are keys and alias info
+        are the values. This helper function usse the species
+        specific information for the build of the Knowledge Network, which is
+        produced by ensembl.py during setup utilities and is located at
+        cf.DEFAULT_MAP_PATH/species/species.json, in order to fetch all matching
+        species specific aliases from the source.
+
+        Args:
+            args (Namespace): args as populated namespace or 'None' for defaults
+
+        Returns:
+            dict: A dictionary of species:(taxid, division) values
+        """
+        src_data_dir = os.path.join(args.working_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+        sp_dir = os.path.join(src_data_dir, 'species', 'species.json')
+        sp_dict = json.load(open(sp_dir))
+        alias_dict = dict()
+        for species, taxid in sp_dict.items():
+            species = species.capitalize().replace('_', ' ')
+            sp_abbrev = species[0] + species.split(' ')[1][:3]
+            splower = species.lower().replace(' ', '_')
+            url = self.get_remote_url(splower)
+            req = requests.get(url)
+            if req.status_code == 200:
+                alias_dict[splower] = taxid
+        return alias_dict
+
 
     def get_source_version(self, alias):
         """Return the release version of the remote blast:alias.
@@ -144,7 +180,7 @@ class Blast(SrcClass):
         Returns:
             str: The url needed to fetch the file corresponding to the alias.
         """
-        url = self.url_base + alias + '.out'
+        url = self.url_base + alias + "_" + alias + '.out'
         return url
 
     def is_map(self, alias):
@@ -206,8 +242,8 @@ class Blast(SrcClass):
                      n2name, n2hint, n2type, n2spec, et_hint, score,
                      table_hash)
             edge_meta (line_hash, info_type, info_desc)
-            node_meta (node_id, 
-                    info_type (evidence, relationship, experiment, or link), 
+            node_meta (node_id,
+                    info_type (evidence, relationship, experiment, or link),
                     info_desc (text))
             node (node_id, n_alias, n_type)
 
@@ -234,8 +270,8 @@ class Blast(SrcClass):
         #info_type = 'synonym'
         alias = version_dict['alias']
 
-        n1spec = version_dict['alias_info'].split('_', 1)[0]
-        n2spec = version_dict['alias_info'].split('_', 1)[1]
+        n1spec = version_dict['alias_info']
+        n2spec = version_dict['alias_info']
 
         with open(raw_line, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges:
@@ -248,7 +284,7 @@ class Blast(SrcClass):
                 raw = line[3:]
                 n1id = raw[0]
                 n2id = raw[1]
-                evalue = raw[10]
+                evalue = raw[12]
                 evalue = float(evalue)
                 score = self.sc_min
                 if evalue == 0.0:

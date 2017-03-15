@@ -9,7 +9,7 @@ Welcome to KnowNet's documentation!
 .. toctree::
    :maxdepth: 2
 
-   tutorial
+   buildKN
    modules
    formats
    tables

@@ -4,16 +4,16 @@
 ## Set environment variables
 ```
 KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
-KNP_CODE_DIR='/mnt/backup/knowdata/KnowNets/KnowNet_0.3/KN-6rep-1611/'
+KNP_CODE_DIR='/mnt/backup/knowdata/KnowNets/KnowNet_0.3/KN-20rep-1702/'
 KNP_WORKING_DIR=$KNP_CODE_DIR'/'
 KNP_STORAGE_DIR="$KNP_WORKING_DIR"
 KNP_DB_DIR="$KNP_WORKING_DIR"
-KNP_BUILD_NAME='rep6-1611'
+KNP_BUILD_NAME='20rep-1702'
 KNP_DATA_PATH='data_'$KNP_BUILD_NAME
 KNP_LOGS_PATH='logs_'$KNP_BUILD_NAME
-KNP_ENS_SPECIES='REPRESENTATIVE'
+KNP_ENS_SPECIES='RESEARCH'
 
-KNP_BUCKET='KNsample'
+KNP_BUCKET="userKN-$KNP_BUILD_NAME"
 KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
 
 # KNP_MYSQL_HOST='knowcluster07.dyndns.org'
@@ -31,13 +31,13 @@ export KNP_MYSQL_PASS='knowdev249'
 export KNP_MYSQL_PORT='3306'
 export KNP_MYSQL_DB='KnowNet'
 
-export KNP_REDIS_HOST='knowcluster06.dyndns.org'
+export KNP_REDIS_HOST='knowcluster07.dyndns.org'
 export KNP_REDIS_PORT='6379'
 export KNP_REDIS_PASS='KnowEnG'
-KNP_REDIS_DIR=$KNP_DB_DIR'/p1redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
+KNP_REDIS_DIR=$KNP_DB_DIR'/redis-'$KNP_BUILD_NAME
 KNP_REDIS_MEM='8000'
 KNP_REDIS_CPU='2.0'
-KNP_REDIS_CONSTRAINT_URL='knowcluster06.dyndns.org'
+KNP_REDIS_CONSTRAINT_URL='knowcluster07.dyndns.org'
 
 KNP_NGINX_PORT='8081'
 KNP_NGINX_DIR=$KNP_DB_DIR'/p1nginx-'$KNP_NGINX_PORT'-'$KNP_BUILD_NAME
@@ -179,7 +179,7 @@ mkdir $KNP_WORKING_DIR/$KNP_BUCKET
 cp code/mysql/edge_type.txt $KNP_WORKING_DIR/$KNP_BUCKET
 
 ## add gene maps
-head -n-1 code/mysql/species.txt > $KNP_WORKING_DIR/$KNP_BUCKET/species.txt
+head -n-1 $KNP_WORKING_DIR/$KNP_DATA_PATH/id_map/species/species.txt > $KNP_WORKING_DIR/$KNP_BUCKET/species.txt
 for TAXON in `cut -f1 $KNP_WORKING_DIR/$KNP_BUCKET/species.txt `; do
     echo $TAXON;
     mkdir -p $KNP_WORKING_DIR/$KNP_BUCKET/Species/$TAXON;
@@ -189,7 +189,7 @@ for TAXON in `cut -f1 $KNP_WORKING_DIR/$KNP_BUCKET/species.txt `; do
         WHERE ns.taxon = $TAXON \
         ORDER BY ns.node_id" \
         | tail -n +2 > $KNP_WORKING_DIR/$KNP_BUCKET/Species/$TAXON/$TAXON.glist;
-        python3 code/conv_utilities.py -mo LIST \
+        LANG=C.UTF-8 python3 code/conv_utilities.py -mo LIST \
             -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
             $KNP_WORKING_DIR/$KNP_BUCKET/Species/$TAXON/$TAXON.glist;
         rm $KNP_WORKING_DIR/$KNP_BUCKET/Species/$TAXON/$TAXON.glist;
@@ -214,7 +214,7 @@ python3 code/workflow_utilities.py EXPORT \
     -myps $KNP_MYSQL_PASS -myu $KNP_MYSQL_USER \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL \
+    -c $KNP_CHRONOS_URL -b $KNP_BUCKET\
     -sd $KNP_STORAGE_DIR -es $KNP_ENS_SPECIES \
     -p "$(tail -n+2 $KNP_WORKING_DIR/$KNP_BUCKET/directories.txt \
         | cut -f2,3 \

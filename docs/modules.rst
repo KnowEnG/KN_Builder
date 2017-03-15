@@ -64,18 +64,20 @@ workflow_utilities
 .. automodule:: workflow_utilities
    :members:
 
-benchmark_utilities
+export_utilities
 -------------------
 
-.. automodule:: benchmark_utilities
+.. automodule:: export_utilities
    :members:
 
-benchmark_utilities_tests
--------------------------
+sanitize_utilities
+-------------------
 
-.. automodule:: benchmark_utilities_tests
+.. automodule:: sanitize_utilities
    :members:
 
-app
----
+merge_utilities
+-------------------
 
+.. automodule:: merge_utilities
+   :members:

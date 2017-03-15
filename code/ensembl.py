@@ -179,6 +179,13 @@ class Ensembl(SrcClass):
         representative = 'mus_musculus,,arabidopsis_thaliana,,' +\
                          'saccharomyces_cerevisiae,,caenorhabditis_elegans,,' +\
                          'drosophila_melanogaster,,homo_sapiens'
+        research =  ( 'arabidopsis_thaliana,,caenorhabditis_elegans,,' \
+                      'drosophila_melanogaster,,homo_sapiens,,mus_musculus,,' \
+                      'saccharomyces_cerevisiae,,bos_taurus,,sus_scrofa,,' \
+                      'pan_troglodytes,,taeniopygia_guttata,,daphnia_pulex,,' \
+                      'xenopus_tropicalis,,macaca_mulatta,,rattus_norvegicus,,' \
+                      'apis_mellifera,,danio_rerio,,gallus_gallus,,' \
+                      'gasterosteus_aculeatus,,aedes_aegypti,,canis_familiaris' )
         keywords = {'ALL':all_species,
                     'REPRESENTATIVE':representative,
                     'BACTERIA':'EnsemblBacteria',
@@ -189,6 +196,7 @@ class Ensembl(SrcClass):
                     'VERTEBRATES':'Ensembl'}
         alias_list = alias_list.replace('ALL', all_species)
         alias_list = alias_list.replace('REPRESENTATIVE', representative)
+        alias_list = alias_list.replace('RESEARCH', research)
         species_list = alias_list.split(',,')
         alias_dict = dict()
         for species in species_list: #replace keywords

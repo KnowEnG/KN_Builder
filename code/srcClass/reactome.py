@@ -280,9 +280,11 @@ class Reactome(SrcClass):
                     n2spec = species_map.get(n2spec_str, "unmapped:unsupported-species")
 
                     e_meta = raw[4]
-                    et_hint = "reactome_curated"
-                    if e_meta == "IEA":
-                        et_hint = "reactome_inferred"
+                    score = 2
+                    et_hint = 'reactome_annotation'
+                    if e_meta == 'IEA':
+                        score = 1    
+                        
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1_id, n1hint, n1type, n1spec,\
                                              n2_id, n2hint, n2type, n2spec, et_hint,

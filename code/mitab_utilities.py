@@ -28,8 +28,8 @@ def table(raw_line, version_dict, taxid_list=[]):
                     n2name, n2hint, n2type, n2spec, et_hint, score,
                     table_hash)
         edge_meta (line_hash, info_type, info_desc)
-        node_meta (node_id, 
-                   info_type (evidence, relationship, experiment, or link), 
+        node_meta (node_id,
+                   info_type (evidence, relationship, experiment, or link),
                    info_desc (text))
         node (node_id, n_alias, n_type)
 
@@ -50,7 +50,6 @@ def table(raw_line, version_dict, taxid_list=[]):
     n1type = 'gene'
     n2type = 'gene'
     score = 1
-    info_type = 'reference'
     src_specific_hints = ["intact", "biogrid"]
     #mapping files
     ppi = os.path.join('..', '..', 'ppi', 'obo_map', 'ppi.obo_map.json')
@@ -114,7 +113,11 @@ def table(raw_line, version_dict, taxid_list=[]):
                     t_chksum = hasher.hexdigest()
                     edge_writer.writerow([chksm, n1id, n1hint, n1type, n1spec, \
                         n2id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
+
             publist = raw[8]
-            e_meta_writer.writerow([chksm, info_type, publist])
+            interaction_id = raw[13]
+            e_meta_writer.writerow([chksm, 'reference', publist])
+            e_meta_writer.writerow([chksm, 'detail', interaction_id])
+
     outfile = e_meta_file.replace('edge_meta', 'unique.edge_meta')
     tu.csu(e_meta_file, outfile)

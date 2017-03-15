@@ -1,7 +1,0 @@
-3702	Atha	Arabidopsis thaliana	Arabidopsis thaliana
-4932	Scer	Saccharomyces cerevisiae	Saccharomyces cerevisiae
-6239	Cele	Caenorhabditis elegans	Caenorhabditis elegans
-7227	Dmel	Drosophila melanogaster	Drosophila melanogaster
-9606	Hsap	Homo sapiens	Homo sapiens
-10090	Mmus	Mus musculus	Mus musculus
-559292	Scer	Saccharomyces cerevisiae S288c	Saccharomyces cerevisiae

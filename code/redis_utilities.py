@@ -223,6 +223,73 @@ def conv_gene(rdb, foreign_key, hint, taxid):
             return hint_ens_ids.pop().decode()
     return 'unmapped-many'
 
+def conv_gene_batch(rdb, foreign_keys, hints, taxids):
+    """Uses the redis database to convert genes to enesmbl stable id
+
+    This checks first if there is a unique name for the provided foreign key.
+    If not it uses the hint and taxid to try and filter the foreign key
+    possiblities to find a matching stable id.
+
+    Args:
+        rdb (redis object): redis connection to the mapping db
+        foreign_keys (array of str): the list of the foreign gene identifers to be translated
+        hints (array of str): the list of hints for conversion
+        taxids (array of str): the list of the species taxids, 'unknown' if unknown
+
+    Returns:
+        array of str: result of seaching for the genes in redis DB
+    """
+    uniques = rdb.mget('unique::' + fk.upper() for fk in foreign_keys)
+    
+    ret = []
+    for foreign_key, unique, hint, taxid in zip(foreign_keys, uniques, hint, taxid):
+        hint = hint.upper()
+        foreign_key = foreign_key.upper()
+        taxid = str(taxid)
+        #use ensembl internal uniprot mappings
+        if hint == 'UNIPROT' or hint == 'UNIPROTKB':
+            hint = 'UNIPROT_GN'
+        if unique is None:
+            ret.append('unmapped-none')
+            continue
+        if unique != 'unmapped-many'.encode():
+            ret.append(unique.decode())
+            continue
+        mappings = rdb.smembers(foreign_key)
+        taxid_match = list()
+        hint_match = list()
+        both_match = list()
+        for taxid_hint in mappings:
+            taxid_hint = taxid_hint.decode()
+            taxid_hint_key = '::'.join([taxid_hint, foreign_key])
+            taxid_hint = taxid_hint.split('::')
+            if len(taxid_hint) < 2: # species key in redis
+                continue
+            if taxid == taxid_hint[0] and hint in taxid_hint[1]:
+                both_match.append(taxid_hint_key)
+            if taxid == taxid_hint[0]:
+                taxid_match.append(taxid_hint_key)
+            if hint in taxid_hint[1] and len(hint):
+                hint_match.append(taxid_hint_key)
+        if both_match:
+            both_ens_ids = set(rdb.mget(both_match))
+            if len(both_ens_ids) == 1:
+                ret.append(both_ens_ids.pop().decode())
+                continue
+        if taxid_match:
+            taxid_ens_ids = set(rdb.mget(taxid_match))
+            if len(taxid_ens_ids) == 1:
+                ret.append(taxid_ens_ids.pop().decode())
+                continue
+        if hint_match:
+            hint_ens_ids = set(rdb.mget(hint_match))
+            if len(hint_ens_ids) == 1:
+                ret.append(hint_ens_ids.pop().decode())
+                continue
+        ret.append('unmapped-many')
+    return ret
+
+
 def node_desc(rdb, stable_id):
     if stable_id.startswith('unmapped'):
         return (None, stable_id, stable_id)
