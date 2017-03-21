@@ -4,10 +4,6 @@
 
 Contains module functions::
 
-    get_database(args=None)
-    import_ensembl(alias, args=None)
-    conv_gene(rdb, foreign_key, hint, taxid)
-    import_mapping(map_dict, args=None)
 
 """
 

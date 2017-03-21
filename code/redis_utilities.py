@@ -7,7 +7,7 @@ Contains module functions::
     get_database(args=None)
     import_ensembl(alias, args=None)
     conv_gene(rdb, foreign_key, hint, taxid)
-    import_mapping(map_dict, args=None)
+
 
 """
 
@@ -105,12 +105,28 @@ def import_ensembl(alias, args=None):
         hint = hint.upper()
         ens_id = map_dict[key].upper()
         foreign_key = foreign_key.upper()
-        rkey = rdb.getset('unique::' + foreign_key, ens_id)
+
+        keystr = 'unique::' + foreign_key
+        rkey = rdb.getset(keystr, ens_id)
         if rkey is not None and rkey.decode() != ens_id:
-            rdb.set('unique::' + foreign_key, 'unmapped-many')
-        rdb.sadd(foreign_key, '::'.join([taxid, hint]))
-        rdb.set('::'.join([taxid, hint, foreign_key]), ens_id)
-        if hint == 'WIKIGENE':
+            rdb.set(keystr, 'unmapped-many')
+
+        keystr = 'hint::' + foreign_key + '::' + hint
+        rkey = rdb.getset(keystr, ens_id)
+        if rkey is not None and rkey.decode() != ens_id:
+            rdb.set(keystr, 'unmapped-many')
+
+        keystr = 'taxon::' + foreign_key + '::' + taxon
+        rkey = rdb.getset(keystr, ens_id)
+        if rkey is not None and rkey.decode() != ens_id:
+            rdb.set(keystr, 'unmapped-many')
+
+        keystr = 'triplet::' + foreign_key + '::' + taxon + '::' + hint
+        rkey = rdb.getset(keystr, ens_id)
+        if rkey is not None and rkey.decode() != ens_id:
+            rdb.set(keystr, 'unmapped-many')
+
+        if hint == 'WIKIGENE': # to replace integer aliases with strings
             try:
                 int(rdb.get('::'.join(['stable', ens_id, 'alias'])))
             except TypeError:
@@ -138,16 +154,27 @@ def import_node_meta(nmfile, args=None):
         reader = csv.reader(infile, delimiter='\t')
         for row in reader:
             node_id, nm_type, nm_value = row
-            node_type = 'Property'
             node_alias = node_id
             node_desc = node_id
             if(nm_type == 'orig_id'):
                 node_alias = nm_value
             elif(nm_type == 'orig_desc'):
                 node_desc = nm_value
+            elif(nm_type == 'biotype'):
+                rkey = rdb.getset('::'.join(['stable', node_id, 'biotype']), nm_value)
+                if rkey is not None and rkey.decode() != nm_value:
+                    rdb.set('::'.join(['stable', node_id, 'biotype']), rkey)
+            elif(nm_type == 'taxon'):
+                rkey = rdb.getset('::'.join(['stable', node_id, 'taxon']), nm_value)
+                if rkey is not None and rkey.decode() != nm_value:
+                    rdb.set('::'.join(['stable', node_id, 'taxon']), rkey)
             else:
                 continue
-            rdb.set('::'.join(['stable', node_id, 'type']), node_type)
+
+            rkey = rdb.getset('::'.join(['stable', node_id, 'type']), 'Property')
+            if rkey is not None and rkey.decode() != 'Property':
+                rdb.set('::'.join(['stable', node_id, 'type']), rkey)
+
             rkey = rdb.getset('::'.join(['stable', node_id, 'alias']), node_alias)
             if rkey is not None and rkey.decode() != node_alias and rkey.decode() != node_id:
                 rdb.set('::'.join(['stable', node_id, 'alias']), rkey)
@@ -155,18 +182,33 @@ def import_node_meta(nmfile, args=None):
             if rkey is not None and rkey.decode() != node_desc and rkey.decode() != node_id:
                 rdb.set('::'.join(['stable', node_id, 'desc']), rkey)
 
-def get_node_info(rdb, foreign_key, hint, taxid):
-    ntype = rdb.get('::'.join(['stable', foreign_key, 'type']))
-    stable_id = None
-    if ntype is None:
-        stable_id = conv_gene(rdb, foreign_key, hint, taxid)
-    elif ntype.decode() == "Gene":
-        stable_id = conv_gene(rdb, foreign_key, hint, taxid)
-    elif ntype.decode() == "Property":
-        stable_id = foreign_key
-    return (foreign_key, stable_id) + node_desc(rdb, stable_id)
 
-def conv_gene(rdb, foreign_key, hint, taxid):
+def get_node_info(rdb, fk_array, ntype, hint, taxid):
+
+    hint = None if hint == '' or hint is None else hint.upper()
+    taxid = None if taxid == '' or taxid is None else str(taxid)
+    ntype = None if ntype == ''
+
+    if ntype is None:
+        res_arr = rdb.mget(['::'.join(['stable', str(fk), 'type']) for fk in fk_array])
+        fk_prop = [fk for fk, res in zip(fk_array, res_arr) if res is not None and res.decode() == 'Property']
+        fk_gene = [fk for fk, res in zip(fk_array, res_arr) if res is not None and res.decode() == 'Gene')]
+        if len(fk_prop) > 0 and len(fk_gene) > 0 :
+            raise ValueError("Mixture of property and gene nodes.")
+        ntype = 'Property' if len(fk_prop) > 0 else 'Gene'
+
+    if ntype == "Gene":
+        stable_array = conv_gene(rdb, fk_array, hint, taxid)
+    elif ntype == "Property":
+        stable_array = fk_array
+    else:
+        raise ValueError("Invalid ntype")
+
+#TODO: output one tuple per foreign_key
+    return zip(fk_array, *node_desc(rdb, stable_array))
+
+
+def conv_gene(rdb, fk_array, hint, taxid):
     """Uses the redis database to convert a gene to enesmbl stable id
 
     This checks first if there is a unique name for the provided foreign key.
@@ -180,153 +222,52 @@ def conv_gene(rdb, foreign_key, hint, taxid):
         taxid (str): the species taxid, 'unknown' if unknown
 
     Returns:
-        str: result of seaching for gene in redis DB
+        str: result of searching for gene in redis DB
     """
-    hint = hint.upper()
-    taxid = str(taxid)
-    #use ensembl internal uniprot mappings
+    hint = None if hint == '' or hint is None else hint.upper()
+    taxid = None if taxid == '' or taxid is None else str(taxid)
+        #use ensembl internal uniprot mappings
     if hint == 'UNIPROT' or hint == 'UNIPROTKB':
         hint = 'UNIPROT_GN'
-    foreign_key = foreign_key.upper()
-    unique = rdb.get('unique::' + foreign_key)
-    if unique is None:
-        return 'unmapped-none'
-    if unique != 'unmapped-many'.encode():
-        return unique.decode()
-    mappings = rdb.smembers(foreign_key)
-    taxid_match = list()
-    hint_match = list()
-    both_match = list()
-    for taxid_hint in mappings:
-        taxid_hint = taxid_hint.decode()
-        taxid_hint_key = '::'.join([taxid_hint, foreign_key])
-        taxid_hint = taxid_hint.split('::')
-        if len(taxid_hint) < 2: # species key in redis
-            continue
-        if taxid == taxid_hint[0] and hint in taxid_hint[1]:
-            both_match.append(taxid_hint_key)
-        if taxid == taxid_hint[0]:
-            taxid_match.append(taxid_hint_key)
-        if hint in taxid_hint[1] and len(hint):
-            hint_match.append(taxid_hint_key)
-    if both_match:
-        both_ens_ids = set(rdb.mget(both_match))
-        if len(both_ens_ids) == 1:
-            return both_ens_ids.pop().decode()
-    if taxid_match:
-        taxid_ens_ids = set(rdb.mget(taxid_match))
-        if len(taxid_ens_ids) == 1:
-            return taxid_ens_ids.pop().decode()
-    if hint_match:
-        hint_ens_ids = set(rdb.mget(hint_match))
-        if len(hint_ens_ids) == 1:
-            return hint_ens_ids.pop().decode()
-    return 'unmapped-many'
 
-def conv_gene_batch(rdb, foreign_keys, hints, taxids):
-    """Uses the redis database to convert genes to enesmbl stable id
+    ret_stable = ['unmapped-none'] * len(fk_array)
 
-    This checks first if there is a unique name for the provided foreign key.
-    If not it uses the hint and taxid to try and filter the foreign key
-    possiblities to find a matching stable id.
+    def replace_none(ret_st, pattern):
+        curr_none = [i for i, fk in enumerate(fk_array) if ret_st[i] == 'unmapped-none']
+        vals_array = rdb.mget([pattern.format(str(fk[i]).upper(), taxid, hint) for i in curr_none])
+        for i, val in zip(curr_none, vals_array):
+            if val is None: continue
+            ret_st[i] = val.decode()
 
-    Args:
-        rdb (redis object): redis connection to the mapping db
-        foreign_keys (array of str): the list of the foreign gene identifers to be translated
-        hints (array of str): the list of hints for conversion
-        taxids (array of str): the list of the species taxids, 'unknown' if unknown
-
-    Returns:
-        array of str: result of seaching for the genes in redis DB
-    """
-    uniques = rdb.mget('unique::' + fk.upper() for fk in foreign_keys)
-    
-    ret = []
-    for foreign_key, unique, hint, taxid in zip(foreign_keys, uniques, hint, taxid):
-        hint = hint.upper()
-        foreign_key = foreign_key.upper()
-        taxid = str(taxid)
-        #use ensembl internal uniprot mappings
-        if hint == 'UNIPROT' or hint == 'UNIPROTKB':
-            hint = 'UNIPROT_GN'
-        if unique is None:
-            ret.append('unmapped-none')
-            continue
-        if unique != 'unmapped-many'.encode():
-            ret.append(unique.decode())
-            continue
-        mappings = rdb.smembers(foreign_key)
-        taxid_match = list()
-        hint_match = list()
-        both_match = list()
-        for taxid_hint in mappings:
-            taxid_hint = taxid_hint.decode()
-            taxid_hint_key = '::'.join([taxid_hint, foreign_key])
-            taxid_hint = taxid_hint.split('::')
-            if len(taxid_hint) < 2: # species key in redis
-                continue
-            if taxid == taxid_hint[0] and hint in taxid_hint[1]:
-                both_match.append(taxid_hint_key)
-            if taxid == taxid_hint[0]:
-                taxid_match.append(taxid_hint_key)
-            if hint in taxid_hint[1] and len(hint):
-                hint_match.append(taxid_hint_key)
-        if both_match:
-            both_ens_ids = set(rdb.mget(both_match))
-            if len(both_ens_ids) == 1:
-                ret.append(both_ens_ids.pop().decode())
-                continue
-        if taxid_match:
-            taxid_ens_ids = set(rdb.mget(taxid_match))
-            if len(taxid_ens_ids) == 1:
-                ret.append(taxid_ens_ids.pop().decode())
-                continue
-        if hint_match:
-            hint_ens_ids = set(rdb.mget(hint_match))
-            if len(hint_ens_ids) == 1:
-                ret.append(hint_ens_ids.pop().decode())
-                continue
-        ret.append('unmapped-many')
-    return ret
+    if(hint is not None and taxid is not None):
+        replace_none(ret_stable, 'triplet::{0}::{1}::{2}')
+    if(taxid is not None):
+        replace_none(ret_stable, 'taxid::{0}::{1}')
+    if(hint is not None):
+        replace_none(ret_stable, 'hint::{0}::{2}')
+    replace_none(ret_stable, 'unique::{0}')
+    return ret_stable
 
 
-def node_desc(rdb, stable_id):
-    if stable_id.startswith('unmapped'):
-        return (None, stable_id, stable_id)
-    alias = rdb.get('::'.join(['stable', stable_id, 'alias']))
-    if alias is None: alias = stable_id
-    else: alias = alias.decode()
-    desc = rdb.get('::'.join(['stable', stable_id, 'desc']))
-    if desc is None: desc = stable_id
-    else: desc = desc.decode()
-    typ = rdb.get('::'.join(['stable', stable_id, 'type']))
-    if typ is None: pass
-    else: typ = typ.decode()
-    return (typ, alias, desc)
+def node_desc(rdb, stable_array):
+    ret_type = [None] * len(stable_array)
+    ret_alias = list(stable_array)
+    ret_desc = list(stable_array)
+    st_map_idxs = [idx for idx, st in enumerate(stable_array) if not st.startswith('unmapped')]
+    vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'type']) for i in st_map_idxs])
+    for i, val in zip(st_map_idxs, vals_array):
+        if val is None: continue
+        ret_type[i] = val.decode()
+    vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'alias']) for i in st_map_idxs])
+    for i, val in zip(st_map_idxs, vals_array):
+        if val is None: continue
+        ret_alias[i] = val.decode()
+    vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'desc']) for i in st_map_idxs])
+    for i, val in zip(st_map_idxs, vals_array):
+        if val is None: continue
+        ret_desc[i] = val.decode()
+    return stable_array, ret_type, ret_alias, ret_desc
 
-def import_mapping(map_dict, args=None):
-    """Imports the property mapping data into the Redis database.
-
-    This stores the original id to KnowNet ids in the Redis database.
-
-    Args:
-        map_dict (dict): An dictionary containing all mapping info.
-        args (Namespace): args as populated namespace or 'None' for defaults
-    """
-    if args is None:
-        args=cf.config_args()
-    rdb = get_database(args)
-    for orig_id in map_dict:
-        KNvals = map_dict[orig_id].split('::')
-        rdb.set('::'.join(['stable', KNvals[0], 'type']), "Property")
-        rdb.set('::'.join(['stable', KNvals[0], 'alias']), orig_id)
-        if len(KNvals)>1:
-            rdb.set('::'.join(['stable', KNvals[0], 'desc']), KNvals[1])
-
-        rkey = rdb.getset('property::' + orig_id, map_dict[orig_id])
-        if rkey is not None and rkey.decode() != map_dict[orig_id]:
-            rdb.set('property::' + orig_id, 'unmapped-many')
-        rdb.sadd(orig_id, map_dict[orig_id])
 
 def main():
     """Deploy a Redis container using marathon with the provided command line
