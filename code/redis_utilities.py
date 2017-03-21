@@ -204,7 +204,6 @@ def get_node_info(rdb, fk_array, ntype, hint, taxid):
     else:
         raise ValueError("Invalid ntype")
 
-#TODO: output one tuple per foreign_key
     return zip(fk_array, *node_desc(rdb, stable_array))
 
 
