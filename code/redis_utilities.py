@@ -187,7 +187,8 @@ def get_node_info(rdb, fk_array, ntype, hint, taxid):
 
     hint = None if hint == '' or hint is None else hint.upper()
     taxid = None if taxid == '' or taxid is None else str(taxid)
-    ntype = None if ntype == ''
+    if ntype == '':
+        ntype = None
 
     if ntype is None:
         res_arr = rdb.mget(['::'.join(['stable', str(fk), 'type']) for fk in fk_array])

@@ -86,6 +86,7 @@ def main(tablefile, args=None):
                 if taxid not in supported_taxids:
                     n1_map = 'unmapped-unsupported-species'
                 else:
+# TODO: change to array input            
                     n1_map = ru.conv_gene(rdb, n1, hint, taxid)
             else:
                 n1_map = n1
@@ -94,6 +95,7 @@ def main(tablefile, args=None):
                 if taxid not in supported_taxids:
                     n2_map = 'unmapped-unsupported-species'
                 else:
+# TODO: change to array input                    
                     n2_map = ru.conv_gene(rdb, n2, hint, taxid)
             else:
                 n2_map = n2
@@ -139,6 +141,7 @@ def map_list(namefile, args=None):
         writer = csv.writer(n_map, delimiter = '\t', lineterminator='\n')
         for line in reader:
             orig = line[0]
+# TODO: change to array input
             mapped = ru.get_node_info(rdb, orig, args.source_hint, args.taxon)
             writer.writerow(mapped)
 
