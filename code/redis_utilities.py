@@ -193,7 +193,7 @@ def get_node_info(rdb, fk_array, ntype, hint, taxid):
     if ntype is None:
         res_arr = rdb.mget(['::'.join(['stable', str(fk), 'type']) for fk in fk_array])
         fk_prop = [fk for fk, res in zip(fk_array, res_arr) if res is not None and res.decode() == 'Property']
-        fk_gene = [fk for fk, res in zip(fk_array, res_arr) if res is not None and res.decode() == 'Gene')]
+        fk_gene = [fk for fk, res in zip(fk_array, res_arr) if res is not None and res.decode() == 'Gene']
         if len(fk_prop) > 0 and len(fk_gene) > 0 :
             raise ValueError("Mixture of property and gene nodes.")
         ntype = 'Property' if len(fk_prop) > 0 else 'Gene'
