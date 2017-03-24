@@ -97,7 +97,7 @@ def import_ensembl(alias, args=None):
     if args is None:
         args=cf.config_args()
     rdb = get_database(args)
-    map_dir = os.path.join(args.working_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+    map_dir = os.path.join(args.wBorking_dir, args.data_path, cf.DEFAULT_MAP_PATH)
     with open(os.path.join(map_dir, alias + '_all.json')) as infile:
         map_dict = json.load(infile)
     for key in map_dict:
@@ -116,12 +116,12 @@ def import_ensembl(alias, args=None):
         if rkey is not None and rkey.decode() != ens_id:
             rdb.set(keystr, 'unmapped-many')
 
-        keystr = 'taxon::' + foreign_key + '::' + taxon
+        keystr = 'taxon::' + foreign_key + '::' + taxid
         rkey = rdb.getset(keystr, ens_id)
         if rkey is not None and rkey.decode() != ens_id:
             rdb.set(keystr, 'unmapped-many')
 
-        keystr = 'triplet::' + foreign_key + '::' + taxon + '::' + hint
+        keystr = 'triplet::' + foreign_key + '::' + taxid + '::' + hint
         rkey = rdb.getset(keystr, ens_id)
         if rkey is not None and rkey.decode() != ens_id:
             rdb.set(keystr, 'unmapped-many')
@@ -164,10 +164,10 @@ def import_node_meta(nmfile, args=None):
                 rkey = rdb.getset('::'.join(['stable', node_id, 'biotype']), nm_value)
                 if rkey is not None and rkey.decode() != nm_value:
                     rdb.set('::'.join(['stable', node_id, 'biotype']), rkey)
-            elif(nm_type == 'taxon'):
-                rkey = rdb.getset('::'.join(['stable', node_id, 'taxon']), nm_value)
+            elif(nm_type == 'taxid'):
+                rkey = rdb.getset('::'.join(['stable', node_id, 'taxid']), nm_value)
                 if rkey is not None and rkey.decode() != nm_value:
-                    rdb.set('::'.join(['stable', node_id, 'taxon']), rkey)
+                    rdb.set('::'.join(['stable', node_id, 'taxid']), rkey)
             else:
                 continue
 
@@ -234,15 +234,16 @@ def conv_gene(rdb, fk_array, hint, taxid):
 
     def replace_none(ret_st, pattern):
         curr_none = [i for i, fk in enumerate(fk_array) if ret_st[i] == 'unmapped-none']
-        vals_array = rdb.mget([pattern.format(str(fk[i]).upper(), taxid, hint) for i in curr_none])
-        for i, val in zip(curr_none, vals_array):
-            if val is None: continue
-            ret_st[i] = val.decode()
+        if curr_none:
+            vals_array = rdb.mget([pattern.format(str(fk_array[i]).upper(), taxid, hint) for i in curr_none])
+            for i, val in zip(curr_none, vals_array):
+                if val is None: continue
+                ret_st[i] = val.decode()
 
     if(hint is not None and taxid is not None):
         replace_none(ret_stable, 'triplet::{0}::{1}::{2}')
     if(taxid is not None):
-        replace_none(ret_stable, 'taxid::{0}::{1}')
+        replace_none(ret_stable, 'taxon::{0}::{1}')
     if(hint is not None):
         replace_none(ret_stable, 'hint::{0}::{2}')
     replace_none(ret_stable, 'unique::{0}')
@@ -254,18 +255,19 @@ def node_desc(rdb, stable_array):
     ret_alias = list(stable_array)
     ret_desc = list(stable_array)
     st_map_idxs = [idx for idx, st in enumerate(stable_array) if not st.startswith('unmapped')]
-    vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'type']) for i in st_map_idxs])
-    for i, val in zip(st_map_idxs, vals_array):
-        if val is None: continue
-        ret_type[i] = val.decode()
-    vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'alias']) for i in st_map_idxs])
-    for i, val in zip(st_map_idxs, vals_array):
-        if val is None: continue
-        ret_alias[i] = val.decode()
-    vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'desc']) for i in st_map_idxs])
-    for i, val in zip(st_map_idxs, vals_array):
-        if val is None: continue
-        ret_desc[i] = val.decode()
+    if st_map_idxs:
+        vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'type']) for i in st_map_idxs])
+        for i, val in zip(st_map_idxs, vals_array):
+            if val is None: continue
+            ret_type[i] = val.decode()
+        vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'alias']) for i in st_map_idxs])
+        for i, val in zip(st_map_idxs, vals_array):
+            if val is None: continue
+            ret_alias[i] = val.decode()
+        vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'desc']) for i in st_map_idxs])
+        for i, val in zip(st_map_idxs, vals_array):
+            if val is None: continue
+            ret_desc[i] = val.decode()
     return stable_array, ret_type, ret_alias, ret_desc
 
 
