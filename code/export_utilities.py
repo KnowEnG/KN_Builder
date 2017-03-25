@@ -43,7 +43,8 @@ def get_nodes(edges):
 
 def convert_nodes(args, nodes):
     rdb = ru.get_database(args)
-    return ru.get_node_info(rdb, nodes, None, None, args.species)
+# TODO: change to array input    
+    return [ru.get_node_info(rdb, item, '', args.species) for item in nodes]
 
 def get_sources(edges):
     return set(edge[4] for edge in edges)

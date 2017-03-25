@@ -246,8 +246,7 @@ def conv_gene(rdb, fk_array, hint, taxid):
         replace_none(ret_stable, 'taxon::{0}::{1}')
     if(hint is not None):
         replace_none(ret_stable, 'hint::{0}::{2}')
-    if(taxid is None):
-        replace_none(ret_stable, 'unique::{0}')
+    replace_none(ret_stable, 'unique::{0}')
     return ret_stable
 
 
