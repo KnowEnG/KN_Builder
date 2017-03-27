@@ -13,7 +13,8 @@ KNP_DATA_PATH='data_'$KNP_BUILD_NAME
 KNP_LOGS_PATH='logs_'$KNP_BUILD_NAME
 KNP_ENS_SPECIES='RESEARCH'
 
-KNP_BUCKET="userKN-$KNP_BUILD_NAME"
+KNP_BUCKET="KnowNets/KN-$KNP_BUILD_NAME"
+KNP_EXPORT_DIR="$KNP_WORKING_DIR/$KNP_BUCKET/userKN-$KNP_BUILD_NAME"
 KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
 
 export KNP_MYSQL_HOST='knowcluster07.dyndns.org'
@@ -177,24 +178,24 @@ python3 code/workflow_utilities.py IMPORT \
 
 ## run export pipeline (time: )
 ```
-mkdir $KNP_WORKING_DIR/$KNP_BUCKET
-cp code/mysql/edge_type.txt $KNP_WORKING_DIR/$KNP_BUCKET
+mkdir $KNP_EXPORT_DIR
+cp code/mysql/edge_type.txt $KNP_EXPORT_DIR
 
 ## add gene maps
-head -n-1 $KNP_WORKING_DIR/$KNP_DATA_PATH/id_map/species/species.txt > $KNP_WORKING_DIR/$KNP_BUCKET/species.txt
-for TAXON in `cut -f1 $KNP_WORKING_DIR/$KNP_BUCKET/species.txt `; do
+head -n-1 $KNP_WORKING_DIR/$KNP_DATA_PATH/id_map/species/species.txt > $KNP_EXPORT_DIR/species.txt
+for TAXON in `cut -f1 $KNP_EXPORT_DIR/species.txt `; do
     echo $TAXON;
-    mkdir -p $KNP_WORKING_DIR/$KNP_BUCKET/Species/$TAXON;
+    mkdir -p $KNP_EXPORT_DIR/Species/$TAXON;
     mysql -h$KNP_MYSQL_HOST -u$KNP_MYSQL_USER -p$KNP_MYSQL_PASS -P$KNP_MYSQL_PORT -D$KNP_MYSQL_DB -e "\
         SELECT ns.node_id \
         FROM node_species ns \
         WHERE ns.taxon = $TAXON \
         ORDER BY ns.node_id" \
-        | tail -n +2 > $KNP_WORKING_DIR/$KNP_BUCKET/Species/$TAXON/$TAXON.glist;
+        | tail -n +2 > $KNP_EXPORT_DIR/Species/$TAXON/$TAXON.glist;
         LANG=C.UTF-8 python3 code/conv_utilities.py -mo LIST \
             -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
-            $KNP_WORKING_DIR/$KNP_BUCKET/Species/$TAXON/$TAXON.glist;
-        rm $KNP_WORKING_DIR/$KNP_BUCKET/Species/$TAXON/$TAXON.glist;
+            $KNP_EXPORT_DIR/Species/$TAXON/$TAXON.glist;
+        rm $KNP_EXPORT_DIR/Species/$TAXON/$TAXON.glist;
 done
 
 ## add subnetworks
@@ -204,13 +205,13 @@ mysql -h$KNP_MYSQL_HOST -p$KNP_MYSQL_PASS -u$KNP_MYSQL_USER -P$KNP_MYSQL_PORT -D
    WHERE e.et_name=et.et_name \
    AND e.n2_id=ns2.node_id \
    GROUP BY et.n1_type, ns2.taxon, e.et_name" \
-   > $KNP_WORKING_DIR/$KNP_BUCKET/db_contents.txt
-head -n1 $KNP_WORKING_DIR/$KNP_BUCKET/db_contents.txt \
-    > $KNP_WORKING_DIR/$KNP_BUCKET/directories.txt
-awk -v x=125000 '$4 >= x' $KNP_WORKING_DIR/$KNP_BUCKET/db_contents.txt \
-    | grep "^Gene" >> $KNP_WORKING_DIR/$KNP_BUCKET/directories.txt
-awk -v x=4000 '$4 >= x' $KNP_WORKING_DIR/$KNP_BUCKET/db_contents.txt \
-    | grep "^Property" >> $KNP_WORKING_DIR/$KNP_BUCKET/directories.txt
+   > $KNP_EXPORT_DIR/db_contents.txt
+head -n1 $KNP_EXPORT_DIR/db_contents.txt \
+    > $KNP_EXPORT_DIR/directories.txt
+awk -v x=125000 '$4 >= x' $KNP_EXPORT_DIR/db_contents.txt \
+    | grep "^Gene" >> $KNP_EXPORT_DIR/directories.txt
+awk -v x=4000 '$4 >= x' $KNP_EXPORT_DIR/db_contents.txt \
+    | grep "^Property" >> $KNP_EXPORT_DIR/directories.txt
 python3 code/workflow_utilities.py EXPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -myps $KNP_MYSQL_PASS -myu $KNP_MYSQL_USER \
@@ -218,19 +219,19 @@ python3 code/workflow_utilities.py EXPORT \
     -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
     -c $KNP_CHRONOS_URL -b $KNP_BUCKET\
     -sd $KNP_STORAGE_DIR -es $KNP_ENS_SPECIES \
-    -p "$(tail -n+2 $KNP_WORKING_DIR/$KNP_BUCKET/directories.txt \
+    -p "$(tail -n+2 $KNP_EXPORT_DIR/directories.txt \
         | cut -f2,3 \
         | sed -e 's/\t/::/g' \
         | sed -e ':a;N;$!ba;s/\n/,,/g')"
 
 ## extract Property node maps
 for CLASS1 in Property; do
-    for line in `grep $CLASS1 $KNP_WORKING_DIR/$KNP_BUCKET/directories.txt | sed 's#\t#/#g'` ; do
+    for line in `grep $CLASS1 $KNP_EXPORT_DIR/directories.txt | sed 's#\t#/#g'` ; do
         echo $line;
         CLASS=$(echo $line | cut -f1 -d/)
         TAXON=$(echo $line | cut -f2 -d/)
         ETYPE=$(echo $line | cut -f3 -d/)
-        grep Property $KNP_WORKING_DIR/$KNP_BUCKET/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.node_map > $KNP_WORKING_DIR/$KNP_BUCKET/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.pnode_map
+        grep Property $KNP_EXPORT_DIR/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.node_map > $KNP_EXPORT_DIR/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.pnode_map
     done
 done;
 
@@ -241,7 +242,7 @@ echo -e "[default]\naws_access_key_id = ABC\naws_secret_access_key = XYZ" > ~/.a
 
 # copy directory to S3 bucket
 pip install awscli
-aws s3 sync --delete $KNP_WORKING_DIR/$KNP_BUCKET s3://$KNP_BUCKET
+aws s3 sync $KNP_WORKING_DIR/$KNP_BUCKET s3://$KNP_BUCKET
 ```
 
 
