@@ -52,7 +52,7 @@ class Pathcom(SrcClass):
         super(Pathcom, self).__init__(name, url_base, aliases, args)
 
         self.source_url = "http://www.pathwaycommons.org/"
-        self.image = ""
+        self.image = "https://pbs.twimg.com/profile_images/862675480281042944/PblJi9Va.jpg"
         self.reference = "Cerami EG, Gross BE, Demir E, et al. Pathway Commons, a web resource for biological pathway data. Nucleic Acids Res. 2011;39(Database issue):D685-90."
 
     def get_source_version(self, alias):
