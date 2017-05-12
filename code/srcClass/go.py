@@ -55,6 +55,10 @@ class Go(SrcClass):
         self.aliases = self.get_aliases(args)
         self.chunk_size = 250000
 
+        self.source_url = "http://www.geneontology.org/"
+        self.image = "https://avatars3.githubusercontent.com/u/7750835?v=3&s=200"
+        self.reference = "Gene Ontology Consortium: going forward. Nucleic Acids Res. 2015;43(Database issue):D1049-56."
+
     def get_aliases(self, args=cf.config_args()):
         """Helper function for producing the alias dictionary.
 

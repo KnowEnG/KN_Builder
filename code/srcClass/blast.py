@@ -75,6 +75,10 @@ class Blast(SrcClass):
         self.sc_max = 100  # may want to load these
         self.sc_min = 2 # may want to load these
 
+        self.source_url = "https://blast.ncbi.nlm.nih.gov/"
+        self.image = "https://blast.ncbi.nlm.nih.gov/images/protein-blast-cover.png"
+        self.reference = "Altschul SF, Gish W, Miller W, Myers EW, Lipman DJ. Basic local alignment search tool. J Mol Biol. 1990;215(3):403-10."
+
     def get_aliases(self, args=cf.config_args()):
         """Helper function for producing the alias dictionary.
 

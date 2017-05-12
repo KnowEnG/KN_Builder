@@ -58,6 +58,10 @@ class PfamProt(SrcClass):
         self.sc_max = 100  # may want to load these
         self.sc_min = 2 # may want to load these
 
+        self.source_url = "http://pfam.xfam.org/"
+        self.image = "https://upload.wikimedia.org/wikipedia/commons/0/03/Pfam_logo.gif"
+        self.reference = "Finn RD, Coggill P, Eberhardt RY, et al. The Pfam protein families database: towards a more sustainable future. Nucleic Acids Res. 2016;44(D1):D279-85."
+
     def get_aliases(self, args=cf.config_args()):
         """Helper function for producing the alias dictionary.
 

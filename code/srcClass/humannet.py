@@ -49,6 +49,10 @@ class HumanNet(SrcClass):
         self.remote_file = 'HumanNet.v1.join.txt'
         self.chunk_size = 250000
 
+        self.source_url = "http://www.functionalnet.org/humannet/about.html"
+        self.image = "http://www.functionalnet.org/humannet/img_files/cover_title.jpg"
+        self.reference = "Lee I, Blom UM, Wang PI, Shim JE, Marcotte EM. Prioritizing candidate disease genes by network-based boosting of genome-wide association data. Genome Res. 2011;21(7):1109-21."
+
     def get_source_version(self, alias):
         """Return the release version of the remote HumanNet:alias.
 

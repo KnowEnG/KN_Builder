@@ -54,6 +54,10 @@ class Dip(SrcClass):
         sp_dict = json.load(open(sp_dir))
         self.taxid_list = sp_dict.values()
 
+        self.source_url = "http://dip.doe-mbi.ucla.edu/"
+        self.image = "https://www.virtuallyimmune.org/wp-content/uploads/2014/07/dip_logo.png"
+        self.reference = "Salwinski L, Miller CS, Smith AJ, Pettit FK, Bowie JU, Eisenberg D. The Database of Interacting Proteins: 2004 update. Nucleic Acids Res. 2004;32(Database issue):D449-51."
+
     def get_source_version(self, alias):
         """Return the release version of the remote dip:alias.
 

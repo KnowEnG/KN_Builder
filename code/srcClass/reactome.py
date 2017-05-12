@@ -55,6 +55,10 @@ class Reactome(SrcClass):
                    "ReactomePathwaysRelation":"ReactomeRelations"}
         super(Reactome, self).__init__(name, url_base, aliases, args)
 
+        self.source_url = "http://www.reactome.org/"
+        self.image = "http://blog.openhelix.eu/wp-content/uploads/2011/01/Reactome_logo.jpg"
+        self.reference = "Fabregat A, Sidiropoulos K, Garapati P, et al. The Reactome pathway Knowledgebase. Nucleic Acids Res. 2016;44(D1):D481-7."
+
     def get_source_version(self, alias):
         """Return the release version of the remote reactome:alias.
 

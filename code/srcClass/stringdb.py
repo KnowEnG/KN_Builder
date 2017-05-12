@@ -55,6 +55,10 @@ class Stringdb(SrcClass):
         self.aliases = self.get_aliases(args)
         self.chunk_size = 250000
 
+        self.source_url = "http://string-db.org/"
+        self.image = "http://meringlab.org/logos/string.png"
+        self.reference = "Szklarczyk D, Franceschini A, Wyder S, et al. STRING v10: protein-protein interaction networks, integrated over the tree of life. Nucleic Acids Res. 2015;43(Database issue):D447-52."
+
     def get_aliases(self, args=cf.config_args()):
         """Helper function for producing the alias dictionary.
 
