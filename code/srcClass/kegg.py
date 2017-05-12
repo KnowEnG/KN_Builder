@@ -111,7 +111,7 @@ class Kegg(SrcClass):
             the_page = response.readlines()
             for line in the_page:
                 d_line = line.decode()
-                match = re.search(r'Release (\S+), ([^<\n]*)', d_line)
+                match = re.search(r'Release (\S+)/', d_line)
                 if match is not None:
                     self.version[alias] = match.group(1)
                     response.close()

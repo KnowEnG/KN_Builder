@@ -139,8 +139,9 @@ def map_list(namefile, args=None):
         open(os.path.splitext(namefile)[0] + '.node_map.txt', 'w') as n_map:
         reader = csv.reader(infile, delimiter = '\t')
         writer = csv.writer(n_map, delimiter = '\t', lineterminator='\n')
-        mapped = ru.get_node_info(rdb, [line[0] for line in reader], None, args.source_hint, args.taxon)
+        mapped = ru.get_node_info(rdb, [line[0] if len(line) > 0 else '' for line in reader], None, args.source_hint, args.taxon)
         writer.writerows(mapped)
+
 
 def main_parse_args():
     """Processes command line arguments.
