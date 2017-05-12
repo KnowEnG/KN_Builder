@@ -193,7 +193,7 @@ for TAXON in `cut -f1 $KNP_EXPORT_DIR/species.txt `; do
         ORDER BY ns.node_id" \
         | tail -n +2 > $KNP_EXPORT_DIR/Species/$TAXON/$TAXON.glist;
         LANG=C.UTF-8 python3 code/conv_utilities.py -mo LIST \
-            -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT -t $TAXON\
+            -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT -t $TAXON \
             $KNP_EXPORT_DIR/Species/$TAXON/$TAXON.glist;
         rm $KNP_EXPORT_DIR/Species/$TAXON/$TAXON.glist;
 done

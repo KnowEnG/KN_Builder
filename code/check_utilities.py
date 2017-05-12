@@ -433,6 +433,10 @@ def compare_versions(src_obj, args=None):
             file_meta[alias]['local_file_name']
         version_dict[alias]['file_exists'] = \
             file_meta[alias]['file_exists']
+        version_dict[alias]['source_url'] = src_obj.source_url
+        version_dict[alias]['image'] = src_obj.image
+        version_dict[alias]['reference'] = src_obj.reference
+
 
         if not file_meta[alias]['file_exists']:
             version_dict[alias]['fetch_needed'] = True
