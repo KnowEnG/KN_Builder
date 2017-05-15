@@ -3,7 +3,7 @@ import config_utilities as cf
 import redis_utilities as ru
 import mysql_utilities as mu
 import sanitize_utilities as su
-import csv, json
+import csv, yaml
 import os
 
 def get_gg(db, et, taxon):
@@ -102,7 +102,7 @@ def main():
         csvw = csv.writer(f, delimiter='\t')
         csvw.writerows(nodes_desc)
     with open(sync_meta, 'w') as f:
-        json.dump(metadata, f)
+        yaml.dump(metadata, f)
 
 if __name__ == "__main__":
     main()
