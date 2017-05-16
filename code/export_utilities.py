@@ -64,9 +64,9 @@ def get_metadata(db, edges, nodes, sp, et):
         else:
             raise ValueError("Invalid type: {}".format(type))
 
-    return {"id": ".".join([sp, et])
-            "species": {"taxon_identifer": sp, "scientific_name": species[0]}
-            "edge_type": {"id": et, "n1_type": n1_type, "n2_type": n2_type, "type_desc": et_desc, "score_desc": sc_desc, "score_best": sc_best, "score_worst": sc_worst}
+    return {"id": ".".join([sp, et]),
+            "species": {"taxon_identifer": sp, "scientific_name": species[0]},
+            "edge_type": {"id": et, "n1_type": n1_type, "n2_type": n2_type, "type_desc": et_desc, "score_desc": sc_desc, "score_best": sc_best, "score_worst": sc_worst},
             "datasets": datasets,
             "data": {"num_edges": len(edges), "num_nodes": len(nodes), "num_prop_nodes": num_prop, "num_gene_nodes": num_gene}}
             #"build_metadata": {"git_revision": , "date": , "command": }}
