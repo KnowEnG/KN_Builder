@@ -48,10 +48,28 @@ def convert_nodes(args, nodes):
 def get_sources(edges):
     return set(edge[4] for edge in edges)
 
-def get_metadata(db, sources, edges, nodes):
-    return {"number_of_edges": len(edges),
-            "number_of_nodes": len(nodes),
-            "sources": [db.run("SELECT file_id, remote_url, remote_date, remote_version, checksum FROM raw_file WHERE file_id = '{}'".format(source))[0] for source in sources]}
+def get_metadata(db, edges, nodes, sp, et):
+    sources = get_sources(edges)
+    datasets = [db.run("SELECT file_id, remote_url, remote_date, remote_version, checksum FROM raw_file WHERE file_id = '{}'".format(source))[0] for source in sources]
+
+    sciname, = db.run("SELECT sp_sciname FROM species WHERE taxon = '{}'".format(sp))[0]
+    n1_type, n2_type, bidir, et_desc, sc_desc, sc_best, sc_worst = db.run("SELECT n1_type, n2_type, bidir, et_desc, sc_desc, sc_best, sc_worst FROM edge_type WHERE et_name = '{}'".format(et))[0]
+
+    num_prop, num_gene = 0, 0
+    for _, _, type, _, _ in nodes:
+        if type == "Property":
+            num_prop += 1
+        elif type == "Gene":
+            num_gene += 1
+        else:
+            raise ValueError("Invalid type: {}".format(type))
+
+    return {"id": ".".join([sp, et])
+            "species": {"taxon_identifer": sp, "scientific_name": species[0]}
+            "edge_type": {"id": et, "n1_type": n1_type, "n2_type": n2_type, "type_desc": et_desc, "score_desc": sc_desc, "score_best": sc_best, "score_worst": sc_worst}
+            "datasets": datasets,
+            "data": {"num_edges": len(edges), "num_nodes": len(nodes), "num_prop_nodes": num_prop, "num_gene_nodes": num_gene}}
+            #"build_metadata": {"git_revision": , "date": , "command": }}
 
 def main():
     """
@@ -90,8 +108,7 @@ def main():
     nodes = get_nodes(res)
     nodes_desc = convert_nodes(args, nodes)
 
-    sources = get_sources(res)
-    metadata = get_metadata(db, sources, res, nodes_desc)
+    metadata = get_metadata(db, res, nodes_desc, args.species, args.edge_type)
     db.close()
 
     os.makedirs(sync_dir, exist_ok=True)
