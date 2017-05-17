@@ -5,6 +5,7 @@ import mysql_utilities as mu
 import sanitize_utilities as su
 import csv, yaml
 import os
+from datetime import datetime
 
 def get_gg(db, et, taxon):
     return db.run("SELECT s.n1_id, s.n2_id, s.weight, s.et_name, rl.file_id, rl.line_num FROM status s JOIN node_species n1 ON s.n1_id = n1.node_id JOIN node_species n2 ON s.n2_id = n2.node_id JOIN raw_line rl ON s.line_hash = rl.line_hash WHERE s.et_name = '{}' AND n1.taxon = {} AND n2.taxon = {} AND s.status = 'production';".format(et, taxon, taxon))
@@ -34,13 +35,6 @@ def norm_edges(edges, args):
     print("NormalizedEdges: " + str(len(edges)))
     return edges
 
-def get_nodes(edges):
-    ret = set()
-    for i in edges:
-        ret.add(i[0])
-        ret.add(i[1])
-    return ret
-
 def convert_nodes(args, nodes):
     rdb = ru.get_database(args)
     return ru.get_node_info(rdb, nodes, None, None, args.species)
@@ -50,22 +44,28 @@ def get_sources(edges):
 
 def get_metadata(db, edges, nodes, sp, et):
     sources = get_sources(edges)
-    datasets = [db.run("SELECT file_id, remote_url, remote_date, remote_version, checksum FROM raw_file WHERE file_id = '{}'".format(source))[0] for source in sources]
+    datasets = {}
+    for source in sources:
+        file_id, remote_url, remote_date, remote_version, date_downloaded, checksum = db.run("SELECT file_id, remote_url, remote_date, remote_version, date_downloaded, checksum FROM raw_file WHERE file_id = '{}'".format(source))[0]
+        datasets[file_id] = {"download_url": remote_url, "remote_version": remote_version, "remote_date": datetime.utcfromtimestamp(float(remote_date)), "download_date": date_downloaded, "file_checksum": checksum}
 
     sciname, = db.run("SELECT sp_sciname FROM species WHERE taxon = '{}'".format(sp))[0]
     n1_type, n2_type, bidir, et_desc, sc_desc, sc_best, sc_worst = db.run("SELECT n1_type, n2_type, bidir, et_desc, sc_desc, sc_best, sc_worst FROM edge_type WHERE et_name = '{}'".format(et))[0]
 
-    num_prop, num_gene = 0, 0
+
+    num_prop, num_gene, num_none = 0, 0, 0
     for _, _, type, _, _ in nodes:
         if type == "Property":
             num_prop += 1
         elif type == "Gene":
             num_gene += 1
+        elif type == "None":
+            num_none += 1
         else:
             raise ValueError("Invalid type: {}".format(type))
 
     return {"id": ".".join([sp, et]),
-            "species": {"taxon_identifer": sp, "scientific_name": species[0]},
+            "species": {"taxon_identifer": sp, "scientific_name": sciname},
             "edge_type": {"id": et, "n1_type": n1_type, "n2_type": n2_type, "type_desc": et_desc, "score_desc": sc_desc, "score_best": sc_best, "score_worst": sc_worst},
             "datasets": datasets,
             "data": {"num_edges": len(edges), "num_nodes": len(nodes), "num_prop_nodes": num_prop, "num_gene_nodes": num_gene}}
@@ -105,8 +105,12 @@ def main():
         pass
     res = norm_edges(res, args)
 
-    nodes = get_nodes(res)
-    nodes_desc = convert_nodes(args, nodes)
+    n1des = list(set(i[0] for i in res))
+    n2des = list(set(i[1] for i in res))
+    
+    n1des_desc = convert_nodes(args, n1des)
+    n2des_desc = convert_nodes(args, n2des)
+    nodes_desc = set(n1des_desc) | set(n2des_desc)
 
     metadata = get_metadata(db, res, nodes_desc, args.species, args.edge_type)
     db.close()
@@ -119,7 +123,7 @@ def main():
         csvw = csv.writer(f, delimiter='\t')
         csvw.writerows(nodes_desc)
     with open(sync_meta, 'w') as f:
-        yaml.dump(metadata, f)
+        yaml.dump(metadata, f, default_flow_style=False)
 
 if __name__ == "__main__":
     main()
