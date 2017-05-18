@@ -46,8 +46,10 @@ def get_metadata(db, edges, nodes, sp, et):
     sources = get_sources(edges)
     datasets = {}
     for source in sources:
-        file_id, remote_url, remote_date, remote_version, date_downloaded, checksum = db.run("SELECT file_id, remote_url, remote_date, remote_version, date_downloaded, checksum FROM raw_file WHERE file_id = '{}'".format(source))[0]
-        datasets[file_id] = {"download_url": remote_url, "remote_version": remote_version, "remote_date": datetime.utcfromtimestamp(float(remote_date)), "download_date": date_downloaded, "file_checksum": checksum}
+        file_id, remote_url, remote_date, remote_version, source_url, image, reference, date_downloaded, checksum = \
+                db.run("SELECT file_id, remote_url, remote_date, remote_version, source_url, image, reference, " \
+                       "date_downloaded, checksum FROM raw_file WHERE file_id = '{}'".format(source))[0]
+        datasets[file_id] = {"source_url": source_url, "image": image, "reference": reference, "download_url": remote_url, "remote_version": remote_version, "remote_date": datetime.utcfromtimestamp(float(remote_date)), "download_date": date_downloaded, "file_checksum": checksum}
 
     sciname, = db.run("SELECT sp_sciname FROM species WHERE taxon = '{}'".format(sp))[0]
     n1_type, n2_type, bidir, et_desc, sc_desc, sc_best, sc_worst = db.run("SELECT n1_type, n2_type, bidir, et_desc, sc_desc, sc_best, sc_worst FROM edge_type WHERE et_name = '{}'".format(et))[0]
