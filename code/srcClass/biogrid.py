@@ -59,6 +59,7 @@ class Biogrid(SrcClass):
         self.source_url = "https://thebiogrid.org/"
         self.image = "https://pbs.twimg.com/profile_images/468116555922808832/oNFBPeKj.png"
         self.reference = "Chatr-aryamontri A, Oughtred R, Boucher L, et al. The BioGRID interaction database: 2017 update. Nucleic Acids Res. 2017;45(D1):D369-D379."
+        self.pmid = 27980099
 
     def get_source_version(self, alias):
         """Return the release version of the remote biogrid:alias.

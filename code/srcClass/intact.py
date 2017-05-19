@@ -59,6 +59,7 @@ class Intact(SrcClass):
         self.source_url = "http://www.ebi.ac.uk/intact/"
         self.image = "http://www.ebi.ac.uk/intact/images/IntAct_logo.png"
         self.reference = "Orchard S, Ammari M, Aranda B, et al. The MIntAct project--IntAct as a common curation platform for 11 molecular interaction databases. Nucleic Acids Res. 2014;42(Database issue):D358-63."
+        self.pmid = 24234451
 
     def get_source_version(self, alias):
         """Return the release version of the remote intact:alias.

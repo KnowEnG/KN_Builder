@@ -115,6 +115,7 @@ class Enrichr(SrcClass):
         self.source_url = "http://amp.pharm.mssm.edu/Enrichr/"
         self.image = "https://lw-static-files.s3.amazonaws.com/public/logos/2688.png"
         self.reference = "Kuleshov MV, Jones MR, Rouillard AD, et al. Enrichr: a comprehensive gene set enrichment analysis web server 2016 update. Nucleic Acids Res. 2016;44(W1):W90-7."
+        self.pmid = 27141961
 
     def get_source_version(self, alias):
         """Return the release version of the remote enrichr:alias.

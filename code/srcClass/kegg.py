@@ -56,6 +56,11 @@ class Kegg(SrcClass):
         self.get_source_version('pathway') #update source version
         self.date_modified = 'unknown'
 
+        self.source_url = "http://www.genome.jp/kegg/pathway.html"
+        self.image = "http://www.genome.jp/Fig/kegg128.gif"
+        self.reference = "Kanehisa M, Furumichi M, Tanabe M, Sato Y, Morishima K. KEGG: new perspectives on genomes, pathways, diseases and drugs. Nucleic Acids Res. 2017;45(D1):D353-D361."
+        self.pmid = 27899662
+
     def get_aliases(self, args=cf.config_args()):
         """Helper function for producing the alias dictionary.
 

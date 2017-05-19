@@ -436,6 +436,7 @@ def compare_versions(src_obj, args=None):
         version_dict[alias]['source_url'] = src_obj.source_url
         version_dict[alias]['image'] = src_obj.image
         version_dict[alias]['reference'] = src_obj.reference
+        version_dict[alias]['pmid'] = src_obj.pmid
 
 
         if not file_meta[alias]['file_exists']:

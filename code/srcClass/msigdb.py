@@ -60,6 +60,7 @@ class Msigdb(SrcClass):
         self.source_url = "http://software.broadinstitute.org/gsea/msigdb/"
         self.image = "http://software.broadinstitute.org/gsea/images/MSigDB-logo1.gif"
         self.reference = "Subramanian A, Tamayo P, Mootha VK, et al. Gene set enrichment analysis: a knowledge-based approach for interpreting genome-wide expression profiles. Proc Natl Acad Sci USA. 2005;102(43):15545-50."
+        self.pmid = 16199517
 
     def get_source_version(self, alias):
         """Return the release version of the remote msigdb:alias.

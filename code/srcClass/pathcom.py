@@ -54,6 +54,7 @@ class Pathcom(SrcClass):
         self.source_url = "http://www.pathwaycommons.org/"
         self.image = "https://pbs.twimg.com/profile_images/862675480281042944/PblJi9Va.jpg"
         self.reference = "Cerami EG, Gross BE, Demir E, et al. Pathway Commons, a web resource for biological pathway data. Nucleic Acids Res. 2011;39(Database issue):D685-90."
+        self.pmid = 21071392
 
     def get_source_version(self, alias):
         """Return the release version of the remote pathcom:alias.
