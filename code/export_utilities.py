@@ -67,7 +67,7 @@ def get_metadata(db, edges, nodes, sp, et):
             raise ValueError("Invalid type: {}".format(type))
 
     return {"id": ".".join([sp, et]),
-            "species": {"taxon_identifer": sp, "scientific_name": sciname},
+            "species": {"taxon_identifier": sp, "scientific_name": sciname},
             "edge_type": {"id": et, "n1_type": n1_type, "n2_type": n2_type, "type_desc": et_desc, "score_desc": sc_desc, "score_best": sc_best, "score_worst": sc_worst},
             "datasets": datasets,
             "data": {"num_edges": len(edges), "num_nodes": len(nodes), "num_prop_nodes": num_prop, "num_gene_nodes": num_gene}}
