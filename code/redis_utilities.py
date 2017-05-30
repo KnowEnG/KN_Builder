@@ -97,7 +97,7 @@ def import_ensembl(alias, args=None):
     if args is None:
         args=cf.config_args()
     rdb = get_database(args)
-    map_dir = os.path.join(args.wBorking_dir, args.data_path, cf.DEFAULT_MAP_PATH)
+    map_dir = os.path.join(args.working_dir, args.data_path, cf.DEFAULT_MAP_PATH)
     with open(os.path.join(map_dir, alias + '_all.json')) as infile:
         map_dict = json.load(infile)
     for key in map_dict:

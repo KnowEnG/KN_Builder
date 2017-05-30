@@ -84,8 +84,8 @@ CREATE TABLE IF NOT EXISTS `raw_file` (
   `remote_size` bigint(11) DEFAULT NULL,
   `source_url` varchar(255) DEFAULT NULL,
   `image` varchar(255) DEFAULT NULL,
-  `reference` varchar(512) DEFAULT NOT NULL,
-  `date_downloaded` datetime NOT NULL,
+  `reference` varchar(512) DEFAULT NULL,
+  `date_downloaded` varchar(40) DEFAULT NULL,
   `local_filename` varchar(255) NOT NULL,
   `checksum` varchar(80) DEFAULT NULL,
   PRIMARY KEY (`file_id`)

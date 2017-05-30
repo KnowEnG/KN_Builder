@@ -133,6 +133,7 @@ def update_filemeta(version_dict, args=None):
     values = [version_dict["source"] + '.' + version_dict["alias"],
               version_dict["remote_url"], version_dict["remote_date"],
               version_dict["remote_version"], version_dict["remote_size"],
+              version_dict["source_url"], version_dict["image"], version_dict["reference"],
               'CURRENT_TIMESTAMP', version_dict["local_file_name"],
               version_dict["checksum"]]
     for i in range(0, len(values)):
@@ -382,4 +383,6 @@ if __name__ == "__main__":
                          ','.join(merge_keys))
     import_file(args.importfile, table, ld_cmd, dup_cmd, args)
     if table == 'node_meta':
-        ru.import_node_meta(args.importfile, args)
+        filename = args.importfile.replace("node_meta", "node_meta_table")
+        mu.get_database("KnowNet", args).dump_table(table, filename)  #TODO: Should we assume the database name here?
+        ru.import_node_meta(filename, args)

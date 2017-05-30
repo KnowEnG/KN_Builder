@@ -1,0 +1,3 @@
+docker build -t cblatti3/py3_skl_redis_mysql_s3_yml:0.1 ./
+docker login
+docker push cblatti3/py3_skl_redis_mysql_s3_yml:0.1

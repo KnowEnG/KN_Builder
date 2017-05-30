@@ -169,6 +169,10 @@ def import_nodes(version_dict, args=None):
            "ON DUPLICATE KEY UPDATE node_id=node_id")
     tablename = 'KnowNet.node_meta'
     db.insert(tablename, cmd)
+    cmd = ("SELECT DISTINCT UCASE(gene.stable_id) AS node_id, 'taxid' AS info_type, " + taxid +
+           " AS info_desc FROM gene ON DUPLICATE KEY UPDATE node_id=node_id")
+    tablename = 'KnowNet.node_meta'
+    db.insert(tablename, cmd)
     cmd = ("SELECT DISTINCT UCASE(gene.stable_id) AS node_id, "
            "gene.description AS n_alias, "
            "'Gene' AS n_type_id "
@@ -769,6 +773,14 @@ class MySQL(object):
                self.port, '--password='+self.passw, import_flags,
                database, '-L', tablefile, '-v']
         subprocess.call(' '.join(cmd), shell=True)
+
+    def dump_table(self, table, file):
+        """Dump the data for the table in the provided file(name).
+        """
+        cmd = ['mysql', '-u', self.user, '-h', self.host, '--port', self.port, 
+               '--password='+self.passw, self.database, "--execute 'SELECT * FROM", table, "' --batch --silent >", file]
+        subprocess.check_call(' '.join(cmd), shell=True) #TODO: Should we use check_call here?
+
 
     def disable_keys(self):
         """Disables keys for faster operations.

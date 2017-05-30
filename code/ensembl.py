@@ -147,6 +147,10 @@ class Ensembl(SrcClass):
         """
         name = 'ensembl'
         url_base = 'ftp.ensembl.org'
+        self.reference = ''
+        self.image = ''
+        self.source_url = ''
+        self.pmid = 0
         aliases = self.get_aliases(args)
         super(Ensembl, self).__init__(name, url_base, aliases, args)
         rem_aliases = list()

@@ -87,7 +87,7 @@ def main(tablefile, args=None):
                     n1_map = 'unmapped-unsupported-species'
                 else:
 # TODO: change to array input            
-                    n1_map = ru.conv_gene(rdb, n1, hint, taxid)
+                    n1_map = ru.conv_gene(rdb, [n1], hint, taxid)[0]
             else:
                 n1_map = n1
             (n2, hint, ntype, taxid) = line[5:9]
@@ -96,7 +96,7 @@ def main(tablefile, args=None):
                     n2_map = 'unmapped-unsupported-species'
                 else:
 # TODO: change to array input                    
-                    n2_map = ru.conv_gene(rdb, n2, hint, taxid)
+                    n2_map = ru.conv_gene(rdb, [n2], hint, taxid)[0]
             else:
                 n2_map = n2
             chksum = line[0] #line chksum

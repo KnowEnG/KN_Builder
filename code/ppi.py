@@ -47,6 +47,10 @@ class Ppi(SrcClass):
         url_base = ('http://psidev.cvs.sourceforge.net/viewvc/*checkout*/'
                     'psidev/psi/mi/rel25/data/psi-mi25.obo')
         aliases = {"obo_map": "map file for PPI edge tyeps"}
+        self.reference = ''
+        self.image = ''
+        self.source_url = ''
+        self.pmid = 0
         super(Ppi, self).__init__(name, url_base, aliases, args)
 
     def get_source_version(self, alias):
