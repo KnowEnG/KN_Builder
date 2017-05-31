@@ -178,7 +178,7 @@ python3 code/workflow_utilities.py IMPORT \
 
 ## run export pipeline (time: )
 ```
-mkdir $KNP_EXPORT_DIR
+mkdir -p $KNP_EXPORT_DIR
 cp code/mysql/edge_type.txt $KNP_EXPORT_DIR
 
 ## add gene maps
