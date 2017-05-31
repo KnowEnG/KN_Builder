@@ -4,7 +4,7 @@
 ## Set environment variables
 ```
 KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
-KNP_BUILD_NAME='20rep-1702'
+KNP_BUILD_NAME='20rep-1706'
 KNP_CODE_DIR="/mnt/backup/knowdata/KnowNets/KnowNet_0.3/KN-$KNP_BUILD_NAME/"
 KNP_WORKING_DIR=$KNP_CODE_DIR'/'
 KNP_STORAGE_DIR="$KNP_WORKING_DIR"
