@@ -217,7 +217,7 @@ python3 code/workflow_utilities.py EXPORT \
     -myps $KNP_MYSQL_PASS -myu $KNP_MYSQL_USER \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
     -wd $KNP_WORKING_DIR -dp $KNP_DATA_PATH -lp $KNP_LOGS_PATH \
-    -c $KNP_CHRONOS_URL -b $KNP_BUCKET\
+    -c $KNP_CHRONOS_URL -b $KNP_EXPORT_DIR \
     -sd $KNP_STORAGE_DIR -es $KNP_ENS_SPECIES \
     -p "$(tail -n+2 $KNP_EXPORT_DIR/directories.txt \
         | cut -f2,3 \

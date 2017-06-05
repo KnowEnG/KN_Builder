@@ -42,7 +42,7 @@ def convert_nodes(args, nodes):
 def get_sources(edges):
     return set(edge[4] for edge in edges)
 
-def get_metadata(db, edges, nodes, sp, et):
+def get_metadata(db, edges, nodes, sp, et, args): #TODO: add normalization parameters.
     sources = get_sources(edges)
     datasets = {}
     for source in sources:
@@ -91,7 +91,7 @@ def main():
     nodes_fn = '{}.{}.node_map'.format(args.species, args.edge_type)
     meta_fn = '{}.{}.metadata'.format(args.species, args.edge_type)
     bucket_dir = os.path.join(cls, args.species, args.edge_type)
-    sync_dir = os.path.join(args.working_dir, args.bucket, bucket_dir)
+    sync_dir = os.path.join(args.bucket, bucket_dir)
     sync_edges = os.path.join(sync_dir, edges_fn)
     sync_nodes = os.path.join(sync_dir, nodes_fn)
     sync_meta = os.path.join(sync_dir, meta_fn)
@@ -114,14 +114,14 @@ def main():
     n2des_desc = convert_nodes(args, n2des)
     nodes_desc = set(n1des_desc) | set(n2des_desc)
 
-    metadata = get_metadata(db, res, nodes_desc, args.species, args.edge_type)
+    metadata = get_metadata(db, res, nodes_desc, args.species, args.edge_type, args)
     db.close()
 
     os.makedirs(sync_dir, exist_ok=True)
     with open(sync_edges, 'w') as f:
         csvw = csv.writer(f, delimiter='\t')
         csvw.writerows(res)
-    with open(sync_nodes, 'w') as f:
+    with open(sync_nodes, 'w', encoding='utf-8') as f:
         csvw = csv.writer(f, delimiter='\t')
         csvw.writerows(nodes_desc)
     with open(sync_meta, 'w') as f:
