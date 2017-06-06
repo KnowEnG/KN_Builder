@@ -142,9 +142,9 @@ def main():
     get = get_gg if cls == 'Gene' else get_pg
     res = get(db, args.edge_type, args.species)
     print("ProductionLines: " + str(len(res)))
-    if cls == 'Property':
-        # TODO: remove small properties
-        pass
+    if (cls == 'Property' and len(res) < 4000) or (cls == 'Gene' and len(res) < 125000):
+        print('Skipping {}.{}'.format(args.species, args.edge_type))
+        return
     res = norm_edges(res, args)
 
     n1des = list(set(i[0] for i in res))
