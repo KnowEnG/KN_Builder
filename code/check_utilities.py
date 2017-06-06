@@ -201,8 +201,9 @@ class SrcClass(object):
         remote_url = self.get_remote_url(alias)
         try:
             response = urllib.request.urlopen(remote_url)
+            print(response.headers)
             return int(response.headers['content-length'])
-        except (ValueError, urllib.error.URLError):
+        except (TypeError, ValueError, urllib.error.URLError):
             return -1
 
     def get_remote_file_modified(self, alias):
