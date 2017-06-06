@@ -158,7 +158,7 @@ def generic_dict(args, ns_parent=None):
         dict: tmp substitution dictionary with appropriate values depending on args
     """
 
-    job_dict = {'TMPLAUNCH': r'"schedule": "R1\/\/P3M"',
+    job_dict = {'TMPLAUNCH': r'"schedule": r"R1\/\/P3M"',
                 'TMPWORKDIR': args.working_dir,
                 'TMPDATAPATH': args.data_path,
                 'TMPCODEPATH': args.code_path,
@@ -262,7 +262,7 @@ def run_fetch(args):
                 jobname = jobname.replace(".", "-")
                 jobdict = generic_dict(args, None)
                 jobdict.update({'TMPJOB': jobname,
-                                'TMPLAUNCH': '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
+                                'TMPLAUNCH': r'"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
                                })
                 ju.run_job_step(args, "placeholder", jobdict)
 
@@ -287,13 +287,13 @@ def run_fetch(args):
             dependencies = version_dict["dependencies"]
             ismap = version_dict["is_map"]
             fetch_needed = version_dict["fetch_needed"] or args.force_fetch
-            if len(dependencies) > 0:
+            if dependencies:
                 for dep in dependencies:
                     parent_string = "-".join(["fetch", src, dep])
                     parents.extend([parent_string])
 
-            launchstr = '"schedule": "R1\/\/P3M"'
-            if len(parents) > 0:
+            launchstr = r'"schedule": "R1\/\/P3M"'
+            if parents:
                 launchstr = ju.chronos_parent_str(parents)
 
             jobname = "-".join(["fetch", src, alias])
@@ -475,14 +475,14 @@ def run_import(args):
             will try to import all tables.
     """
     importfile_list = args.step_parameters.split(",,")
-    TABLES = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta', 'edge', 'raw_line']
+    tables = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta', 'edge', 'raw_line']
     if args.step_parameters == "":
-        importfile_list = TABLES
+        importfile_list = tables
     ju.Job("importer", args)
 
     ctr = 0
     for importfile in importfile_list:
-        if importfile in TABLES:
+        if importfile in tables:
             mergefile = 'unique.' + importfile + '.txt'
             output_files = mergefile
             filestr = importfile
@@ -491,7 +491,7 @@ def run_import(args):
             filestr = os.path.basename(importfile)
             if not os.path.exists(importfile):
                 raise IOError('ERROR: "importfile" specified with --step_parameters (-p) '
-                          'option, ' + importfile + ' does not exist: ' + importfile)
+                              'option, ' + importfile + ' does not exist: ' + importfile)
         ctr += 1
         print("\t".join([str(ctr), filestr]))
 
@@ -511,7 +511,7 @@ def run_import(args):
 
 def run_export(args):
     """
-    TODO: Documentation.
+    TODO: Documentationr.
 
     Args:
         args (Namespace): args as populated namespace from parse_args,
@@ -560,16 +560,16 @@ def main():
 
         jobdict = generic_dict(args, None)
         jobdict['TMPJOB'] = "KN_starter_" + stage + args.time_stamp
-        jobdict['TMPLAUNCH'] = '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
+        jobdict['TMPLAUNCH'] = r'"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
         file_setup_job = ju.run_job_step(args, "file_setup", jobdict)
         args.dependencies = file_setup_job.jobname
         init_job = file_setup_job.jobname
 
     if args.setup:
         if args.start_step == 'CHECK':
-           run_check(args)
+            run_check(args)
         elif args.start_step == 'FETCH':
-           run_fetch(args)
+            run_fetch(args)
     else:
         if args.start_step == 'CHECK':
             run_check(args)

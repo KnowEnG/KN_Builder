@@ -9,7 +9,6 @@ Functions:
     get_SrcClass: returns a Reactome object
     main: runs compare_versions (see utilities.py) on a Reactome object
 """
-from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
 import os
@@ -18,6 +17,7 @@ import hashlib
 import csv
 import config_utilities as cf
 import table_utilities as tu
+from check_utilities import SrcClass, compare_versions
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -57,7 +57,8 @@ class Reactome(SrcClass):
 
         self.source_url = "http://www.reactome.org/"
         self.image = "http://blog.openhelix.eu/wp-content/uploads/2011/01/Reactome_logo.jpg"
-        self.reference = "Fabregat A, Sidiropoulos K, Garapati P, et al. The Reactome pathway Knowledgebase. Nucleic Acids Res. 2016;44(D1):D481-7."
+        self.reference = ("Fabregat A, Sidiropoulos K, Garapati P, et al. The Reactome pathway "
+                          "Knowledgebase. Nucleic Acids Res. 2016;44(D1):D481-7.")
         self.pmid = 26656494
 
     def get_source_version(self, alias):
@@ -88,54 +89,7 @@ class Reactome(SrcClass):
             for alias_name in self.aliases:
                 self.version[alias_name] = match.group(1)
             return self.version[alias]
-        else:
-            return version
-
-    def get_local_file_info(self, alias):
-        """Return a dictionary with the local file information for the alias.
-
-        (See utilities.SrcClass.get_local_file_info)
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            dict: The local file information for a given source alias.
-        """
-        return super(Reactome, self).get_local_file_info(alias)
-
-    def get_remote_file_size(self, alias):
-        """Return the remote file size.
-
-        This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see
-        utilities.SrcClass.get_remote_file_size).
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            int: The remote file size in bytes.
-        """
-        url = self.get_remote_url(alias)
-        return super(Reactome, self).get_remote_file_size(url)
-
-    def get_remote_file_modified(self, alias):
-        """Return the remote file date modified.
-
-        This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see
-        utilities.SrcClass.get_remote_file_modified).
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            float: time of last modification time of remote file in seconds
-                since the epoch
-        """
-        url = self.get_remote_url(alias)
-        return super(Reactome, self).get_remote_file_modified(url)
+        return version
 
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the
@@ -195,24 +149,6 @@ class Reactome(SrcClass):
                         "homo_sapiens.interactions": list(),
                         "ReactomePathwaysRelation": ['ReactomePathways']}
         return dependencies[alias]
-
-    def create_mapping_dict(self, filename):
-        """Return a mapping dictionary for the provided file.
-
-        This returns a dictionary for use in mapping reactome pathway nodes
-        from the file specified by filetype. If the alias is
-        Ensembl2Reactome_All_Levels it uses the second column as the key and
-        the first column as the value, otherwise it creates a dictionary using
-        the first column as the key and the second column as the value.
-
-        Args:
-            filename(str): The name of the file containing the information
-                needed to produce the maping dictionary.
-
-        Returns:
-            dict: A dictionary for use in mapping nodes or edge types.
-        """
-        return super(Reactome, self).create_mapping_dict(filename)
 
     def table(self, raw_line, version_dict):
         """Uses the provided raw_line file to produce a 2table_edge file, an
@@ -288,8 +224,8 @@ class Reactome(SrcClass):
                     score = 2
                     et_hint = 'reactome_annotation'
                     if e_meta == 'IEA':
-                        score = 1    
-                        
+                        score = 1
+
                     hasher = hashlib.md5()
                     hasher.update('\t'.join([chksm, n1_id, n1hint, n1type, n1spec,\
                                              n2_id, n2hint, n2type, n2spec, et_hint,
@@ -359,8 +295,7 @@ class Reactome(SrcClass):
             tu.csu(e_meta_file, outfile)
 
 
-
-if __name__ == "__main__":
+def main():
     """Runs compare_versions (see utilities.compare_versions) on a Reactome
     object
 
@@ -373,3 +308,6 @@ if __name__ == "__main__":
             alias described in Reactome.
     """
     compare_versions(Reactome())
+
+if __name__ == "__main__":
+    main()

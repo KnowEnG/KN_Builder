@@ -16,13 +16,13 @@ Contains module functions::
     get_insert_cmd(step)
     import_ensembl(alias, args=None)
 """
-from argparse import ArgumentParser
-import config_utilities as cf
-import mysql.connector as sql
 import os
 import json
 import subprocess
 import shutil
+from argparse import ArgumentParser
+import config_utilities as cf
+import mysql.connector as sql
 
 def deploy_container(args=None):
     """Deplays a container with marathon running MySQL using the specified
@@ -35,11 +35,12 @@ def deploy_container(args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     deploy_dir = os.path.join(args.working_dir, args.logs_path, 'marathon_jobs')
     if not os.path.exists(deploy_dir):
         os.makedirs(deploy_dir)
-    template_job = os.path.join(args.working_dir, args.code_path, 'dockerfiles', 'marathon', 'mysql.json')
+    template_job = os.path.join(args.working_dir, args.code_path, 'dockerfiles', 'marathon',
+                                'mysql.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
     deploy_dict["id"] = os.path.basename(args.mysql_dir)
@@ -67,7 +68,7 @@ def deploy_container(args=None):
     out_path = os.path.join(deploy_dir, "p1mysql-" + args.mysql_port +'.json')
     with open(out_path, 'w') as outfile:
         outfile.write(json.dumps(deploy_dict))
-    job= 'curl -X POST -H "Content-type: application/json" ' + args.marathon + " -d '"
+    job = 'curl -X POST -H "Content-type: application/json" ' + args.marathon + " -d '"
     job += json.dumps(deploy_dict) + "'"
     if not args.test_mode:
         try:
@@ -91,7 +92,7 @@ def combine_tables(alias, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     alias_db = 'ensembl_' + alias
     combined_db = 'KnowNet'
     combined_table = alias + '_mappings'
@@ -104,14 +105,14 @@ def combine_tables(alias, args=None):
         db.insert(combined_table, get_insert_cmd(step))
     db.use_db(combined_db)
     cmd = ("SELECT *, db_display_name AS species FROM " + alias_db + '.' +
-            alias + "_mappings WHERE 1=2")
+           alias + "_mappings WHERE 1=2")
     db.create_table(all_table, cmd)
     cmd = ("SELECT UCASE(dbprimary_acc) as dbprimary_acc, "
-            "UCASE(display_label) AS display_label, "
-            "UCASE(db_name) AS db_name, priority, "
-            "UCASE(db_display_name) AS db_display_name, "
-            "UCASE(stable_id) AS stable_id, '" + alias + "' AS species FROM " + 
-            alias_db + '.' + alias + "_mappings")
+           "UCASE(display_label) AS display_label, "
+           "UCASE(db_name) AS db_name, priority, "
+           "UCASE(db_display_name) AS db_display_name, "
+           "UCASE(stable_id) AS stable_id, '" + alias + "' AS species FROM " +
+           alias_db + '.' + alias + "_mappings")
     db.insert(all_table, cmd)
     db.close()
 
@@ -146,7 +147,7 @@ def import_nodes(version_dict, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     alias = version_dict['alias']
     taxid = version_dict['alias_info'].split('::')[0]
     alias_db = 'ensembl_' + alias
@@ -192,7 +193,7 @@ def query_all_mappings(version_dict, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     alias = version_dict['alias']
     taxid = version_dict['alias_info']
     database = 'ensembl_' + alias
@@ -240,7 +241,7 @@ def create_mapping_dicts(version_dict, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     alias = version_dict['alias']
     taxid = version_dict['alias_info']
     database = 'KnowNet'
@@ -279,7 +280,7 @@ def get_database(db=None, args=None):
         MySQL: a source class object
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     return MySQL(db, args)
 
 def create_KnowNet(args=None):
@@ -296,7 +297,7 @@ def create_KnowNet(args=None):
         MySQL: a source class object
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     db = MySQL(None, args)
     db.init_knownet()
     return db
@@ -394,7 +395,7 @@ def import_ensembl(alias, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     database = 'ensembl_' + alias
     db = MySQL(None, args)
     db.init_knownet()
@@ -428,11 +429,11 @@ def get_file_meta(file_id, args=None):
         dict: The file_meta information for a given source alias.
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     file_meta = {'file_id':file_id}
     db = get_database('KnowNet', args)
     results = db.query_distinct('remote_date, remote_size, remote_version',
-                        'raw_file', 'WHERE file_id="'+file_id+'"')
+                                'raw_file', 'WHERE file_id="'+file_id+'"')
     if not results:
         file_meta['file_exists'] = False
     else:
@@ -467,7 +468,7 @@ class MySQL(object):
             args (Namespace): args as populated namespace or 'None' for defaults
         """
         if args is None:
-            args=cf.config_args()
+            args = cf.config_args()
         self.user = args.mysql_user
         self.host = args.mysql_host
         self.port = args.mysql_port
@@ -716,7 +717,7 @@ class MySQL(object):
         self.cursor.execute(cmd + ';')
         try:
             results = self.cursor.fetchall()
-        except:
+        except sql.Error:
             results = list()
         self.conn.commit()
         return results
@@ -777,14 +778,15 @@ class MySQL(object):
     def dump_table(self, table, file):
         """Dump the data for the table in the provided file(name).
         """
-        cmd = ['mysql', '-u', self.user, '-h', self.host, '--port', self.port, 
-               '--password='+self.passw, self.database, "--execute 'SELECT * FROM", table, "' --batch --silent >", file]
-        subprocess.check_call(' '.join(cmd), shell=True) #TODO: Should we use check_call here?
+        cmd = ['mysql', '-u', self.user, '-h', self.host, '--port', self.port,
+               '--password='+self.passw, self.database, "--execute 'SELECT * FROM", table,
+               "' --batch --silent >", file]
+        subprocess.check_call(' '.join(cmd), shell=True)
 
 
     def disable_keys(self):
         """Disables keys for faster operations.
-        
+
         Turns off autocommit, unique_checks, and foreign_key_checks for
         the MySQLdatabase.
         """
@@ -795,7 +797,7 @@ class MySQL(object):
 
     def enable_keys(self):
         """Enables keys for safer operations.
-        
+
         Turns on autocommit, unique_checks, and foreign_key_checks for
         the MySQLdatabase.
         """

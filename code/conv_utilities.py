@@ -24,16 +24,16 @@ Examples:
         $ python3 code/conv_utilities.py -h
 """
 
-import config_utilities as cf
-import redis_utilities as ru
-import table_utilities as tu
-import import_utilities as iu
-from argparse import ArgumentParser
 import csv
 import sys
 import hashlib
 import os
 import json
+from argparse import ArgumentParser
+import config_utilities as cf
+import redis_utilities as ru
+import table_utilities as tu
+import import_utilities as iu
 
 csv.field_size_limit(sys.maxsize)
 
@@ -57,7 +57,7 @@ def main(tablefile, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     if 'lincs.level4' in tablefile or 'lincs.exp_meta' in tablefile:
         if os.path.isfile(tablefile.replace('conv', 'node')):
             iu.import_pnode(tablefile.replace('conv', 'node'), args)
@@ -77,16 +77,16 @@ def main(tablefile, args=None):
     with open(tablefile, 'r') as infile, \
         open(edge_file, 'w') as edge, \
         open(status_file, 'w') as e_stat:
-        reader = csv.reader(infile, delimiter = '\t')
-        s_writer = csv.writer(e_stat, delimiter = '\t', lineterminator='\n')
-        e_writer = csv.writer(edge, delimiter = '\t', lineterminator='\n')
+        reader = csv.reader(infile, delimiter='\t')
+        s_writer = csv.writer(e_stat, delimiter='\t', lineterminator='\n')
+        e_writer = csv.writer(edge, delimiter='\t', lineterminator='\n')
         for line in reader:
             (n1, hint, ntype, taxid) = line[1:5]
             if ntype == 'gene':
                 if taxid not in supported_taxids:
                     n1_map = 'unmapped-unsupported-species'
                 else:
-# TODO: change to array input            
+                    # TODO: change to array input
                     n1_map = ru.conv_gene(rdb, [n1], hint, taxid)[0]
             else:
                 n1_map = n1
@@ -95,7 +95,7 @@ def main(tablefile, args=None):
                 if taxid not in supported_taxids:
                     n2_map = 'unmapped-unsupported-species'
                 else:
-# TODO: change to array input                    
+                    # TODO: change to array input
                     n2_map = ru.conv_gene(rdb, [n2], hint, taxid)[0]
             else:
                 n2_map = n2
@@ -133,13 +133,14 @@ def map_list(namefile, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=main_parse_args()
+        args = main_parse_args()
     rdb = ru.get_database(args)
     with open(namefile, 'r') as infile, \
         open(os.path.splitext(namefile)[0] + '.node_map.txt', 'w') as n_map:
-        reader = csv.reader(infile, delimiter = '\t')
-        writer = csv.writer(n_map, delimiter = '\t', lineterminator='\n')
-        mapped = ru.get_node_info(rdb, [line[0] if len(line) > 0 else '' for line in reader], None, args.source_hint, args.taxon)
+        reader = csv.reader(infile, delimiter='\t')
+        writer = csv.writer(n_map, delimiter='\t', lineterminator='\n')
+        mapped = ru.get_node_info(rdb, [line[0] if line else '' for line in reader], None,
+                                  args.source_hint, args.taxon)
         writer.writerows(mapped)
 
 

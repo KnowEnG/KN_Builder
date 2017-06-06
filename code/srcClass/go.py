@@ -9,7 +9,6 @@ Functions:
     get_SrcClass: returns a Go object
     main: runs compare_versions (see utilities.py) on a Go object
 """
-from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
 import time
@@ -19,6 +18,7 @@ import csv
 import hashlib
 import config_utilities as cf
 import table_utilities as tu
+from check_utilities import SrcClass, compare_versions
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -57,7 +57,8 @@ class Go(SrcClass):
 
         self.source_url = "http://www.geneontology.org/"
         self.image = "https://avatars3.githubusercontent.com/u/7750835?v=3&s=200"
-        self.reference = "Gene Ontology Consortium: going forward. Nucleic Acids Res. 2015;43(Database issue):D1049-56."
+        self.reference = ("Gene Ontology Consortium: going forward. Nucleic Acids Res. "
+                          "2015;43(Database issue):D1049-56.")
         self.pmid = 25428369
 
     def get_aliases(self, args=cf.config_args()):
@@ -96,50 +97,6 @@ class Go(SrcClass):
             if species in go_dict:
                 alias_dict[go_dict[species]] = species
         return alias_dict
-
-    def get_source_version(self, alias):
-        """Return the release version of the remote go:alias.
-
-        This returns the release version of the remote source for a specific
-        alias. This value will be 'unknown' for every alias. This value is
-        stored in the self.version dictionary object.
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            str: The remote version of the source.
-        """
-        return super(Go, self).get_source_version(alias)
-
-    def get_local_file_info(self, alias):
-        """Return a dictionary with the local file information for the alias.
-
-        (See utilities.SrcClass.get_local_file_info)
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            dict: The local file information for a given source alias.
-        """
-        return super(Go, self).get_local_file_info(alias)
-
-    def get_remote_file_size(self, alias):
-        """Return the remote file size.
-
-        This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see
-        utilities.SrcClass.get_remote_file_size).
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            int: The remote file size in bytes.
-        """
-        url = self.get_remote_url(alias)
-        return super(Go, self).get_remote_file_size(url)
 
     def get_remote_file_modified(self, alias):
         """Return the remote file date modified.
@@ -195,43 +152,11 @@ class Go(SrcClass):
         go_url = self.url_base + 'go_annotation_metadata.all.json'
         go_resp = urllib.request.urlopen(go_url).readall().decode()
         go_resources = json.loads(go_resp)
-        go_dict = dict()
         for resource in go_resources['resources']:
             if resource['id'] == alias:
                 return self.url_base + resource['gaf_filename']
 
-    def is_map(self, alias):
-        """Return a boolean representing if the provided alias is used for
-        source specific mapping of nodes or edges.
-
-        This returns a boolean representing if the alias corresponds to a file
-        used for mapping. By default this returns True if the alias ends in
-        '_map' and False otherwise.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            bool: Whether or not the alias is used for mapping.
-        """
-        return super(Go, self).is_map(alias)
-
-    def get_dependencies(self, alias):
-        """Return a list of other aliases that the provided alias depends on.
-
-        This returns a list of other aliases that must be processed before
-        full processing of the provided alias can be completed.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            list: The other aliases defined in self.aliases that the provided
-                alias depends on.
-        """
-        return super(Go, self).get_dependencies(alias)
-
-    def create_mapping_dict(self, filename):
+    def create_mapping_dict(self, filename, key_col=3, value_col=4):
         """Return a mapping dictionary for the provided file.
 
         This returns a dictionary for use in mapping nodes or edge types from
@@ -302,8 +227,8 @@ class Go(SrcClass):
                      n2name, n2hint, n2type, n2spec, et_hint, score,
                      table_hash)
             edge_meta (line_hash, info_type, info_desc)
-            node_meta (node_id, 
-                    info_type (evidence, relationship, experiment, or link), 
+            node_meta (node_id,
+                    info_type (evidence, relationship, experiment, or link),
                     info_desc (text))
             node (node_id, n_alias, n_type)
 
@@ -396,7 +321,7 @@ class Go(SrcClass):
             outfile = e_meta_file.replace('edge_meta', 'unique.edge_meta')
             tu.csu(e_meta_file, outfile)
 
-if __name__ == "__main__":
+def main():
     """Runs compare_versions (see utilities.compare_versions) on a Go object.
 
     This runs the compare_versions function on a Go object to find the version
@@ -408,3 +333,6 @@ if __name__ == "__main__":
             alias described in Go.
     """
     compare_versions(Go())
+
+if __name__ == "__main__":
+    main()

@@ -11,13 +11,13 @@ Contains module functions::
 
 """
 
-import config_utilities as cf
-import redis
 import json
 import os
 from argparse import ArgumentParser
 import subprocess
 import csv
+import redis
+import config_utilities as cf
 
 def deploy_container(args=None):
     """Deplays a container with marathon running Redis using the specified
@@ -30,7 +30,7 @@ def deploy_container(args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     deploy_dir = os.path.join(args.working_dir, args.logs_path, 'marathon_jobs')
     if not os.path.exists(deploy_dir):
         os.makedirs(deploy_dir)
@@ -39,7 +39,7 @@ def deploy_container(args=None):
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
     deploy_dict["id"] = os.path.basename(args.redis_dir)
-    deploy_dict["cmd"] ="redis-server --appendonly yes --requirepass " + \
+    deploy_dict["cmd"] = "redis-server --appendonly yes --requirepass " + \
                         args.redis_pass
     deploy_dict["cpus"] = float(args.redis_cpu)
     deploy_dict["mem"] = int(args.redis_mem)
@@ -52,7 +52,7 @@ def deploy_container(args=None):
     out_path = os.path.join(deploy_dir, "p1redis-" + args.redis_port +'.json')
     with open(out_path, 'w') as outfile:
         outfile.write(json.dumps(deploy_dict))
-    job= 'curl -X POST -H "Content-type: application/json" ' + args.marathon + " -d '"
+    job = 'curl -X POST -H "Content-type: application/json" ' + args.marathon + " -d '"
     job += json.dumps(deploy_dict) + "'"
     if not args.test_mode:
         try:
@@ -74,7 +74,7 @@ def get_database(args=None):
         StrictRedis: a redis connection object
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     return redis.StrictRedis(host=args.redis_host, port=args.redis_port,
                              password=args.redis_pass)
 
@@ -95,7 +95,7 @@ def import_ensembl(alias, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     rdb = get_database(args)
     map_dir = os.path.join(args.working_dir, args.data_path, cf.DEFAULT_MAP_PATH)
     with open(os.path.join(map_dir, alias + '_all.json')) as infile:
@@ -137,8 +137,10 @@ def import_ensembl(alias, args=None):
                 rdb.set('::'.join(['stable', ens_id, 'alias']), foreign_key)
 
 def import_gene_nodes(node_table, args=None):
+    """Import gene node metadata into redis.
+    """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     rdb = get_database(args)
     for row in node_table:
         node_id, node_desc, node_type = row
@@ -147,8 +149,10 @@ def import_gene_nodes(node_table, args=None):
         rdb.set('::'.join(['stable', node_id, 'type']), node_type)
 
 def import_node_meta(nmfile, args=None):
+    """Import node metadata into redis.
+    """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     rdb = get_database(args)
     with open(nmfile) as infile:
         reader = csv.reader(infile, delimiter='\t')
@@ -156,15 +160,15 @@ def import_node_meta(nmfile, args=None):
             node_id, nm_type, nm_value = row
             node_alias = node_id
             node_desc = node_id
-            if(nm_type == 'orig_id'):
+            if nm_type == 'orig_id':
                 node_alias = nm_value
-            elif(nm_type == 'orig_desc'):
+            elif nm_type == 'orig_desc':
                 node_desc = nm_value
-            elif(nm_type == 'biotype'):
+            elif nm_type == 'biotype':
                 rkey = rdb.getset('::'.join(['stable', node_id, 'biotype']), nm_value)
                 if rkey is not None and rkey.decode() != nm_value:
                     rdb.set('::'.join(['stable', node_id, 'biotype']), rkey)
-            elif(nm_type == 'taxid'):
+            elif nm_type == 'taxid':
                 rkey = rdb.getset('::'.join(['stable', node_id, 'taxid']), nm_value)
                 if rkey is not None and rkey.decode() != nm_value:
                     rdb.set('::'.join(['stable', node_id, 'taxid']), rkey)
@@ -205,11 +209,13 @@ def get_node_info(rdb, fk_array, ntype, hint, taxid):
 
     if ntype is None:
         res_arr = rdb.mget(['::'.join(['stable', str(fk), 'type']) for fk in fk_array])
-        fk_prop = [fk for fk, res in zip(fk_array, res_arr) if res is not None and res.decode() == 'Property']
-        fk_gene = [fk for fk, res in zip(fk_array, res_arr) if res is not None and res.decode() == 'Gene']
-        if len(fk_prop) > 0 and len(fk_gene) > 0:
+        fk_prop = [fk for fk, res in zip(fk_array, res_arr) if res is not None
+                   and res.decode() == 'Property']
+        fk_gene = [fk for fk, res in zip(fk_array, res_arr) if res is not None
+                   and res.decode() == 'Gene']
+        if fk_prop and fk_gene:
             raise ValueError("Mixture of property and gene nodes.")
-        ntype = 'Property' if len(fk_prop) > 0 else 'Gene'
+        ntype = 'Property' if fk_prop else 'Gene'
 
     if ntype == "Gene":
         stable_array = conv_gene(rdb, fk_array, hint, taxid)
@@ -251,9 +257,11 @@ def conv_gene(rdb, fk_array, hint, taxid):
         """
         curr_none = [i for i in range(len(fk_array)) if ret_st[i] == 'unmapped-none']
         if curr_none:
-            vals_array = rdb.mget([pattern.format(str(fk_array[i]).upper(), taxid, hint) for i in curr_none])
+            vals_array = rdb.mget([pattern.format(str(fk_array[i]).upper(), taxid, hint)
+                                   for i in curr_none])
             for i, val in zip(curr_none, vals_array):
-                if val is None: continue
+                if val is None:
+                    continue
                 ret_st[i] = val.decode()
 
     if hint is not None and taxid is not None:
@@ -286,15 +294,19 @@ def node_desc(rdb, stable_array):
     if st_map_idxs:
         vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'type']) for i in st_map_idxs])
         for i, val in zip(st_map_idxs, vals_array):
-            if val is None: continue
+            if val is None:
+                continue
             ret_type[i] = val.decode()
-        vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'alias']) for i in st_map_idxs])
+        vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'alias'])
+                               for i in st_map_idxs])
         for i, val in zip(st_map_idxs, vals_array):
-            if val is None: continue
+            if val is None:
+                continue
             ret_alias[i] = val.decode()
         vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'desc']) for i in st_map_idxs])
         for i, val in zip(st_map_idxs, vals_array):
-            if val is None: continue
+            if val is None:
+                continue
             ret_desc[i] = val.decode()
     return stable_array, ret_type, ret_alias, ret_desc
 

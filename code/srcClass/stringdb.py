@@ -9,16 +9,16 @@ Functions:
     get_SrcClass: returns a Stringdb object
     main: runs compare_versions (see utilities.py) on a Stringdb object
 """
-from check_utilities import SrcClass, compare_versions
 import urllib.request
-import requests
 import re
 import os
 import hashlib
 import csv
 import json
+import requests
 import config_utilities as cf
 import table_utilities as tu
+from check_utilities import SrcClass, compare_versions
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -57,7 +57,9 @@ class Stringdb(SrcClass):
 
         self.source_url = "http://string-db.org/"
         self.image = "http://meringlab.org/logos/string.png"
-        self.reference = "Szklarczyk D, Franceschini A, Wyder S, et al. STRING v10: protein-protein interaction networks, integrated over the tree of life. Nucleic Acids Res. 2015;43(Database issue):D447-52."
+        self.reference = ("Szklarczyk D, Franceschini A, Wyder S, et al. STRING v10: "
+                          "protein-protein interaction networks, integrated over the tree of life. "
+                          "Nucleic Acids Res. 2015;43(Database issue):D447-52.")
         self.pmid = 25352553
 
     def get_aliases(self, args=cf.config_args()):
@@ -108,63 +110,17 @@ class Stringdb(SrcClass):
             the_page = response.readlines()
             for line in the_page:
                 d_line = line.decode()
-                match = re.search("<li class='last'>(\d+\.?\d*)</li>", d_line)
+                match = re.search(r"<li class='last'>(\d+\.?\d*)</li>", d_line)
                 if match is not None:
                     response.close()
-                    vs = match.group(1)
-                    if '.' in vs:
-                        vs = vs.rstrip('0')
-                    if vs[-1] == '.':
-                        vs = vs[:-1]
-                    self.version[alias] = vs
+                    vers = match.group(1)
+                    if '.' in vers:
+                        vers = vers.rstrip('0')
+                    if vers[-1] == '.':
+                        vers = vers[:-1]
+                    self.version[alias] = vers
                     return self.version[alias]
         return self.version[alias]
-
-    def get_local_file_info(self, alias):
-        """Return a dictionary with the local file information for the alias.
-
-        (See utilities.SrcClass.get_local_file_info)
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            dict: The local file information for a given source alias.
-        """
-        return super(Stringdb, self).get_local_file_info(alias)
-
-    def get_remote_file_size(self, alias):
-        """Return the remote file size.
-
-        This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see
-        utilities.SrcClass.get_remote_file_size).
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            int: The remote file size in bytes.
-        """
-        url = self.get_remote_url(alias)
-        return super(Stringdb, self).get_remote_file_size(url)
-
-    def get_remote_file_modified(self, alias):
-        """Return the remote file date modified.
-
-        This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see
-        utilities.SrcClass.get_remote_file_modified).
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            float: time of last modification time of remote file in seconds
-                since the epoch
-        """
-        url = self.get_remote_url(alias)
-        return super(Stringdb, self).get_remote_file_modified(url)
 
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the
@@ -186,54 +142,6 @@ class Stringdb(SrcClass):
         url += version + '.txt.gz'
         return url
 
-    def is_map(self, alias):
-        """Return a boolean representing if the provided alias is used for
-        source specific mapping of nodes or edges.
-
-        This returns a boolean representing if the alias corresponds to a file
-        used for mapping. By default this returns True if the alias ends in
-        '_map' and False otherwise.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            bool: Whether or not the alias is used for mapping.
-        """
-        return super(Stringdb, self).is_map(alias)
-
-    def get_dependencies(self, alias):
-        """Return a list of other aliases that the provided alias depends on.
-
-        This returns a list of other aliases that must be processed before
-        full processing of the provided alias can be completed.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            list: The other aliases defined in self.aliases that the provided
-                alias depends on.
-        """
-        return super(Stringdb, self).get_dependencies(alias)
-
-    def create_mapping_dict(self, filename):
-        """Return a mapping dictionary for the provided file.
-
-        This returns a dictionary for use in mapping nodes or edge types from
-        the file specified by filetype. By default it opens the file specified
-        by filename creates a dictionary using the first column as the key and
-        the second column as the value.
-
-        Args:
-            filename(str): The name of the file containing the information
-                needed to produce the maping dictionary.
-
-        Returns:
-            dict: A dictionary for use in mapping nodes or edge types.
-        """
-        return super(Stringdb, self).create_mapping_dict(filename)
-
     def table(self, raw_line, version_dict):
         """Uses the provided raw_line file to produce a 2table_edge file, an
         edge_meta file, a node and/or node_meta file (only for property nodes).
@@ -245,8 +153,8 @@ class Stringdb(SrcClass):
                      n2name, n2hint, n2type, n2spec, et_hint, score,
                      table_hash)
             edge_meta (line_hash, info_type, info_desc)
-            node_meta (node_id, 
-                    info_type (evidence, relationship, experiment, or link), 
+            node_meta (node_id,
+                    info_type (evidence, relationship, experiment, or link),
                     info_desc (text))
             node (node_id, n_alias, n_type)
 
@@ -315,7 +223,7 @@ class Stringdb(SrcClass):
         tu.csu(e_meta_file, outfile, [1, 2, 3])
 
 
-if __name__ == "__main__":
+def main():
     """Runs compare_versions (see utilities.compare_versions) on a Stringdb
     object
 
@@ -328,3 +236,6 @@ if __name__ == "__main__":
             alias described in Stringdb.
     """
     compare_versions(Stringdb())
+
+if __name__ == "__main__":
+    main()

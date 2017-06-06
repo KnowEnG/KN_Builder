@@ -13,12 +13,6 @@ Functions:
 Variables:
     TABLE_LIST: list of tables of interest from Ensembl
 """
-from check_utilities import SrcClass, compare_versions
-import config_utilities as cf
-from fetch_utilities import download
-import mysql_utilities as db
-import redis_utilities as ru
-import mysql.connector
 import ftplib
 import json
 import urllib.request
@@ -26,6 +20,12 @@ import re
 import time
 import os
 import shutil
+import mysql.connector
+from check_utilities import SrcClass, compare_versions
+import config_utilities as cf
+from fetch_utilities import download
+import mysql_utilities as db
+import redis_utilities as ru
 
 TABLE_LIST = ['external_db', 'gene', 'object_xref', 'transcript',
               'translation', 'xref']
@@ -127,7 +127,7 @@ def species_import(alias_dict, args=cf.config_args()):
             sp_file.write('\t'.join([taxid, sp_abbrev, species, species])+'\n')
     db.get_database(None, args).import_table('KnowNet', table_file, '--ignore')
     with open(species_file, 'w') as outfile:
-       json.dump(species_dict, outfile, indent=4, sort_keys=True)
+        json.dump(species_dict, outfile, indent=4, sort_keys=True)
 
 
 class Ensembl(SrcClass):
@@ -163,7 +163,7 @@ class Ensembl(SrcClass):
         args.ens_species = ',,'.join(aliases.keys())
         species_import(self.aliases, args)
 
-    def get_aliases(self, args):
+    def get_aliases(self, args=cf.config_args()):
         """Return the alias dictionary for ensembl based on the provided alias_list.
 
         This returns a dictionary where species names are keys and a tuple of
@@ -178,18 +178,14 @@ class Ensembl(SrcClass):
         """
         #replace all special keywords
         alias_list = args.ens_species
-        all_species = 'REPRESENTATIVE,,BACTERIA,,FUNGI,,METAZOA,,PLANTS,,' +\
-                      'PROTISTS,,VERTEBRATES'
-        representative = 'mus_musculus,,arabidopsis_thaliana,,' +\
-                         'saccharomyces_cerevisiae,,caenorhabditis_elegans,,' +\
-                         'drosophila_melanogaster,,homo_sapiens'
-        research =  ( 'arabidopsis_thaliana,,caenorhabditis_elegans,,' \
-                      'drosophila_melanogaster,,homo_sapiens,,mus_musculus,,' \
-                      'saccharomyces_cerevisiae,,bos_taurus,,sus_scrofa,,' \
-                      'pan_troglodytes,,taeniopygia_guttata,,daphnia_pulex,,' \
-                      'xenopus_tropicalis,,macaca_mulatta,,rattus_norvegicus,,' \
-                      'apis_mellifera,,danio_rerio,,gallus_gallus,,' \
-                      'gasterosteus_aculeatus,,aedes_aegypti,,canis_familiaris' )
+        all_species = 'REPRESENTATIVE,,BACTERIA,,FUNGI,,METAZOA,,PLANTS,,PROTISTS,,VERTEBRATES'
+        representative = ('mus_musculus,,arabidopsis_thaliana,,saccharomyces_cerevisiae,,'
+                          'caenorhabditis_elegans,,drosophila_melanogaster,,homo_sapiens')
+        research = ('arabidopsis_thaliana,,caenorhabditis_elegans,,drosophila_melanogaster,,'
+                    'homo_sapiens,,mus_musculus,,saccharomyces_cerevisiae,,bos_taurus,,sus_scrofa,,'
+                    'pan_troglodytes,,taeniopygia_guttata,,daphnia_pulex,,xenopus_tropicalis,,'
+                    'macaca_mulatta,,rattus_norvegicus,,apis_mellifera,,danio_rerio,,'
+                    'gallus_gallus,,gasterosteus_aculeatus,,aedes_aegypti,,canis_familiaris')
         keywords = {'ALL':all_species,
                     'REPRESENTATIVE':representative,
                     'BACTERIA':'EnsemblBacteria',
@@ -277,19 +273,6 @@ class Ensembl(SrcClass):
             version = version[1:-1]
         return version
 
-    def get_local_file_info(self, alias):
-        """Return a dictionary with the local file information for the alias.
-
-        (See check_utilities.get_local_file_info)
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            dict: The local file information for a given source alias.
-        """
-        return super(Ensembl, self).get_local_file_info(alias)
-
     def get_remote_file_size(self, alias):
         """Return the remote file size.
 
@@ -315,7 +298,7 @@ class Ensembl(SrcClass):
         file_size = 0
         file_dir = ''
         for directory in ftp.nlst():
-            match = re.match(alias + '_core_[\S]*', directory)
+            match = re.match(alias + r'_core_[\S]*', directory)
             if match is not None:
                 file_dir = directory
                 break
@@ -350,7 +333,7 @@ class Ensembl(SrcClass):
         ftp.login()
         ftp.cwd(chdir)
         for directory in ftp.nlst():
-            match = re.match(alias + '_core_[\S]*', directory)
+            match = re.match(alias + r'_core_[\S]*', directory)
             if match is not None:
                 time_str = ftp.sendcmd('MDTM ' + match.group(0) + chk_file)
                 time_str = time_str[4:]
@@ -383,7 +366,7 @@ class Ensembl(SrcClass):
         ftp.cwd(chdir)
         file_dir = ''
         for directory in ftp.nlst():
-            match = re.match(alias + '_core_[\S]*', directory)
+            match = re.match(alias + r'_core_[\S]*', directory)
             if match is not None:
                 file_dir = directory
                 break

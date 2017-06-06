@@ -9,7 +9,6 @@ Functions:
     get_SrcClass: returns a Kegg object
     main: runs compare_versions (see utilities.py) on a Kegg object
 """
-from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
 import time
@@ -18,6 +17,7 @@ import hashlib
 import json
 import csv
 import config_utilities as cf
+from check_utilities import SrcClass, compare_versions
 import table_utilities as tu
 
 def get_SrcClass(args):
@@ -58,7 +58,9 @@ class Kegg(SrcClass):
 
         self.source_url = "http://www.genome.jp/kegg/pathway.html"
         self.image = "http://www.genome.jp/Fig/kegg128.gif"
-        self.reference = "Kanehisa M, Furumichi M, Tanabe M, Sato Y, Morishima K. KEGG: new perspectives on genomes, pathways, diseases and drugs. Nucleic Acids Res. 2017;45(D1):D353-D361."
+        self.reference = ("Kanehisa M, Furumichi M, Tanabe M, Sato Y, Morishima K. KEGG: new "
+                          "perspectives on genomes, pathways, diseases and drugs. Nucleic Acids "
+                          "Res. 2017;45(D1):D353-D361.")
         self.pmid = 27899662
 
     def get_aliases(self, args=cf.config_args()):
@@ -124,21 +126,7 @@ class Kegg(SrcClass):
             for alias_name in self.aliases:
                 self.version[alias_name] = self.version[alias]
             return self.version[alias]
-        else:
-            return version
-
-    def get_local_file_info(self, alias):
-        """Return a dictionary with the local file information for the alias.
-
-        (See utilities.SrcClass.get_local_file_info)
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            dict: The local file information for a given source alias.
-        """
-        return super(Kegg, self).get_local_file_info(alias)
+        return version
 
     def get_remote_file_size(self, alias):
         """Return the remote file size.
@@ -220,8 +208,7 @@ class Kegg(SrcClass):
         """
         if alias == 'pathway':
             return True
-        else:
-            return super(Kegg, self).is_map(alias)
+        return super(Kegg, self).is_map(alias)
 
     def get_dependencies(self, alias):
         """Return a list of other aliases that the provided alias depends on.
@@ -238,10 +225,9 @@ class Kegg(SrcClass):
         """
         if alias[-4:] == '_map' or alias == 'pathway':
             return list()
-        else:
-            return [alias + '_map', 'pathway']
+        return [alias + '_map', 'pathway']
 
-    def create_mapping_dict(self, filename):
+    def create_mapping_dict(self, filename, key_col=3, value_col=4):
         """Return a mapping dictionary for the provided file.
 
         This returns a dictionary for use in mapping nodes or edge types from
@@ -313,8 +299,8 @@ class Kegg(SrcClass):
                      n2name, n2hint, n2type, n2spec, et_hint, score,
                      table_hash)
             edge_meta (line_hash, info_type, info_desc)
-            node_meta (node_id, 
-                    info_type (evidence, relationship, experiment, or link), 
+            node_meta (node_id,
+                    info_type (evidence, relationship, experiment, or link),
                     info_desc (text))
             node (node_id, n_alias, n_type)
 
@@ -375,7 +361,7 @@ class Kegg(SrcClass):
                 edge_writer.writerow([chksm, n1_id, n1hint, n1type, n1spec, \
                         n2_id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
 
-if __name__ == "__main__":
+def main():
     """Runs compare_versions (see utilities.compare_versions) on a kegg
     object
 
@@ -388,3 +374,6 @@ if __name__ == "__main__":
             alias described in kegg.
     """
     compare_versions(Kegg())
+
+if __name__ == "__main__":
+    main()

@@ -9,12 +9,12 @@ Functions:
     get_SrcClass: returns an Species object
     main: runs compare_versions (see utilities.py) on a Species object
 """
-from check_utilities import SrcClass, compare_versions
 import time
 import ftplib
 import csv
 import json
 import config_utilities as cf
+from check_utilities import SrcClass, compare_versions
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -49,34 +49,6 @@ class Species(SrcClass):
         aliases = {"species_map": "mapping file for species"}
         super(Species, self).__init__(name, url_base, aliases, args)
         self.remote_file = 'names.dmp'
-
-    def get_source_version(self, alias):
-        """Return the release version of the remote species:alias.
-
-        This returns the release version of the remote source for a specific
-        alias. This value will be the same for every alias and is 'unknown' in
-        this case. This value is stored in the self.version dictionary object.
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            str: The remote version of the source.
-        """
-        return super(Species, self).get_source_version(alias)
-
-    def get_local_file_info(self, alias):
-        """Return a dictionary with the local file information for the alias.
-
-        (See utilities.get_local_file_info)
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            dict: The local file information for a given source alias.
-        """
-        return super(Species, self).get_local_file_info(alias)
 
     def get_remote_file_size(self, alias):
         """Return the remote file size.
@@ -137,38 +109,7 @@ class Species(SrcClass):
         url = self.url_base + '/pub/taxonomy/taxdmp.zip'
         return 'ftp://' + url
 
-    def is_map(self, alias):
-        """Return a boolean representing if the provided alias is used for
-        source specific mapping of nodes or edges.
-
-        This returns a boolean representing if the alias corresponds to a file
-        used for mapping. By default this returns True if the alias ends in
-        '_map' and False otherwise.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            bool: Whether or not the alias is used for mapping.
-        """
-        return super(Species, self).is_map(alias)
-
-    def get_dependencies(self, alias):
-        """Return a list of other aliases that the provided alias depends on.
-
-        This returns a list of other aliases that must be processed before
-        full processing of the provided alias can be completed.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            list: The other aliases defined in self.aliases that the provided
-                alias depends on.
-        """
-        return super(Species, self).get_dependencies(alias)
-
-    def create_mapping_dict(self, filename):
+    def create_mapping_dict(self, filename, key_col=3, value_col=4):
         """Return a mapping dictionary for the provided file.
 
         This returns a dictionary for use in mapping species name to taxid from
@@ -191,7 +132,7 @@ class Species(SrcClass):
 
         with open(filename, encoding='utf-8') as infile:
             reader = csv.reader((line.replace('\t|', '') for line in infile),
-                                delimiter='\t',  quoting=csv.QUOTE_NONE)
+                                delimiter='\t', quoting=csv.QUOTE_NONE)
             for full_line in reader:
                 line = full_line[3:]
                 if line[3] == 'scientific name':
@@ -209,11 +150,12 @@ class Species(SrcClass):
                     species[taxid]['abbreviated_name'] = abbr_name
         with open('species.json', 'w') as outfile:
             json.dump(species, outfile, indent=4, sort_keys=True)
-        for key in species.keys():
+        for key in species:
             s_name = species[key]['unique_name']
             species2taxid[s_name] = key
         return species2taxid
-if __name__ == "__main__":
+
+def main():
     """Runs compare_versions (see utilities.compare_versions) on a species
     object
 
@@ -226,3 +168,6 @@ if __name__ == "__main__":
             alias described in species.
     """
     compare_versions(Species())
+
+if __name__ == "__main__":
+    main()

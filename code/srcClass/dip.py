@@ -8,13 +8,13 @@ Classes:
 Functions:
     main: runs compare_versions (see utilities.py) on a Dip object
 """
-from check_utilities import SrcClass, compare_versions
-from mitab_utilities import table
 import urllib.request
 import re
-import config_utilities as cf
 import os
 import json
+import config_utilities as cf
+from check_utilities import SrcClass, compare_versions
+from mitab_utilities import table
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -56,7 +56,9 @@ class Dip(SrcClass):
 
         self.source_url = "http://dip.doe-mbi.ucla.edu/"
         self.image = "https://www.virtuallyimmune.org/wp-content/uploads/2014/07/dip_logo.png"
-        self.reference = "Salwinski L, Miller CS, Smith AJ, Pettit FK, Bowie JU, Eisenberg D. The Database of Interacting Proteins: 2004 update. Nucleic Acids Res. 2004;32(Database issue):D449-51."
+        self.reference = ("Salwinski L, Miller CS, Smith AJ, Pettit FK, Bowie JU, Eisenberg D. The "
+                          "Database of Interacting Proteins: 2004 update. Nucleic Acids Res. "
+                          "2004;32(Database issue):D449-51.")
         self.pmid = 14681454
 
     def get_source_version(self, alias):
@@ -101,52 +103,6 @@ class Dip(SrcClass):
         else:
             return version
 
-    def get_local_file_info(self, alias):
-        """Return a dictionary with the local file information for the alias.
-
-        (See utilities.SrcClass.get_local_file_info)
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            dict: The local file information for a given source alias.
-        """
-        return super(Dip, self).get_local_file_info(alias)
-
-    def get_remote_file_size(self, alias):
-        """Return the remote file size.
-
-        This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see
-        utilities.SrcClass.get_remote_file_size).
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            int: The remote file size in bytes.
-        """
-        url = self.get_remote_url(alias)
-        return super(Dip, self).get_remote_file_size(url)
-
-    def get_remote_file_modified(self, alias):
-        """Return the remote file date modified.
-
-        This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see
-        utilities.SrcClass.get_remote_file_modified).
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            float: time of last modification time of remote file in seconds
-                since the epoch
-        """
-        url = self.get_remote_url(alias)
-        return super(Dip, self).get_remote_file_modified(url)
-
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the
         alias.
@@ -165,54 +121,6 @@ class Dip(SrcClass):
         url = self.url_base + self.year + 'tab25/' + version + '.txt'
         return url
 
-    def is_map(self, alias):
-        """Return a boolean representing if the provided alias is used for
-        source specific mapping of nodes or edges.
-
-        This returns a boolean representing if the alias corresponds to a file
-        used for mapping. By default this returns True if the alias ends in
-        '_map' and False otherwise.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            bool: Whether or not the alias is used for mapping.
-        """
-        return super(Dip, self).is_map(alias)
-
-    def get_dependencies(self, alias):
-        """Return a list of other aliases that the provided alias depends on.
-
-        This returns a list of other aliases that must be processed before
-        full processing of the provided alias can be completed.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            list: The other aliases defined in self.aliases that the provided
-                alias depends on.
-        """
-        return super(Dip, self).get_dependencies(alias)
-
-    def create_mapping_dict(self, filename):
-        """Return a mapping dictionary for the provided file.
-
-        This returns a dictionary for use in mapping nodes or edge types from
-        the file specified by filetype. By default it opens the file specified
-        by filename creates a dictionary using the first column as the key and
-        the second column as the value.
-
-        Args:
-            filename(str): The name of the file containing the information
-                needed to produce the maping dictionary.
-
-        Returns:
-            dict: A dictionary for use in mapping nodes or edge types.
-        """
-        return super(Dip, self).create_mapping_dict(filename)
-
     def table(self, raw_line, version_dict):
         """Uses the provided raw_lines file to produce a 2table_edge file, an
         edge_meta file, a node and/or node_meta file (only for property nodes).
@@ -224,8 +132,8 @@ class Dip(SrcClass):
                      n2name, n2hint, n2type, n2spec, et_hint, score,
                      table_hash)
             edge_meta (line_hash, info_type, info_desc)
-            node_meta (node_id, 
-                    info_type (evidence, relationship, experiment, or link), 
+            node_meta (node_id,
+                    info_type (evidence, relationship, experiment, or link),
                     info_desc (text))
             node (node_id, n_alias, n_type)
 
@@ -238,7 +146,7 @@ class Dip(SrcClass):
         """
         return table(raw_line, version_dict, self.taxid_list)
 
-if __name__ == "__main__":
+def main():
     """Runs compare_versions (see utilities.compare_versions) on a dip
     object
 
@@ -251,3 +159,6 @@ if __name__ == "__main__":
             alias described in dip.
     """
     compare_versions(Dip())
+
+if __name__ == "__main__":
+    main()

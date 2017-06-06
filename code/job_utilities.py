@@ -131,12 +131,12 @@ class Job:
         envvars = json.loads(self.tmpdict.get("TMPENV", "[]"))
         envstr = ""
         vmntstr = "-v " + self.args.working_dir + ":" + self.args.working_dir
-        if(self.args.working_dir != self.args.storage_dir):
+        if self.args.working_dir != self.args.storage_dir:
             vmntstr += " -v " + self.args.storage_dir + ":" + self.args.storage_dir
         for env in envvars:
             envstr += ' -e ' + env['variable'] + '=' + env['value']
         docker_cmd = ["docker", "run", "--name", jobjson["name"], "--rm=true",
-                      vmntstr, self.tmpdict["TMPIMG"], jobjson["command"] ]
+                      vmntstr, self.tmpdict["TMPIMG"], jobjson["command"]]
         print("\n"+" ".join(docker_cmd))
         if not self.args.test_mode:
 #           subprocess.call(' '.join(docker_cmd), shell=True)
@@ -200,10 +200,10 @@ def queue_starter_job(args, jobname='starter-jobname', dummy=1):
     elif args.chronos == "DOCKER":
         return myjob
 
-    tmpdict = {'TMPLAUNCH': '"schedule": "R1\/\/P3M"',
+    tmpdict = {'TMPLAUNCH': r'"schedule": "R1\/\/P3M"',
                'TMPMSG': 'date | sed \\"s#^#TMPJOB begun #g\\"'}
     if dummy == 1:
-        tmpdict['TMPLAUNCH'] = '"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
+        tmpdict['TMPLAUNCH'] = r'"schedule": "R1\/2200-01-01T06:00:00Z\/P3M"'
         tmpdict['TMPMSG'] = 'echo \\"TMPJOB was not supposed to run\\"'
         tmpdict['TMPJOB'] = jobname
     myjob.replace_jobtmp(tmpdict)

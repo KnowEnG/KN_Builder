@@ -12,14 +12,13 @@ Contains module functions::
 
 """
 
-import config_utilities as cf
-import mysql_utilities as mu
-import redis_utilities as ru
-import json
 import os
 import csv
 import subprocess
 from argparse import ArgumentParser
+import config_utilities as cf
+import mysql_utilities as mu
+import redis_utilities as ru
 
 #@profile
 def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
@@ -38,7 +37,7 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     db = mu.get_database('KnowNet', args)
     print('Inserting data from into ' + table)
     db.load_data(file_name, table, ld_cmd)
@@ -50,7 +49,7 @@ def import_file_nokeys(file_name, table, ld_cmd='', args=None):
 
     Starts a transaction and changes some MySQL settings for optimization, which
     disables the keys. It then loads the data into the provided table in MySQL.
-    Note that the keys are not re-enabled after import. To do this call 
+    Note that the keys are not re-enabled after import. To do this call
     enable_keys(args).
 
     Args:
@@ -60,7 +59,7 @@ def import_file_nokeys(file_name, table, ld_cmd='', args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     db = mu.get_database('KnowNet', args)
     print('Inserting data from into ' + table)
     db.disable_keys()
@@ -73,7 +72,7 @@ def enable_keys(args=None):
 
     Starts a transaction and changes some MySQL settings for optimization, which
     disables the keys. It then loads the data into the provided table in MySQL.
-    Note that the keys are not re-enabled after import. To do this call 
+    Note that the keys are not re-enabled after import. To do this call
     mysql_utilities.get_database('KnowNet', args).enable_keys().
 
     Args:
@@ -83,7 +82,7 @@ def enable_keys(args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     db = mu.get_database('KnowNet', args)
     db.enable_keys()
     db.close()
@@ -98,7 +97,7 @@ def import_filemeta(version_dict, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     db = mu.get_database('KnowNet', args)
     values = [version_dict["source"] + '.' + version_dict["alias"],
               version_dict["remote_url"], version_dict["remote_date"],
@@ -109,7 +108,7 @@ def import_filemeta(version_dict, args=None):
         val = values[i]
         if val == 'CURRENT_TIMESTAMP' or val == 'NULL':
             continue
-        elif type(val) is str:
+        elif isinstance(val, str):
             values[i] = '"' + val + '"'
         else:
             values[i] = str(val)
@@ -128,7 +127,7 @@ def update_filemeta(version_dict, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     db = mu.get_database('KnowNet', args)
     values = [version_dict["source"] + '.' + version_dict["alias"],
               version_dict["remote_url"], version_dict["remote_date"],
@@ -140,7 +139,7 @@ def update_filemeta(version_dict, args=None):
         val = values[i]
         if val == 'CURRENT_TIMESTAMP' or val == 'NULL':
             continue
-        elif type(val) is str:
+        elif isinstance(val, str):
             values[i] = '"' + val + '"'
         else:
             values[i] = str(val)
@@ -163,7 +162,7 @@ def import_edge(edgefile, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     imports = ['node', 'node_meta', 'edge2line', 'edge', 'edge_meta']
     #uedge_cmd  = ('edge.weight = IF(edge.weight > {0}.weight, edge.weight, '
     #                '{0}.weight)')
@@ -193,7 +192,7 @@ def import_production_edges(args=None):
     """
 
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     db = mu.get_database('KnowNet', args)
     cmd = ('SELECT DISTINCT n1_id, n2_id, et_name, weight, edge_hash '
            'FROM KnowNet.status WHERE status.status="production" '
@@ -216,7 +215,7 @@ def import_status(statusfile, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     imports = ['node', 'node_meta', 'edge2line', 'status', 'edge_meta']
     for table in imports:
         ld_cmd = ''
@@ -246,7 +245,7 @@ def import_nodemeta(nmfile, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     table = 'node_meta'
     dup_cmd = 'node_meta.node_id = node_meta.node_id'
     ld_cmd = ''
@@ -265,7 +264,7 @@ def import_pnode(filename, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     ld_cmd = '(node_id, n_alias) SET n_type="Property"'
     dup_cmd = 'node.node_id = node.node_id'
     table = 'node'
@@ -285,7 +284,7 @@ def merge(merge_key, args):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     if args.storage_dir:
         searchpath = os.path.join(args.storage_dir, args.data_path)
     else:
@@ -298,7 +297,7 @@ def merge(merge_key, args):
     searchpath = os.path.join(searchpath, '*', '*', '*')
     with open(outfile, 'w') as out:
         cmd1 = ['find', searchpath, '-type', 'f',
-                '-name', '*.unique.'+merge_key+'.*', '-print0' ]
+                '-name', '*.unique.'+merge_key+'.*', '-print0']
         temppath = os.path.join(outpath, 'tmp')
         if not os.path.isdir(temppath):
             os.makedirs(temppath)
@@ -307,7 +306,7 @@ def merge(merge_key, args):
         print(' '.join(cmd2))
         p1 = subprocess.Popen(' '.join(cmd1), stdout=subprocess.PIPE, shell=True)
         subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
-    
+
     if merge_key != 'edge':
         return outfile
 
@@ -316,8 +315,8 @@ def merge(merge_key, args):
     ue_file = os.path.join(outpath, 'unique.edge.txt')
     with open(us_file, 'r') as infile, \
         open(ud_file, 'w') as edge:
-        reader = csv.reader(infile, delimiter = '\t')
-        writer = csv.writer(edge, delimiter = '\t', lineterminator='\n')
+        reader = csv.reader(infile, delimiter='\t')
+        writer = csv.writer(edge, delimiter='\t', lineterminator='\n')
         prev = False
         for line in reader:
             line = line[1:] + [line[0]]
@@ -345,7 +344,7 @@ def merge(merge_key, args):
         subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
     os.remove(ud_file)
     return ue_file
-    
+
 
 def main_parse_args():
     """Processes command line arguments.
@@ -365,7 +364,9 @@ def main_parse_args():
     args = parser.parse_args()
     return args
 
-if __name__ == "__main__":
+def main():
+    """Imports according to the given arguments.
+    """
     args = main_parse_args()
     merge_keys = ['node', 'node_meta', 'edge2line', 'status', 'edge', \
                   'edge_meta', 'raw_line', 'table']
@@ -384,5 +385,8 @@ if __name__ == "__main__":
     import_file(args.importfile, table, ld_cmd, dup_cmd, args)
     if table == 'node_meta':
         filename = args.importfile.replace("node_meta", "node_meta_table")
-        mu.get_database("KnowNet", args).dump_table(table, filename)  #TODO: Should we assume the database name here?
+        mu.get_database("KnowNet", args).dump_table(table, filename)
         ru.import_node_meta(filename, args)
+
+if __name__ == "__main__":
+    main()

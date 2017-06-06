@@ -9,7 +9,6 @@ Functions:
     get_SrcClass: returns a Msigdb object
     main: runs compare_versions (see utilities.py) on a Msigdb object
 """
-from check_utilities import SrcClass, compare_versions
 import urllib.request
 import re
 import time
@@ -17,6 +16,7 @@ import csv
 import hashlib
 import config_utilities as cf
 import table_utilities as tu
+from check_utilities import SrcClass, compare_versions
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -59,7 +59,9 @@ class Msigdb(SrcClass):
 
         self.source_url = "http://software.broadinstitute.org/gsea/msigdb/"
         self.image = "http://software.broadinstitute.org/gsea/images/MSigDB-logo1.gif"
-        self.reference = "Subramanian A, Tamayo P, Mootha VK, et al. Gene set enrichment analysis: a knowledge-based approach for interpreting genome-wide expression profiles. Proc Natl Acad Sci USA. 2005;102(43):15545-50."
+        self.reference = ("Subramanian A, Tamayo P, Mootha VK, et al. Gene set enrichment "
+                          "analysis: a knowledge-based approach for interpreting genome-wide "
+                          "expression profiles. Proc Natl Acad Sci USA. 2005;102(43):15545-50.")
         self.pmid = 16199517
 
     def get_source_version(self, alias):
@@ -83,7 +85,7 @@ class Msigdb(SrcClass):
             for line in the_page:
                 try:
                     d_line = line.decode()
-                except:
+                except UnicodeDecodeError:
                     continue
                 match = re.search('MSigDB database v([^ ]*)', d_line)
                 if match is not None:
@@ -93,37 +95,7 @@ class Msigdb(SrcClass):
             for alias_name in self.aliases:
                 self.version[alias_name] = match.group(1)
             return self.version[alias]
-        else:
-            return version
-
-    def get_local_file_info(self, alias):
-        """Return a dictionary with the local file information for the alias.
-
-        (See utilities.SrcClass.get_local_file_info)
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            dict: The local file information for a given source alias.
-        """
-        return super(Msigdb, self).get_local_file_info(alias)
-
-    def get_remote_file_size(self, alias):
-        """Return the remote file size.
-
-        This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see
-        utilities.SrcClass.get_remote_file_size).
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            int: The remote file size in bytes.
-        """
-        url = self.get_remote_url(alias)
-        return super(Msigdb, self).get_remote_file_size(url)
+        return version
 
     def get_remote_file_modified(self, alias):
         """Return the remote file date modified.
@@ -173,54 +145,6 @@ class Msigdb(SrcClass):
         url += alias + '.v' + version + '.entrez.gmt'
         return url
 
-    def is_map(self, alias):
-        """Return a boolean representing if the provided alias is used for
-        source specific mapping of nodes or edges.
-
-        This returns a boolean representing if the alias corresponds to a file
-        used for mapping. By default this returns True if the alias ends in
-        '_map' and False otherwise.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            bool: Whether or not the alias is used for mapping.
-        """
-        return super(Msigdb, self).is_map(alias)
-
-    def get_dependencies(self, alias):
-        """Return a list of other aliases that the provided alias depends on.
-
-        This returns a list of other aliases that must be processed before
-        full processing of the provided alias can be completed.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            list: The other aliases defined in self.aliases that the provided
-                alias depends on.
-        """
-        return super(Msigdb, self).get_dependencies(alias)
-
-    def create_mapping_dict(self, filename):
-        """Return a mapping dictionary for the provided file.
-
-        This returns a dictionary for use in mapping nodes or edge types from
-        the file specified by filetype. By default it opens the file specified
-        by filename creates a dictionary using the first column as the key and
-        the second column as the value.
-
-        Args:
-            filename(str): The name of the file containing the information
-                needed to produce the maping dictionary.
-
-        Returns:
-            dict: A dictionary for use in mapping nodes or edge types.
-        """
-        return super(Msigdb, self).create_mapping_dict(filename)
-
     def table(self, raw_line, version_dict):
         """Uses the provided raw_line file to produce a 2table_edge file, an
         edge_meta file, a node and/or node_meta file (only for property nodes).
@@ -232,8 +156,8 @@ class Msigdb(SrcClass):
                      n2name, n2hint, n2type, n2spec, et_hint, score,
                      table_hash)
             edge_meta (line_hash, info_type, info_desc)
-            node_meta (node_id, 
-                    info_type (evidence, relationship, experiment, or link), 
+            node_meta (node_id,
+                    info_type (evidence, relationship, experiment, or link),
                     info_desc (text))
             node (node_id, n_alias, n_type)
 
@@ -302,7 +226,7 @@ class Msigdb(SrcClass):
         outfile = node_file.replace('node', 'unique.node')
         tu.csu(node_file, outfile)
 
-if __name__ == "__main__":
+def main():
     """Runs compare_versions (see utilities.compare_versions) on a Msigdb
     object
 
@@ -315,3 +239,6 @@ if __name__ == "__main__":
             alias described in Msigdb.
     """
     compare_versions(Msigdb())
+
+if __name__ == "__main__":
+    main()

@@ -4,7 +4,7 @@ that has been updated.
 Contains module functions::
 
     download(version_dict)
-    chunk(filename, total_lines, args)
+    chunk(filename, total_lines)
     format_raw_line(filename)
     get_md5_hash(filename)
     get_line_count(filename)
@@ -39,11 +39,10 @@ import os
 import sys
 import math
 import hashlib
+from argparse import ArgumentParser
 import config_utilities as cf
-import redis_utilities as ru
 import import_utilities as iu
 import table_utilities as tu
-from argparse import ArgumentParser
 
 ARCHIVES = ['.zip', '.tar', '.gz']
 MAX_CHUNKS = 500
@@ -109,7 +108,7 @@ def download(version_dict):
     shutil.copy2(filename, ret_file)
     return os.path.relpath(ret_file)
 
-def chunk(filename, total_lines, args, chunksize=500000):
+def chunk(filename, total_lines, chunksize=500000):
     """Splits the provided file into equal chunks with
     ceiling(num_lines/chunksize) lines each.
 
@@ -203,7 +202,7 @@ def format_raw_line(filename):
                 outfile.write(outline.encode())
                 cleanline = line.decode('ascii', 'ignore')
                 outfile.write(cleanline.encode())
-    tu.csu(raw_line, raw_line.replace('raw_line', 'unique.raw_line'), [1,2,3])
+    tu.csu(raw_line, raw_line.replace('raw_line', 'unique.raw_line'), [1, 2, 3])
     return raw_line
 
 def get_md5_hash(filename):
@@ -262,7 +261,7 @@ def main(version_json, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     with open(version_json, 'r') as infile:
         version_dict = json.load(infile)
     if not version_dict['fetch_needed'] and not args.force_fetch:
@@ -298,7 +297,7 @@ def main(version_json, args=None):
             json.dump(map_dict, outfile, indent=4, sort_keys=True)
     else:
         #raw_line = format_raw_line(newfile)
-        num_chunks = chunk(newfile, line_count, args, mySrc.chunk_size)
+        num_chunks = chunk(newfile, line_count, mySrc.chunk_size)
     #update version_dict
     version_dict['checksum'] = md5hash
     version_dict['line_count'] = line_count

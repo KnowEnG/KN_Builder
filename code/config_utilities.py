@@ -29,7 +29,7 @@ Attributes:
     DEFAULT_REDIS_MEM (str): memory for launching Redis db
     DEFAULT_REDIS_CPU (str): CPUs for launching Redis db
     DEFAULT_REDIS_DIR (str): toplevel directory for Redis db storage
-    
+
     DEFAULT_NGINX_PORT (int): port for nginx db
     DEFAULT_NGINX_DIR (str): toplevel directory for nginx db storage
     DEFAULT_NGINX_CONF (str): name of config path for launching nginx
@@ -186,11 +186,11 @@ def add_config_args(parser):
     parser.add_argument('-tm', '--test_mode', action='store_true', default=False,
                         help='run in test mode by only printing commands')
     parser.add_argument('-es', '--ens_species', default='REPRESENTATIVE',
-                        help=',, separated list of ensembl species to run in setup pipeline' )
+                        help=',, separated list of ensembl species to run in setup pipeline')
     parser.add_argument('-ff', '--force_fetch', action='store_true', default=False,
-                        help='fetch even if file exists and has not changed from last run', )
+                        help='fetch even if file exists and has not changed from last run')
     parser.add_argument('-b', '--bucket', default=DEFAULT_S3_BUCKET,
-                        help='S3 bucket to sync output', )
+                        help='S3 bucket to sync output')
 
     return parser
 

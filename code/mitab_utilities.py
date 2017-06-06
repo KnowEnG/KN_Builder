@@ -17,7 +17,7 @@ import re
 import hashlib
 import table_utilities as tu
 
-def table(raw_line, version_dict, taxid_list=[]):
+def table(raw_line, version_dict, taxid_list=None):
     """Uses the provided raw_line file to produce a table file, an
     edge_meta file, a node and/or node_meta file (only for property nodes).
 
@@ -41,6 +41,8 @@ def table(raw_line, version_dict, taxid_list=[]):
 
     Returns:
     """
+    if taxid_list is None:
+        taxid_list = []
 
     #outfiles
     table_file = raw_line.replace('raw_line', 'table')
@@ -71,16 +73,16 @@ def table(raw_line, version_dict, taxid_list=[]):
             raw = line[3:]
             n1list = raw[0].split('|') + raw[2].split('|')
             n2list = raw[1].split('|') + raw[3].split('|')
-            if len(n1list) == 0 or len(n2list) == 0:
+            if not n1list or not n2list:
                 continue
-            match = re.search('taxid:(\d+)', raw[9])
+            match = re.search(r'taxid:(\d+)', raw[9])
             if match is not None:
                 n1spec = match.group(1)
                 if taxid_list and n1spec not in taxid_list:
                     continue
             else:
                 continue
-            match = re.search('taxid:(\d+)', raw[10])
+            match = re.search(r'taxid:(\d+)', raw[10])
             if match is not None:
                 n2spec = match.group(1)
                 if taxid_list and n2spec not in taxid_list:
@@ -90,7 +92,7 @@ def table(raw_line, version_dict, taxid_list=[]):
             if len(raw) > 35 and raw[35].upper() == 'TRUE':
                 et_hint = 'PPI_negative'
             else:
-                match = re.search('(MI:\d+)', raw[11])
+                match = re.search(r'(MI:\d+)', raw[11])
                 if match is not None:
                     et_hint = term_map[match.group(1)]
                 else:

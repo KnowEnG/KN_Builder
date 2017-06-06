@@ -9,12 +9,12 @@ Functions:
     get_SrcClass: returns a Biogrid object
     main: runs compare_versions (see utilities.py) on a Biogrid object
 """
-from check_utilities import SrcClass, compare_versions
-from mitab_utilities import table
 import urllib.request
-import config_utilities as cf
 import os
 import json
+from check_utilities import SrcClass, compare_versions
+from mitab_utilities import table
+import config_utilities as cf
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -58,7 +58,9 @@ class Biogrid(SrcClass):
 
         self.source_url = "https://thebiogrid.org/"
         self.image = "https://pbs.twimg.com/profile_images/468116555922808832/oNFBPeKj.png"
-        self.reference = "Chatr-aryamontri A, Oughtred R, Boucher L, et al. The BioGRID interaction database: 2017 update. Nucleic Acids Res. 2017;45(D1):D369-D379."
+        self.reference = ("Chatr-aryamontri A, Oughtred R, Boucher L, et al. The BioGRID "
+                          "interaction database: 2017 update. Nucleic Acids Res. "
+                          "2017;45(D1):D369-D379.")
         self.pmid = 27980099
 
     def get_source_version(self, alias):
@@ -83,116 +85,7 @@ class Biogrid(SrcClass):
             for alias_name in self.aliases:
                 self.version[alias_name] = self.version[alias]
             return self.version[alias]
-        else:
-            return version
-
-    def get_local_file_info(self, alias):
-        """Return a dictionary with the local file information for the alias.
-
-        (See utilities.SrcClass.get_local_file_info)
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            dict: The local file information for a given source alias.
-        """
-        return super(Biogrid, self).get_local_file_info(alias)
-
-    def get_remote_file_size(self, alias):
-        """Return the remote file size.
-
-        This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see
-        utilities.SrcClass.get_remote_file_size).
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            int: The remote file size in bytes.
-        """
-        url = self.get_remote_url(alias)
-        return super(Biogrid, self).get_remote_file_size(url)
-
-    def get_remote_file_modified(self, alias):
-        """Return the remote file date modified.
-
-        This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see
-        utilities.SrcClass.get_remote_file_modified).
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            float: time of last modification time of remote file in seconds
-                since the epoch
-        """
-        url = self.get_remote_url(alias)
-        return super(Biogrid, self).get_remote_file_modified(url)
-
-    def get_remote_url(self, alias):
-        """Return the remote url needed to fetch the file corresponding to the
-        alias.
-
-        (See utilities.SrcClass.get_remote_url)
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            str: The url needed to fetch the file corresponding to the alias.
-        """
-        return super(Biogrid, self).get_remote_url(alias)
-
-    def is_map(self, alias):
-        """Return a boolean representing if the provided alias is used for
-        source specific mapping of nodes or edges.
-
-        This returns a boolean representing if the alias corresponds to a file
-        used for mapping. By default this returns True if the alias ends in
-        '_map' and False otherwise.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            bool: Whether or not the alias is used for mapping.
-        """
-        return super(Biogrid, self).is_map(alias)
-
-    def get_dependencies(self, alias):
-        """Return a list of other aliases that the provided alias depends on.
-
-        This returns a list of other aliases that must be processed before
-        full processing of the provided alias can be completed.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            list: The other aliases defined in self.aliases that the provided
-                alias depends on.
-        """
-        return super(Biogrid, self).get_dependencies(alias)
-
-    def create_mapping_dict(self, filename):
-        """Return a mapping dictionary for the provided file.
-
-        This returns a dictionary for use in mapping nodes or edge types from
-        the file specified by filetype. By default it opens the file specified
-        by filename creates a dictionary using the first column as the key and
-        the second column as the value.
-
-        Args:
-            filename(str): The name of the file containing the information
-                needed to produce the maping dictionary.
-
-        Returns:
-            dict: A dictionary for use in mapping nodes or edge types.
-        """
-        return super(Biogrid, self).create_mapping_dict(filename)
+        return version
 
     def table(self, raw_line, version_dict):
         """Uses the provided raw_line file to produce a table file, an
@@ -205,8 +98,8 @@ class Biogrid(SrcClass):
                      n2name, n2hint, n2type, n2spec, et_hint, score,
                      table_hash)
             edge_meta (line_hash, info_type, info_desc)
-            node_meta (node_id, 
-                    info_type (evidence, relationship, experiment, or link), 
+            node_meta (node_id,
+                    info_type (evidence, relationship, experiment, or link),
                     info_desc (text))
             node (node_id, n_alias, n_type)
 
@@ -219,7 +112,7 @@ class Biogrid(SrcClass):
         """
         return table(raw_line, version_dict, self.taxid_list)
 
-if __name__ == "__main__":
+def main():
     """Runs compare_versions (see utilities.compare_versions) on a biogrid
     object
 
@@ -232,3 +125,6 @@ if __name__ == "__main__":
             alias described in biogrid.
     """
     compare_versions(Biogrid())
+
+if __name__ == "__main__":
+    main()

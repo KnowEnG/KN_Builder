@@ -23,10 +23,10 @@ import json
 import sys
 import subprocess
 import os
-import config_utilities as cf
 from argparse import ArgumentParser
+import config_utilities as cf
 
-def csu(infile, outfile, columns=list()):
+def csu(infile, outfile, columns=None):
     """Performs a cut | sort | uniq on infile using the provided columns and
     stores it into outfile.
 
@@ -39,9 +39,11 @@ def csu(infile, outfile, columns=list()):
         columns (list): the columns to use in cut or an empty list if all
                         columns should be used
     """
+    if columns is None:
+        columns = []
     with open(outfile, 'w') as out:
         cmd2 = ['sort', '-u']
-        if len(columns):
+        if columns:
             cmd1 = ['cut', '-f', ','.join(map(str, columns)), infile]
         else:
             cmd1 = ['cat', infile]
@@ -72,7 +74,7 @@ def main(chunkfile, version_json, args=None):
         args (Namespace): args as populated namespace or 'None' for defaults
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     with open(version_json, 'r') as infile:
         version_dict = json.load(infile)
     src_code_dir = os.path.join(args.working_dir, args.code_path, args.src_path)

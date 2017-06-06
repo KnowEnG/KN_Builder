@@ -9,12 +9,14 @@ Functions:
     get_SrcClass: returns a Blast object
     main: runs compare_versions (see utilities.py) on a Blast object
 """
-from check_utilities import SrcClass, compare_versions
 import csv
 import hashlib
 import math
+import os
+import json
+import requests
 import config_utilities as cf
-import os, json, requests
+from check_utilities import SrcClass, compare_versions
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -77,7 +79,8 @@ class Blast(SrcClass):
 
         self.source_url = "https://blast.ncbi.nlm.nih.gov/"
         self.image = "https://blast.ncbi.nlm.nih.gov/images/protein-blast-cover.png"
-        self.reference = "Altschul SF, Gish W, Miller W, Myers EW, Lipman DJ. Basic local alignment search tool. J Mol Biol. 1990;215(3):403-10."
+        self.reference = ("Altschul SF, Gish W, Miller W, Myers EW, Lipman DJ. Basic local "
+                          "alignment search tool. J Mol Biol. 1990;215(3):403-10.")
         self.pmid = 2231712
 
     def get_aliases(self, args=cf.config_args()):
@@ -110,68 +113,6 @@ class Blast(SrcClass):
                 alias_dict[splower] = taxid
         return alias_dict
 
-
-    def get_source_version(self, alias):
-        """Return the release version of the remote blast:alias.
-
-        This returns the release version of the remote source for a specific
-        alias. This value will be the same for every alias and is 'unknown' in
-        this case. This value is stored in the self.version dictionary object.
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            str: The remote version of the source.
-        """
-        return super(Blast, self).get_source_version(alias)
-
-    def get_local_file_info(self, alias):
-        """Return a dictionary with the local file information for the alias.
-
-        (See utilities.SrcClass.get_local_file_info)
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            dict: The local file information for a given source alias.
-        """
-        return super(Blast, self).get_local_file_info(alias)
-
-    def get_remote_file_size(self, alias):
-        """Return the remote file size.
-
-        This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see
-        utilities.SrcClass.get_remote_file_size).
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            int: The remote file size in bytes.
-        """
-        url = self.get_remote_url(alias)
-        return super(Blast, self).get_remote_file_size(url)
-
-    def get_remote_file_modified(self, alias):
-        """Return the remote file date modified.
-
-        This builds a url for the given alias (see get_remote_url) and then
-        calls the SrcClass function (see
-        utilities.SrcClass.get_remote_file_modified).
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            float: time of last modification time of remote file in seconds
-                since the epoch
-        """
-        url = self.get_remote_url(alias)
-        return super(Blast, self).get_remote_file_modified(url)
-
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the
         alias.
@@ -187,54 +128,6 @@ class Blast(SrcClass):
         """
         url = self.url_base + alias + "_" + alias + '.out'
         return url
-
-    def is_map(self, alias):
-        """Return a boolean representing if the provided alias is used for
-        source specific mapping of nodes or edges.
-
-        This returns a boolean representing if the alias corresponds to a file
-        used for mapping. By default this returns True if the alias ends in
-        '_map' and False otherwise.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            bool: Whether or not the alias is used for mapping.
-        """
-        return super(Blast, self).is_map(alias)
-
-    def get_dependencies(self, alias):
-        """Return a list of other aliases that the provided alias depends on.
-
-        This returns a list of other aliases that must be processed before
-        full processing of the provided alias can be completed.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            list: The other aliases defined in self.aliases that the provided
-                alias depends on.
-        """
-        return super(Blast, self).get_dependencies(alias)
-
-    def create_mapping_dict(self, filename):
-        """Return a mapping dictionary for the provided file.
-
-        This returns a dictionary for use in mapping nodes or edge types from
-        the file specified by filetype. By default it opens the file specified
-        by filename creates a dictionary using the first column as the key and
-        the second column as the value.
-
-        Args:
-            filename(str): The name of the file containing the information
-                needed to produce the maping dictionary.
-
-        Returns:
-            dict: A dictionary for use in mapping nodes or edge types.
-        """
-        return super(Blast, self).create_mapping_dict(filename)
 
     def table(self, raw_line, version_dict):
         """Uses the provided raw_line file to produce a 2table_edge file, an
@@ -309,7 +202,7 @@ class Blast(SrcClass):
                         n2id, n2hint, n2type, n2spec, et_hint, score, t_chksum])
 
 
-if __name__ == "__main__":
+def main():
     """Runs compare_versions (see utilities.compare_versions) on a blast
     object
 
@@ -322,3 +215,6 @@ if __name__ == "__main__":
             alias described in blast.
     """
     compare_versions(Blast())
+
+if __name__ == "__main__":
+    main()

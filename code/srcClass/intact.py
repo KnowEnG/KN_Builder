@@ -9,13 +9,13 @@ Functions:
     get_SrcClass: returns an Intact object
     main: runs compare_versions (see utilities.py) on a Intact object
 """
-from check_utilities import SrcClass, compare_versions
-from mitab_utilities import table
 import time
 import ftplib
-import config_utilities as cf
 import os
 import json
+import config_utilities as cf
+from check_utilities import SrcClass, compare_versions
+from mitab_utilities import table
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -58,36 +58,10 @@ class Intact(SrcClass):
 
         self.source_url = "http://www.ebi.ac.uk/intact/"
         self.image = "http://www.ebi.ac.uk/intact/images/IntAct_logo.png"
-        self.reference = "Orchard S, Ammari M, Aranda B, et al. The MIntAct project--IntAct as a common curation platform for 11 molecular interaction databases. Nucleic Acids Res. 2014;42(Database issue):D358-63."
+        self.reference = ("Orchard S, Ammari M, Aranda B, et al. The MIntAct project--IntAct as a "
+                          "common curation platform for 11 molecular interaction databases. "
+                          "Nucleic Acids Res. 2014;42(Database issue):D358-63.")
         self.pmid = 24234451
-
-    def get_source_version(self, alias):
-        """Return the release version of the remote intact:alias.
-
-        This returns the release version of the remote source for a specific
-        alias. This value will be the same for every alias and is 'unknown' in
-        this case. This value is stored in the self.version dictionary object.
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            str: The remote version of the source.
-        """
-        return super(Intact, self).get_source_version(alias)
-
-    def get_local_file_info(self, alias):
-        """Return a dictionary with the local file information for the alias.
-
-        (See utilities.get_local_file_info)
-
-        Args:
-            alias (str): An alias defined in self.aliases.
-
-        Returns:
-            dict: The local file information for a given source alias.
-        """
-        return super(Intact, self).get_local_file_info(alias)
 
     def get_remote_file_size(self, alias):
         """Return the remote file size.
@@ -148,54 +122,6 @@ class Intact(SrcClass):
         url += 'intact.zip'
         return 'ftp://' + url
 
-    def is_map(self, alias):
-        """Return a boolean representing if the provided alias is used for
-        source specific mapping of nodes or edges.
-
-        This returns a boolean representing if the alias corresponds to a file
-        used for mapping. By default this returns True if the alias ends in
-        '_map' and False otherwise.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            bool: Whether or not the alias is used for mapping.
-        """
-        return super(Intact, self).is_map(alias)
-
-    def get_dependencies(self, alias):
-        """Return a list of other aliases that the provided alias depends on.
-
-        This returns a list of other aliases that must be processed before
-        full processing of the provided alias can be completed.
-
-        Args:
-            alias(str): An alias defined in self.aliases.
-
-        Returns:
-            list: The other aliases defined in self.aliases that the provided
-                alias depends on.
-        """
-        return super(Intact, self).get_dependencies(alias)
-
-    def create_mapping_dict(self, filename):
-        """Return a mapping dictionary for the provided file.
-
-        This returns a dictionary for use in mapping nodes or edge types from
-        the file specified by filetype. By default it opens the file specified
-        by filename creates a dictionary using the first column as the key and
-        the second column as the value.
-
-        Args:
-            filename(str): The name of the file containing the information
-                needed to produce the maping dictionary.
-
-        Returns:
-            dict: A dictionary for use in mapping nodes or edge types.
-        """
-        return super(Intact, self).create_mapping_dict(filename)
-
     def table(self, raw_line, version_dict):
         """Uses the provided raw_lines file to produce a 2table_edge file, an
         edge_meta file, a node and/or node_meta file (only for property nodes).
@@ -207,8 +133,8 @@ class Intact(SrcClass):
                      n2name, n2hint, n2type, n2spec, et_hint, score,
                      table_hash)
             edge_meta (line_hash, info_type, info_desc)
-            node_meta (node_id, 
-                    info_type (evidence, relationship, experiment, or link), 
+            node_meta (node_id,
+                    info_type (evidence, relationship, experiment, or link),
                     info_desc (text))
             node (node_id, n_alias, n_type)
 
@@ -221,7 +147,7 @@ class Intact(SrcClass):
         """
         return table(raw_line, version_dict, self.taxid_list)
 
-if __name__ == "__main__":
+def main():
     """Runs compare_versions (see utilities.compare_versions) on a intact
     object
 
@@ -234,3 +160,6 @@ if __name__ == "__main__":
             alias described in intact.
     """
     compare_versions(Intact())
+
+if __name__ == "__main__":
+    main()

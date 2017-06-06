@@ -22,16 +22,17 @@ Examples:
 """
 
 import urllib.request
+import urllib.error
 import os
 import time
 import json
 import csv
 import sys
+from argparse import ArgumentParser
 import config_utilities as cf
 import table_utilities as tu
 import mysql_utilities as mu
 import import_utilities as iu
-from argparse import ArgumentParser
 
 class SrcClass(object):
     """Base class to be extended by each supported source in KnowEnG.
@@ -72,7 +73,7 @@ class SrcClass(object):
             args (Namespace): args as populated namespace or 'None' for defaults
         """
         if args is None:
-            args=cf.config_args()
+            args = cf.config_args()
         self.name = src_name
         self.url_base = base_url
         self.aliases = aliases
@@ -184,7 +185,7 @@ class SrcClass(object):
         return file_meta
 
 
-    def get_remote_file_size(self, remote_url):
+    def get_remote_file_size(self, alias):
         """Return the remote file size.
 
         This returns the remote file size as specificied by the
@@ -197,13 +198,14 @@ class SrcClass(object):
         Returns:
             int: The remote file size in bytes.
         """
+        remote_url = self.get_remote_url(alias)
         try:
             response = urllib.request.urlopen(remote_url)
             return int(response.headers['content-length'])
-        except:
+        except (ValueError, urllib.error.URLError):
             return -1
 
-    def get_remote_file_modified(self, remote_url):
+    def get_remote_file_modified(self, alias):
         """Return the remote file date modified.
 
         This returns the remote file date modifed as specificied by the
@@ -217,12 +219,13 @@ class SrcClass(object):
             float: time of last modification time of remote file in seconds
                 since the epoch
         """
+        remote_url = self.get_remote_url(alias)
         try:
             response = urllib.request.urlopen(remote_url)
             time_str = response.headers['last-modified']
             time_format = "%a, %d %b %Y %H:%M:%S %Z"
             return time.mktime(time.strptime(time_str, time_format))
-        except:
+        except (urllib.error.URLError, ValueError):
             return float(0)
 
     def get_remote_url(self, alias):
@@ -254,10 +257,7 @@ class SrcClass(object):
         Returns:
             bool: Whether or not the alias is used for mapping.
         """
-        if alias[-4:] == '_map':
-            return True
-        else:
-            return False
+        return alias[-4:] == '_map'
 
     def get_dependencies(self, alias):
         """Return a list of other aliases that the provided alias depends on.
@@ -357,7 +357,7 @@ class SrcClass(object):
         """
         return
 
-def get_SrcClass(args):
+def get_SrcClass(args, *posargs, **kwargs):
     """Returns an object of the source class.
 
     This returns an object of the source class to allow access to its functions
@@ -369,7 +369,7 @@ def get_SrcClass(args):
     Returns:
         SrcClass: a source class object
     """
-    return SrcClass(args)
+    return SrcClass(args, *posargs, **kwargs)
 
 def compare_versions(src_obj, args=None):
     """Return a dictionary with the version information for each alias in the
@@ -422,7 +422,8 @@ def compare_versions(src_obj, args=None):
         version_dict[alias]['alias_info'] = src_obj.aliases[alias]
         version_dict[alias]['is_map'] = src_obj.is_map(alias)
         version_dict[alias]['dependencies'] = src_obj.get_dependencies(alias)
-        version_dict[alias]['remote_url'] = src_obj.get_remote_url(alias)
+        remote_url = src_obj.get_remote_url(alias)
+        version_dict[alias]['remote_url'] = remote_url
         version_dict[alias]['remote_file'] = src_obj.remote_file
         version_dict[alias]['remote_date'] = \
             src_obj.get_remote_file_modified(alias)
@@ -486,7 +487,7 @@ def check(module, args=None):
             alias described in source.
     """
     if args is None:
-        args=cf.config_args()
+        args = cf.config_args()
     src_code_dir = os.path.join(args.working_dir, args.code_path, args.src_path)
     sys.path.append(src_code_dir)
     src_module = __import__(module)
