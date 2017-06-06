@@ -158,7 +158,7 @@ def generic_dict(args, ns_parent=None):
         dict: tmp substitution dictionary with appropriate values depending on args
     """
 
-    job_dict = {'TMPLAUNCH': r'"schedule": r"R1\/\/P3M"',
+    job_dict = {'TMPLAUNCH': r'"schedule": "R1\/\/P3M"',
                 'TMPWORKDIR': args.working_dir,
                 'TMPDATAPATH': args.data_path,
                 'TMPCODEPATH': args.code_path,
