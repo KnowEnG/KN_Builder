@@ -87,6 +87,8 @@ class Stringdb(SrcClass):
             req = requests.get(url)
             if req.status_code == 200:
                 alias_dict[taxid] = sp_abbrev
+            else:
+                print("warning: string species {} error {}".format(taxid, req.status_code))
         return alias_dict
 
     def get_source_version(self, alias):
@@ -179,7 +181,7 @@ class Stringdb(SrcClass):
             str: The url needed to fetch the file corresponding to the alias.
         """
         version = self.get_source_version(alias)
-        url = self.url_base + 'newstring_download/protein.links.detailed.v'
+        url = self.url_base + 'download/protein.links.detailed.v'
         url += version + '/' + alias + '.protein.links.detailed.v'
         url += version + '.txt.gz'
         return url
