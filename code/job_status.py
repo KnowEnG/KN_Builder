@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 import http.client
 import json
-from .. import config_utilities as cf
+import config_utilities as cf
 
 def main_parse_args():
     """Processes command line arguments.
