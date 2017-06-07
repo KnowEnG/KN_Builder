@@ -144,7 +144,7 @@ done;
 ```
 ## Check the status of jobs
 ```
-python3 -m code.reports.job_status -c $KNP_CHRONOS_URL
+python3 code/job_status.py -c $KNP_CHRONOS_URL
 ```
 
 ## run setup pipeline (time: 2hr 30min)
