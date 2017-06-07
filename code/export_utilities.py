@@ -30,6 +30,18 @@ def get_pg(db, et, taxon):
                   "WHERE s.et_name = '{}' AND n2.taxon = {} "
                   "AND s.status = 'production';".format(et, taxon))
 
+def num_connected_components(edges, nodes):
+    """Count the number of connected components in a graph given the edges and the nodes.
+    """
+    num = len(nodes)
+    comps = {node: {node} for node in nodes}
+    for n1, n2 in edges:
+        if comps[n1] != comps[n2]:
+            num -= 1
+        join = comps[n1] | comps[n2]
+        comps[n1] = join
+        comps[n2] = join
+    return num
 
 def figure_out_class(db, et):
     """Determines the class and bidirectionality of the edge_type.
@@ -106,7 +118,9 @@ def get_metadata(db, edges, nodes, sp, et, args):
                           "score_desc": sc_desc, "score_best": sc_best, "score_worst": sc_worst},
             "datasets": datasets,
             "data": {"num_edges": len(edges), "num_nodes": len(nodes), "num_prop_nodes": num_prop,
-                     "num_gene_nodes": num_gene},
+                     "num_gene_nodes": num_gene, "density": 2*len(edges)/(len(nodes)(len(nodes)-1)),
+                     "num_connected_components": num_connected_components(edges, [n[0] for n in
+                                                                                  nodes])},
             "build_metadata": {"export": {"command": sys.argv, "arguments": args,
                                           "revision": subprocess.check_output(["git", "describe",
                                                                                "--always"]),
