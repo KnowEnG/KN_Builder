@@ -14,7 +14,8 @@ KNP_LOGS_PATH='logs_'$KNP_BUILD_NAME
 KNP_ENS_SPECIES='RESEARCH'
 
 KNP_BUCKET="KnowNets/KN-$KNP_BUILD_NAME"
-KNP_EXPORT_DIR="$KNP_WORKING_DIR/$KNP_BUCKET/userKN-$KNP_BUILD_NAME"
+KNP_S3_DIR="$KNP_WORKING_DIR/$KNP_BUCKET/"
+KNP_EXPORT_DIR="$KNP_S3_DIR/userKN-$KNP_BUILD_NAME"
 KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
 
 export KNP_MYSQL_HOST='knowcluster07.dyndns.org'
@@ -238,6 +239,10 @@ for CLASS1 in Property; do
         grep Property $KNP_EXPORT_DIR/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.node_map > $KNP_EXPORT_DIR/$CLASS/$TAXON/$ETYPE/$TAXON.$ETYPE.pnode_map
     done
 done;
+
+## export databases
+mysqldump -h $KNP_MYSQL_HOST -u $KNP_MYSQL_USER -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT $KNP_MYSQL_DB | gzip > $KNP_S3_DIR/mysql.gz
+redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS SAVE && gzip -c $KNP_REDIS_DIR/dump.rdb > $KNP_S3_DIR/redis.gz
 
 # set up your AWS credentials
 mkdir ~/.aws
