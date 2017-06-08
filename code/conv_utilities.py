@@ -87,16 +87,16 @@ def main(tablefile, args=None):
                 to_map[hint, taxid].append(n1)
             (n2, hint, ntype, taxid) = line[5:9]
             if ntype == 'gene' and taxid in supported_taxids:
-                to_map[hint, taxid].append(n1)
+                to_map[hint, taxid].append(n2)
         infile.seek(0)
-        mapped = {k: ru.conv_gene(rdb, v, k[0], k[1]) for k, v in to_map.items()}
+        mapped = {k: {n: m for m, n in zip(ru.conv_gene(rdb, v, k[0], k[1]), v)} for k, v in to_map.items()}
         for line in reader:
             (n1, hint, ntype, taxid) = line[1:5]
             if ntype == 'gene':
                 if taxid not in supported_taxids:
                     n1_map = 'unmapped-unsupported-species'
                 else:
-                    n1_map = mapped[hint, taxid].pop(0)
+                    n1_map = mapped[hint, taxid][n1]
             else:
                 n1_map = n1
             (n2, hint, ntype, taxid) = line[5:9]
@@ -104,7 +104,7 @@ def main(tablefile, args=None):
                 if taxid not in supported_taxids:
                     n2_map = 'unmapped-unsupported-species'
                 else:
-                    n2_map = mapped[hint, taxid].pop(0)
+                    n2_map = mapped[hint, taxid][n2]
             else:
                 n2_map = n2
             chksum = line[0] #line chksum
