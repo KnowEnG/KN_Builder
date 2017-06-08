@@ -30,6 +30,7 @@ import hashlib
 import os
 import json
 from argparse import ArgumentParser
+from collections import defaultdict
 import config_utilities as cf
 import redis_utilities as ru
 import table_utilities as tu
@@ -40,7 +41,6 @@ csv.field_size_limit(sys.maxsize)
 DEFAULT_HINT = ''
 DEFAULT_TAXON = 9606
 
-#@profile
 def main(tablefile, args=None):
     """Maps the nodes for the source:alias tablefile.
 
@@ -80,14 +80,23 @@ def main(tablefile, args=None):
         reader = csv.reader(infile, delimiter='\t')
         s_writer = csv.writer(e_stat, delimiter='\t', lineterminator='\n')
         e_writer = csv.writer(edge, delimiter='\t', lineterminator='\n')
+        to_map = defaultdict(list)
+        for line in reader:
+            (n1, hint, ntype, taxid) = line[1:5]
+            if ntype == 'gene' and taxid in supported_taxids:
+                to_map[hint, taxid].append(n1)
+            (n2, hint, ntype, taxid) = line[5:9]
+            if ntype == 'gene' and taxid in supported_taxids:
+                to_map[hint, taxid].append(n1)
+        infile.seek(0)
+        mapped = {k: ru.conv_gene(rdb, v, k[0], k[1]) for k, v in to_map.items()}
         for line in reader:
             (n1, hint, ntype, taxid) = line[1:5]
             if ntype == 'gene':
                 if taxid not in supported_taxids:
                     n1_map = 'unmapped-unsupported-species'
                 else:
-                    # TODO: change to array input
-                    n1_map = ru.conv_gene(rdb, [n1], hint, taxid)[0]
+                    n1_map = mapped[hint, taxid].pop(0)
             else:
                 n1_map = n1
             (n2, hint, ntype, taxid) = line[5:9]
@@ -95,8 +104,7 @@ def main(tablefile, args=None):
                 if taxid not in supported_taxids:
                     n2_map = 'unmapped-unsupported-species'
                 else:
-                    # TODO: change to array input
-                    n2_map = ru.conv_gene(rdb, [n2], hint, taxid)[0]
+                    n2_map = mapped[hint, taxid].pop(0)
             else:
                 n2_map = n2
             chksum = line[0] #line chksum
