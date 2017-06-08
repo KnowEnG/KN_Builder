@@ -89,7 +89,8 @@ def main(tablefile, args=None):
             if ntype == 'gene' and taxid in supported_taxids:
                 to_map[hint, taxid].append(n2)
         infile.seek(0)
-        mapped = {k: {n: m for m, n in zip(ru.conv_gene(rdb, v, k[0], k[1]), v)} for k, v in to_map.items()}
+        mapped = {k: {n: m for m, n in zip(ru.conv_gene(rdb, v, k[0], k[1]), v)} for k, v in
+                  to_map.items()}
         for line in reader:
             (n1, hint, ntype, taxid) = line[1:5]
             if ntype == 'gene':
