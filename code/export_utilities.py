@@ -12,7 +12,7 @@ import mysql_utilities as mu
 import sanitize_utilities as su
 
 def get_gg(db, et, taxon):
-    """Get GG nodes.
+    """Get gene-gene nodes.
     """
     return db.run("SELECT s.n1_id, s.n2_id, s.weight, s.et_name, rl.file_id, rl.line_num "
                   "FROM status s JOIN node_species n1 ON s.n1_id = n1.node_id "
@@ -22,7 +22,7 @@ def get_gg(db, et, taxon):
                   "AND s.status = 'production';".format(et, taxon, taxon))
 
 def get_pg(db, et, taxon):
-    """Get PG nodes.
+    """Get property-gene nodes.
     """
     return db.run("SELECT s.n1_id, s.n2_id, s.weight, s.et_name, rl.file_id, rl.line_num "
                   "FROM status s JOIN node_species n2 ON s.n2_id = n2.node_id "
