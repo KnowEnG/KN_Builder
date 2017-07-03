@@ -51,21 +51,23 @@ def figure_out_class(db, et):
 def norm_edges(edges, args):
     """Normalizes and cleans edges according to the specified arguments.
     """
+    lines = []
+    lines.append(len(edges))
     if args.make_unweighted:
         edges = su.make_network_unweighted(edges, 2)
-        print("UnweightedLines: " + str(len(edges)))
+    lines.append(len(edges))
     if args.make_undirected: #TODO: less important, yes, no, auto
         edges = su.make_network_undirected(edges)
-        print("UndirectedLines: " + str(len(edges)))
+    lines.append(len(edges))
     edges = su.sort_network(edges)
-    print("SortedLines: " + str(len(edges)))
+    lines.append(len(edges))
     edges = su.drop_duplicates_by_type_or_node(edges, 0, 1, 3)
-    print("DeDuplicatedEdges: " + str(len(edges)))
+    lines.append(len(edges))
     if args.make_undirected: #TODO: less important, yes, no, auto
         edges = su.upper_triangle(edges, 0, 1)
-        print("UpperTriangleEdges: " + str(len(edges)))
+    lines.append(len(edges))
     edges = su.normalize_network_by_type(edges, 3, 2) #TODO: none, all, type
-    print("NormalizedEdges: " + str(len(edges)))
+    lines.append(len(edges))
     return edges
 
 def convert_nodes(args, nodes):
@@ -79,7 +81,7 @@ def get_sources(edges):
     """
     return set(edge[4] for edge in edges)
 
-def get_metadata(db, edges, nodes, sp, et, args):
+def get_metadata(db, edges, nodes, lines, sp, et, args):
     """Retrieves the metadata for a subnetwork.
     """
     sources = get_sources(edges)
@@ -120,8 +122,8 @@ def get_metadata(db, edges, nodes, sp, et, args):
             "datasets": datasets,
             "data": {"num_edges": len(edges), "num_nodes": len(nodes), "num_prop_nodes": num_prop,
                      "num_gene_nodes": num_gene, "density": 2*len(edges)/(len(nodes)(len(nodes)-1)),
-                     "num_connected_components": num_connected_components(edges, [n[0] for n in
-                                                                                  nodes])},
+                     "num_lines": lines, "num_connected_components": num_connected_components(edges,
+                        [n[0] for n in nodes])},
             "build_metadata": {"export": {"command": sys.argv, "arguments": args,
                                           "revision": subprocess.check_output(["git", "describe",
                                                                                "--always"]),
@@ -160,7 +162,7 @@ def main():
     if (cls == 'Property' and len(res) < 4000) or (cls == 'Gene' and len(res) < 125000):
         print('Skipping {}.{}'.format(args.species, args.edge_type))
         return
-    res = norm_edges(res, args)
+    res, lines = norm_edges(res, args)
 
     n1des = list(set(i[0] for i in res))
     n2des = list(set(i[1] for i in res))
@@ -169,7 +171,7 @@ def main():
     n2des_desc = convert_nodes(args, n2des)
     nodes_desc = set(n1des_desc) | set(n2des_desc)
 
-    metadata = get_metadata(db, res, nodes_desc, args.species, args.edge_type, args)
+    metadata = get_metadata(db, res, nodes_desc, lines, args.species, args.edge_type, args)
     db.close()
 
     os.makedirs(sync_dir, exist_ok=True)
