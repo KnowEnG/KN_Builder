@@ -345,6 +345,24 @@ def merge(merge_key, args):
     return ue_file
 
 
+def merge_logs(args):
+    if args.storage_dir:
+        searchpath = os.path.join(args.storage_dir)
+    else:
+        searchpath = os.path.join(args.working_dir)
+    searchfile = os.path.join(searchpath, '../logs_*/*.log')
+    outpath = os.path.join(args.working_dir, args.data_path)
+    outfile = os.path.join(outpath, 'unique.log.txt')
+    with open(outfile, 'w') as out:
+        cmd1 = ["""awk -F'\t' -v OFS='\t' '$1 == "run info" {$1 = FILENAME; print}'""", searchfile]
+        cmd2 = ['cut', '-f2-', '-d\t']
+        print(' '.join(cmd1))
+        print(' '.join(cmd2))
+        p1 = subprocess.Popen(' '.join(cmd1), stdout=subprocess.PIPE, shell=True)
+        subprocess.Popen(cmd2, stdin=p1.stdout, stdout=out).communicate()
+    return outfile
+
+
 def main_parse_args():
     """Processes command line arguments.
 
@@ -368,8 +386,10 @@ def main():
     """
     args = main_parse_args()
     merge_keys = ['node', 'node_meta', 'edge2line', 'status', 'edge', \
-                  'edge_meta', 'raw_line', 'table']
-    if args.importfile in merge_keys:
+                  'edge_meta', 'raw_line', 'table', 'log']
+    if args.importfile == 'log':
+        args.importfile = merge_logs(args)
+    elif args.importfile in merge_keys:
         args.importfile = merge(args.importfile, args)
     table = ''
     ld_cmd = ''

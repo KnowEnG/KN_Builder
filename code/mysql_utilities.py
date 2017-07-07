@@ -60,10 +60,12 @@ def deploy_container(args=None):
         os.makedirs(conf_path)
     os.chmod(os.path.dirname(mysql_dir), 0o777)
     shutil.copy(os.path.join(conf_template, 'my.cnf'), os.path.join(conf_path, 'my.cnf'))
+    with open(os.path.join(conf_path, 'password')) as f:
+        f.write(args.mysql_path)
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.mysql_dir
     deploy_dict["container"]["volumes"][1]["hostPath"] = conf_path
     deploy_dict["container"]["docker"]["parameters"][0]["value"] = \
-                    "MYSQL_ROOT_PASSWORD=" + args.mysql_pass
+                    "MYSQL_ROOT_PASSWORD_FILE=/etc/mysql/conf.d/password"
     deploy_dict["container"]["docker"]["portMappings"][0]["hostPort"] = int(args.mysql_port)
     out_path = os.path.join(deploy_dir, "p1mysql-" + args.mysql_port +'.json')
     with open(out_path, 'w') as outfile:

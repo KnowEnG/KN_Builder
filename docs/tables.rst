@@ -119,8 +119,10 @@ raw_file
                                                 remote source
     'remote_version' varchar(40) DEFAULT NULL:  release version of the remote
                                                 source
-    'remote_size' bigint(11) DEFAULT NULL:      size of file on the remote
-                                                source
+    'remote_size' bigint(11) DEFAULT NULL:      size of file on the remote source
+    'source_url' varchar(255) DEFAULT NULL:     url of the homepage of the source
+    'image' varchar(255) DEFAULT NULL:          url of an image for the source
+    'reference' varchar(512) DEFAULT NULL:      reference for the source
     'date_downloaded' datetime NOT NULL:        date source was last downloaded
     'local_filename' varchar(255) NOT NULL:     name of the downloaded file on
                                                 local disk

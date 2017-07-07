@@ -55,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'KnowNet'
-copyright = '2016, Project1'
+copyright = '2017, Project1'
 author = 'Project1'
 
 # The version info for the project you're documenting, acts as replacement for

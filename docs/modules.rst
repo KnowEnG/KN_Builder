@@ -75,9 +75,3 @@ sanitize_utilities
 
 .. automodule:: sanitize_utilities
    :members:
-
-merge_utilities
--------------------
-
-.. automodule:: merge_utilities
-   :members:
