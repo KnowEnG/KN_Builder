@@ -60,8 +60,8 @@ def deploy_container(args=None):
         os.makedirs(conf_path)
     os.chmod(os.path.dirname(mysql_dir), 0o777)
     shutil.copy(os.path.join(conf_template, 'my.cnf'), os.path.join(conf_path, 'my.cnf'))
-    with open(os.path.join(conf_path, 'password')) as f:
-        f.write(args.mysql_path)
+    with open(os.path.join(conf_path, 'password'), 'w') as f:
+        f.write(args.mysql_pass)
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.mysql_dir
     deploy_dict["container"]["volumes"][1]["hostPath"] = conf_path
     deploy_dict["container"]["docker"]["parameters"][0]["value"] = \
