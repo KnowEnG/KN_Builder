@@ -122,15 +122,9 @@ def get_metadata(db, edges, nodes, lines, sp, et, args):
                           "bidirectional": bidir},
             "datasets": datasets,
             "data": {"num_edges": len(edges), "num_nodes": len(nodes), "num_prop_nodes": num_prop,
-<<<<<<< HEAD
-                     "num_gene_nodes": num_gene, "density": 2*len(edges)/(len(nodes)(len(nodes)-1)),
-                     "num_lines": lines, "num_connected_components": num_connected_components(edges,
-                        [n[0] for n in nodes])},
-=======
                      "num_gene_nodes": num_gene, "density": 2*len(edges)/(len(nodes)*(len(nodes)-1)),
                      "num_connected_components": num_connected_components(edges, [n[0] for n in
                                                                                   nodes])},
->>>>>>> af8ef04f14b04ecc9947299e895533c89472312e
             "build_metadata": {"export": {"command": sys.argv, "arguments": args,
                                           "revision": subprocess.check_output(["git", "describe",
                                                                                "--always"]),
