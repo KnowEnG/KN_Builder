@@ -159,21 +159,28 @@ def main():
 
     get = get_gg if cls == 'Gene' else get_pg
     res = get(db, args.edge_type, args.species)
+
+    usage()
+
     print("ProductionLines: " + str(len(res)))
     if (cls == 'Property' and len(res) < 4000) or (cls == 'Gene' and len(res) < 125000):
         print('Skipping {}.{}'.format(args.species, args.edge_type))
         return
     res, lines = norm_edges(res, args)
+    usage()
 
     n1des = list(set(i[0] for i in res))
     n2des = list(set(i[1] for i in res))
+    usage()
 
     n1des_desc = convert_nodes(args, n1des)
     n2des_desc = convert_nodes(args, n2des)
     nodes_desc = set(n1des_desc) | set(n2des_desc)
+    usage()
 
     metadata = get_metadata(db, res, nodes_desc, lines, args.species, args.edge_type, args)
     db.close()
+    usage()
 
     os.makedirs(sync_dir, exist_ok=True)
     with open(sync_edges, 'w') as file:
@@ -184,6 +191,10 @@ def main():
         csvw.writerows(nodes_desc)
     with open(sync_meta, 'w') as file:
         yaml.dump(metadata, file, default_flow_style=False)
+
+def usage():
+    import resource                        
+    print(resource.getrusage(resource.RUSAGE_SELF))
 
 if __name__ == "__main__":
     main()
