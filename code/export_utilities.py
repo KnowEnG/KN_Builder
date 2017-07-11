@@ -85,7 +85,9 @@ def get_sources(edges):
 def get_metadata(db, edges, nodes, lines, sp, et, args):
     """Retrieves the metadata for a subnetwork.
     """
+    usage()
     sources = get_sources(edges)
+    usage()
     datasets = {}
     for source in sources:
         file_id, remote_url, remote_date, remote_version, source_url, \
@@ -97,12 +99,14 @@ def get_metadata(db, edges, nodes, lines, sp, et, args):
                              "download_url": remote_url, "remote_version": remote_version,
                              "remote_date": datetime.utcfromtimestamp(float(remote_date)),
                              "download_date": date_downloaded, "file_checksum": checksum}
+    usage()
 
     sciname, = db.run("SELECT sp_sciname FROM species WHERE taxon = '{}'".format(sp))[0]
     n1_type, n2_type, bidir, et_desc, sc_desc, sc_best, sc_worst = \
             db.run("SELECT n1_type, n2_type, bidir, et_desc, sc_desc, sc_best, sc_worst "
                    "FROM edge_type WHERE et_name = '{}'".format(et))[0]
 
+    usage()
 
     num_prop, num_gene, num_none = 0, 0, 0
     for _, _, typ, _, _ in nodes:
@@ -114,6 +118,7 @@ def get_metadata(db, edges, nodes, lines, sp, et, args):
             num_none += 1
         else:
             raise ValueError("Invalid type: {}".format(type))
+    usage()
 
     return {"id": ".".join([sp, et]),
             "species": {"taxon_identifier": sp, "scientific_name": sciname},
@@ -160,27 +165,22 @@ def main():
     get = get_gg if cls == 'Gene' else get_pg
     res = get(db, args.edge_type, args.species)
 
-    usage()
 
     print("ProductionLines: " + str(len(res)))
     if (cls == 'Property' and len(res) < 4000) or (cls == 'Gene' and len(res) < 125000):
         print('Skipping {}.{}'.format(args.species, args.edge_type))
         return
     res, lines = norm_edges(res, args)
-    usage()
 
     n1des = list(set(i[0] for i in res))
     n2des = list(set(i[1] for i in res))
-    usage()
 
     n1des_desc = convert_nodes(args, n1des)
     n2des_desc = convert_nodes(args, n2des)
     nodes_desc = set(n1des_desc) | set(n2des_desc)
-    usage()
 
     metadata = get_metadata(db, res, nodes_desc, lines, args.species, args.edge_type, args)
     db.close()
-    usage()
 
     os.makedirs(sync_dir, exist_ok=True)
     with open(sync_edges, 'w') as file:
