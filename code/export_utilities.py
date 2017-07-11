@@ -69,7 +69,7 @@ def norm_edges(edges, args):
     lines.append(len(edges))
     edges = su.normalize_network_by_type(edges, 3, 2) #TODO: none, all, type
     lines.append(len(edges))
-    return edges
+    return edges, lines
 
 def convert_nodes(args, nodes):
     """Uses redis_utilities to convert a set of nodes.
