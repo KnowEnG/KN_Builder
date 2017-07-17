@@ -33,6 +33,7 @@ def get_pg(db, et, taxon):
 def num_connected_components(edges, nodes):
     """Count the number of connected components in a graph given the edges and the nodes.
     """
+    return 0 # TODO: Reimplement this.
     num = len(nodes)
     comps = {node: {node} for node in nodes}
     for edge in edges:
@@ -85,9 +86,8 @@ def get_sources(edges):
 def get_metadata(db, edges, nodes, lines, sp, et, args):
     """Retrieves the metadata for a subnetwork.
     """
-    usage()
+
     sources = get_sources(edges)
-    usage()
     datasets = {}
     for source in sources:
         file_id, remote_url, remote_date, remote_version, source_url, \
@@ -99,14 +99,11 @@ def get_metadata(db, edges, nodes, lines, sp, et, args):
                              "download_url": remote_url, "remote_version": remote_version,
                              "remote_date": datetime.utcfromtimestamp(float(remote_date)),
                              "download_date": date_downloaded, "file_checksum": checksum}
-    usage()
 
     sciname, = db.run("SELECT sp_sciname FROM species WHERE taxon = '{}'".format(sp))[0]
     n1_type, n2_type, bidir, et_desc, sc_desc, sc_best, sc_worst = \
             db.run("SELECT n1_type, n2_type, bidir, et_desc, sc_desc, sc_best, sc_worst "
                    "FROM edge_type WHERE et_name = '{}'".format(et))[0]
-
-    usage()
 
     num_prop, num_gene, num_none = 0, 0, 0
     for _, _, typ, _, _ in nodes:
@@ -118,7 +115,6 @@ def get_metadata(db, edges, nodes, lines, sp, et, args):
             num_none += 1
         else:
             raise ValueError("Invalid type: {}".format(type))
-    usage()
 
     return {"id": ".".join([sp, et]),
             "species": {"taxon_identifier": sp, "scientific_name": sciname},
@@ -128,8 +124,7 @@ def get_metadata(db, edges, nodes, lines, sp, et, args):
             "datasets": datasets,
             "data": {"num_edges": len(edges), "num_nodes": len(nodes), "num_prop_nodes": num_prop,
                      "num_gene_nodes": num_gene, "density": 2*len(edges)/(len(nodes)*(len(nodes)-1)),
-                     "num_connected_components": num_connected_components(edges, [n[0] for n in
-                                                                                  nodes])},
+                     "num_connected_components": num_connected_components(edges, [n[0] for n in nodes])},
             "build_metadata": {"export": {"command": sys.argv, "arguments": args,
                                           "revision": subprocess.check_output(["git", "describe",
                                                                                "--always"]),
@@ -165,7 +160,6 @@ def main():
     get = get_gg if cls == 'Gene' else get_pg
     res = get(db, args.edge_type, args.species)
 
-
     print("ProductionLines: " + str(len(res)))
     if (cls == 'Property' and len(res) < 4000) or (cls == 'Gene' and len(res) < 125000):
         print('Skipping {}.{}'.format(args.species, args.edge_type))
@@ -181,7 +175,7 @@ def main():
 
     metadata = get_metadata(db, res, nodes_desc, lines, args.species, args.edge_type, args)
     db.close()
-
+    
     os.makedirs(sync_dir, exist_ok=True)
     with open(sync_edges, 'w') as file:
         csvw = csv.writer(file, delimiter='\t')
@@ -191,10 +185,6 @@ def main():
         csvw.writerows(nodes_desc)
     with open(sync_meta, 'w') as file:
         yaml.dump(metadata, file, default_flow_style=False)
-
-def usage():
-    import resource                        
-    print(resource.getrusage(resource.RUSAGE_SELF))
 
 if __name__ == "__main__":
     main()
