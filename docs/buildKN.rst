@@ -309,7 +309,7 @@ Setup and delete AWS RDS instance
 
 .. code:: bash
 
-        aws rds create-db-instance \    --db-instance-class db.m4.2xlarge \    --allocated-storage 800 \    --db-instance-identifier knownet \    --master-username p1user \    --master-user-password knowdev249 \    --availability-zone us-west-2c \    --port 3306 \    --engine mysql \    --engine-version 5.6.27 \    --vpc-security-group-ids sg-03700267 \    --db-subnet-group-name default \    --backup-retention-period 0 \    --no-multi-az \    --auto-minor-version-upgrade \    --license-model general-public-license \    --publicly-accessible \    --storage-type gp2 \    --no-storage-encrypted \    --no-copy-tags-to-snapshot \    --monitoring-interval 0 \    --no-enable-iam-database-authentication
+        aws rds create-db-instance \    --db-instance-class db.m4.2xlarge \    --allocated-storage 800 \    --db-instance-identifier knownet \    --master-username p1user \    --master-user-password knowdev249 \    --port 3306 \    --engine mysql \    --engine-version 5.6.27 \    --vpc-security-group-ids sg-03700267 \    --db-subnet-group-name default \    --backup-retention-period 0 \    --no-multi-az \    --auto-minor-version-upgrade \    --license-model general-public-license \    --publicly-accessible \    --storage-type gp2 \    --no-storage-encrypted \    --no-copy-tags-to-snapshot \    --monitoring-interval 0 \    --no-enable-iam-database-authentication
         aws rds delete-db-instance \    --db-instance-identifier knownet \    --skip-final-snapshot
 
 Copy directory to S3 bucket

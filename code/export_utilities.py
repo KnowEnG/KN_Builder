@@ -162,7 +162,8 @@ def main():
     res = get(db, args.edge_type, args.species)
 
     print("ProductionLines: " + str(len(res)))
-    if (cls == 'Property' and len(res) < 4000) or (cls == 'Gene' and len(res) < 125000):
+    #if (cls == 'Property' and len(res) < 4000) or (cls == 'Gene' and len(res) < 125000):
+    if False:
         print('Skipping {}.{}'.format(args.species, args.edge_type))
         return
     res, lines = norm_edges(res, args)
