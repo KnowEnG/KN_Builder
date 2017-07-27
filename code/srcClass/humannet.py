@@ -55,6 +55,7 @@ class HumanNet(SrcClass):
                           "disease genes by network-based boosting of genome-wide association "
                           "data. Genome Res. 2011;21(7):1109-21.")
         self.pmid = 21536720
+        self.license = 'Contact Dr. Edward Marcotte, Email: marcotte AT icmb dot utexas dot edu'
 
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the

@@ -21,22 +21,22 @@ Set environment variables
         KNP_EXPORT_DIR="$KNP_S3_DIR/userKN-$KNP_BUILD_NAME"
         KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
         
-        export KNP_MYSQL_HOST='knowcluster07.dyndns.org'
-        export KNP_MYSQL_PORT='3306'
-        export KNP_MYSQL_PASS='KnowEnG'
-        export KNP_MYSQL_USER='root'
-        export KNP_MYSQL_DB='KnowNet'
-        KNP_MYSQL_DIR=$KNP_DB_DIR'/mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
-        KNP_MYSQL_CONF='build_conf/'
-        KNP_MYSQL_MEM='10000'
-        KNP_MYSQL_CPU='2.0'
-        KNP_MYSQL_CONSTRAINT_URL='knowcluster07.dyndns.org'
-        
-        #export KNP_MYSQL_HOST='knownet.cxtvettjrq71.us-west-2.rds.amazonaws.com'
-        #export KNP_MYSQL_USER='p1user'
-        #export KNP_MYSQL_PASS='knowdev249'
+        #export KNP_MYSQL_HOST='knowcluster07.dyndns.org'
         #export KNP_MYSQL_PORT='3306'
+        #export KNP_MYSQL_PASS='KnowEnG'
+        #export KNP_MYSQL_USER='root'
         #export KNP_MYSQL_DB='KnowNet'
+        #KNP_MYSQL_DIR=$KNP_DB_DIR'/mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
+        #KNP_MYSQL_CONF='build_conf/'
+        #KNP_MYSQL_MEM='10000'
+        #KNP_MYSQL_CPU='2.0'
+        #KNP_MYSQL_CONSTRAINT_URL='knowcluster07.dyndns.org'
+        
+        export KNP_MYSQL_HOST='knownet.cxtvettjrq71.us-west-2.rds.amazonaws.com'
+        export KNP_MYSQL_USER='p1user'
+        export KNP_MYSQL_PASS='knowdev249'
+        export KNP_MYSQL_PORT='3306'
+        export KNP_MYSQL_DB='KnowNet'
         
         export KNP_REDIS_HOST='knowcluster05.dyndns.org'
         export KNP_REDIS_PORT='6379'
@@ -220,7 +220,7 @@ Run export pipeline (time: )
         cp code/mysql/edge_type.txt $KNP_EXPORT_DIR
         
         ## add gene maps
-        head -n-1 $KNP_WORKING_DIR/$KNP_DATA_PATH/id_map/species/species.txt > $KNP_EXPORT_DIR/species.txt
+        cp $KNP_WORKING_DIR/$KNP_DATA_PATH/id_map/species/species.txt $KNP_EXPORT_DIR/species.txt
         for TAXON in `cut -f1 $KNP_EXPORT_DIR/species.txt `; do
             echo $TAXON;
             mkdir -p $KNP_EXPORT_DIR/Species/$TAXON;
@@ -273,6 +273,13 @@ Run export pipeline (time: )
             done
         done;
 
+Check for errors
+----------------
+
+.. code:: bash
+
+        grep -ri -e failed -e error -e killed ../logs_*
+
 Export databases
 ----------------
 
@@ -286,8 +293,8 @@ Import databases
 
 .. code:: bash
 
-        mysql -h $KNP_MYSQL_HOST -u $KNP_MYSQL_USER -p$KNP_MYSQL_PASS         -P $KNP_MYSQL_PORT "CREATE DATABASE KnowNet;"
-        gzip -dc $KNP_S3_DIR/mysql.gz | mysql -h $KNP_MYSQL_HOST -u $KNP_MYSQL_USER -p$KNP_MYSQL_PASS         -P $KNP_MYSQL_PORT KnowNet
+        mysql -h $KNP_MYSQL_HOST -u $KNP_MYSQL_USER -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT -e "CREATE DATABASE KnowNet;"
+        gzip -dc $KNP_S3_DIR/mysql.gz | mysql -h $KNP_MYSQL_HOST -u $KNP_MYSQL_USER -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT KnowNet
 
 Set up your AWS credentials (modify with your keys)
 ---------------------------------------------------

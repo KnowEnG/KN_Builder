@@ -64,6 +64,7 @@ class PfamProt(SrcClass):
                           "database: towards a more sustainable future. Nucleic Acids Res. "
                           "2016;44(D1):D279-85.")
         self.pmid = 26673716
+        self.license = 'Pfam is freely available under the Creative Commons Zero ("CC0") licence.'
 
     def get_aliases(self, args=cf.config_args()):
         """Helper function for producing the alias dictionary.

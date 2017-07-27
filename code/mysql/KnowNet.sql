@@ -85,6 +85,8 @@ CREATE TABLE IF NOT EXISTS `raw_file` (
   `source_url` varchar(255) DEFAULT NULL,
   `image` varchar(255) DEFAULT NULL,
   `reference` varchar(512) DEFAULT NULL,
+  `pmid` int(11) DEFAULT NULL,
+  `license` varchar(512) DEFAULT NULL,
   `date_downloaded` varchar(40) DEFAULT NULL,
   `local_filename` varchar(255) NOT NULL,
   `checksum` varchar(80) DEFAULT NULL,

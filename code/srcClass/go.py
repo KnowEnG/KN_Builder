@@ -60,6 +60,7 @@ class Go(SrcClass):
         self.reference = ("Gene Ontology Consortium: going forward. Nucleic Acids Res. "
                           "2015;43(Database issue):D1049-56.")
         self.pmid = 25428369
+        self.license = 'Creative commons license attribution 4.0 international'
 
     def get_aliases(self, args=cf.config_args()):
         """Helper function for producing the alias dictionary.

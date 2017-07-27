@@ -82,6 +82,7 @@ class Blast(SrcClass):
         self.reference = ("Altschul SF, Gish W, Miller W, Myers EW, Lipman DJ. Basic local "
                           "alignment search tool. J Mol Biol. 1990;215(3):403-10.")
         self.pmid = 2231712
+        self.license = 'NCBI itself places no restrictions on the use or distribution of the data contained therein. Nor do we accept data when the submitter has requested restrictions on reuse or redistribution. Full disclaimer can be found <a href="https://www.ncbi.nlm.nih.gov/home/about/policies/#data.">here</a>.'
 
     def get_aliases(self, args=cf.config_args()):
         """Helper function for producing the alias dictionary.

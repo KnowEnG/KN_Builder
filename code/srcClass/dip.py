@@ -60,6 +60,7 @@ class Dip(SrcClass):
                           "Database of Interacting Proteins: 2004 update. Nucleic Acids Res. "
                           "2004;32(Database issue):D449-51.")
         self.pmid = 14681454
+        self.license = '<a href="http://creativecommons.org/licenses/by-nd/3.0/">Creative Commons Attribution-NoDerivs License</a>. However, if you intend to distribute data from our database, you must <a href="mailto:dip@mbi.ucla.edu">ask us</a> for permission first.'
 
     def get_source_version(self, alias):
         """Return the release version of the remote dip:alias.

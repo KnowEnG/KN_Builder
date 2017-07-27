@@ -91,14 +91,15 @@ def get_metadata(db, edges, nodes, lines, sp, et, args):
     datasets = {}
     for source in sources:
         file_id, remote_url, remote_date, remote_version, source_url, \
-            image, reference, date_downloaded, checksum = \
+            image, reference, date_downloaded, checksum, pmid = \
             db.run("SELECT file_id, remote_url, remote_date, remote_version, source_url, image, "
-                   "reference, date_downloaded, checksum FROM raw_file "
+                   "reference, date_downloaded, checksum, pmid, license FROM raw_file "
                    "WHERE file_id = '{}'".format(source))[0]
         datasets[file_id] = {"source_url": source_url, "image": image, "reference": reference,
                              "download_url": remote_url, "remote_version": remote_version,
                              "remote_date": datetime.utcfromtimestamp(float(remote_date)),
-                             "download_date": date_downloaded, "file_checksum": checksum}
+                             "download_date": date_downloaded, "file_checksum": checksum,
+                             "pubmed": pmid, "license": license}
 
     sciname, = db.run("SELECT sp_sciname FROM species WHERE taxon = '{}'".format(sp))[0]
     n1_type, n2_type, bidir, et_desc, sc_desc, sc_best, sc_worst = \

@@ -117,6 +117,7 @@ class Enrichr(SrcClass):
                           "gene set enrichment analysis web server 2016 update. Nucleic Acids Res. "
                           "2016;44(W1):W90-7.")
         self.pmid = 27141961
+        self.license = 'Enrichr\'s web-based tools and services are free for academic, non-profit use, but for commercial uses please contact <a href="http://www.ip.mountsinai.org/">MSIP</a> for a license.'
 
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the

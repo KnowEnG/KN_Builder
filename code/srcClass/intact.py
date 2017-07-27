@@ -62,6 +62,7 @@ class Intact(SrcClass):
                           "common curation platform for 11 molecular interaction databases. "
                           "Nucleic Acids Res. 2014;42(Database issue):D358-63.")
         self.pmid = 24234451
+        self.license = 'IntAct is released monthly. All IntAct data and software is freely available to all users, academic or commercial, under the terms of the Apache License, Version 2.0.'
 
     def get_remote_file_size(self, alias):
         """Return the remote file size.

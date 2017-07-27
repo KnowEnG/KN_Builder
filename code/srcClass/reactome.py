@@ -60,6 +60,7 @@ class Reactome(SrcClass):
         self.reference = ("Fabregat A, Sidiropoulos K, Garapati P, et al. The Reactome pathway "
                           "Knowledgebase. Nucleic Acids Res. 2016;44(D1):D481-7.")
         self.pmid = 26656494
+        self.license = 'The Reactome data and source code continues to be publicly accessible under the terms of a Creative Commons Attribution 3.0 Unported License.'
 
     def get_source_version(self, alias):
         """Return the release version of the remote reactome:alias.

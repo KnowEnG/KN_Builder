@@ -101,7 +101,7 @@ def import_filemeta(version_dict, args=None):
     values = [version_dict["source"] + '.' + version_dict["alias"],
               version_dict["remote_url"], version_dict["remote_date"],
               version_dict["remote_version"], version_dict["remote_size"],
-              version_dict["source_url"], version_dict["image"], version_dict["reference"],
+              version_dict["source_url"], version_dict["image"], version_dict["reference"], version_dict["pmid"], version_dict["license"],
               'CURRENT_TIMESTAMP', version_dict["local_file_name"], 'NULL']
     for i in range(0, len(values)):
         val = values[i]
