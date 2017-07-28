@@ -21,22 +21,22 @@ Set environment variables
         KNP_EXPORT_DIR="$KNP_S3_DIR/userKN-$KNP_BUILD_NAME"
         KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
         
-        #export KNP_MYSQL_HOST='knowcluster07.dyndns.org'
-        #export KNP_MYSQL_PORT='3306'
-        #export KNP_MYSQL_PASS='KnowEnG'
-        #export KNP_MYSQL_USER='root'
-        #export KNP_MYSQL_DB='KnowNet'
-        #KNP_MYSQL_DIR=$KNP_DB_DIR'/mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
-        #KNP_MYSQL_CONF='build_conf/'
-        #KNP_MYSQL_MEM='10000'
-        #KNP_MYSQL_CPU='2.0'
-        #KNP_MYSQL_CONSTRAINT_URL='knowcluster07.dyndns.org'
-        
-        export KNP_MYSQL_HOST='knownet.cxtvettjrq71.us-west-2.rds.amazonaws.com'
-        export KNP_MYSQL_USER='p1user'
-        export KNP_MYSQL_PASS='knowdev249'
+        export KNP_MYSQL_HOST='knowcluster07.dyndns.org'
         export KNP_MYSQL_PORT='3306'
+        export KNP_MYSQL_PASS='KnowEnG'
+        export KNP_MYSQL_USER='root'
         export KNP_MYSQL_DB='KnowNet'
+        KNP_MYSQL_DIR=$KNP_DB_DIR'/mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
+        KNP_MYSQL_CONF='build_conf/'
+        KNP_MYSQL_MEM='10000'
+        KNP_MYSQL_CPU='2.0'
+        KNP_MYSQL_CONSTRAINT_URL='knowcluster07.dyndns.org'
+        
+        #export KNP_MYSQL_HOST='knownet.cxtvettjrq71.us-west-2.rds.amazonaws.com'
+        #export KNP_MYSQL_USER='p1user'
+        #export KNP_MYSQL_PASS='knowdev249'
+        #export KNP_MYSQL_PORT='3306'
+        #export KNP_MYSQL_DB='KnowNet'
         
         export KNP_REDIS_HOST='knowcluster05.dyndns.org'
         export KNP_REDIS_PORT='6379'
@@ -286,7 +286,7 @@ Export databases
 .. code:: bash
 
         mysqldump -h $KNP_MYSQL_HOST -u $KNP_MYSQL_USER -p$KNP_MYSQL_PASS -P $KNP_MYSQL_PORT $KNP_MYSQL_DB | gzip > $KNP_S3_DIR/mysql.gz
-        redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS SAVE && gzip -c $KNP_REDIS_DIR/dump.rdb > $KNP_S3_DIR/redis.gz
+        redis-cli -h $KNP_REDIS_HOST -p $KNP_REDIS_PORT -a $KNP_REDIS_PASS SAVE && mv $KNP_REDIS_DIR/dump.rdb $KNP_S3_DIR/dump.rdb
 
 Import databases
 ----------------
@@ -304,7 +304,7 @@ Set up your AWS credentials (modify with your keys)
         mkdir ~/.aws
         echo -e "[default]\naws_access_key_id = ABC\naws_secret_access_key = XYZ" > ~/.aws/credentials
 
-Setup and delete AWS RDS instance
+Setup and delete AWS RDS/EC instance
 ---------------------------------
 
 .. code:: bash
@@ -333,6 +333,21 @@ Setup and delete AWS RDS instance
         aws rds delete-db-instance \
                 --db-instance-identifier knownet \
                 --skip-final-snapshot
+
+        aws elasticache create-cache-cluster \
+                --cache-node-type cache.m4.xlarge \
+                --cache-cluster-id knowredis1706 \
+                --snapshot-arns arn:aws:s3:::KnowNets/KN-20rep-1706/redis-KN-20rep-1706/dump.rdb \
+                --port 6381 \
+                --az-mode single-az \
+                --preferred-availability-zone us-west-2a \
+                --num-cache-nodes 1 \
+                --engine redis \
+                --engine-version 3.2.4 \
+                --cache-subnet-group-name default \
+                --auto-minor-version-upgrade \
+                --security-group-ids sg-39b2f842   
+
 
 Copy directory to S3 bucket
 ---------------------------
