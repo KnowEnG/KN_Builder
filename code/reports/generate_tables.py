@@ -14,6 +14,9 @@ def fold(l):
             ret[e[0]][:0] = e[2:]
     return [[k] + v for k, v in ret.items()]
 
+txid_sp = {l[0]: l[2] for l in reader(open("species.txt"), delimiter='\t')}
+hr_edge = {l[0]: l[-1] for l in reader(open("edge_type.txt"), delimiter='\t')}
+
 r = reader(open("subnetwork_summaries.txt"), delimiter=' ')
 
 species = []
@@ -25,50 +28,50 @@ contents = [("Version:", "KN-20rep-1706"), ["Number of Species:", 0], ("Number o
 
 for line in r:
     if all(map(lambda x: x == "ALL", line[0:3])):
-        species.append([line[3], int(line[8])/1_000_000, int(line[7])/1_000, int(line[6])/1_000, int(line[9])])
+        species.append([f'{txid_sp[line[3]]} ({line[3]})' if line[3] != "ALL" else "Total", f'{int(line[8])/1_000_000:.1f}', f'{int(line[7])/1_000:.1f}', f'{int(line[6])/1_000:.1f}', int(line[9])])
         if line[3] == "ALL":
             contents.append(("Number of Datasets:", line[9]))
             contents.append(("Number of Edge Types:", line[4]))
-            contents.append(("Number of Edges:", line[8]))
-            contents.append(("Number of Nodes:", line[5]))
-            contents.append(("Number of Gene Nodes:", line[6]))
-            contents.append(("Number of Property Nodes:", line[7]))
+            contents.append(("Number of Edges:", f'{int(line[8]):,}'))
+            contents.append(("Number of Nodes:", f'{int(line[5]):,}'))
+            contents.append(("Number of Gene Nodes:", f'{int(line[6]):,}'))
+            contents.append(("Number of Property Nodes:", f'{int(line[7]):,}'))
         else:
             contents[1][1] += 1
     if line[0] == "Gene" and line[2] == "ALL" and line[3] in ["ALL", "9606"]:
-        gene_gene.append([line[1], line[3], int(line[8])/1_000_000, int(line[9])])
+        gene_gene.append([line[1] if line[1] != "ALL" else "Total", line[3], f'{int(line[8])/1_000_000:.1f}', int(line[9])])
     if line[0] == "Property" and line[2] == "ALL" and line[3] in ["ALL", "9606"]:
-        gene_prop.append([line[1], line[3], int(line[8])/1_000_000, int(line[7])/1_000, int(line[9])])
+        gene_prop.append([line[1] if line[1] != "ALL" else "Total", line[3], f'{int(line[8])/1_000_000:.1f}', f'{int(line[7])/1_000:.1f}', int(line[9])])
     if line[0] == "Gene" and line[2] != "ALL" and line[3] in ["ALL", "9606"]:
-        gene_edge_type.append([line[2], line[3], int(line[8])/1_000_000, int(line[6])/1_000, int(line[9])])
+        gene_edge_type.append([f'{hr_edge[line[2]]} ({line[2]})', line[3], f'{int(line[8])/1_000_000:.1f}', f'{int(line[6])/1_000:.1f}', int(line[9])])
     if line[0] == "Property" and line[2] != "ALL" and line[3] in ["ALL", "9606"]:
-        prop_edge_type.append([line[2], line[3], int(line[8])/1_000_000, int(line[7])/1_000, int(line[6])/1_000, int(line[9])])
+        prop_edge_type.append([f'{hr_edge[line[2]]} ({line[2]})', line[3], f'{int(line[8])/1_000_000:.1f}', f'{int(line[7])/1_000:.1f}', f'{int(line[6])/1_000:.1f}', int(line[9])])
 
 w = writer(open("contents_table.csv", 'w'))
 w.writerows(contents)
 
 w = writer(open("species_table.csv", 'w'))
 w.writerow(["Species", "Network Edges (millions)", "Property Nodes (thousands)", "Gene Nodes (thousands)", "Datasets"])
-w.writerows(sorted(species, key=lambda x: x[1], reverse=True))
+w.writerows(sorted(species, key=lambda x: float(x[1]), reverse=True))
 
 w = writer(open("GGrels_table.csv", 'w'))
-w.writerow(["Edge Type Collection", "Human Only<br>Network Edges (millions)", "Datasets", "All Species<br>Network Edges (millions)", "Datasets"])
-w.writerows(sorted(fold(gene_gene), key=lambda x: x[1], reverse=True))
+w.writerow(["Edge Type Collection", "Human<br>Network Edges (millions)", "Human<br>Datasets", "All<br>Network Edges (millions)", "All<br>Datasets"])
+w.writerows(sorted(fold(gene_gene), key=lambda x: float(x[1]), reverse=True))
 
 w = writer(open("PGrels_table.csv", 'w'))
-w.writerow(["Edge Type Collection", "Human Only<br>Network Edges (millions)", "Property Nodes (thousands)", "Datasets", "All Species<br>Network Edges (millions)", "Property Nodes (thousands)", "Datasets"])
-w.writerows(sorted(fold(gene_prop), key=lambda x: x[1], reverse=True))
+w.writerow(["Edge Type Collection", "Human<br>Network Edges (millions)", "Human<br>Property Nodes (thousands)", "Human<br>Datasets", "All<br>Network Edges (millions)", "All<br>Property Nodes (thousands)", "All<br>Datasets"])
+w.writerows(sorted(fold(gene_prop), key=lambda x: float(x[1]), reverse=True))
 
 w = writer(open("GGtypes_table.csv", 'w'))
-w.writerow(["Edge Type Collection", "Human Only<br>Network Edges (millions)", "Gene Nodes (thousands)", "Datasets", "All Species<br>Network Edges (millions)", "Gene Nodes (thousands)", "Datasets"])
-w.writerows(sorted(fold(gene_edge_type), key=lambda x: x[1], reverse=True))
+w.writerow(["Edge Type Collection", "Human<br>Network Edges (millions)", "Human<br>Gene Nodes (thousands)", "Human<br>Datasets", "All<br>Network Edges (millions)", "All<br>Gene Nodes (thousands)", "All<br>Datasets"])
+w.writerows(sorted(fold(gene_edge_type), key=lambda x: float(x[1]), reverse=True))
 
 w = writer(open("PGtypes_table.csv", 'w'))
-w.writerow(["Edge Type Collection", "Human Only<br>Network Edges (millions)", "Property Nodes (thousands)", "Gene Nodes (thousands)", "Datasets", "All Species<br>Network Edges (millions)", "Property Nodes (thousands)", "Gene Nodes (thousands)", "Datasets"])
-w.writerows(sorted(fold(prop_edge_type), key=lambda x: x[1], reverse=True))
+w.writerow(["Edge Type Collection", "Human<br>Network Edges (millions)", "Human<br>Property Nodes (thousands)", "Human<br>Gene Nodes (thousands)", "Human<br>Datasets", "All<br>Network Edges (millions)", "All<br>Property Nodes (thousands)", "All<br>Gene Nodes (thousands)", "All<br>Datasets"])
+w.writerows(sorted(fold(prop_edge_type), key=lambda x: float(x[1]), reverse=True))
 
 r = DictReader(open("source_summaries.txt"), delimiter='\t')
-src_sums = {(e["type"], e["source"]): e for e in r}
+src_sums = {(e["type"], e["source"]): {k: v if v != '-' else 0 for k, v in e.items()} for e in r}
 
 temp_srcs = {e["resource"]: e for e in DictReader(open("/home/aidane/Downloads/test.csv"))}
 
@@ -105,14 +108,14 @@ for k, v in d.items():
         d2[k][i] = temp
     for i in ["download_url", "edge_type"]:
         d2[k][i] = compress(v.values(), i)
-    d2[k]["nodes"] = src_sums["*/chunks/*.unique.node.*", k]["lines"]
+    d2[k]["nodes"] = src_sums["*/chunks/*.unique.node.*", k]["lines"] or src_sums["*/*.unique.node.*", k]["lines"]
     d2[k]["edges"] = src_sums["*/chunks/*.unique.edge.*", k]["lines"]
 
 w = writer(open("KNDR_sum_table.csv", 'w'))
 for k, l in d2.items():
-    w.writerow([f'<img src="{l["image"]}">', f'<a href="{l["source_url"]}">{l["name"]}</a>{": " + l["description"] if l["description"] else ""}', f'Nodes: {l["nodes"]}, Edges: {l["edges"]}'])
+    w.writerow([f'<img src="{l["image"]}">', f'<a href="{l["source_url"]}">{l["name"]}</a>{": " + l["description"] if l["description"] else ""}', (f'Nodes: {int(l["nodes"]):,}, ' if l["nodes"] else "") + f'Edges: {int(l["edges"]):,}'])
 
 w = writer(open("KNDR_full_table.csv", 'w'))
 w.writerow(["Resource", "Reference", "Source Files", "License"])
 for k, l in d2.items():
-    w.writerow([l['name'], f'{l["reference"]} <a href="https://www.ncbi.nlm.nih.gov/pubmed/{l["pmid"]}">Pudmed</a>', '<br>'.join(l["download_url"]), l["license"]])
+    w.writerow([l['name'], f'{l["reference"]} <a href="https://www.ncbi.nlm.nih.gov/pubmed/{l["pmid"]}">Pudmed</a>', '<ul>' + ''.join(f'<li>{e}</li>' for e in l["download_url"]) + '</ul>', l["license"]])
