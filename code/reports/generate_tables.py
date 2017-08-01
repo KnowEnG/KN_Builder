@@ -51,16 +51,16 @@ w = writer(open("contents_table.csv", 'w'))
 w.writerows(contents)
 
 w = writer(open("species_table.csv", 'w'))
-w.writerow(["Species", "Network Edges (millions)", "Property Nodes (thousands)", "Gene Nodes (thousands)", "Datasets"])
-w.writerows(sorted(species, key=lambda x: float(x[1]), reverse=True))
+w.writerow(["Species (TaxonID)", "Network Edges (millions)", "Property Nodes (thousands)", "Gene Nodes (thousands)", "Datasets"])
+w.writerows(sorted(species, key=lambda x: float(x[1]) if x[0] != "Total" else -1, reverse=True))
 
 w = writer(open("GGrels_table.csv", 'w'))
 w.writerow(["Edge Type Collection", "Human<br>Network Edges (millions)", "Human<br>Datasets", "All<br>Network Edges (millions)", "All<br>Datasets"])
-w.writerows(sorted(fold(gene_gene), key=lambda x: float(x[1]), reverse=True))
+w.writerows(sorted(fold(gene_gene), key=lambda x: float(x[1]) if x[0] != "Total" else -1, reverse=True))
 
 w = writer(open("PGrels_table.csv", 'w'))
 w.writerow(["Edge Type Collection", "Human<br>Network Edges (millions)", "Human<br>Property Nodes (thousands)", "Human<br>Datasets", "All<br>Network Edges (millions)", "All<br>Property Nodes (thousands)", "All<br>Datasets"])
-w.writerows(sorted(fold(gene_prop), key=lambda x: float(x[1]), reverse=True))
+w.writerows(sorted(fold(gene_prop), key=lambda x: float(x[1]) if x[0] != "Total" else -1, reverse=True))
 
 w = writer(open("GGtypes_table.csv", 'w'))
 w.writerow(["Edge Type Collection", "Human<br>Network Edges (millions)", "Human<br>Gene Nodes (thousands)", "Human<br>Datasets", "All<br>Network Edges (millions)", "All<br>Gene Nodes (thousands)", "All<br>Datasets"])
@@ -118,4 +118,4 @@ for k, l in d2.items():
 w = writer(open("KNDR_full_table.csv", 'w'))
 w.writerow(["Resource", "Reference", "Source Files", "License"])
 for k, l in d2.items():
-    w.writerow([l['name'], f'{l["reference"]} <a href="https://www.ncbi.nlm.nih.gov/pubmed/{l["pmid"]}">Pudmed</a>', '<ul>' + ''.join(f'<li>{e}</li>' for e in l["download_url"]) + '</ul>', l["license"]])
+    w.writerow([l['name'], f'{l["reference"]} <a href="https://www.ncbi.nlm.nih.gov/pubmed/{l["pmid"]}">Pubmed</a>', '<ul>' + ''.join(f'<li>{e}</li>' for e in l["download_url"]) + '</ul>', l["license"]])
