@@ -17,7 +17,7 @@ def main_parse_args():
     return args
 
 
-def main():
+def get_status():
     """Prints information on chronos jobs.
     """
     args = main_parse_args()
@@ -28,8 +28,7 @@ def main():
     response_str = response.decode("utf-8")
     jobs = json.loads(response_str)
 
-    print("\t".join(['name', 'last_succ', 'last_err', 'pending', 'succeeded', 'threw_error',
-                     'recovered']))
+    l = []
     for job in jobs:
         jname = -1
         jsucc = -1
@@ -51,8 +50,17 @@ def main():
             threw_error = 1
         if jsucc != -1 and jerr != -1 and jsucc > jerr:
             recovered = 0
-        print("\t".join([str(jname), str(jsucc), str(jerr), str(pending), str(succeeded),
-                         str(threw_error), str(recovered)]))
+        l.append([jname, jsucc, jerr, pending, succeeded, threw_error, recovered])
+
+    return l
+
+
+def main():
+    print("\t".join(['name', 'last_succ', 'last_err', 'pending', 'succeeded', 'threw_error',
+                     'recovered']))
+    jobs = get_status()
+    for job in jobs:
+        print("\t".join(map(str, job)))
 
 if __name__ == "__main__":
     main()
