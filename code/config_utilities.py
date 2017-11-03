@@ -51,6 +51,8 @@ try:
     csvw.writerow(['run info', 'commit', subprocess.check_output(['git', 'describe', '--always']).strip().decode()])
 except subprocess.CalledProcessError:
     pass
+except FileNotFoundError:
+    pass
 
 DEFAULT_CHRONOS_URL = 'knowcluster01.dyndns.org:8888'
 DEFAULT_MARATHON_URL = 'knowcluster01.dyndns.org:8080/v2/apps'

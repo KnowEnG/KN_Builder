@@ -51,6 +51,7 @@ class Ppi(SrcClass):
         self.image = ''
         self.source_url = ''
         self.pmid = 0
+        self.license = ''
         super(Ppi, self).__init__(name, url_base, aliases, args)
 
     def get_source_version(self, alias):

@@ -10,8 +10,7 @@
         "volumes": [{"containerPath": "/data", "hostPath": "TMPPATH/TMPREDISNAME/", "mode": "RW"}],
         "docker": {
             "image": "redis",
-            "network": "BRIDGE",
-            "portMappings": [{"containerPort": 6379, "hostPort": "TMPREDISPORT"}]
+            "network": "HOST"
         }
     }
 }

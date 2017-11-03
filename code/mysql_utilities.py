@@ -65,8 +65,7 @@ def deploy_container(args=None):
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.mysql_dir
     deploy_dict["container"]["volumes"][1]["hostPath"] = conf_path
     deploy_dict["container"]["docker"]["parameters"][0]["value"] = \
-                    "MYSQL_ROOT_PASSWORD_FILE=/etc/mysql/conf.d/password"
-    deploy_dict["container"]["docker"]["portMappings"][0]["hostPort"] = int(args.mysql_port)
+                    "MYSQL_ROOT_PASSWORD=KnowEnG"
     out_path = os.path.join(deploy_dir, "p1mysql-" + args.mysql_port +'.json')
     with open(out_path, 'w') as outfile:
         outfile.write(json.dumps(deploy_dict))
@@ -692,6 +691,18 @@ class MySQL(object):
             cmd (str): a valid SQL command to use for inserting into tablename
         """
         self.cursor.execute('REPLACE INTO ' + tablename + ' ' + cmd + ';')
+        self.conn.commit()
+
+    def replace_safe(self, tablename, cmd, values):
+        """Insert into tablename using cmd.
+
+        Replace into tablename using cmd.
+
+        Args:
+            tablename (str): name of the table to add to the MySQL database
+            cmd (str): a valid SQL command to use for inserting into tablename
+        """
+        self.cursor.execute('REPLACE INTO ' + tablename + ' ' + cmd + ';', values)
         self.conn.commit()
 
     def insert_ignore(self, tablename, cmd=''):

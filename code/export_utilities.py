@@ -91,7 +91,7 @@ def get_metadata(db, edges, nodes, lines, sp, et, args):
     datasets = {}
     for source in sources:
         file_id, remote_url, remote_date, remote_version, source_url, \
-            image, reference, date_downloaded, checksum, pmid = \
+            image, reference, date_downloaded, checksum, pmid, license = \
             db.run("SELECT file_id, remote_url, remote_date, remote_version, source_url, image, "
                    "reference, date_downloaded, checksum, pmid, license FROM raw_file "
                    "WHERE file_id = '{}'".format(source))[0]

@@ -49,13 +49,13 @@ class Stringdb(SrcClass):
         This calls the SrcClass constructor (see utilities.SrcClass)
         """
         name = 'stringdb'
-        url_base = 'http://string-db.org/'
+        url_base = 'https://string-db.org/'
         aliases = dict()
         super(Stringdb, self).__init__(name, url_base, aliases, args)
         self.aliases = self.get_aliases(args)
         self.chunk_size = 250000
 
-        self.source_url = "http://string-db.org/"
+        self.source_url = "https://string-db.org/"
         self.image = "http://meringlab.org/logos/string.png"
         self.reference = ("Szklarczyk D, Franceschini A, Wyder S, et al. STRING v10: "
                           "protein-protein interaction networks, integrated over the tree of life. "
@@ -111,7 +111,7 @@ class Stringdb(SrcClass):
             the_page = response.readlines()
             for line in the_page:
                 d_line = line.decode()
-                match = re.search(r"<li class='last'>(\d+\.?\d*)</li>", d_line)
+                match = re.search(r"<li class='last'>.*>(\d+\.?\d*)<?.*</li>", d_line)
                 if match is not None:
                     response.close()
                     vers = match.group(1)

@@ -46,7 +46,7 @@ class Pathcom(SrcClass):
         This calls the SrcClass constructor (see utilities.SrcClass)
         """
         name = 'pathcom'
-        url_base = 'http://www.pathwaycommons.org/archives/PC2/current/'
+        url_base = 'http://www.pathwaycommons.org/archives/PC2/'
         aliases = {"all":""}
         super(Pathcom, self).__init__(name, url_base, aliases, args)
 
@@ -73,11 +73,11 @@ class Pathcom(SrcClass):
         """
         version = super(Pathcom, self).get_source_version(alias)
         if version == 'unknown':
-            response = urllib.request.urlopen(self.url_base + 'datasources.txt')
+            response = urllib.request.urlopen('http://www.pathwaycommons.org/pc2/downloads')
             the_page = response.readlines()
             for line in the_page:
                 d_line = line.decode()
-                match = re.search('Pathway Commons version ([^ ]*)', d_line)
+                match = re.search('Pathway Commons .* version ([^ ,]*)', d_line)
                 if match is not None:
                     response.close()
                     self.version[alias] = match.group(1)
@@ -102,8 +102,9 @@ class Pathcom(SrcClass):
             str: The url needed to fetch the file corresponding to the alias.
         """
         url = self.url_base
-        url += 'PathwayCommons.{0}.All.EXTENDED_BINARY_SIF.uniprot.txt.gz'
+        url += 'v{0}/PathwayCommons{0}.All.hgnc.txt.gz'
         url = url.format(self.get_source_version(alias))
+        print(url)
         return url
 
     def table(self, raw_line, version_dict):

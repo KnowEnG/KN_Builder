@@ -8,7 +8,7 @@
                     {"containerPath": "/etc/nginx/conf.d/", "hostPath": "CONFPATH", "mode": "RW"}],
         "docker": {
             "image": "nginx",
-            "network": "BRIDGE",
+            "network": "HOST",
             "portMappings": [{"containerPort": 80, "hostPort": "TMPPORT"}]
         }
     }

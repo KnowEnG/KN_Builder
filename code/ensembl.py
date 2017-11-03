@@ -151,6 +151,7 @@ class Ensembl(SrcClass):
         self.image = ''
         self.source_url = ''
         self.pmid = 0
+        self.license = ''
         aliases = self.get_aliases(args)
         super(Ensembl, self).__init__(name, url_base, aliases, args)
         rem_aliases = list()

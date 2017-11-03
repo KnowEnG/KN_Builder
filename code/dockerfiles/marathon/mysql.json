@@ -11,9 +11,8 @@
                     {"containerPath": "/etc/mysql/conf.d/", "hostPath": "TMPMYSQLCONFPATH", "mode": "RW"}],
         "docker": {
             "image": "mysql",
-            "network": "BRIDGE",
-            "parameters": [{ "key": "env", "value": "MYSQL_ROOT_PASSWORD=TMPSQLPASS" }],
-            "portMappings": [{"containerPort": 3306, "hostPort": "TMPMYSQLPORT"}]
+            "network": "HOST",
+            "parameters": [{ "key": "env", "value": "MYSQL_ROOT_PASSWORD=TMPSQLPASS" }]
         }
     }
 }

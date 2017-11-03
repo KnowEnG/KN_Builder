@@ -48,7 +48,6 @@ def deploy_container(args=None):
     else:
         deploy_dict["constraints"] = []
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.redis_dir
-    deploy_dict["container"]["docker"]["portMappings"][0]["hostPort"] = int(args.redis_port)
     out_path = os.path.join(deploy_dir, "p1redis-" + args.redis_port +'.json')
     with open(out_path, 'w') as outfile:
         outfile.write(json.dumps(deploy_dict))

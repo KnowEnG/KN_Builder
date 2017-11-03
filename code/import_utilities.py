@@ -112,8 +112,8 @@ def import_filemeta(version_dict, args=None):
         else:
             values[i] = str(val)
     values = [str(i) for i in values]
-    cmd = 'VALUES( ' + ','.join(values) + ')'
-    db.replace('raw_file', cmd)
+    cmd = 'VALUES( ' + ','.join('%s' for i in values) + ')'
+    db.replace_safe('raw_file', cmd, values)
     db.close()
 
 def update_filemeta(version_dict, args=None):
@@ -131,7 +131,7 @@ def update_filemeta(version_dict, args=None):
     values = [version_dict["source"] + '.' + version_dict["alias"],
               version_dict["remote_url"], version_dict["remote_date"],
               version_dict["remote_version"], version_dict["remote_size"],
-              version_dict["source_url"], version_dict["image"], version_dict["reference"],
+              version_dict["source_url"], version_dict["image"], version_dict["reference"], version_dict["pmid"], version_dict["license"],
               'CURRENT_TIMESTAMP', version_dict["local_file_name"],
               version_dict["checksum"]]
     for i in range(0, len(values)):
@@ -143,8 +143,8 @@ def update_filemeta(version_dict, args=None):
         else:
             values[i] = str(val)
     values = [str(i) for i in values]
-    cmd = 'VALUES( ' + ','.join(values) + ')'
-    db.replace('raw_file', cmd)
+    cmd = 'VALUES( ' + ','.join('%s' for i in values) + ')'
+    db.replace_safe('raw_file', cmd, values)
     db.close()
 
 def import_edge(edgefile, args=None):

@@ -6,22 +6,22 @@ Set environment variables
 
 .. code:: bash
 
-        KNP_CHRONOS_URL='knowcluster01.dyndns.org:4400'
+        KNP_CHRONOS_URL='127.0.0.1:8888'
         KNP_BUILD_NAME='20rep-1706'
-        KNP_CODE_DIR="/mnt/backup/knowdata/KnowNets/KnowNet_0.3/KN-$KNP_BUILD_NAME/"
+        KNP_CODE_DIR="/mnt/backup/knowtest/KN-$KNP_BUILD_NAME/"
         KNP_WORKING_DIR=$KNP_CODE_DIR'/'
         KNP_STORAGE_DIR="$KNP_WORKING_DIR"
         KNP_DB_DIR="$KNP_WORKING_DIR"
         KNP_DATA_PATH='data_'$KNP_BUILD_NAME
         KNP_LOGS_PATH='logs_'$KNP_BUILD_NAME
-        KNP_ENS_SPECIES='RESEARCH'
+        KNP_ENS_SPECIES='homo_sapiens'
         
         KNP_BUCKET="KnowNets/KN-$KNP_BUILD_NAME"
         KNP_S3_DIR="$KNP_WORKING_DIR/$KNP_BUCKET/"
         KNP_EXPORT_DIR="$KNP_S3_DIR/userKN-$KNP_BUILD_NAME"
-        KNP_MARATHON_URL='knowcluster01.dyndns.org:8080/v2/apps'
+        KNP_MARATHON_URL='127.0.0.1:8080/v2/apps'
         
-        export KNP_MYSQL_HOST='knowcluster07.dyndns.org'
+        export KNP_MYSQL_HOST='127.0.0.1'
         export KNP_MYSQL_PORT='3306'
         export KNP_MYSQL_PASS='KnowEnG'
         export KNP_MYSQL_USER='root'
@@ -30,7 +30,7 @@ Set environment variables
         KNP_MYSQL_CONF='build_conf/'
         KNP_MYSQL_MEM='10000'
         KNP_MYSQL_CPU='2.0'
-        KNP_MYSQL_CONSTRAINT_URL='knowcluster07.dyndns.org'
+        KNP_MYSQL_CONSTRAINT_URL='127.0.0.1'
         
         #export KNP_MYSQL_HOST='knownet.cxtvettjrq71.us-west-2.rds.amazonaws.com'
         #export KNP_MYSQL_USER='p1user'
@@ -38,18 +38,18 @@ Set environment variables
         #export KNP_MYSQL_PORT='3306'
         #export KNP_MYSQL_DB='KnowNet'
         
-        export KNP_REDIS_HOST='knowcluster05.dyndns.org'
+        export KNP_REDIS_HOST='knowcluster02.dyndns.org'
         export KNP_REDIS_PORT='6379'
         export KNP_REDIS_PASS='KnowEnG'
         KNP_REDIS_DIR=$KNP_DB_DIR'/redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
         KNP_REDIS_MEM='8000'
         KNP_REDIS_CPU='2.0'
-        KNP_REDIS_CONSTRAINT_URL='knowcluster05.dyndns.org'
+        KNP_REDIS_CONSTRAINT_URL='127.0.0.1'
         
         KNP_NGINX_PORT='8081'
         KNP_NGINX_DIR=$KNP_DB_DIR'/nginx-'$KNP_NGINX_PORT'-'$KNP_BUILD_NAME
         KNP_NGINX_CONF='autoindex/'
-        KNP_NGINX_CONSTRAINT_URL='knowcluster05.dyndns.org'
+        KNP_NGINX_CONSTRAINT_URL='127.0.0.1'
         
         KNP_NEO4J_PORT='7474'
         KNP_NEO4J_DIR=$KNP_DB_DIR'/neo4j-'$KNP_NEO4J_PORT'-'$KNP_BUILD_NAME
