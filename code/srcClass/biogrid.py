@@ -62,7 +62,8 @@ class Biogrid(SrcClass):
                           "interaction database: 2017 update. Nucleic Acids Res. "
                           "2017;45(D1):D369-D379.")
         self.pmid = 27980099
-        self.license = 'BioGRID interaction data are 100% freely available to both commercial and academic users.'
+        self.license = ('BioGRID interaction data are 100% freely available to both commercial and '
+                        'academic users.')
 
     def get_source_version(self, alias):
         """Return the release version of the remote biogrid:alias.

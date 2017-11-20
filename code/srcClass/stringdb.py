@@ -61,7 +61,8 @@ class Stringdb(SrcClass):
                           "protein-protein interaction networks, integrated over the tree of life. "
                           "Nucleic Acids Res. 2015;43(Database issue):D447-52.")
         self.pmid = 25352553
-        self.license = 'The dataset obtained from STRING is distributed under Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)'
+        self.license = ('The dataset obtained from STRING is distributed under '
+                        'Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)')
 
     def get_aliases(self, args=cf.config_args()):
         """Helper function for producing the alias dictionary.

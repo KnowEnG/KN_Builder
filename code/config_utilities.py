@@ -42,13 +42,15 @@ import sys
 import csv
 import time
 import subprocess
+import shlex
 
 print("Running on", socket.gethostname())
 csvw = csv.writer(sys.stdout, delimiter='\t')
-csvw.writerow(['run info', 'argv'] + sys.argv)
+csvw.writerow(['run info', 'argv'] + ' '.join(map(shlex.quote, sys.argv)))
 csvw.writerow(['run info', 'time', time.time()])
 try:
-    csvw.writerow(['run info', 'commit', subprocess.check_output(['git', 'describe', '--always']).strip().decode()])
+    csvw.writerow(['run info', 'commit',
+                   subprocess.check_output(['git', 'describe', '--always']).strip().decode()])
 except subprocess.CalledProcessError:
     pass
 except FileNotFoundError:

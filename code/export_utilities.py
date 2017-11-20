@@ -5,6 +5,8 @@ import sys
 import csv
 import subprocess
 import yaml
+import numpy as np
+import scipy.sparse as ss
 
 import config_utilities as cf
 import redis_utilities as ru
@@ -33,16 +35,15 @@ def get_pg(db, et, taxon):
 def num_connected_components(edges, nodes):
     """Count the number of connected components in a graph given the edges and the nodes.
     """
-    return 0 # TODO: Reimplement this.
-    num = len(nodes)
-    comps = {node: {node} for node in nodes}
-    for edge in edges:
-        n1, n2 = edge[:2]
-        if comps[n1] != comps[n2]:
-            num -= 1
-        join = comps[n1] | comps[n2]
-        comps[n1] = join
-        comps[n2] = join
+    nodes = list(nodes)
+    rev_nodes = {v: i for i, v in enumerate(nodes)}
+    row = []
+    col = []
+    for r, c in edges:
+        row.append(rev_nodes[r])
+        col.append(rev_nodes[c])
+    mat = ss.coo_matrix((np.ones(len(edges)), (row, col)), shape=(len(nodes), len(nodes)))
+    num, _ = ss.csgraph.connected_components(mat)
     return num
 
 def figure_out_class(db, et):
@@ -83,6 +84,9 @@ def get_sources(edges):
     """
     return set(edge[4] for edge in edges)
 
+def get_log_queries(sources):
+    return "SELECT filename, info_type, info_value FROM log WHERE filename IS NULL"
+
 def get_metadata(db, edges, nodes, lines, sp, et, args):
     """Retrieves the metadata for a subnetwork.
     """
@@ -117,19 +121,27 @@ def get_metadata(db, edges, nodes, lines, sp, et, args):
         else:
             raise ValueError("Invalid type: {}".format(type))
 
-    return {"id": ".".join([sp, et]),
+    build = defaultdict(lambda: {})
+    build["export"] = {"command": sys.argv, "arguments": args, "date": datetime.now(timezone.utc),
+                        "revision": subprocess.check_output(["git", "describe", "--always"])}
+    for query in get_log_query(sources):
+        for f, t, k in db.run(query):
+            build[t][f] = k
+
+    return {"id": ".".join([sp, et]), "datasets": datasets, "build_metadata": build,
             "species": {"taxon_identifier": sp, "scientific_name": sciname},
             "edge_type": {"id": et, "n1_type": n1_type, "n2_type": n2_type, "type_desc": et_desc,
                           "score_desc": sc_desc, "score_best": sc_best, "score_worst": sc_worst,
                           "bidirectional": bidir},
-            "datasets": datasets,
             "data": {"num_edges": len(edges), "num_nodes": len(nodes), "num_prop_nodes": num_prop,
-                     "num_gene_nodes": num_gene, "density": 2*len(edges)/(len(nodes)*(len(nodes)-1)),
-                     "num_connected_components": num_connected_components(edges, [n[0] for n in nodes])},
-            "build_metadata": {"export": {"command": sys.argv, "arguments": args,
-                                          "revision": subprocess.check_output(["git", "describe",
-                                                                               "--always"]),
-                                          "date": datetime.now(timezone.utc)}}}
+                     "num_gene_nodes": num_gene, "num_connected_components":
+                     num_connected_components(edges, [n[0] for n in nodes]),
+                     "density": 2*len(edges)/(len(nodes)*(len(nodes)-1))}}
+
+def should_skip(cls, res):
+    """Determine if the subnetwork is especially small, and if we should skip it.
+    """
+    return (cls == 'Property' and len(res) < 4000) or (cls == 'Gene' and len(res) < 125000)
 
 def main():
     """Parses arguments and then exports the specified subnetworks.
@@ -162,8 +174,7 @@ def main():
     res = get(db, args.edge_type, args.species)
 
     print("ProductionLines: " + str(len(res)))
-    #if (cls == 'Property' and len(res) < 4000) or (cls == 'Gene' and len(res) < 125000):
-    if False:
+    if not args.force_fetch and should_skip(cls, res):
         print('Skipping {}.{}'.format(args.species, args.edge_type))
         return
     res, lines = norm_edges(res, args)
@@ -177,7 +188,7 @@ def main():
 
     metadata = get_metadata(db, res, nodes_desc, lines, args.species, args.edge_type, args)
     db.close()
-    
+
     os.makedirs(sync_dir, exist_ok=True)
     with open(sync_edges, 'w') as file:
         csvw = csv.writer(file, delimiter='\t')

@@ -93,6 +93,13 @@ CREATE TABLE IF NOT EXISTS `raw_file` (
   PRIMARY KEY (`file_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+CREATE TABLE IF NOT EXISTS `log` (
+  `filename` varchar(255) DEFAULT NULL,
+  `info_type` varchar(255) NOT NULL,
+  `info_value` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`taxon`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 CREATE TABLE IF NOT EXISTS `raw_line` (
   `line_hash` varchar(40) NOT NULL,
   `line_num` int(11) NOT NULL,

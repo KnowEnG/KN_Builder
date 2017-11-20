@@ -63,7 +63,10 @@ class Msigdb(SrcClass):
                           "analysis: a knowledge-based approach for interpreting genome-wide "
                           "expression profiles. Proc Natl Acad Sci USA. 2005;102(43):15545-50.")
         self.pmid = 16199517
-        self.license = 'MSigDB v6.0 is available under a Creative Commons style license, plus additional terms for some gene sets. The full license terms are available <a href="http://software.broadinstitute.org/gsea/msigdb_license_terms.jsp">here</a>.'
+        self.license = ('MSigDB v6.0 is available under a Creative Commons style license, plus '
+                        'additional terms for some gene sets. The full license terms are available '
+                        '<a href="http://software.broadinstitute.org/gsea/msigdb_license_terms.jsp"'
+                        '>here</a>.')
 
     def get_source_version(self, alias):
         """Return the release version of the remote msigdb:alias.

@@ -1,9 +1,8 @@
 from csv import reader, writer, DictReader
-from sys import stdout
 from collections import defaultdict
 from glob import glob
+from os import mkdir
 from yaml import load
-from pprint import pprint
 
 def fold(l):
     ret = defaultdict(lambda: [])
@@ -47,26 +46,28 @@ for line in r:
     if line[0] == "Property" and line[2] != "ALL" and line[3] in ["ALL", "9606"]:
         prop_edge_type.append([f'{hr_edge[line[2]]} ({line[2]})', line[3], f'{int(line[8])/1_000_000:.1f}', f'{int(line[7])/1_000:.1f}', f'{int(line[6])/1_000:.1f}', int(line[9])])
 
-w = writer(open("contents_table.csv", 'w'))
+mkdir("Tables")
+
+w = writer(open("Tables/contents_table.csv", 'w'))
 w.writerows(contents)
 
-w = writer(open("species_table.csv", 'w'))
+w = writer(open("Tables/species_table.csv", 'w'))
 w.writerow(["Species (TaxonID)", "Network Edges (millions)", "Property Nodes (thousands)", "Gene Nodes (thousands)", "Datasets"])
 w.writerows(sorted(species, key=lambda x: float(x[1]) if x[0] != "Total" else -1, reverse=True))
 
-w = writer(open("GGrels_table.csv", 'w'))
+w = writer(open("Tables/GGrels_table.csv", 'w'))
 w.writerow(["Edge Type Collection", "Human<br>Network Edges (millions)", "Human<br>Datasets", "All<br>Network Edges (millions)", "All<br>Datasets"])
 w.writerows(sorted(fold(gene_gene), key=lambda x: float(x[1]) if x[0] != "Total" else -1, reverse=True))
 
-w = writer(open("PGrels_table.csv", 'w'))
+w = writer(open("Tables/PGrels_table.csv", 'w'))
 w.writerow(["Edge Type Collection", "Human<br>Network Edges (millions)", "Human<br>Property Nodes (thousands)", "Human<br>Datasets", "All<br>Network Edges (millions)", "All<br>Property Nodes (thousands)", "All<br>Datasets"])
 w.writerows(sorted(fold(gene_prop), key=lambda x: float(x[1]) if x[0] != "Total" else -1, reverse=True))
 
-w = writer(open("GGtypes_table.csv", 'w'))
+w = writer(open("Tables/GGtypes_table.csv", 'w'))
 w.writerow(["Edge Type Collection", "Human<br>Network Edges (millions)", "Human<br>Gene Nodes (thousands)", "Human<br>Datasets", "All<br>Network Edges (millions)", "All<br>Gene Nodes (thousands)", "All<br>Datasets"])
 w.writerows(sorted(fold(gene_edge_type), key=lambda x: float(x[1]), reverse=True))
 
-w = writer(open("PGtypes_table.csv", 'w'))
+w = writer(open("Tables/PGtypes_table.csv", 'w'))
 w.writerow(["Edge Type Collection", "Human<br>Network Edges (millions)", "Human<br>Property Nodes (thousands)", "Human<br>Gene Nodes (thousands)", "Human<br>Datasets", "All<br>Network Edges (millions)", "All<br>Property Nodes (thousands)", "All<br>Gene Nodes (thousands)", "All<br>Datasets"])
 w.writerows(sorted(fold(prop_edge_type), key=lambda x: float(x[1]), reverse=True))
 
@@ -82,13 +83,13 @@ def compress(d, v):
     return set(d)
 
 d = defaultdict(lambda: {})
-for f in glob('KN-20rep-1706/userKN-20rep-1706/**/*.metadata', recursive=True):
+for f in glob('**/*.metadata', recursive=True):
     with open(f) as metadata:
         data = load(metadata)
         for k, v in data['datasets'].items():
             source, alias = k.split('.', 1)
             if source in d and alias in d[source] and "edge_type" in d[source][alias]:
-                temp = d[source][alias]["edge_type"] 
+                temp = d[source][alias]["edge_type"]
             else:
                 temp = []
             d[source][alias] = v
@@ -111,11 +112,11 @@ for k, v in d.items():
     d2[k]["nodes"] = src_sums["*/chunks/*.unique.node.*", k]["lines"] or src_sums["*/*.unique.node.*", k]["lines"]
     d2[k]["edges"] = src_sums["*/chunks/*.unique.edge.*", k]["lines"]
 
-w = writer(open("KNDR_sum_table.csv", 'w'))
+w = writer(open("Tables/KNDR_sum_table.csv", 'w'))
 for k, l in d2.items():
     w.writerow([f'<img src="{l["image"]}">', f'<a href="{l["source_url"]}">{l["name"]}</a>{": " + l["description"] if l["description"] else ""}', (f'Nodes: {int(l["nodes"]):,}, ' if l["nodes"] else "") + f'Edges: {int(l["edges"]):,}'])
 
-w = writer(open("KNDR_full_table.csv", 'w'))
+w = writer(open("Tables/KNDR_full_table.csv", 'w'))
 w.writerow(["Resource", "Reference", "Source Files", "License"])
 for k, l in d2.items():
     w.writerow([l['name'], f'{l["reference"]} <a href="https://www.ncbi.nlm.nih.gov/pubmed/{l["pmid"]}">Pubmed</a>', '<ul>' + ''.join(f'<li>{e}</li>' for e in l["download_url"]) + '</ul>', l["license"]])

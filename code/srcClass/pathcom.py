@@ -56,7 +56,8 @@ class Pathcom(SrcClass):
                           "for biological pathway data. Nucleic Acids Res. "
                           "2011;39(Database issue):D685-90.")
         self.pmid = 21071392
-        self.license = 'Full list of data sources are available <a href="http://www.pathwaycommons.org/pc2/datasources">here</a>.'
+        self.license = ('Full list of data sources are available <a '
+                        'href="http://www.pathwaycommons.org/pc2/datasources">here</a>.')
 
     def get_source_version(self, alias):
         """Return the release version of the remote pathcom:alias.
