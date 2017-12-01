@@ -769,7 +769,7 @@ class MySQL(object):
         self.create_db(database)
         cmd = ['mysql', '-u', self.user, '-h', self.host, '--port', self.port,
                '--password='+self.passw, database, '<', sqlfile]
-        subprocess.call(' '.join(cmd), shell=True)
+        subprocess.check_call(' '.join(cmd), shell=True)
 
     def import_table(self, database, tablefile, import_flags='--delete'):
         """Import the data for the table in the provided database described by

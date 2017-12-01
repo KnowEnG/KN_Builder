@@ -64,7 +64,7 @@ def fetch(version_dict, args=cf.config_args()):
     try:
         db_import(version_dict, args)
     except mysql.connector.DatabaseError as err:
-        print('Encountered error: ' + err)
+        print('Encountered error: ' + str(err))
         print('Trying operation again')
         db_import(version_dict, args)
     except:

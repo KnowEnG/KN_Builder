@@ -92,6 +92,7 @@ def get_metadata(db, edges, nodes, lines, sp, et, args):
     """
 
     sources = get_sources(edges)
+    print(sources)
     datasets = {}
     for source in sources:
         file_id, remote_url, remote_date, remote_version, source_url, \

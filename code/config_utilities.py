@@ -46,7 +46,7 @@ import shlex
 
 print("Running on", socket.gethostname())
 csvw = csv.writer(sys.stdout, delimiter='\t')
-csvw.writerow(['run info', 'argv'] + ' '.join(map(shlex.quote, sys.argv)))
+csvw.writerow(['run info', 'argv', ' '.join(map(shlex.quote, sys.argv))])
 csvw.writerow(['run info', 'time', time.time()])
 try:
     csvw.writerow(['run info', 'commit',

@@ -1,3 +1,7 @@
+#!/bin/bash
+
+set -u
+
 mkdir -p $KNP_EXPORT_DIR
 cp code/mysql/edge_type.txt $KNP_EXPORT_DIR
 

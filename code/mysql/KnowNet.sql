@@ -94,10 +94,10 @@ CREATE TABLE IF NOT EXISTS `raw_file` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `log` (
-  `filename` varchar(255) DEFAULT NULL,
+  `filename` varchar(255) NOT NULL,
   `info_type` varchar(255) NOT NULL,
   `info_value` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`taxon`)
+  PRIMARY KEY (`filename`, `info_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `raw_line` (

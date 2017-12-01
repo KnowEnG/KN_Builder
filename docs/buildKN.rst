@@ -8,7 +8,7 @@ Set environment variables
 
         KNP_CHRONOS_URL='127.0.0.1:8888'
         KNP_BUILD_NAME='20rep-1706'
-        KNP_CODE_DIR="/mnt/backup/knowtest/KN-$KNP_BUILD_NAME/"
+        KNP_CODE_DIR="/data/"
         KNP_WORKING_DIR=$KNP_CODE_DIR'/'
         KNP_STORAGE_DIR="$KNP_WORKING_DIR"
         KNP_DB_DIR="$KNP_WORKING_DIR"
@@ -29,7 +29,7 @@ Set environment variables
         KNP_MYSQL_DIR=$KNP_DB_DIR'/mysql-'$KNP_MYSQL_PORT'-'$KNP_BUILD_NAME
         KNP_MYSQL_CONF='build_conf/'
         KNP_MYSQL_MEM='10000'
-        KNP_MYSQL_CPU='2.0'
+        KNP_MYSQL_CPU='0.5'
         KNP_MYSQL_CONSTRAINT_URL='127.0.0.1'
         
         #export KNP_MYSQL_HOST='knownet.cxtvettjrq71.us-west-2.rds.amazonaws.com'
@@ -38,12 +38,12 @@ Set environment variables
         #export KNP_MYSQL_PORT='3306'
         #export KNP_MYSQL_DB='KnowNet'
         
-        export KNP_REDIS_HOST='knowcluster02.dyndns.org'
+        export KNP_REDIS_HOST='127.0.0.1'
         export KNP_REDIS_PORT='6379'
         export KNP_REDIS_PASS='KnowEnG'
         KNP_REDIS_DIR=$KNP_DB_DIR'/redis-'$KNP_REDIS_PORT'-'$KNP_BUILD_NAME
         KNP_REDIS_MEM='8000'
-        KNP_REDIS_CPU='2.0'
+        KNP_REDIS_CPU='0.5'
         KNP_REDIS_CONSTRAINT_URL='127.0.0.1'
         
         KNP_NGINX_PORT='8081'
