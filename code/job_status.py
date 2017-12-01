@@ -77,7 +77,6 @@ def get_status():
 def is_running(jobs):
     return any(j[3] for j in jobs)
 
-
 def is_succeeded(jobs):
     return all(j[4] for j in jobs)
 
@@ -120,6 +119,10 @@ def run_step_and_wait(step):
         args = ['python3', 'code/workflow_utilities.py', 'IMPORT', '-myh', KNP_MYSQL_HOST, '-myp', KNP_MYSQL_PORT, '-myps', KNP_MYSQL_PASS, '-myu', KNP_MYSQL_USER, '-rh', KNP_REDIS_HOST, '-rp', KNP_REDIS_PORT, '-wd', KNP_WORKING_DIR, '-dp', KNP_DATA_PATH, '-lp', KNP_LOGS_PATH, '-c', KNP_CHRONOS_URL, '-sd', KNP_STORAGE_DIR]
     elif step == 'EXPORT':
         args = ['env', 'KNP_MYSQL_HOST='+KNP_MYSQL_HOST, 'KNP_MYSQL_PORT='+KNP_MYSQL_PORT, 'KNP_MYSQL_PASS='+KNP_MYSQL_PASS, 'KNP_MYSQL_USER='+KNP_MYSQL_USER, 'KNP_REDIS_HOST='+KNP_REDIS_HOST, 'KNP_REDIS_PORT='+KNP_REDIS_PORT, 'KNP_WORKING_DIR='+KNP_WORKING_DIR, 'KNP_DATA_PATH='+KNP_DATA_PATH, 'KNP_LOGS_PATH='+KNP_LOGS_PATH, 'KNP_CHRONOS_URL='+KNP_CHRONOS_URL, 'KNP_STORAGE_DIR='+KNP_STORAGE_DIR]
+    elif step == 'MYSQL':
+        args = ['python3', 'code/mysql_utilities.py', '-myh', KNP_MYSQL_HOST, '-myp', KNP_MYSQL_PORT, '-myps', KNP_MYSQL_PASS, '-myu', KNP_MYSQL_USER,  '-wd', KNP_WORKING_DIR, '-dp', KNP_DATA_PATH, '-lp', KNP_LOGS_PATH, '-sd', KNP_STORAGE_DIR, "-mym", KNP_MYSQL_MEM, "-myc", KNP_MYSQL_CPU, "-myd", KNP_MYSQL_DIR, "-mycf", KNP_MYSQL_CONF]
+    elif step == 'REDIS':
+        args = ["python3", "code/redis_utilities.py", "-rh", KNP_REDIS_HOST, "-rp", KNP_REDIS_PORT, "-rm", KNP_REDIS_MEM, "-rc", KNP_REDIS_CPU, "-rd", KNP_REDIS_DIR, "-rps", KNP_REDIS_PASS, "-m", KNP_MARATHON_URL, "-wd", KNP_WORKING_DIR, "-lp", KNP_LOGS_PATH]
     else:
         ValueError("Invalid step:", step)
 
