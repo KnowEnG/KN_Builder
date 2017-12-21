@@ -7,6 +7,7 @@ import subprocess
 import yaml
 import numpy as np
 import scipy.sparse as ss
+from collections import defaultdict
 
 import config_utilities as cf
 import redis_utilities as ru
@@ -39,7 +40,8 @@ def num_connected_components(edges, nodes):
     rev_nodes = {v: i for i, v in enumerate(nodes)}
     row = []
     col = []
-    for r, c in edges:
+    for edge in edges:
+        r, c = edge[:2]
         row.append(rev_nodes[r])
         col.append(rev_nodes[c])
     mat = ss.coo_matrix((np.ones(len(edges)), (row, col)), shape=(len(nodes), len(nodes)))
@@ -84,7 +86,7 @@ def get_sources(edges):
     """
     return set(edge[4] for edge in edges)
 
-def get_log_queries(sources):
+def get_log_query(sources):
     return "SELECT filename, info_type, info_value FROM log WHERE filename IS NULL"
 
 def get_metadata(db, edges, nodes, lines, sp, et, args):
@@ -122,12 +124,13 @@ def get_metadata(db, edges, nodes, lines, sp, et, args):
         else:
             raise ValueError("Invalid type: {}".format(type))
 
-    build = defaultdict(lambda: {})
+    build = defaultdict(dict)
     build["export"] = {"command": sys.argv, "arguments": args, "date": datetime.now(timezone.utc),
-                        "revision": subprocess.check_output(["git", "describe", "--always"])}
-    for query in get_log_query(sources):
-        for f, t, k in db.run(query):
-            build[t][f] = k
+                        "revision": str(subprocess.check_output(["git", "describe", "--always"]).strip())}
+    query = get_log_query(sources)
+    for f, t, k in db.run(query):
+        build[t][f] = k
+    build = dict(build)
 
     return {"id": ".".join([sp, et]), "datasets": datasets, "build_metadata": build,
             "species": {"taxon_identifier": sp, "scientific_name": sciname},

@@ -19,25 +19,33 @@ def main_parse_args():
     args = parser.parse_args()
     return args
 
-
+KNP_WORKING_DIR = "/data/"
+KNP_DATA_PATH = 'data_20rep-1706'
+KNP_LOGS_PATH = 'logs_20rep-1706'
+KNP_DB_DIR = KNP_WORKING_DIR
+KNP_CHRONOS_URL = '127.0.0.1:8888'
+KNP_BUILD_NAME = '20rep-1706'
+KNP_MARATHON_URL='127.0.0.1:8080/v2/apps'
 KNP_MYSQL_HOST = '127.0.0.1'
 KNP_MYSQL_PORT = '3306'
 KNP_MYSQL_PASS = 'KnowEnG'
 KNP_MYSQL_USER = 'root'
+KNP_MYSQL_DIR = KNP_DB_DIR+'/mysql-'+KNP_MYSQL_PORT+'-'+KNP_BUILD_NAME
+KNP_MYSQL_CONF = 'build_conf/'
+KNP_MYSQL_MEM = '10000'
+KNP_MYSQL_CPU = '0.5'
 KNP_REDIS_HOST = '127.0.0.1'
 KNP_REDIS_PORT = '6379'
 KNP_REDIS_PASS = 'KnowEnG'
-KNP_WORKING_DIR= "/data/"
-KNP_DATA_PATH = 'data_20rep-1706'
-KNP_LOGS_PATH = 'logs_20rep-1706'
-KNP_CHRONOS_URL = '127.0.0.1:8888'
-KNP_BUILD_NAME = '20rep-1706'
+KNP_REDIS_DIR = KNP_DB_DIR+'/redis-'+KNP_REDIS_PORT+'-'+KNP_BUILD_NAME
+KNP_REDIS_MEM = '8000'
+KNP_REDIS_CPU = '0.5'
 KNP_STORAGE_DIR = KNP_WORKING_DIR
 KNP_BUCKET = "KnowNets/KN-"+KNP_BUILD_NAME
 KNP_S3_DIR = KNP_WORKING_DIR+"/"+KNP_BUCKET+"/"
 KNP_EXPORT_DIR = KNP_S3_DIR+"/userKN-"+KNP_BUILD_NAME
-#KNP_ENS_SPECIES = 'drosophila_melanogaster'
-KNP_ENS_SPECIES = 'homo_sapiens'
+KNP_ENS_SPECIES = 'drosophila_melanogaster'
+#KNP_ENS_SPECIES = 'homo_sapiens'
 #KNP_ENS_SOURCE = 'blast'
 KNP_ENS_SOURCE = 'pfam_prot'
 
@@ -114,7 +122,7 @@ def wait_for_success(interval=30):
         time.sleep(interval)
 
 
-def run_step_and_wait(step):
+def run_step(step, wait=True):
     args = []
 
     if step == 'SETUP':
@@ -126,19 +134,14 @@ def run_step_and_wait(step):
     elif step == 'EXPORT':
         args = ['env', 'KNP_MYSQL_HOST='+KNP_MYSQL_HOST, 'KNP_MYSQL_PORT='+KNP_MYSQL_PORT, 'KNP_MYSQL_PASS='+KNP_MYSQL_PASS, 'KNP_MYSQL_USER='+KNP_MYSQL_USER, 'KNP_REDIS_HOST='+KNP_REDIS_HOST, 'KNP_REDIS_PORT='+KNP_REDIS_PORT, 'KNP_WORKING_DIR='+KNP_WORKING_DIR, 'KNP_DATA_PATH='+KNP_DATA_PATH, 'KNP_LOGS_PATH='+KNP_LOGS_PATH, 'KNP_CHRONOS_URL='+KNP_CHRONOS_URL, 'KNP_STORAGE_DIR='+KNP_STORAGE_DIR, 'KNP_EXPORT_DIR='+KNP_EXPORT_DIR, 'KNP_ENS_SPECIES='+KNP_ENS_SPECIES, 'code/export.sh']
     elif step == 'MYSQL':
-        args = ['python3', 'code/mysql_utilities.py', '-myh', KNP_MYSQL_HOST, '-myp', KNP_MYSQL_PORT, '-myps', KNP_MYSQL_PASS, '-myu', KNP_MYSQL_USER,  '-wd', KNP_WORKING_DIR, '-dp', KNP_DATA_PATH, '-lp', KNP_LOGS_PATH, '-sd', KNP_STORAGE_DIR, "-mym", KNP_MYSQL_MEM, "-myc", KNP_MYSQL_CPU, "-myd", KNP_MYSQL_DIR, "-mycf", KNP_MYSQL_CONF]
+        args = ['python3', 'code/mysql_utilities.py', '-myh', KNP_MYSQL_HOST, '-myp', KNP_MYSQL_PORT, '-myps', KNP_MYSQL_PASS, '-myu', KNP_MYSQL_USER,  '-wd', KNP_WORKING_DIR, '-dp', KNP_DATA_PATH, '-lp', KNP_LOGS_PATH, '-sd', KNP_STORAGE_DIR, "-mym", KNP_MYSQL_MEM, "-myc", KNP_MYSQL_CPU, "-myd", KNP_MYSQL_DIR, "-mycf", KNP_MYSQL_CONF, "-m", KNP_MARATHON_URL]
     elif step == 'REDIS':
         args = ["python3", "code/redis_utilities.py", "-rh", KNP_REDIS_HOST, "-rp", KNP_REDIS_PORT, "-rm", KNP_REDIS_MEM, "-rc", KNP_REDIS_CPU, "-rd", KNP_REDIS_DIR, "-rps", KNP_REDIS_PASS, "-m", KNP_MARATHON_URL, "-wd", KNP_WORKING_DIR, "-lp", KNP_LOGS_PATH]
     else:
         ValueError("Invalid step:", step)
 
-    try:
-        #subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-        subprocess.check_output(args, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
-        print(e.output.decode())
-        raise
-    if not wait_for_success():
+    subprocess.check_call(args, stderr=subprocess.STDOUT)
+    if wait and not wait_for_success():
         raise Exception("A job failed.")
 
 
@@ -146,7 +149,10 @@ if __name__ == "__main__":
     if get_status():
         main()
     else:
-        run_step_and_wait('SETUP')
-        run_step_and_wait('CHECK')
-        run_step_and_wait('IMPORT')
-        run_step_and_wait('EXPORT')
+        run_step("MYSQL", False)
+        run_step("REDIS", False)
+        time.sleep(60) # Change to try to connect
+        run_step('SETUP')
+        run_step('CHECK')
+        run_step('IMPORT')
+        run_step('EXPORT')

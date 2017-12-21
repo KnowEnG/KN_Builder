@@ -104,15 +104,6 @@ def import_filemeta(version_dict, args=None):
               version_dict["source_url"], version_dict["image"], version_dict["reference"],
               version_dict["pmid"], version_dict["license"],
               'CURRENT_TIMESTAMP', version_dict["local_file_name"], 'NULL']
-    for i in range(0, len(values)):
-        val = values[i]
-        if val == 'CURRENT_TIMESTAMP' or val == 'NULL':
-            continue
-        elif isinstance(val, str):
-            values[i] = '"' + val + '"'
-        else:
-            values[i] = str(val)
-    values = [str(i) for i in values]
     cmd = 'VALUES( ' + ','.join('%s' for i in values) + ')'
     db.replace_safe('raw_file', cmd, values)
     db.close()
@@ -135,15 +126,6 @@ def update_filemeta(version_dict, args=None):
               version_dict["source_url"], version_dict["image"], version_dict["reference"], version_dict["pmid"], version_dict["license"],
               'CURRENT_TIMESTAMP', version_dict["local_file_name"],
               version_dict["checksum"]]
-    for i in range(0, len(values)):
-        val = values[i]
-        if val == 'CURRENT_TIMESTAMP' or val == 'NULL':
-            continue
-        elif isinstance(val, str):
-            values[i] = '"' + val + '"'
-        else:
-            values[i] = str(val)
-    values = [str(i) for i in values]
     cmd = 'VALUES( ' + ','.join('%s' for i in values) + ')'
     db.replace_safe('raw_file', cmd, values)
     db.close()
