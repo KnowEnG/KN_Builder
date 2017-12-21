@@ -19,7 +19,7 @@ def main_parse_args():
     args = parser.parse_args()
     return args
 
-KNP_WORKING_DIR = "/data/"
+KNP_WORKING_DIR = "/mnt/knowdnn_hdd/p1build/"
 KNP_DATA_PATH = 'data_20rep-1706'
 KNP_LOGS_PATH = 'logs_20rep-1706'
 KNP_DB_DIR = KNP_WORKING_DIR
@@ -131,8 +131,10 @@ def run_step(step, wait=True):
         args = ['python3', 'code/workflow_utilities.py', 'CHECK', '-myh', KNP_MYSQL_HOST, '-myp', KNP_MYSQL_PORT, '-myps', KNP_MYSQL_PASS, '-myu', KNP_MYSQL_USER, '-rh', KNP_REDIS_HOST, '-rp', KNP_REDIS_PORT, '-wd', KNP_WORKING_DIR, '-dp', KNP_DATA_PATH, '-lp', KNP_LOGS_PATH, '-c', KNP_CHRONOS_URL, '-sd', KNP_STORAGE_DIR, '-p', KNP_ENS_SOURCE]
     elif step == 'IMPORT':
         args = ['python3', 'code/workflow_utilities.py', 'IMPORT', '-myh', KNP_MYSQL_HOST, '-myp', KNP_MYSQL_PORT, '-myps', KNP_MYSQL_PASS, '-myu', KNP_MYSQL_USER, '-rh', KNP_REDIS_HOST, '-rp', KNP_REDIS_PORT, '-wd', KNP_WORKING_DIR, '-dp', KNP_DATA_PATH, '-lp', KNP_LOGS_PATH, '-c', KNP_CHRONOS_URL, '-sd', KNP_STORAGE_DIR]
-    elif step == 'EXPORT':
-        args = ['env', 'KNP_MYSQL_HOST='+KNP_MYSQL_HOST, 'KNP_MYSQL_PORT='+KNP_MYSQL_PORT, 'KNP_MYSQL_PASS='+KNP_MYSQL_PASS, 'KNP_MYSQL_USER='+KNP_MYSQL_USER, 'KNP_REDIS_HOST='+KNP_REDIS_HOST, 'KNP_REDIS_PORT='+KNP_REDIS_PORT, 'KNP_WORKING_DIR='+KNP_WORKING_DIR, 'KNP_DATA_PATH='+KNP_DATA_PATH, 'KNP_LOGS_PATH='+KNP_LOGS_PATH, 'KNP_CHRONOS_URL='+KNP_CHRONOS_URL, 'KNP_STORAGE_DIR='+KNP_STORAGE_DIR, 'KNP_EXPORT_DIR='+KNP_EXPORT_DIR, 'KNP_ENS_SPECIES='+KNP_ENS_SPECIES, 'code/export.sh']
+    elif step == 'EXPORT1':
+        args = ['env', 'KNP_MYSQL_HOST='+KNP_MYSQL_HOST, 'KNP_MYSQL_PORT='+KNP_MYSQL_PORT, 'KNP_MYSQL_PASS='+KNP_MYSQL_PASS, 'KNP_MYSQL_USER='+KNP_MYSQL_USER, 'KNP_REDIS_HOST='+KNP_REDIS_HOST, 'KNP_REDIS_PORT='+KNP_REDIS_PORT, 'KNP_WORKING_DIR='+KNP_WORKING_DIR, 'KNP_DATA_PATH='+KNP_DATA_PATH, 'KNP_LOGS_PATH='+KNP_LOGS_PATH, 'KNP_CHRONOS_URL='+KNP_CHRONOS_URL, 'KNP_STORAGE_DIR='+KNP_STORAGE_DIR, 'KNP_EXPORT_DIR='+KNP_EXPORT_DIR, 'KNP_ENS_SPECIES='+KNP_ENS_SPECIES, 'code/export1.sh']
+    elif step == 'EXPORT2':
+        args = ['env', 'KNP_MYSQL_HOST='+KNP_MYSQL_HOST, 'KNP_MYSQL_PORT='+KNP_MYSQL_PORT, 'KNP_MYSQL_PASS='+KNP_MYSQL_PASS, 'KNP_MYSQL_USER='+KNP_MYSQL_USER, 'KNP_REDIS_HOST='+KNP_REDIS_HOST, 'KNP_REDIS_PORT='+KNP_REDIS_PORT, 'KNP_WORKING_DIR='+KNP_WORKING_DIR, 'KNP_DATA_PATH='+KNP_DATA_PATH, 'KNP_LOGS_PATH='+KNP_LOGS_PATH, 'KNP_CHRONOS_URL='+KNP_CHRONOS_URL, 'KNP_STORAGE_DIR='+KNP_STORAGE_DIR, 'KNP_EXPORT_DIR='+KNP_EXPORT_DIR, 'KNP_ENS_SPECIES='+KNP_ENS_SPECIES, 'code/export2.sh']
     elif step == 'MYSQL':
         args = ['python3', 'code/mysql_utilities.py', '-myh', KNP_MYSQL_HOST, '-myp', KNP_MYSQL_PORT, '-myps', KNP_MYSQL_PASS, '-myu', KNP_MYSQL_USER,  '-wd', KNP_WORKING_DIR, '-dp', KNP_DATA_PATH, '-lp', KNP_LOGS_PATH, '-sd', KNP_STORAGE_DIR, "-mym", KNP_MYSQL_MEM, "-myc", KNP_MYSQL_CPU, "-myd", KNP_MYSQL_DIR, "-mycf", KNP_MYSQL_CONF, "-m", KNP_MARATHON_URL]
     elif step == 'REDIS':
@@ -155,4 +157,5 @@ if __name__ == "__main__":
         run_step('SETUP')
         run_step('CHECK')
         run_step('IMPORT')
-        run_step('EXPORT')
+        run_step('EXPORT1')
+        run_step('EXPORT2')
