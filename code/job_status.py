@@ -4,6 +4,7 @@ import json
 import config_utilities as cf
 import time
 import subprocess
+import os
 from datetime import datetime
 
 def main_parse_args():
@@ -19,8 +20,7 @@ def main_parse_args():
     args = parser.parse_args()
     return args
 
-#KNP_WORKING_DIR = "/mnt/knowdnn_hdd/p1build/"
-KNP_WORKING_DIR = "/home/p1build/"
+KNP_WORKING_DIR = os.path.abspath('..')
 KNP_DATA_PATH = 'data_20rep-1706'
 KNP_LOGS_PATH = 'logs_20rep-1706'
 KNP_DB_DIR = KNP_WORKING_DIR
