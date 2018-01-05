@@ -40,7 +40,7 @@ def deploy_container(args=None):
         deploy_dict = json.load(infile)
     deploy_dict["id"] = os.path.basename(args.redis_dir)
     deploy_dict["cmd"] = "redis-server --appendonly yes --requirepass " + \
-                        args.redis_pass
+                        args.redis_pass + " --port " + args.redis_port
     deploy_dict["cpus"] = float(args.redis_cpu)
     deploy_dict["mem"] = int(args.redis_mem)
     if args.redis_curl:
