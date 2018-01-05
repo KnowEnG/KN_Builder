@@ -5,8 +5,8 @@ import sys
 import csv
 import subprocess
 import yaml
-import numpy as np
-import scipy.sparse as ss
+#import numpy as np
+#import scipy.sparse as ss
 from collections import defaultdict
 
 import config_utilities as cf
@@ -44,8 +44,9 @@ def num_connected_components(edges, nodes):
         r, c = edge[:2]
         row.append(rev_nodes[r])
         col.append(rev_nodes[c])
-    mat = ss.coo_matrix((np.ones(len(edges)), (row, col)), shape=(len(nodes), len(nodes)))
-    num, _ = ss.csgraph.connected_components(mat)
+#    mat = ss.coo_matrix((np.ones(len(edges)), (row, col)), shape=(len(nodes), len(nodes)))
+#    num, _ = ss.csgraph.connected_components(mat)
+    return -1
     return num
 
 def figure_out_class(db, et):
