@@ -1,8 +1,9 @@
 {
     "id": "p1redis-TMPREDISPORT",
-    "cmd": "redis-server --appendonly yes --requirepass TMPREDISPASS",
+    "cmd": "redis-server --port TMPREDISPORT --appendonly yes --requirepass TMPREDISPASS",
     "cpus": 1.0,
     "mem": "TMPREDISMEM",
+    "backoffFactor": 2.0,
     "instances": 1,
     "constraints": [["hostname", "CLUSTER", "TMPREDISHOST"]],
     "container": {
