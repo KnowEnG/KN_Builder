@@ -6,6 +6,7 @@ import time
 import subprocess
 import os
 from datetime import datetime
+import socket
 
 def main_parse_args():
     """Processes command line arguments.
@@ -26,13 +27,13 @@ KNP_ENS_SPECIES = 'drosophila_melanogaster'
 #KNP_ENS_SPECIES = 'homo_sapiens'
 #KNP_ENS_SOURCE = 'blast'
 KNP_ENS_SOURCE = 'pfam_prot'
-KNP_BUILD_NAME = '1test_1801'
+KNP_BUILD_NAME = '1test-1801'
 
 KNP_WORKING_DIR = os.path.abspath('..')
 KNP_STORAGE_DIR = KNP_WORKING_DIR
-KNP_DATA_PATH = KNP_WORKING_DIR+"/data-"+KNP_BUILD_NAME
+KNP_DATA_PATH = "data-"+KNP_BUILD_NAME
 KNP_EXPORT_DIR = KNP_WORKING_DIR+"/userKN-"+KNP_BUILD_NAME
-KNP_LOGS_PATH = KNP_WORKING_DIR+"/logs-"+KNP_BUILD_NAME
+KNP_LOGS_PATH = "logs-"+KNP_BUILD_NAME
 KNP_CHRONOS_URL = '127.0.0.1:8888'
 KNP_MARATHON_URL='127.0.0.1:8080/v2/apps'
 
@@ -125,6 +126,27 @@ def wait_for_success(interval=30):
         time.sleep(interval)
 
 
+def wait_for_redis_mysql(interval=30):
+    redis = False
+    mysql = False
+    while not redis or not mysql:
+        try:
+            rs = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            rs.connect((KNP_REDIS_HOST, int(KNP_REDIS_PORT)))
+            rs.close()
+            redis = True
+        except socket.error:
+            rs.close()
+        try:
+            ms = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            ms.connect((KNP_MYSQL_HOST, int(KNP_MYSQL_PORT)))
+            ms.close()
+            mysql = True
+        except socket.error:
+            ms.close()
+        time.sleep(interval)
+
+
 def run_step(step, wait=True):
     args = []
 
@@ -156,7 +178,7 @@ if __name__ == "__main__":
     else:
         run_step("MYSQL", False)
         run_step("REDIS", False)
-        time.sleep(60) # Change to try to connect
+        wait_for_redis_mysql()
         run_step('SETUP')
         run_step('CHECK')
         run_step('IMPORT')
