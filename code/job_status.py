@@ -166,8 +166,8 @@ def run_step(step, wait=True):
 
 if __name__ == "__main__":
     args = main_parse_args()
-    KNP_ENS_SPECIES = args.species
-    KNP_ENS_SOURCE = args.source
+    KNP_ENS_SPECIES = ',,'.join(args.species)
+    KNP_ENS_SOURCE = ',,'.join(args.source)
     if get_status():
         main()
     else:
