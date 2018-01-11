@@ -8,26 +8,12 @@ import os
 from datetime import datetime
 import socket
 
-def main_parse_args():
-    """Processes command line arguments.
 
-    Expects a number of pipeline specific and global optional arguments.
-    If argument is missing, supplies default value.
-
-    Returns: args as populated namespace
-    """
-    parser = ArgumentParser()
-    parser = cf.add_config_args(parser)
-    args = parser.parse_args()
-    return args
-
-
-
-KNP_ENS_SPECIES = 'drosophila_melanogaster'
+KNP_ENS_SPECIES = 'drosophila_melanogaster,,homo_sapiens'
 #KNP_ENS_SPECIES = 'homo_sapiens'
 #KNP_ENS_SOURCE = 'blast'
-KNP_ENS_SOURCE = 'pfam_prot'
-KNP_BUILD_NAME = '1test-1801'
+KNP_ENS_SOURCE = 'pfam_prot,,stringdb'
+KNP_BUILD_NAME = '2test-1801'
 
 KNP_WORKING_DIR = os.path.abspath('..')
 KNP_STORAGE_DIR = KNP_WORKING_DIR
@@ -43,15 +29,29 @@ KNP_MYSQL_PASS = 'KnowEnG'
 KNP_MYSQL_USER = 'root'
 KNP_MYSQL_CONF = 'build_conf/'
 KNP_MYSQL_DIR = KNP_WORKING_DIR+'/mysql-'+KNP_MYSQL_PORT+'-'+KNP_BUILD_NAME
-KNP_MYSQL_MEM = '2000'
+KNP_MYSQL_MEM = '2500'
 KNP_MYSQL_CPU = '0.5'
 
 KNP_REDIS_HOST = '127.0.0.1'
 KNP_REDIS_PORT = '6380'
 KNP_REDIS_PASS = 'KnowEnG'
 KNP_REDIS_DIR = KNP_WORKING_DIR+'/redis-'+KNP_REDIS_PORT+'-'+KNP_BUILD_NAME
-KNP_REDIS_MEM = '800'
+KNP_REDIS_MEM = '1500'
 KNP_REDIS_CPU = '0.5'
+
+
+def main_parse_args():
+    """Processes command line arguments.
+
+    Expects a number of pipeline specific and global optional arguments.
+    If argument is missing, supplies default value.
+
+    Returns: args as populated namespace
+    """
+    parser = ArgumentParser()
+    parser = cf.add_config_args(parser)
+    args = parser.parse_args()
+    return args
 
 
 def get_status():
