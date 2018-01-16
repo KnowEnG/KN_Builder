@@ -226,7 +226,7 @@ class SrcClass(object):
             time_str = response.headers['last-modified']
             time_format = "%a, %d %b %Y %H:%M:%S %Z"
             return time.mktime(time.strptime(time_str, time_format))
-        except (urllib.error.URLError, ValueError, TypeError):
+        except (urllib.error.URLError, ValueError, TypeError, ConnectionResetError):
             return float(0)
 
     def get_remote_url(self, alias):
