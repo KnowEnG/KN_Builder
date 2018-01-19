@@ -8,7 +8,7 @@ from datetime import datetime
 import socket
 
 
-KNP_BUILD_NAME = '2test-1801'
+#KNP_BUILD_NAME = '1test-1801'
 #KNP_ENS_SPECIES = 'drosophila_melanogaster'
 ##KNP_ENS_SPECIES = 'homo_sapiens'
 ##KNP_ENS_SOURCE = 'blast'
@@ -50,6 +50,7 @@ def main_parse_args():
     parser = ArgumentParser()
     parser.add_argument("-p", "--species", nargs='+', required=True)
     parser.add_argument("-s", "--source", nargs='+', required=True)
+    parser.add_argument("-b", "--build_name", default="2test-1801")
     args = parser.parse_args()
     return args
 
@@ -159,7 +160,7 @@ def run_step(step, wait=True):
     else:
         ValueError("Invalid step:", step)
 
-    subprocess.check_call(args, stderr=subprocess.STDOUT)
+    subprocess.check_call(args, stderr=subprocess.STDOUT, stdout=open('/dev/null', 'w')) #TODO: Redirect to a file?  What file?
     if wait and not wait_for_success():
         raise Exception("A job failed.")
 
@@ -168,6 +169,7 @@ if __name__ == "__main__":
     args = main_parse_args()
     KNP_ENS_SPECIES = ',,'.join(args.species)
     KNP_ENS_SOURCE = ',,'.join(args.source)
+    KNP_BUILD_NAME = args.build_name
     if get_status():
         main()
     else:
