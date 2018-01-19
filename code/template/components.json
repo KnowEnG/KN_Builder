@@ -29,7 +29,7 @@
     },
     "fetcher": {
         "TMPIMG": "cblatti3/py3_redis_mysql:0.2",
-        "TMPMEM": "1000",
+        "TMPMEM": "2500",
         "TMPCPUS": "0.5",
         "TMPPRIOR": "false",
         "TMPCMD": "sh -c '{ cd /TMPWORKDIR/TMPDATAPATH/TMPALIASPATH && ls -l file_metadata.json && python3 /TMPWORKDIR/TMPCODEPATH/fetch_utilities.py file_metadata.json TMPOPTS && if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPDATAPATH/TMPALIASPATH/ /TMPSHAREDIR/ && cd TMPDATAPATH/ && find TMPALIASPATH -maxdepth 1 -type f ! -name '*.json' -delete; fi; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"

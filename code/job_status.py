@@ -8,11 +8,11 @@ from datetime import datetime
 import socket
 
 
+#KNP_BUILD_NAME = '1test-1801'
 #KNP_ENS_SPECIES = 'drosophila_melanogaster'
 ##KNP_ENS_SPECIES = 'homo_sapiens'
 ##KNP_ENS_SOURCE = 'blast'
 #KNP_ENS_SOURCE = 'pfam_prot'
-#KNP_BUILD_NAME = '1test-1801'
 
 KNP_WORKING_DIR = os.path.abspath('..')
 KNP_STORAGE_DIR = KNP_WORKING_DIR
@@ -28,14 +28,14 @@ KNP_MYSQL_PASS = 'KnowEnG'
 KNP_MYSQL_USER = 'root'
 KNP_MYSQL_CONF = 'build_conf/'
 KNP_MYSQL_DIR = KNP_WORKING_DIR+'/mysql-'+KNP_MYSQL_PORT+'-'+KNP_BUILD_NAME
-KNP_MYSQL_MEM = '2000'
+KNP_MYSQL_MEM = '3000'
 KNP_MYSQL_CPU = '0.5'
 
 KNP_REDIS_HOST = '127.0.0.1'
 KNP_REDIS_PORT = '6380'
 KNP_REDIS_PASS = 'KnowEnG'
 KNP_REDIS_DIR = KNP_WORKING_DIR+'/redis-'+KNP_REDIS_PORT+'-'+KNP_BUILD_NAME
-KNP_REDIS_MEM = '800'
+KNP_REDIS_MEM = '1500'
 KNP_REDIS_CPU = '0.5'
 
 
@@ -50,7 +50,7 @@ def main_parse_args():
     parser = ArgumentParser()
     parser.add_argument("-p", "--species", nargs='+', required=True)
     parser.add_argument("-s", "--source", nargs='+', required=True)
-    parser.add_argument("-b", "--build_name", default="1test-1801")
+    parser.add_argument("-b", "--build_name", default="2test-1801")
     args = parser.parse_args()
     return args
 
@@ -143,7 +143,11 @@ def wait_for_port(port, host="localhost", interval=30):
 def run_step(step, wait=True):
     args = []
 
-    if step == 'SETUP':
+    if step == 'MYSQL':
+        args = ['python3', 'code/mysql_utilities.py', '-myh', KNP_MYSQL_HOST, '-myp', KNP_MYSQL_PORT, '-myps', KNP_MYSQL_PASS, '-myu', KNP_MYSQL_USER,  '-wd', KNP_WORKING_DIR, '-dp', KNP_DATA_PATH, '-lp', KNP_LOGS_PATH, '-sd', KNP_STORAGE_DIR, "-mym", KNP_MYSQL_MEM, "-myc", KNP_MYSQL_CPU, "-myd", KNP_MYSQL_DIR, "-mycf", KNP_MYSQL_CONF, "-m", KNP_MARATHON_URL]
+    elif step == 'REDIS':
+        args = ["python3", "code/redis_utilities.py", "-rh", KNP_REDIS_HOST, "-rp", KNP_REDIS_PORT, "-rm", KNP_REDIS_MEM, "-rc", KNP_REDIS_CPU, "-rd", KNP_REDIS_DIR, "-rps", KNP_REDIS_PASS, "-m", KNP_MARATHON_URL, "-wd", KNP_WORKING_DIR, "-lp", KNP_LOGS_PATH]
+    elif step == 'SETUP':
         args = ['python3', 'code/workflow_utilities.py', 'CHECK', '-su', '-myh', KNP_MYSQL_HOST, '-myp', KNP_MYSQL_PORT, '-myps', KNP_MYSQL_PASS, '-myu', KNP_MYSQL_USER, '-rh', KNP_REDIS_HOST, '-rp', KNP_REDIS_PORT, '-wd', KNP_WORKING_DIR, '-dp', KNP_DATA_PATH, '-lp', KNP_LOGS_PATH, '-c', KNP_CHRONOS_URL, '-sd', KNP_STORAGE_DIR, '-es', KNP_ENS_SPECIES]
     elif step == 'CHECK':
         args = ['python3', 'code/workflow_utilities.py', 'CHECK', '-myh', KNP_MYSQL_HOST, '-myp', KNP_MYSQL_PORT, '-myps', KNP_MYSQL_PASS, '-myu', KNP_MYSQL_USER, '-rh', KNP_REDIS_HOST, '-rp', KNP_REDIS_PORT, '-wd', KNP_WORKING_DIR, '-dp', KNP_DATA_PATH, '-lp', KNP_LOGS_PATH, '-c', KNP_CHRONOS_URL, '-sd', KNP_STORAGE_DIR, '-p', KNP_ENS_SOURCE]
@@ -153,10 +157,6 @@ def run_step(step, wait=True):
         args = ['env', 'KNP_MYSQL_HOST='+KNP_MYSQL_HOST, 'KNP_MYSQL_PORT='+KNP_MYSQL_PORT, 'KNP_MYSQL_PASS='+KNP_MYSQL_PASS, 'KNP_MYSQL_USER='+KNP_MYSQL_USER, 'KNP_REDIS_HOST='+KNP_REDIS_HOST, 'KNP_REDIS_PORT='+KNP_REDIS_PORT, 'KNP_WORKING_DIR='+KNP_WORKING_DIR, 'KNP_DATA_PATH='+KNP_DATA_PATH, 'KNP_LOGS_PATH='+KNP_LOGS_PATH, 'KNP_CHRONOS_URL='+KNP_CHRONOS_URL, 'KNP_STORAGE_DIR='+KNP_STORAGE_DIR, 'KNP_EXPORT_DIR='+KNP_EXPORT_DIR, 'KNP_ENS_SPECIES='+KNP_ENS_SPECIES, 'code/export1.sh']
     elif step == 'EXPORT2':
         args = ['env', 'KNP_MYSQL_HOST='+KNP_MYSQL_HOST, 'KNP_MYSQL_PORT='+KNP_MYSQL_PORT, 'KNP_MYSQL_PASS='+KNP_MYSQL_PASS, 'KNP_MYSQL_USER='+KNP_MYSQL_USER, 'KNP_REDIS_HOST='+KNP_REDIS_HOST, 'KNP_REDIS_PORT='+KNP_REDIS_PORT, 'KNP_WORKING_DIR='+KNP_WORKING_DIR, 'KNP_DATA_PATH='+KNP_DATA_PATH, 'KNP_LOGS_PATH='+KNP_LOGS_PATH, 'KNP_CHRONOS_URL='+KNP_CHRONOS_URL, 'KNP_STORAGE_DIR='+KNP_STORAGE_DIR, 'KNP_EXPORT_DIR='+KNP_EXPORT_DIR, 'KNP_ENS_SPECIES='+KNP_ENS_SPECIES, 'code/export2.sh']
-    elif step == 'MYSQL':
-        args = ['python3', 'code/mysql_utilities.py', '-myh', KNP_MYSQL_HOST, '-myp', KNP_MYSQL_PORT, '-myps', KNP_MYSQL_PASS, '-myu', KNP_MYSQL_USER,  '-wd', KNP_WORKING_DIR, '-dp', KNP_DATA_PATH, '-lp', KNP_LOGS_PATH, '-sd', KNP_STORAGE_DIR, "-mym", KNP_MYSQL_MEM, "-myc", KNP_MYSQL_CPU, "-myd", KNP_MYSQL_DIR, "-mycf", KNP_MYSQL_CONF, "-m", KNP_MARATHON_URL]
-    elif step == 'REDIS':
-        args = ["python3", "code/redis_utilities.py", "-rh", KNP_REDIS_HOST, "-rp", KNP_REDIS_PORT, "-rm", KNP_REDIS_MEM, "-rc", KNP_REDIS_CPU, "-rd", KNP_REDIS_DIR, "-rps", KNP_REDIS_PASS, "-m", KNP_MARATHON_URL, "-wd", KNP_WORKING_DIR, "-lp", KNP_LOGS_PATH]
     else:
         ValueError("Invalid step:", step)
 
