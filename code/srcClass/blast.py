@@ -70,7 +70,7 @@ class Blast(SrcClass):
 #                   "Scer64_Scer64": "4932_4932",
 #                   "Atha10_Atha10": "3702_3702"}
 
-        url_base = 'http://knowcluster02.knowhub.org:8082/'
+        url_base = 'http://knowredis.knoweng.org:8082/'
         aliases = dict()
         super(Blast, self).__init__(name, url_base, aliases, args)
         self.aliases = self.get_aliases(args)

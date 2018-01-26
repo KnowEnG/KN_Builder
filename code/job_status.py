@@ -8,36 +8,6 @@ from datetime import datetime
 import socket
 
 
-#KNP_BUILD_NAME = '1test-1801'
-#KNP_ENS_SPECIES = 'drosophila_melanogaster'
-##KNP_ENS_SPECIES = 'homo_sapiens'
-##KNP_ENS_SOURCE = 'blast'
-#KNP_ENS_SOURCE = 'pfam_prot'
-
-KNP_WORKING_DIR = os.path.abspath('..')
-KNP_STORAGE_DIR = KNP_WORKING_DIR
-KNP_DATA_PATH = "data-"+KNP_BUILD_NAME
-KNP_EXPORT_DIR = KNP_WORKING_DIR+"/userKN-"+KNP_BUILD_NAME
-KNP_LOGS_PATH = "logs-"+KNP_BUILD_NAME
-KNP_CHRONOS_URL = '127.0.0.1:8888'
-KNP_MARATHON_URL='127.0.0.1:8080/v2/apps'
-
-KNP_MYSQL_HOST = '127.0.0.1'
-KNP_MYSQL_PORT = '3306'
-KNP_MYSQL_PASS = 'KnowEnG'
-KNP_MYSQL_USER = 'root'
-KNP_MYSQL_CONF = 'build_conf/'
-KNP_MYSQL_DIR = KNP_WORKING_DIR+'/mysql-'+KNP_MYSQL_PORT+'-'+KNP_BUILD_NAME
-KNP_MYSQL_MEM = '3000'
-KNP_MYSQL_CPU = '0.5'
-
-KNP_REDIS_HOST = '127.0.0.1'
-KNP_REDIS_PORT = '6380'
-KNP_REDIS_PASS = 'KnowEnG'
-KNP_REDIS_DIR = KNP_WORKING_DIR+'/redis-'+KNP_REDIS_PORT+'-'+KNP_BUILD_NAME
-KNP_REDIS_MEM = '1250'
-KNP_REDIS_CPU = '0.5'
-
 
 def main_parse_args():
     """Processes command line arguments.
@@ -170,6 +140,30 @@ if __name__ == "__main__":
     KNP_ENS_SPECIES = ',,'.join(args.species)
     KNP_ENS_SOURCE = ',,'.join(args.source)
     KNP_BUILD_NAME = args.build_name
+    KNP_WORKING_DIR = os.path.abspath('..')
+    KNP_STORAGE_DIR = KNP_WORKING_DIR
+    KNP_DATA_PATH = "data-"+KNP_BUILD_NAME
+    KNP_EXPORT_DIR = KNP_WORKING_DIR+"/userKN-"+KNP_BUILD_NAME
+    KNP_LOGS_PATH = "logs-"+KNP_BUILD_NAME
+    KNP_CHRONOS_URL = '127.0.0.1:8888'
+    KNP_MARATHON_URL='127.0.0.1:8080/v2/apps'
+    
+    KNP_MYSQL_HOST = '127.0.0.1'
+    KNP_MYSQL_PORT = '3306'
+    KNP_MYSQL_PASS = 'KnowEnG'
+    KNP_MYSQL_USER = 'root'
+    KNP_MYSQL_CONF = 'build_conf/'
+    KNP_MYSQL_DIR = KNP_WORKING_DIR+'/mysql-'+KNP_MYSQL_PORT+'-'+KNP_BUILD_NAME
+    KNP_MYSQL_MEM = '0'
+    KNP_MYSQL_CPU = '0.5'
+    
+    KNP_REDIS_HOST = '127.0.0.1'
+    KNP_REDIS_PORT = '6380'
+    KNP_REDIS_PASS = 'KnowEnG'
+    KNP_REDIS_DIR = KNP_WORKING_DIR+'/redis-'+KNP_REDIS_PORT+'-'+KNP_BUILD_NAME
+    KNP_REDIS_MEM = '0'
+    KNP_REDIS_CPU = '0.5'
+
     if get_status():
         main()
     else:
