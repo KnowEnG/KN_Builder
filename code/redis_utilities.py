@@ -19,6 +19,8 @@ import csv
 import redis
 import config_utilities as cf
 
+MGET_CHUNK = 100
+
 def deploy_container(args=None):
     """Deplays a container with marathon running Redis using the specified
     args.
@@ -255,10 +257,12 @@ def conv_gene(rdb, fk_array, hint, taxid):
         """Search redis for genes that still are unmapped
         """
         curr_none = [i for i in range(len(fk_array)) if ret_st[i] == 'unmapped-none']
-        if curr_none:
+        while curr_none:
+            temp_curr_none = curr_none[:MGET_CHUNK]
+            curr_none = curr_none[MGET_CHUNK:]
             vals_array = rdb.mget([pattern.format(str(fk_array[i]).upper(), taxid, hint)
-                                   for i in curr_none])
-            for i, val in zip(curr_none, vals_array):
+                                   for i in temp_curr_none])
+            for i, val in zip(temp_curr_none, vals_array):
                 if val is None:
                     continue
                 ret_st[i] = val.decode()
