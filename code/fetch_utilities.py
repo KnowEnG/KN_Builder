@@ -44,6 +44,11 @@ import config_utilities as cf
 import import_utilities as iu
 import table_utilities as tu
 
+class AppURLopener(urllib.request.FancyURLopener):
+    version = "Mozilla/5.0"
+
+opener = AppURLopener()
+
 ARCHIVES = ['.zip', '.tar', '.gz']
 MAX_CHUNKS = 500
 DIR = "."
@@ -70,7 +75,7 @@ def download(version_dict):
     if url[-1] == '/':
         url = url[:-1]
     filename = version_dict['local_file_name']
-    with urllib.request.urlopen(url) as response:
+    with opener.open(url) as response:
         with open(filename, 'wb') as outfile:
             shutil.copyfileobj(response, outfile)
     os.utime(filename, (0, version_dict['remote_date']))
