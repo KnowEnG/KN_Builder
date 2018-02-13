@@ -435,7 +435,7 @@ def run_map(args):
         tablefile = os.path.basename(filestr)
         output_files = tablefile.replace('.table.', '.*.')
         src = tablefile.split('.')[0]
-        alias = tablefile.split('.table.')[0].split(src+'.')[1]
+        alias = tablefile.split('.table.')[0].replace(src+'.', '', 1)
 
         chunk_path = os.path.join(src, alias, "chunks")
         local_chunk_dir = os.path.join(args.working_dir, args.data_path, chunk_path)

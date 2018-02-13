@@ -51,7 +51,7 @@ class Reactome(SrcClass):
         url_base = 'http://www.reactome.org/'
         aliases = {"Ensembl2Reactome_All_Levels": "genes2pathways",
                    "ReactomePathways": "reactomePathways",
-                   "homo_sapiens.interactions": "pathwayInteractions",
+                   "reactome.homo_sapiens.interactions.tab-delimited": "pathwayInteractions",
                    "ReactomePathwaysRelation":"ReactomeRelations"}
         super(Reactome, self).__init__(name, url_base, aliases, args)
 
@@ -78,7 +78,7 @@ class Reactome(SrcClass):
         """
         version = super(Reactome, self).get_source_version(alias)
         if version == 'unknown':
-            url = self.url_base + 'category/reactome-announcement/'
+            url = self.url_base + 'about/news/'
             response = urllib.request.urlopen(url)
             the_page = response.readlines()
             for line in the_page:
@@ -108,7 +108,7 @@ class Reactome(SrcClass):
         """
         url = self.url_base + 'download/current/'
         if 'interactions' in alias:
-            url += alias + '.txt.gz'
+            url += "interactors/" + alias + '.txt'
         else:
             url += alias + '.txt'
         return url
@@ -129,7 +129,7 @@ class Reactome(SrcClass):
         """
         maps = {"Ensembl2Reactome_All_Levels": False,
                 "ReactomePathways": True,
-                "homo_sapiens.interactions": False,
+                "reactome.homo_sapiens.interactions.tab-delimited": False,
                 "ReactomePathwaysRelation": True}
         return maps[alias]
 
@@ -148,7 +148,7 @@ class Reactome(SrcClass):
         """
         dependencies = {"Ensembl2Reactome_All_Levels": ['ReactomePathways'],
                         "ReactomePathways": list(),
-                        "homo_sapiens.interactions": list(),
+                        "reactome.homo_sapiens.interactions.tab-delimited": list(),
                         "ReactomePathwaysRelation": ['ReactomePathways']}
         return dependencies[alias]
 
@@ -241,7 +241,7 @@ class Reactome(SrcClass):
             tu.csu(e_meta_file, outfile)
             outfile = n_meta_file.replace('node_meta', 'unique.node_meta')
             tu.csu(n_meta_file, outfile)
-        if alias == 'homo_sapiens.interactions':
+        if alias == 'reactome.homo_sapiens.interactions.tab-delimited':
 
             #static column values
             n1type = 'gene'
