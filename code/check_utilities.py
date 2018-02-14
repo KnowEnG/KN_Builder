@@ -146,6 +146,7 @@ class SrcClass(object):
         f_dir = os.path.join(self.args.working_dir, self.args.data_path, self.name)
         f_dir = os.path.join(f_dir, alias)
         url = self.get_remote_url(alias)
+        print("get_local_file_info " + url)
         filename = os.path.basename(url).replace('%20', '_')
         file = os.path.join(f_dir, filename)
         local_dict = dict()
@@ -178,6 +179,7 @@ class SrcClass(object):
         f_dir = os.path.join(self.args.working_dir, self.args.data_path, self.name)
         f_dir = os.path.join(f_dir, alias)
         url = self.get_remote_url(alias)
+        print("get_local_version_info " + url)
         filename = os.path.basename(url).replace('%20', '_')
         file = os.path.join(f_dir, filename)
         file_meta['local_file_name'] = filename
@@ -199,6 +201,7 @@ class SrcClass(object):
             int: The remote file size in bytes.
         """
         remote_url = self.get_remote_url(alias)
+        print("get_remote_file_size " + remote_url)
         try:
             response = urllib.request.urlopen(remote_url)
             print(response.headers)
@@ -221,6 +224,7 @@ class SrcClass(object):
                 since the epoch
         """
         remote_url = self.get_remote_url(alias)
+        print("get_remote_file_modified " + remote_url)
         try:
             response = urllib.request.urlopen(remote_url)
             time_str = response.headers['last-modified']
