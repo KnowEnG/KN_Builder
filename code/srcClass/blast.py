@@ -112,7 +112,6 @@ class Blast(SrcClass):
             sp_abbrev = species[0] + species.split(' ')[1][:3]
             splower = species.lower().replace(' ', '_')
             url = self.get_remote_url(splower)
-            print("get_aliases " + url)
             req = requests.get(url)
             if req.status_code == 200:
                 alias_dict[splower] = taxid
@@ -132,7 +131,6 @@ class Blast(SrcClass):
             str: The url needed to fetch the file corresponding to the alias.
         """
         url = self.url_base + alias + "_" + alias + '.out'
-        print("get_remote_url " + url)
         return url
 
     def table(self, raw_line, version_dict):
