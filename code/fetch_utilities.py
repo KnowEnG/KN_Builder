@@ -39,6 +39,8 @@ import os
 import sys
 import math
 import hashlib
+from random import randint
+from time import sleep
 from argparse import ArgumentParser
 import config_utilities as cf
 import import_utilities as iu
@@ -76,13 +78,15 @@ def download(version_dict):
         url = url[:-1]
     filename = version_dict['local_file_name']
     if "http" in url:
+        if 'enrichr' in version_dict['source']:
+            sleep(randint(10,90))
         with opener.open(url) as response:
             with open(filename, 'wb') as outfile:
                 shutil.copyfileobj(response, outfile)
-    else: 
+    else:
         with urllib.request.urlopen(url) as response:
             with open(filename, 'wb') as outfile:
-                shutil.copyfileobj(response, outfile)        
+                shutil.copyfileobj(response, outfile)
     os.utime(filename, (0, version_dict['remote_date']))
 
     #unzip remote file
