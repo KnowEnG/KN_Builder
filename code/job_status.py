@@ -32,7 +32,11 @@ def get_status():
     connection.request("GET", "/scheduler/jobs")
     response = connection.getresponse().read()
     response_str = response.decode("utf-8")
-    jobs = json.loads(response_str)
+    try:
+        jobs = json.loads(response_str)
+    except ValueError:
+        print(response_str)
+        return get_status()
 
     l = []
     for job in jobs:
@@ -164,15 +168,15 @@ if __name__ == "__main__":
     KNP_REDIS_MEM = '0'
     KNP_REDIS_CPU = '0.5'
 
-    if get_status():
-        main()
-    else:
-        run_step("MYSQL", False)
-        run_step("REDIS", False)
-        wait_for_port(int(KNP_REDIS_PORT), KNP_REDIS_HOST)
-        wait_for_port(int(KNP_MYSQL_PORT), KNP_MYSQL_HOST)
-        run_step('SETUP')
-        run_step('CHECK')
-        run_step('IMPORT')
-        run_step('EXPORT1')
-        run_step('EXPORT2')
+    #if get_status():
+    #    main()
+    #else:
+    run_step("MYSQL", False)
+    run_step("REDIS", False)
+    wait_for_port(int(KNP_REDIS_PORT), KNP_REDIS_HOST)
+    wait_for_port(int(KNP_MYSQL_PORT), KNP_MYSQL_HOST)
+    #    run_step('SETUP')
+    #    run_step('CHECK')
+    #    run_step('IMPORT')
+    run_step('EXPORT1')
+    run_step('EXPORT2')
