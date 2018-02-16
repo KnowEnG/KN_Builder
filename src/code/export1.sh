@@ -3,7 +3,7 @@
 set -u
 
 mkdir -p $KNP_EXPORT_DIR
-cp code/mysql/edge_type.txt $KNP_EXPORT_DIR
+cp $KNP_CODE_DIR/mysql/edge_type.txt $KNP_EXPORT_DIR
 
 ## add gene maps
 cp $KNP_WORKING_DIR/$KNP_DATA_PATH/id_map/species/species.txt $KNP_EXPORT_DIR/species.txt
@@ -16,7 +16,7 @@ for TAXON in `cut -f1 $KNP_EXPORT_DIR/species.txt `; do
         WHERE ns.taxon = $TAXON \
         ORDER BY ns.node_id" \
         | tail -n +2 > $KNP_EXPORT_DIR/Species/$TAXON/$TAXON.glist;
-        LANG=C.UTF-8 python3 code/conv_utilities.py -mo LIST \
+        LANG=C.UTF-8 python3 $KNP_CODE_DIR/conv_utilities.py -mo LIST \
             -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT -t $TAXON \
             $KNP_EXPORT_DIR/Species/$TAXON/$TAXON.glist;
         rm $KNP_EXPORT_DIR/Species/$TAXON/$TAXON.glist;
@@ -36,7 +36,7 @@ awk -v x=125000 '$4 >= x' $KNP_EXPORT_DIR/db_contents.txt \
     | grep "^Gene" >> $KNP_EXPORT_DIR/directories.txt
 awk -v x=4000 '$4 >= x' $KNP_EXPORT_DIR/db_contents.txt \
     | grep "^Property" >> $KNP_EXPORT_DIR/directories.txt
-python3 code/workflow_utilities.py EXPORT \
+python3 $KNP_CODE_DIR/workflow_utilities.py EXPORT \
     -myh $KNP_MYSQL_HOST -myp $KNP_MYSQL_PORT \
     -myps $KNP_MYSQL_PASS -myu $KNP_MYSQL_USER \
     -rh $KNP_REDIS_HOST -rp $KNP_REDIS_PORT \
