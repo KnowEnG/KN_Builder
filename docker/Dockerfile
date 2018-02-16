@@ -1,12 +1,12 @@
 ############################################################
-# Dockerfile to build py3_skl_redis_mysql_s3
+# Dockerfile to build kn_builder
 ############################################################
 
-# Set the base image to python v3
+# Set the base image to ubuntu
 FROM ubuntu:14.04
 
 # File Author / Maintainer
-MAINTAINER Charles Blatti
+MAINTAINER Charles Blatti <blatti@illinois.edu>
 
 RUN apt-get update && apt-get -y install \
     build-essential \
@@ -29,6 +29,8 @@ RUN pip3 install redis \
     PyYAML
 
 ENV PYTHONUNBUFFERED 1
+
+COPY ./ /kn_builder/
 
 # Set default contain command on run
 CMD /bin/bash
