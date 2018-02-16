@@ -1,0 +1,19 @@
+{
+    "id": "kn_mysql-TMPMYSQLPORT",
+    "cpus": "TMPCPU",
+    "mem": "TMPMYSQLMEM",
+    "instances": 1,
+    "backoffFactor": 2.0,    
+    "env": {"PORT": "3306"},    
+    "constraints": [["hostname", "CLUSTER", "TMPMYSQLHOST"]],
+    "container": {
+        "type": "DOCKER",
+        "volumes": [{"containerPath": "/var/lib/mysql", "hostPath": "TMPMYSQLPATH", "mode": "RW"},
+                    {"containerPath": "/etc/mysql/conf.d/", "hostPath": "TMPMYSQLCONFPATH", "mode": "RW"}],
+        "docker": {
+            "image": "mysql:5.6",
+            "network": "HOST",
+            "parameters": [{ "key": "env", "value": "MYSQL_ROOT_PASSWORD=TMPSQLPASS" }]
+        }
+    }
+}

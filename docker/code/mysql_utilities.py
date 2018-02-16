@@ -39,7 +39,7 @@ def deploy_container(args=None):
     deploy_dir = os.path.join(args.working_dir, args.logs_path, 'marathon_jobs')
     if not os.path.exists(deploy_dir):
         os.makedirs(deploy_dir)
-    template_job = os.path.join(args.working_dir, args.code_path, 'dockerfiles', 'marathon',
+    template_job = os.path.join(args.working_dir, args.code_path, 'marathon',
                                 'mysql.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
@@ -66,7 +66,7 @@ def deploy_container(args=None):
     deploy_dict["container"]["volumes"][1]["hostPath"] = conf_path
     deploy_dict["container"]["docker"]["parameters"][0]["value"] = \
                     "MYSQL_ROOT_PASSWORD=KnowEnG"
-    out_path = os.path.join(deploy_dir, "p1mysql-" + args.mysql_port +'.json')
+    out_path = os.path.join(deploy_dir, "kn_mysql-" + args.mysql_port +'.json')
     with open(out_path, 'w') as outfile:
         outfile.write(json.dumps(deploy_dict))
     job = 'curl -X POST -H "Content-type: application/json" ' + args.marathon + " -d '"

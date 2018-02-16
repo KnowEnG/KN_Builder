@@ -2,11 +2,11 @@ set -eu
 
 # default parameter values
 #KNP_DATA_PATH='local_pipe'
-#KNP_MYSQL_HOST='knowcharles.dyndns.org'
+#KNP_MYSQL_HOST='knowcluster01.knoweng.org'
 #KNP_MYSQL_PORT='3306'
 #KNP_MYSQL_USER='root'
 #KNP_MYSQL_PASS='KnowEnG'
-#KNP_REDIS_HOST='knowcharles.dyndns.org'
+#KNP_REDIS_HOST='knowcluster01.knoweng.org'
 #KNP_REDIS_PORT='6379'
 #KNP_REDIS_PASS='KnowEnG'
 VERBOSE='COUNTS'

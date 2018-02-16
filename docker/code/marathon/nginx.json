@@ -1,0 +1,15 @@
+{
+    "id": "kn_nginx-TMPPORT",
+    "instances": 1,
+    "container": {
+        "type": "DOCKER",
+        "volumes": [{"containerPath": "/usr/share/nginx/html", "hostPath": "TMPPATH", "mode": "RO"},
+                    {"containerPath": "/usr/share/nginx/html/docs", "hostPath": "DOCSPATH", "mode": "RO"},
+                    {"containerPath": "/etc/nginx/conf.d/", "hostPath": "CONFPATH", "mode": "RW"}],
+        "docker": {
+            "image": "nginx",
+            "network": "HOST",
+            "portMappings": [{"containerPort": 80, "hostPort": "TMPPORT"}]
+        }
+    }
+}

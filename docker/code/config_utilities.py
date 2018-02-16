@@ -56,37 +56,37 @@ except subprocess.CalledProcessError:
 except FileNotFoundError:
     pass
 
-DEFAULT_CHRONOS_URL = 'knowcluster01.dyndns.org:8888'
-DEFAULT_MARATHON_URL = 'knowcluster01.dyndns.org:8080/v2/apps'
-DEFAULT_WORKING_DIR = '/workspace/prototype'
+DEFAULT_CHRONOS_URL = '127.0.0.1:8888'
+DEFAULT_MARATHON_URL = '127.0.0.1:8080/v2/apps'
+DEFAULT_WORKING_DIR = os.path.abspath('.')
 
-DEFAULT_CODE_PATH = 'KnowNet_Pipeline/code'
+DEFAULT_CODE_PATH = '/kn_builder/code'
 DEFAULT_DATA_PATH = 'data'
 DEFAULT_LOGS_PATH = 'logs'
 DEFAULT_SRC_PATH = 'srcClass'
 DEFAULT_MAP_PATH = 'id_map'
 
-DEFAULT_MYSQL_URL = 'knowice.cs.illinois.edu'
-DEFAULT_MYSQL_PORT = '3306'
+DEFAULT_MYSQL_URL = '127.0.0.1'
+DEFAULT_MYSQL_PORT = '3307'
 DEFAULT_MYSQL_USER = 'root'
 DEFAULT_MYSQL_PASS = 'KnowEnG'
-DEFAULT_MYSQL_MEM = '15000'
-DEFAULT_MYSQL_CPU = '4.0'
-DEFAULT_MYSQL_DIR = os.path.join(DEFAULT_WORKING_DIR, 'p1_mysql')
+DEFAULT_MYSQL_MEM = '0'
+DEFAULT_MYSQL_CPU = '0.5'
+DEFAULT_MYSQL_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn_mysql')
 DEFAULT_MYSQL_CONF = 'build_conf/'
 
-DEFAULT_REDIS_URL = 'knowice.cs.illinois.edu'
-DEFAULT_REDIS_PORT = '6379'
+DEFAULT_REDIS_URL = '127.0.0.1'
+DEFAULT_REDIS_PORT = '6380'
 DEFAULT_REDIS_PASS = 'KnowEnG'
-DEFAULT_REDIS_MEM = '15000'
-DEFAULT_REDIS_CPU = '1.0'
-DEFAULT_REDIS_DIR = os.path.join(DEFAULT_WORKING_DIR, 'p1_redis')
+DEFAULT_REDIS_MEM = '0'
+DEFAULT_REDIS_CPU = '0.5'
+DEFAULT_REDIS_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn_redis')
 
 DEFAULT_NGINX_PORT = '8080'
-DEFAULT_NGINX_DIR = os.path.join(DEFAULT_WORKING_DIR, 'p1_nginx')
+DEFAULT_NGINX_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn_nginx')
 DEFAULT_NGINX_CONF = 'autoindex/'
 
-DEFAULT_S3_BUCKET = 'KNsample'
+DEFAULT_S3_BUCKET = 'KnowNets'
 
 
 def add_config_args(parser):

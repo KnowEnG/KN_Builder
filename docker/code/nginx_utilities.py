@@ -29,7 +29,7 @@ def deploy_container(args=None):
     if not os.path.exists(deploy_dir):
         os.makedirs(deploy_dir)
     template_job = os.path.join(args.working_dir, args.code_path,
-                                'dockerfiles', 'marathon', 'nginx.json')
+                                'marathon', 'nginx.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
     deploy_dict["id"] = os.path.basename(args.nginx_dir)
@@ -44,7 +44,7 @@ def deploy_container(args=None):
     conf_path = os.path.join(args.working_dir, args.code_path, 'nginx', args.nginx_conf)
     deploy_dict["container"]["volumes"][2]["hostPath"] = conf_path
     deploy_dict["container"]["docker"]["portMappings"][0]["hostPort"] = int(args.nginx_port)
-    out_path = os.path.join(deploy_dir, "p1nginx-" + args.nginx_port +'.json')
+    out_path = os.path.join(deploy_dir, "kn_nginx-" + args.nginx_port +'.json')
     with open(out_path, 'w') as outfile:
         outfile.write(json.dumps(deploy_dict))
     job = 'curl -X POST -H "Content-type: application/json" ' + args.marathon + " -d '"

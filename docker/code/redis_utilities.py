@@ -37,7 +37,7 @@ def deploy_container(args=None):
     if not os.path.exists(deploy_dir):
         os.makedirs(deploy_dir)
     template_job = os.path.join(args.working_dir, args.code_path,
-                                'dockerfiles', 'marathon', 'redis.json')
+                                'marathon', 'redis.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
     deploy_dict["id"] = os.path.basename(args.redis_dir)
@@ -50,7 +50,7 @@ def deploy_container(args=None):
     else:
         deploy_dict["constraints"] = []
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.redis_dir
-    out_path = os.path.join(deploy_dir, "p1redis-" + args.redis_port +'.json')
+    out_path = os.path.join(deploy_dir, "kn_redis-" + args.redis_port +'.json')
     with open(out_path, 'w') as outfile:
         outfile.write(json.dumps(deploy_dict))
     job = 'curl -X POST -H "Content-type: application/json" ' + args.marathon + " -d '"

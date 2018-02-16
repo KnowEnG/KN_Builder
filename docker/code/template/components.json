@@ -7,56 +7,56 @@
         "TMPCMD": "sh -c 'echo WARNING was not supposed to run >> /TMPWORKDIR/TMPLOGSPATH/WARN.TMPJOB.log'"
     },
     "file_setup": {
-        "TMPIMG": "cblatti3/py3_redis_mysql:0.2",
+        "TMPIMG": "cblatti3/kn_builder",
         "TMPMEM": "50",
         "TMPCPUS": "1",
         "TMPPRIOR": "true",
         "TMPCMD": "sh -c 'mkdir -m 777 -p /TMPWORKDIR/TMPLOGSPATH/; if TMPSHAREBOOL ; then mkdir -m 777 -p /TMPSHAREDIR/; fi; { ls -l /TMPWORKDIR/TMPCODEPATH/*py && mkdir -m 777 -p /TMPWORKDIR/TMPDATAPATH/ && sleep 5; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
     },
     "checker": {
-        "TMPIMG": "cblatti3/py3_redis_mysql:0.2",
+        "TMPIMG": "cblatti3/kn_builder",
         "TMPMEM": "100",
         "TMPCPUS": "1",
         "TMPPRIOR": "true",
         "TMPCMD": "sh -c '{ cd /TMPWORKDIR/TMPCODEPATH/ && python3 check_utilities.py TMPSRC TMPOPTS && if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPDATAPATH/TMPSRC/ /TMPSHAREDIR/; fi; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
     },
     "exporter": {
-        "TMPIMG": "cblatti3/py3_skl_redis_mysql_s3_yml:0.1",
+        "TMPIMG": "cblatti3/kn_builder",
         "TMPMEM": "8000",
         "TMPCPUS": "0.5",
         "TMPPRIOR": "true",
         "TMPCMD": "sh -c '{ cd /TMPWORKDIR/TMPCODEPATH/ && python3 export_utilities.py -s TMPTAXON -e TMPETYPE -b KNsample TMPOPTS ; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
     },
     "fetcher": {
-        "TMPIMG": "cblatti3/py3_redis_mysql:0.2",
+        "TMPIMG": "cblatti3/kn_builder",
         "TMPMEM": "2500",
         "TMPCPUS": "0.5",
         "TMPPRIOR": "false",
         "TMPCMD": "sh -c '{ cd /TMPWORKDIR/TMPDATAPATH/TMPALIASPATH && ls -l file_metadata.json && python3 /TMPWORKDIR/TMPCODEPATH/fetch_utilities.py file_metadata.json TMPOPTS && if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPDATAPATH/TMPALIASPATH/ /TMPSHAREDIR/ && cd TMPDATAPATH/ && find TMPALIASPATH -maxdepth 1 -type f ! -name '*.json' -delete; fi; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
     },
     "tabler": {
-        "TMPIMG": "cblatti3/py3_redis_mysql:0.2",
+        "TMPIMG": "cblatti3/kn_builder",
         "TMPMEM": "500",
         "TMPCPUS": "1",
         "TMPPRIOR": "true",
         "TMPCMD": "sh -c '{ cd /TMPWORKDIR/TMPDATAPATH/TMPALIASPATH && python3 /TMPWORKDIR/TMPCODEPATH/table_utilities.py TMPCHUNK file_metadata.json TMPOPTS && if TMPSHAREBOOL ; then cd /TMPWORKDIR && rsync -aR --exclude='*.raw_line.*' TMPDATAPATH/TMPALIASPATH/TMPFILES /TMPSHAREDIR/ && cd TMPDATAPATH/TMPALIASPATH && rm TMPCHUNK ; fi; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
     },
     "mapper": {
-        "TMPIMG": "cblatti3/py3_redis_mysql:0.2",
+        "TMPIMG": "cblatti3/kn_builder",
         "TMPMEM": "800",
         "TMPCPUS": "1",
         "TMPPRIOR": "true",
         "TMPCMD": "sh -c '{ python3 /TMPWORKDIR/TMPCODEPATH/conv_utilities.py /TMPWORKDIR/TMPDATAPATH/TMPTABLEPATH TMPOPTS && if TMPSHAREBOOL ; then cd /TMPWORKDIR && rsync -aR TMPDATAPATH/TMPFILES /TMPSHAREDIR/ && cd TMPDATAPATH && rm TMPFILES ; fi; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
     },
     "importer": {
-        "TMPIMG": "cblatti3/py3_redis_mysql:0.2",
+        "TMPIMG": "cblatti3/kn_builder",
         "TMPMEM": "2400",
         "TMPCPUS": "1",
         "TMPPRIOR": "true",
         "TMPCMD": "sh -c '{ python3 /TMPWORKDIR/TMPCODEPATH/import_utilities.py TMPIMPORTPATH TMPOPTS && if TMPSHAREBOOL ; then cd /TMPWORKDIR && rsync -aR TMPDATAPATH/TMPFILES /TMPSHAREDIR/ && cd TMPDATAPATH && rm TMPFILES ; fi; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
     },
     "next_step_caller": {
-        "TMPIMG": "cblatti3/py3_redis_mysql:0.2",
+        "TMPIMG": "cblatti3/kn_builder",
         "TMPMEM": "50",
         "TMPCPUS": "1",
         "TMPPRIOR": "true",
