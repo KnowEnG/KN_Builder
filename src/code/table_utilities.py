@@ -77,7 +77,7 @@ def main(chunkfile, version_json, args=None):
         args = cf.config_args()
     with open(version_json, 'r') as infile:
         version_dict = json.load(infile)
-    src_code_dir = os.path.join(args.working_dir, args.code_path, args.src_path)
+    src_code_dir = os.path.join(args.code_path, args.src_path)
     sys.path.append(src_code_dir)
     src_module = __import__(version_dict['source'])
     SrcClass = src_module.get_SrcClass(args)

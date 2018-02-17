@@ -490,7 +490,7 @@ def check(module, args=None):
     """
     if args is None:
         args = cf.config_args()
-    src_code_dir = os.path.join(args.working_dir, args.code_path, args.src_path)
+    src_code_dir = os.path.join(args.code_path, args.src_path)
     sys.path.append(src_code_dir)
     src_module = __import__(module)
     SrcClass = src_module.get_SrcClass(args)

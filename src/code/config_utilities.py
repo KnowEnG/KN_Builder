@@ -8,7 +8,7 @@ Attributes:
     DEFAULT_MARATHON_URL (str): address of marathon scheduler
     DEFAULT_WORK_BASE (str): toplevel directory of working directory
 
-    DEFAULT_CODE_PATH (str): relative path of code dir from toplevel
+    DEFAULT_CODE_PATH (str): absolute path of code dir
     DEFAULT_DATA_PATH (str): relative path of data dir from toplevel
     DEFAULT_LOGS_PATH (str): relative path of logs dir from toplevel
     DEFAULT_LOGS_PATH (str): relative path of srcClass dir from toplevel
@@ -100,9 +100,9 @@ def add_config_args(parser):
     :delim: |
 
     --chronos  	    |str	|-c	    |url of chronos scheduler or LOCAL or DOCKER
-    --working_dir	    |str	|-wd	|name of toplevel directory of working dir
-    --storage_dir    |str	|-sd	|name of toplevel directory of shared storage
-    --code_path	    |str	|-cp	|relative path of code directory from toplevel
+    --working_dir	|str	|-wd	|name of toplevel directory of working dir
+    --storage_dir   |str	|-sd	|name of toplevel directory of shared storage
+    --code_path	    |str	|-cp	|absolute path of code directory
     --data_path	    |str	|-dp	|relative path of data directory from toplevel
     --logs_path	    |str	|-lp	|relative path of data directory from toplevel
     --src_path 	    |str	|-sp	|relative path of source code directory from code directory
@@ -150,7 +150,7 @@ def add_config_args(parser):
     parser.add_argument('-sd', '--storage_dir', default='', nargs='?',
                         help='name of toplevel directory of storage directory')
     parser.add_argument('-cp', '--code_path', default=DEFAULT_CODE_PATH,
-                        help='relative path of code directory from toplevel')
+                        help='absolute path of code directory')
     parser.add_argument('-dp', '--data_path', default=DEFAULT_DATA_PATH,
                         help='relative path of data directory from toplevel')
     parser.add_argument('-lp', '--logs_path', default=DEFAULT_LOGS_PATH,

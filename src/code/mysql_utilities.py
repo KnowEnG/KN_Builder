@@ -39,7 +39,7 @@ def deploy_container(args=None):
     deploy_dir = os.path.join(args.working_dir, args.logs_path, 'marathon_jobs')
     if not os.path.exists(deploy_dir):
         os.makedirs(deploy_dir)
-    template_job = os.path.join(args.working_dir, args.code_path, 'marathon',
+    template_job = os.path.join(args.code_path, 'marathon',
                                 'mysql.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
@@ -50,7 +50,7 @@ def deploy_container(args=None):
         deploy_dict["constraints"] = [["hostname", "CLUSTER", args.mysql_curl]]
     else:
         deploy_dict["constraints"] = []
-    conf_template = os.path.join(args.working_dir, args.code_path, 'mysql', args.mysql_conf)
+    conf_template = os.path.join(args.code_path, 'mysql', args.mysql_conf)
     if args.storage_dir:
         mysql_dir = os.path.join(args.storage_dir, args.data_path, 'mysql')
     else:
@@ -507,9 +507,7 @@ class MySQL(object):
         already in the tables.
         """
         import_tables = ['node_type.txt', 'edge_type.txt']
-        mysql_dir = os.sep + os.path.join(self.args.code_path, 'mysql')
-        if os.path.isdir(self.args.working_dir):
-            mysql_dir = self.args.working_dir + mysql_dir
+        mysql_dir = os.path.join(self.args.code_path, 'mysql')
         self.import_schema('KnowNet', os.path.join(mysql_dir, 'KnowNet.sql'))
         for table in import_tables:
             tablefile = os.path.join(mysql_dir, table)

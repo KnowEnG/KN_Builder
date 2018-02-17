@@ -53,12 +53,12 @@ class Job:
         self.cjobfile = 'missing.json'
         # read in dummy template
         self.cjobstr = ""
-        with open(os.path.join(self.args.working_dir, args.code_path, "template",
+        with open(os.path.join(args.code_path, "template",
                                "job_template.json"), 'r') as infile:
             self.cjobstr = infile.read(10000)
         # read in job dictionaries
         jobsdesc = ""
-        with open(os.path.join(self.args.working_dir, args.code_path, "template",
+        with open(os.path.join(args.code_path, "template",
                                "components.json"), 'r') as infile:
             jobsdesc = json.load(infile)
         # prepare volume mount

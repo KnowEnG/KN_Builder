@@ -36,8 +36,7 @@ def deploy_container(args=None):
     deploy_dir = os.path.join(args.working_dir, args.logs_path, 'marathon_jobs')
     if not os.path.exists(deploy_dir):
         os.makedirs(deploy_dir)
-    template_job = os.path.join(args.working_dir, args.code_path,
-                                'marathon', 'redis.json')
+    template_job = os.path.join(args.code_path, 'marathon', 'redis.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
     deploy_dict["id"] = os.path.basename(args.redis_dir)

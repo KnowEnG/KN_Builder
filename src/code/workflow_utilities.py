@@ -124,8 +124,7 @@ def list_sources(args):
                     continue
                 src_list.extend([srcstr])
         else:
-            local_src_code_dir = os.path.join(args.working_dir, args.code_path,
-                                              args.src_path)
+            local_src_code_dir = os.path.join(args.code_path, args.src_path)
             if not os.path.exists(local_src_code_dir):
                 raise IOError("ERROR: cannot find {0}!".format(local_src_code_dir))
             src_pys_list = sorted(os.listdir(local_src_code_dir))
