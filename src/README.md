@@ -9,6 +9,7 @@ Fetch and parse source files to construct the KnowEnG Knowledge Network
 docker run -it -w=`pwd` -v `pwd`:`pwd` cblatti3/kn_builder:latest
 ```
 
+
 - **Run command within the Docker container**
 ```console
 python3 /kn_builder/code/job_status.py --species homo_sapiens \
