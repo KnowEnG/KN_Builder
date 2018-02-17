@@ -48,13 +48,13 @@ print("Running on", socket.gethostname())
 csvw = csv.writer(sys.stdout, delimiter='\t')
 csvw.writerow(['run info', 'argv', ' '.join(map(shlex.quote, sys.argv))])
 csvw.writerow(['run info', 'time', time.time()])
-try:
-    csvw.writerow(['run info', 'commit',
-                   subprocess.check_output(['git', 'describe', '--always']).strip().decode()])
-except subprocess.CalledProcessError:
-    pass
-except FileNotFoundError:
-    pass
+#try:
+#    csvw.writerow(['run info', 'commit',
+#                   subprocess.check_output(['git', 'describe', '--always']).strip().decode()])
+#except subprocess.CalledProcessError:
+#    pass
+#except FileNotFoundError:
+#    pass
 
 DEFAULT_CHRONOS_URL = '127.0.0.1:8888'
 DEFAULT_MARATHON_URL = '127.0.0.1:8080/v2/apps'

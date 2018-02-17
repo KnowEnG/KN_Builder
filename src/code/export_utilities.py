@@ -126,8 +126,8 @@ def get_metadata(db, edges, nodes, lines, sp, et, args):
             raise ValueError("Invalid type: {}".format(type))
 
     build = defaultdict(dict)
-    build["export"] = {"command": sys.argv, "arguments": args, "date": datetime.now(timezone.utc),
-                        "revision": str(subprocess.check_output(["git", "describe", "--always"]).strip())}
+    build["export"] = {"command": sys.argv, "arguments": args, "date": datetime.now(timezone.utc)}
+    #                        "revision": str(subprocess.check_output(["git", "describe", "--always"]).strip())}
     query = get_log_query(sources)
     for f, t, k in db.run(query):
         build[t][f] = k
