@@ -1,3 +1,0 @@
-docker build -t cblatti3/py3_redis_mysql:0.1 ./
-docker login
-docker push cblatti3/py3_redis_mysql:0.1
