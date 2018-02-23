@@ -729,7 +729,7 @@ class MySQL(object):
         """
         self.cursor.execute(cmd + ';')
         try:
-            results = self.cursor.fetchall()
+            results = list(self.cursor)
         except sql.Error:
             results = list()
         self.conn.commit()
