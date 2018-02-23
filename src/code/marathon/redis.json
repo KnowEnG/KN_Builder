@@ -1,0 +1,17 @@
+{
+    "id": "kn_redis-TMPREDISPORT",
+    "cmd": "redis-server --port TMPREDISPORT --appendonly yes --requirepass TMPREDISPASS",
+    "cpus": 1.0,
+    "mem": "TMPREDISMEM",
+    "backoffFactor": 2.0,
+    "instances": 1,
+    "constraints": [["hostname", "CLUSTER", "TMPREDISHOST"]],
+    "container": {
+        "type": "DOCKER",
+        "volumes": [{"containerPath": "/data", "hostPath": "TMPPATH/TMPREDISNAME/", "mode": "RW"}],
+        "docker": {
+            "image": "redis",
+            "network": "HOST"
+        }
+    }
+}
