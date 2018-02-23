@@ -44,8 +44,7 @@ class Ppi(SrcClass):
         This calls the SrcClass constructor (see utilities.SrcClass)
         """
         name = 'ppi'
-        url_base = ('http://psidev.cvs.sourceforge.net/viewvc/*checkout*/'
-                    'psidev/psi/mi/rel25/data/psi-mi25.obo')
+        url_base = ('http://ontologies.berkeleybop.org/mi.obo')
         aliases = {"obo_map": "map file for PPI edge tyeps"}
         self.reference = ''
         self.image = ''

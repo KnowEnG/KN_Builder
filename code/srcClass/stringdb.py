@@ -17,8 +17,10 @@ import csv
 import json
 import requests
 import config_utilities as cf
+import fetch_utilities as fu
 import table_utilities as tu
 from check_utilities import SrcClass, compare_versions
+
 
 def get_SrcClass(args):
     """Returns an object of the source class.
@@ -108,11 +110,11 @@ class Stringdb(SrcClass):
             str: The remote version of the source.
         """
         if alias not in self.version:
-            response = urllib.request.urlopen(self.url_base)
+            response = fu.opener.open(self.url_base)
             the_page = response.readlines()
             for line in the_page:
                 d_line = line.decode()
-                match = re.search(r"<li class='last'>.*>(\d+\.?\d*)<?.*</li>", d_line)
+                match = re.search("string_database_version_dotted: '(\d+\.?\d*)'", d_line)
                 if match is not None:
                     response.close()
                     vers = match.group(1)
