@@ -341,6 +341,7 @@ class Ensembl(SrcClass):
                 time_format = "%Y%m%d%H%M%S"
                 ftp.quit()
                 return time.mktime(time.strptime(time_str, time_format))
+        return float(0)
 
     def get_remote_url(self, alias):
         """Return the remote url needed to fetch the file corresponding to the

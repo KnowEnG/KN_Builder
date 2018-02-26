@@ -4,10 +4,10 @@ import os
 import sys
 import csv
 import subprocess
-import yaml
-#import numpy as np
-#import scipy.sparse as ss
 from collections import defaultdict
+import yaml
+import numpy as np
+import scipy.sparse as ss
 
 import config_utilities as cf
 import redis_utilities as ru
@@ -44,9 +44,8 @@ def num_connected_components(edges, nodes):
         r, c = edge[:2]
         row.append(rev_nodes[r])
         col.append(rev_nodes[c])
-#    mat = ss.coo_matrix((np.ones(len(edges)), (row, col)), shape=(len(nodes), len(nodes)))
-#    num, _ = ss.csgraph.connected_components(mat)
-    return -1
+    mat = ss.coo_matrix((np.ones(len(edges)), (row, col)), shape=(len(nodes), len(nodes)))
+    num, _ = ss.csgraph.connected_components(mat)
     return num
 
 def figure_out_class(db, et):

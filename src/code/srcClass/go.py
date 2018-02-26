@@ -156,6 +156,7 @@ class Go(SrcClass):
         for resource in go_resources['resources']:
             if resource['id'] == alias:
                 return self.url_base + resource['gaf_filename']
+        raise ValueError()
 
     def create_mapping_dict(self, filename, key_col=3, value_col=4):
         """Return a mapping dictionary for the provided file.

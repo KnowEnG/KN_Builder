@@ -47,6 +47,7 @@ import import_utilities as iu
 import table_utilities as tu
 
 class AppURLopener(urllib.request.FancyURLopener):
+    """URLopener to open with a custom user-agent."""
     version = "Mozilla/5.0"
 
 opener = AppURLopener()
@@ -79,7 +80,7 @@ def download(version_dict):
     filename = version_dict['local_file_name']
     if "http" in url:
         if 'enrichr' in version_dict['source']:
-            sleep(randint(10,90))
+            sleep(randint(10, 90))
         with opener.open(url) as response:
             with open(filename, 'wb') as outfile:
                 shutil.copyfileobj(response, outfile)

@@ -118,7 +118,7 @@ def run_step(step, wait=True):
     args = []
 
     if step == 'MYSQL':
-        args = ['python3', 'code/mysql_utilities.py', '-myh', KNP_MYSQL_HOST, '-myp', KNP_MYSQL_PORT, '-myps', KNP_MYSQL_PASS, '-myu', KNP_MYSQL_USER,  '-wd', KNP_WORKING_DIR, '-dp', KNP_DATA_PATH, '-lp', KNP_LOGS_PATH, '-sd', KNP_STORAGE_DIR, "-mym", KNP_MYSQL_MEM, "-myc", KNP_MYSQL_CPU, "-myd", KNP_MYSQL_DIR, "-mycf", KNP_MYSQL_CONF, "-m", KNP_MARATHON_URL]
+        args = ['python3', 'code/mysql_utilities.py', '-myh', KNP_MYSQL_HOST, '-myp', KNP_MYSQL_PORT, '-myps', KNP_MYSQL_PASS, '-myu', KNP_MYSQL_USER, '-wd', KNP_WORKING_DIR, '-dp', KNP_DATA_PATH, '-lp', KNP_LOGS_PATH, '-sd', KNP_STORAGE_DIR, "-mym", KNP_MYSQL_MEM, "-myc", KNP_MYSQL_CPU, "-myd", KNP_MYSQL_DIR, "-mycf", KNP_MYSQL_CONF, "-m", KNP_MARATHON_URL]
     elif step == 'REDIS':
         args = ["python3", "code/redis_utilities.py", "-rh", KNP_REDIS_HOST, "-rp", KNP_REDIS_PORT, "-rm", KNP_REDIS_MEM, "-rc", KNP_REDIS_CPU, "-rd", KNP_REDIS_DIR, "-rps", KNP_REDIS_PASS, "-m", KNP_MARATHON_URL, "-wd", KNP_WORKING_DIR, "-lp", KNP_LOGS_PATH]
     elif step == 'SETUP':
@@ -150,8 +150,8 @@ if __name__ == "__main__":
     KNP_EXPORT_DIR = KNP_WORKING_DIR+"/userKN-"+KNP_BUILD_NAME
     KNP_LOGS_PATH = "logs-"+KNP_BUILD_NAME
     KNP_CHRONOS_URL = '127.0.0.1:8888'
-    KNP_MARATHON_URL='127.0.0.1:8080/v2/apps'
-    
+    KNP_MARATHON_URL = '127.0.0.1:8080/v2/apps'
+
     KNP_MYSQL_HOST = '127.0.0.1'
     KNP_MYSQL_PORT = '3306'
     KNP_MYSQL_PASS = 'KnowEnG'
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     KNP_MYSQL_DIR = KNP_WORKING_DIR+'/mysql-'+KNP_MYSQL_PORT+'-'+KNP_BUILD_NAME
     KNP_MYSQL_MEM = '0'
     KNP_MYSQL_CPU = '0.5'
-    
+
     KNP_REDIS_HOST = '127.0.0.1'
     KNP_REDIS_PORT = '6380'
     KNP_REDIS_PASS = 'KnowEnG'
@@ -171,12 +171,12 @@ if __name__ == "__main__":
     if get_status():
         main()
     else:
-    run_step("MYSQL", False)
-    run_step("REDIS", False)
-    wait_for_port(int(KNP_REDIS_PORT), KNP_REDIS_HOST)
-    wait_for_port(int(KNP_MYSQL_PORT), KNP_MYSQL_HOST)
+        run_step("MYSQL", False)
+        run_step("REDIS", False)
+        wait_for_port(int(KNP_REDIS_PORT), KNP_REDIS_HOST)
+        wait_for_port(int(KNP_MYSQL_PORT), KNP_MYSQL_HOST)
         run_step('SETUP')
         run_step('CHECK')
         run_step('IMPORT')
-    run_step('EXPORT1')
-    run_step('EXPORT2')
+        run_step('EXPORT1')
+        run_step('EXPORT2')
