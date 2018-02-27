@@ -136,7 +136,7 @@ class Job:
         for env in envvars:
             envstr += ' -e ' + env['variable'] + '=' + env['value']
         docker_cmd = ["docker", "run", "--name", jobjson["name"], "--rm=true",
-                      vmntstr, self.tmpdict["TMPIMG"], jobjson["command"]]
+                      vmntstr, self.args.build_image, jobjson["command"]]
         print("\n"+" ".join(docker_cmd))
         if not self.args.test_mode:
 #           subprocess.call(' '.join(docker_cmd), shell=True)

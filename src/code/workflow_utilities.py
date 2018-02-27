@@ -164,7 +164,8 @@ def generic_dict(args, ns_parent=None):
                 'TMPLOGSPATH': args.logs_path,
                 'TMPOPTS': args.config_opts,
                 'TMPSHAREDIR': args.storage_dir,
-                'TMPSHAREBOOL': 'false'
+                'TMPSHAREBOOL': 'false',
+                'TMPIMG': args.build_image
                }
     if ns_parent is None: # regular job
         if args.dependencies != "": # continuation job

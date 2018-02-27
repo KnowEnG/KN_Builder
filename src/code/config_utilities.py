@@ -87,6 +87,7 @@ DEFAULT_NGINX_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn_nginx')
 DEFAULT_NGINX_CONF = 'autoindex/'
 
 DEFAULT_S3_BUCKET = 'KnowNets'
+DEFAULT_BUILD_IMAGE = 'knoweng/kn_build:latest'
 
 
 def add_config_args(parser):
@@ -206,6 +207,8 @@ def add_config_args(parser):
                         help='fetch even if file exists and has not changed from last run')
     parser.add_argument('-b', '--bucket', default=DEFAULT_S3_BUCKET,
                         help='S3 bucket to sync output')
+    parser.add_argument('-i', '--build_image', default=DEFAULT_BUILD_IMAGE,
+                        help='Builder image to use')
 
     return parser
 
