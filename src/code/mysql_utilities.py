@@ -69,7 +69,7 @@ def deploy_container(args=None):
     out_path = os.path.join(deploy_dir, "kn_mysql-" + args.mysql_port +'.json')
     with open(out_path, 'w') as outfile:
         outfile.write(json.dumps(deploy_dict))
-    job = 'curl -X POST -H "Content-type: application/json" ' + args.marathon + " -d '"
+    job = 'curl -fX POST -H "Content-type: application/json" ' + args.marathon + " -d '"
     job += json.dumps(deploy_dict) + "'"
     if not args.test_mode:
         try:

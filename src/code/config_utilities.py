@@ -58,7 +58,7 @@ csvw.writerow(['run info', 'time', time.time()])
 
 DEFAULT_CHRONOS_URL = '127.0.0.1:8888'
 DEFAULT_MARATHON_URL = '127.0.0.1:8080/v2/apps'
-DEFAULT_WORKING_DIR = os.path.abspath('.')
+DEFAULT_WORKING_DIR = os.path.abspath('..')
 
 DEFAULT_CODE_PATH = '/kn_builder/code'
 DEFAULT_DATA_PATH = 'data'
@@ -72,7 +72,7 @@ DEFAULT_MYSQL_USER = 'root'
 DEFAULT_MYSQL_PASS = 'KnowEnG'
 DEFAULT_MYSQL_MEM = '0'
 DEFAULT_MYSQL_CPU = '0.5'
-DEFAULT_MYSQL_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn_mysql')
+DEFAULT_MYSQL_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn-mysql')
 DEFAULT_MYSQL_CONF = 'build_conf/'
 
 DEFAULT_REDIS_URL = '127.0.0.1'
@@ -80,10 +80,10 @@ DEFAULT_REDIS_PORT = '6380'
 DEFAULT_REDIS_PASS = 'KnowEnG'
 DEFAULT_REDIS_MEM = '0'
 DEFAULT_REDIS_CPU = '0.5'
-DEFAULT_REDIS_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn_redis')
+DEFAULT_REDIS_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn-redis')
 
 DEFAULT_NGINX_PORT = '8080'
-DEFAULT_NGINX_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn_nginx')
+DEFAULT_NGINX_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn-nginx')
 DEFAULT_NGINX_CONF = 'autoindex/'
 
 DEFAULT_S3_BUCKET = 'KnowNets'
