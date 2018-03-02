@@ -86,6 +86,8 @@ def get_status(chronos_url, statuses=False):
     job_status['all'] = []
     for job in jobs_dict:
         jname = job['name']
+        if jname not in jobs_csv:
+            continue
         nerror = job['errorCount']
         nsuccess = job['successCount']
         #command = job['command']
