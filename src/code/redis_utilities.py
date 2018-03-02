@@ -19,7 +19,7 @@ import csv
 import redis
 import config_utilities as cf
 
-MGET_CHUNK = 100
+MGET_CHUNK = 5000
 
 def deploy_container(args=None):
     """Deplays a container with marathon running Redis using the specified
@@ -44,15 +44,15 @@ def deploy_container(args=None):
                         args.redis_pass + " --port " + args.redis_port
     deploy_dict["cpus"] = float(args.redis_cpu)
     deploy_dict["mem"] = int(args.redis_mem)
-    if args.redis_curl:
-        deploy_dict["constraints"] = [["hostname", "CLUSTER", args.redis_curl]]
+    if args.redis_host is not cf.DEFAULT_REDIS_URL:
+        deploy_dict["constraints"] = [["hostname", "CLUSTER", args.redis_host]]
     else:
         deploy_dict["constraints"] = []
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.redis_dir
     out_path = os.path.join(deploy_dir, "kn_redis-" + args.redis_port +'.json')
     with open(out_path, 'w') as outfile:
         outfile.write(json.dumps(deploy_dict))
-    job = 'curl -X POST -H "Content-type: application/json" ' + args.marathon + " -d '"
+    job = 'curl -fX POST -H "Content-type: application/json" ' + args.marathon + "/v2/apps -d '"
     job += json.dumps(deploy_dict) + "'"
     if not args.test_mode:
         try:

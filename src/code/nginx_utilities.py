@@ -13,6 +13,10 @@ import subprocess
 from argparse import ArgumentParser
 import config_utilities as cf
 
+DEFAULT_NGINX_PORT = '8080'
+DEFAULT_NGINX_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn_nginx')
+DEFAULT_NGINX_CONF = 'autoindex/'
+
 def deploy_container(args=None):
     """Deplays a container with marathon running nginx using the specified
     args.
@@ -46,7 +50,7 @@ def deploy_container(args=None):
     out_path = os.path.join(deploy_dir, "kn_nginx-" + args.nginx_port +'.json')
     with open(out_path, 'w') as outfile:
         outfile.write(json.dumps(deploy_dict))
-    job = 'curl -X POST -H "Content-type: application/json" ' + args.marathon + " -d '"
+    job = 'curl -fX POST -H "Content-type: application/json" ' + args.marathon + "/v2/apps -d '"
     job += json.dumps(deploy_dict) + "'"
     if not args.test_mode:
         try:
@@ -64,6 +68,14 @@ def main():
     config_utilities to launch a Nginx docker container using marathon.
     """
     parser = ArgumentParser()
+    parser.add_argument('-ngp', '--nginx_port', default=DEFAULT_NGINX_PORT,
+                        help='port for nginx db')
+    parser.add_argument('-ngd', '--nginx_dir', default=DEFAULT_NGINX_DIR,
+                        help='directory for deploying nginx container')
+    parser.add_argument('-ngcf', '--nginx_conf', default=DEFAULT_NGINX_CONF,
+                        help='config directory for deploying nginx container')
+    parser.add_argument('-ncu', '--nginx_curl', default='', nargs='?',
+                        help='constrain url for deploying nginx container')
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
     deploy_container(args)

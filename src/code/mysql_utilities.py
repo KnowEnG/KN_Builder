@@ -46,8 +46,8 @@ def deploy_container(args=None):
     deploy_dict["id"] = os.path.basename(args.mysql_dir)
     deploy_dict["cpus"] = float(args.mysql_cpu)
     deploy_dict["mem"] = int(args.mysql_mem)
-    if args.mysql_curl:
-        deploy_dict["constraints"] = [["hostname", "CLUSTER", args.mysql_curl]]
+    if args.mysql_host is not cf.DEFAULT_MYSQL_URL:
+        deploy_dict["constraints"] = [["hostname", "CLUSTER", args.mysql_host]]
     else:
         deploy_dict["constraints"] = []
     conf_template = os.path.join(args.code_path, 'mysql', args.mysql_conf)
@@ -69,8 +69,9 @@ def deploy_container(args=None):
     out_path = os.path.join(deploy_dir, "kn_mysql-" + args.mysql_port +'.json')
     with open(out_path, 'w') as outfile:
         outfile.write(json.dumps(deploy_dict))
-    job = 'curl -X POST -H "Content-type: application/json" ' + args.marathon + " -d '"
+    job = 'curl -fX POST -H "Content-type: application/json" ' + args.marathon + "/v2/apps -d '"
     job += json.dumps(deploy_dict) + "'"
+    print(job)
     if not args.test_mode:
         try:
             subprocess.check_output(job, shell=True)
@@ -836,6 +837,7 @@ def main():
     parser = ArgumentParser()
     parser = cf.add_config_args(parser)
     args = parser.parse_args()
+    print(args)
     deploy_container(args)
 
 if __name__ == "__main__":
