@@ -26,6 +26,7 @@ import config_utilities as cf
 from fetch_utilities import download
 import mysql_utilities as db
 import redis_utilities as ru
+import fetch_utilities as fu
 
 TABLE_LIST = ['external_db', 'gene', 'object_xref', 'transcript',
               'translation', 'xref']
@@ -267,7 +268,9 @@ class Ensembl(SrcClass):
             rest_url = 'http://rest.ensembl.org'
             query = '/info/data/?content-type=application/json'
             key = 'releases'
-        response = urllib.request.urlopen(rest_url + query)
+        print(rest_url + query)
+        response = fu.opener.open(rest_url + query)
+#        response = urllib.request.urlopen(rest_url + query)
         json_obj = json.loads(response.read().decode())
         version = str(json_obj[key])
         if '[' in version:
