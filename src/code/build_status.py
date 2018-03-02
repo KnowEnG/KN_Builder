@@ -76,6 +76,9 @@ def get_status(chronos_url, statuses=False):
             continue
         jobs_csv[row[1]] = row
 
+    # last_status: ['fresh', 'failure', 'success']
+    # state: ['idle', 'queued', 'running']
+
     job_status = {}
     job_status['running'] = []
     job_status['failure'] = []
@@ -164,8 +167,11 @@ def run_step(step, wait=True, args=cf.config_args()):
         arg_list = ['python3', os.path.join(args.code_path, 'workflow_utilities.py'),
                     'CHECK', '-su', args.config_opts]
     elif step == 'CHECK':
+        param_str = ""
+        if args.src_classes:
+            param_str = " ".join(['-p', args.src_classes])
         arg_list = ['python3', os.path.join(args.code_path, 'workflow_utilities.py'),
-                    'CHECK', '-p', args.src_classes, args.config_opts]
+                        'CHECK', param_str, args.config_opts]
     elif step == 'IMPORT':
         arg_list = ['python3', os.path.join(args.code_path, 'workflow_utilities.py'),
                     'IMPORT', args.config_opts]
