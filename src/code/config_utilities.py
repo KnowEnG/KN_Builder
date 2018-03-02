@@ -3,36 +3,19 @@
 This module establishes default values and argument parsers for commonly
 used variables
 
+Contains module functions::
+
+    add_run_config_args(parser)
+    add_file_config_args(parser)
+    add_mysql_config_args(parser)
+    add_redis_config_args(parser)
+    add_config_args(parser)
+    config_args()
+    pretty_name(orig_name, endlen=63)
+
 Attributes:
-    DEFAULT_CHRONOS_URL (str): address of chronos scheduler
-    DEFAULT_MARATHON_URL (str): address of marathon scheduler
-    DEFAULT_WORK_BASE (str): toplevel directory of working directory
 
-    DEFAULT_CODE_PATH (str): absolute path of code dir
-    DEFAULT_DATA_PATH (str): relative path of data dir from toplevel
-    DEFAULT_LOGS_PATH (str): relative path of logs dir from toplevel
-    DEFAULT_LOGS_PATH (str): relative path of srcClass dir from toplevel
-    DEFAULT_MAP_PATH (str): relative path of id_map dir from toplevel
-
-    DEFAULT_MYSQL_URL (str): location of MySQL db
-    DEFAULT_MYSQL_PORT (int): port for MySQL db
-    DEFAULT_MYSQL_USER (str): user for MySQL db
-    DEFAULT_MYSQL_PASS (str): password for MySQL db
-    DEFAULT_MYSQL_MEM (str): memory for launching MySQL db
-    DEFAULT_MYSQL_CPU (str): CPUs for launching MySQL db
-    DEFAULT_MYSQL_DIR (str): toplevel directory for MySQL db storage
-    DEFAULT_MYSQL_CONF (str): name of config path for launching MySQL
-
-    DEFAULT_REDIS_URL (str): location of Redis db
-    DEFAULT_REDIS_PORT (int): port for Redis db
-    DEFAULT_REDIS_PASS (str): password for Redis db
-    DEFAULT_REDIS_MEM (str): memory for launching Redis db
-    DEFAULT_REDIS_CPU (str): CPUs for launching Redis db
-    DEFAULT_REDIS_DIR (str): toplevel directory for Redis db storage
-
-    DEFAULT_NGINX_PORT (int): port for nginx db
-    DEFAULT_NGINX_DIR (str): toplevel directory for nginx db storage
-    DEFAULT_NGINX_CONF (str): name of config path for launching nginx
+    Default values for different configuration options
 """
 from argparse import ArgumentParser
 import os
@@ -41,56 +24,20 @@ import socket
 import sys
 import csv
 import time
-import subprocess
 import shlex
 
 print("Running on", socket.gethostname())
-csvw = csv.writer(sys.stdout, delimiter='\t')
-csvw.writerow(['run info', 'argv', ' '.join(map(shlex.quote, sys.argv))])
-csvw.writerow(['run info', 'time', time.time()])
-#try:
-#    csvw.writerow(['run info', 'commit',
-#                   subprocess.check_output(['git', 'describe', '--always']).strip().decode()])
-#except subprocess.CalledProcessError:
-#    pass
-#except FileNotFoundError:
-#    pass
+CSVM = csv.writer(sys.stdout, delimiter='\t')
+CSVM.writerow(['run info', 'argv', ' '.join(map(shlex.quote, sys.argv))])
+CSVM.writerow(['run info', 'time', time.strftime("%y/%m/%d %H:%M:%S")])
+
 
 DEFAULT_CHRONOS_URL = '127.0.0.1:8888'
-DEFAULT_MARATHON_URL = '127.0.0.1:8080/v2/apps'
-DEFAULT_WORKING_DIR = os.path.abspath('.')
+DEFAULT_MARATHON_URL = '127.0.0.1:8080'
+DEFAULT_BUILD_IMAGE = 'knoweng/kn_builder:latest'
+DEFAULT_ENS_SPECIES = 'homo_sapiens'
 
-DEFAULT_CODE_PATH = '/kn_builder/code'
-DEFAULT_DATA_PATH = 'data'
-DEFAULT_LOGS_PATH = 'logs'
-DEFAULT_SRC_PATH = 'srcClass'
-DEFAULT_MAP_PATH = 'id_map'
-
-DEFAULT_MYSQL_URL = '127.0.0.1'
-DEFAULT_MYSQL_PORT = '3307'
-DEFAULT_MYSQL_USER = 'root'
-DEFAULT_MYSQL_PASS = 'KnowEnG'
-DEFAULT_MYSQL_MEM = '0'
-DEFAULT_MYSQL_CPU = '0.5'
-DEFAULT_MYSQL_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn_mysql')
-DEFAULT_MYSQL_CONF = 'build_conf/'
-
-DEFAULT_REDIS_URL = '127.0.0.1'
-DEFAULT_REDIS_PORT = '6380'
-DEFAULT_REDIS_PASS = 'KnowEnG'
-DEFAULT_REDIS_MEM = '0'
-DEFAULT_REDIS_CPU = '0.5'
-DEFAULT_REDIS_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn_redis')
-
-DEFAULT_NGINX_PORT = '8080'
-DEFAULT_NGINX_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn_nginx')
-DEFAULT_NGINX_CONF = 'autoindex/'
-
-DEFAULT_S3_BUCKET = 'KnowNets'
-DEFAULT_BUILD_IMAGE = 'knoweng/kn_build:latest'
-
-
-def add_config_args(parser):
+def add_run_config_args(parser):
     """Add global configuation options to command line arguments.
 
     If global arguments are not specified, supplies their default values.
@@ -100,41 +47,13 @@ def add_config_args(parser):
     :widths: 4,2,2,12
     :delim: |
 
-    --chronos  	    |str	|-c	    |url of chronos scheduler or LOCAL or DOCKER
-    --working_dir	|str	|-wd	|name of toplevel directory of working dir
-    --storage_dir   |str	|-sd	|name of toplevel directory of shared storage
-    --code_path	    |str	|-cp	|absolute path of code directory
-    --data_path	    |str	|-dp	|relative path of data directory from toplevel
-    --logs_path	    |str	|-lp	|relative path of data directory from toplevel
-    --src_path 	    |str	|-sp	|relative path of source code directory from code directory
-    --mysql_host	|str	|-myh	|url of mySQL db
-    --mysql_port	|str	|-myp	|port for mySQL db
-    --mysql_user	|str	|-myu	|user for mySQL db
-    --mysql_pass	|str	|-myps	|password for mySQL db
-    --mysql_mem     |str    |-mym   |memory for deploying MySQL container
-    --mysql_cpu     |str    |-myc   |cpus for deploying MySQL container
-    --mysql_dir     |str    |-myd   |directory for deploying MySQL container
-    --mysql_curl    |str    |-mycu  |constraint url for deploying MySQL container
-    --mysql_dir     |str    |-myd   |directory for deploying MySQL container
-    --mysql_curl    |str    |-mycu  |constraint url for deploying MySQL container
-    --mysql_conf    |str    |-mycf  |config directory for deploying MySQL container
-    --redis_host	|str	|-rh 	|url of Redis db
-    --redis_port	|str	|-rp 	|port for Redis db
-    --redis_pass	|str	|-rps	|password for Redis db
-    --redis_mem     |str    |-rm    |memory for deploying redis container
-    --redis_cpu     |str    |-rc    |cpus for deploying redis container
-    --redis_dir     |str    |-rd    |directory for deploying redis container
-    --redis_curl    |str    |-rcu   |constraint url for deploying redis container
-    --nginx_port	|str	|-ngp	|port for nginx db
-    --nginx_dir     |str    |-ngd   |directory for deploying MySQL container
-    --nginx_conf    |str    |-ngcf  |config directory for deploying nginx container
-    --chunk_size	|int	|-cs	|lines per chunk
-    --test_mode	    |   	|-tm	|run in test mode by only printing command, defaults to False
+    --chronos       |str    |-c     |url of chronos scheduler or LOCAL or DOCKER
+    --marathon      |str    |-m     |url of marathon scheduler
+    --build_image   |str    |-i     |docker image name to use for kn_build pipeline
     --ens_species   |str    |-es    |',,' separated ensembl species to run in setup pipeline
-    --force_fetch   |	    |-ff	|fetch even if file exists and has not changed from last run
-    --bucket|str|-b|S3 bucket to sync output
-
-
+    --src_classes   |str    |-srcs  |',,' separated source keywords to run in parse pipeline
+    --force_fetch   |bool   |-ff    |fetch even if file exists and is unchanged from last run
+    --test_mode     |bool   |-tm    |run in test mode by only printing commands
 
     Args:
         parser (argparse.ArgumentParser): a parser to add global config opts to
@@ -146,70 +65,185 @@ def add_config_args(parser):
                         help='url of chronos scheduler or LOCAL or DOCKER')
     parser.add_argument('-m', '--marathon', default=DEFAULT_MARATHON_URL,
                         help='url of marathon scheduler')
+    parser.add_argument('-i', '--build_image', default=DEFAULT_BUILD_IMAGE,
+                        help='docker image name to use for kn_build pipeline')
+    parser.add_argument('-es', '--ens_species', default=DEFAULT_ENS_SPECIES,
+                        help=',, separated list of ensembl species to run in setup pipeline')
+    parser.add_argument('-srcs', '--src_classes', default='',
+                        help=',, separated list of source keywords to run in parse pipeline')
+    parser.add_argument('-ff', '--force_fetch', action='store_true', default=False,
+                        help='fetch even if file exists and has not changed from last run')
+    parser.add_argument('-tm', '--test_mode', action='store_true', default=False,
+                        help='run in test mode by only printing commands')
+    return parser
+
+
+DEFAULT_WORKING_DIR = os.path.abspath('.')
+DEFAULT_CODE_PATH = '/kn_builder/code/'
+DEFAULT_DATA_PATH = 'data'
+DEFAULT_LOGS_PATH = 'logs'
+DEFAULT_EXPORT_PATH = 'userKN'
+DEFAULT_SRC_PATH = 'srcClass'
+DEFAULT_MAP_PATH = 'id_map' # not parameter
+
+def add_file_config_args(parser):
+    """Add global configuation options to command line arguments.
+
+    If global arguments are not specified, supplies their default values.
+
+.. csv-table::
+    :header: parameter,argument,flag,description
+    :widths: 4,2,2,12
+    :delim: |
+
+    --working_dir   |str    |-wd    |absolute path to toplevel working directory
+    --code_path     |str    |-cp    |absolute path of code directory
+    --storage_dir   |str    |-sd    |absolute path to toplevel shared storage directory
+    --data_path     |str    |-dp    |relative path of data directory from toplevel
+    --logs_path     |str    |-lp    |relative path of logs directory from toplevel
+    --export_path   |str    |-ep    |relative path of export directory from toplevel
+    --src_path      |str    |-sp    |relative path of srcClass directory from code_path
+
+    Args:
+        parser (argparse.ArgumentParser): a parser to add global config opts to
+
+    Returns:
+        argparse.ArgumentParser: parser with appended global options
+    """
     parser.add_argument('-wd', '--working_dir', default=DEFAULT_WORKING_DIR,
-                        help='name of toplevel directory of working directory')
-    parser.add_argument('-sd', '--storage_dir', default='', nargs='?',
-                        help='name of toplevel directory of storage directory')
+                        help='absolute path to toplevel working directory')
     parser.add_argument('-cp', '--code_path', default=DEFAULT_CODE_PATH,
                         help='absolute path of code directory')
+    parser.add_argument('-sd', '--storage_dir', default='', nargs='?',
+                        help='name of toplevel directory of storage directory')
     parser.add_argument('-dp', '--data_path', default=DEFAULT_DATA_PATH,
                         help='relative path of data directory from toplevel')
     parser.add_argument('-lp', '--logs_path', default=DEFAULT_LOGS_PATH,
                         help='relative path of data directory from toplevel')
+    parser.add_argument('-ep', '--export_path', default=DEFAULT_EXPORT_PATH,
+                        help='relative path of export directory from toplevel')
     parser.add_argument('-sp', '--src_path', default=DEFAULT_SRC_PATH,
-                        help=('relative path of source code directory from code'
-                              ' directory'))
+                        help=('relative path of srcClass directory from code_path'))
+    return parser
+
+
+DEFAULT_MYSQL_URL = '127.0.0.1'
+DEFAULT_MYSQL_PORT = '3306'
+DEFAULT_MYSQL_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn-mysql')
+DEFAULT_MYSQL_MEM = '0'
+DEFAULT_MYSQL_CPU = '0.5'
+DEFAULT_MYSQL_CONF = 'build_conf/'
+DEFAULT_MYSQL_USER = 'root'
+DEFAULT_MYSQL_PASS = 'KnowEnG'
+
+def add_mysql_config_args(parser):
+    """Add global configuation options to command line arguments.
+
+    If global arguments are not specified, supplies their default values.
+
+.. csv-table::
+    :header: parameter,argument,flag,description
+    :widths: 4,2,2,12
+    :delim: |
+
+    --mysql_host    |str    |-myh   |address of mySQL db
+    --mysql_port    |str    |-myp   |port for mySQL db
+    --mysql_dir     |str    |-myd   |absolute directory for MySQL db files
+    --mysql_mem     |str    |-mym   |memory for deploying MySQL container
+    --mysql_cpu     |str    |-myc   |cpus for deploying MySQL container
+    --mysql_conf    |str    |-mycf  |relative config dir for deploying MySQL
+    --mysql_user    |str    |-myu   |user for mySQL db
+    --mysql_pass    |str    |-myps  |password for mySQL db
+
+    Args:
+        parser (argparse.ArgumentParser): a parser to add global config opts to
+
+    Returns:
+        argparse.ArgumentParser: parser with appended global options
+    """
     parser.add_argument('-myh', '--mysql_host', default=DEFAULT_MYSQL_URL,
-                        help='url of mySQL db')
+                        help='address of mySQL db')
     parser.add_argument('-myp', '--mysql_port', default=DEFAULT_MYSQL_PORT,
                         help='port for mySQL db')
-    parser.add_argument('-myu', '--mysql_user', default=DEFAULT_MYSQL_USER,
-                        help='user for mySQL db')
-    parser.add_argument('-myps', '--mysql_pass', default=DEFAULT_MYSQL_PASS,
-                        help='password for mySQL db')
+    parser.add_argument('-myd', '--mysql_dir', default=DEFAULT_MYSQL_DIR,
+                        help='absolute directory for MySQL db files')
     parser.add_argument('-mym', '--mysql_mem', default=DEFAULT_MYSQL_MEM,
                         help='memory for deploying MySQL container')
     parser.add_argument('-myc', '--mysql_cpu', default=DEFAULT_MYSQL_CPU,
                         help='cpus for deploying MySQL container')
-    parser.add_argument('-mycu', '--mysql_curl', default='', nargs='?',
-                        help='constrain url for deploying MySQL container')
-    parser.add_argument('-myd', '--mysql_dir', default=DEFAULT_MYSQL_DIR,
-                        help='directory for deploying MySQL container')
     parser.add_argument('-mycf', '--mysql_conf', default=DEFAULT_MYSQL_CONF,
                         help='config directory for deploying MySQL container')
+    parser.add_argument('-myu', '--mysql_user', default=DEFAULT_MYSQL_USER,
+                        help='user for mySQL db')
+    parser.add_argument('-myps', '--mysql_pass', default=DEFAULT_MYSQL_PASS,
+                        help='password for mySQL db')
+    return parser
+
+
+DEFAULT_REDIS_URL = '127.0.0.1'
+DEFAULT_REDIS_PORT = '6379'
+DEFAULT_REDIS_DIR = os.path.join(DEFAULT_WORKING_DIR, 'kn-redis')
+DEFAULT_REDIS_MEM = '0'
+DEFAULT_REDIS_CPU = '0.5'
+DEFAULT_REDIS_PASS = 'KnowEnG'
+
+def add_redis_config_args(parser):
+    """Add global configuation options to command line arguments.
+
+    If global arguments are not specified, supplies their default values.
+
+.. csv-table::
+    :header: parameter,argument,flag,description
+    :widths: 4,2,2,12
+    :delim: |
+
+    --redis_host    |str    |-rh    |address of Redis db
+    --redis_port    |str    |-rp    |port for Redis db
+    --redis_dir     |str    |-rd    |absolute directory for Redis db files
+    --redis_mem     |str    |-rm    |memory for deploying redis container
+    --redis_cpu     |str    |-rc    |cpus for deploying redis container
+    --redis_pass    |str    |-rps   |password for Redis db
+
+    Args:
+        parser (argparse.ArgumentParser): a parser to add global config opts to
+
+    Returns:
+        argparse.ArgumentParser: parser with appended global options
+    """
     parser.add_argument('-rh', '--redis_host', default=DEFAULT_REDIS_URL,
-                        help='url of Redis db')
+                        help='address of Redis db')
     parser.add_argument('-rp', '--redis_port', default=DEFAULT_REDIS_PORT,
                         help='port for Redis db')
-    parser.add_argument('-rps', '--redis_pass', default=DEFAULT_REDIS_PASS,
-                        help='password for Redis db')
+    parser.add_argument('-rd', '--redis_dir', default=DEFAULT_REDIS_DIR,
+                        help='absolute directory for Redis db files')
     parser.add_argument('-rm', '--redis_mem', default=DEFAULT_REDIS_MEM,
                         help='memory for deploying redis container')
     parser.add_argument('-rc', '--redis_cpu', default=DEFAULT_REDIS_CPU,
                         help='cpus for deploying redis container')
-    parser.add_argument('-rcu', '--redis_curl', default='', nargs='?',
-                        help='constrain url for deploying redis container')
-    parser.add_argument('-rd', '--redis_dir', default=DEFAULT_REDIS_DIR,
-                        help='directory for deploying redis container')
-    parser.add_argument('-ngp', '--nginx_port', default=DEFAULT_NGINX_PORT,
-                        help='port for nginx db')
-    parser.add_argument('-ngd', '--nginx_dir', default=DEFAULT_NGINX_DIR,
-                        help='directory for deploying nginx container')
-    parser.add_argument('-ngcf', '--nginx_conf', default=DEFAULT_NGINX_CONF,
-                        help='config directory for deploying nginx container')
-    parser.add_argument('-ncu', '--nginx_curl', default='', nargs='?',
-                        help='constrain url for deploying nginx container')
-    parser.add_argument('-tm', '--test_mode', action='store_true', default=False,
-                        help='run in test mode by only printing commands')
-    parser.add_argument('-es', '--ens_species', default='REPRESENTATIVE',
-                        help=',, separated list of ensembl species to run in setup pipeline')
-    parser.add_argument('-ff', '--force_fetch', action='store_true', default=False,
-                        help='fetch even if file exists and has not changed from last run')
-    parser.add_argument('-b', '--bucket', default=DEFAULT_S3_BUCKET,
-                        help='S3 bucket to sync output')
-    parser.add_argument('-i', '--build_image', default=DEFAULT_BUILD_IMAGE,
-                        help='Builder image to use')
+    parser.add_argument('-rps', '--redis_pass', default=DEFAULT_REDIS_PASS,
+                        help='password for Redis db')
+    return parser
 
+
+def add_config_args(parser):
+    """Add global configuation options to command line arguments.
+
+    If global arguments are not specified, supplies their default values.
+
+    Args:
+        parser (argparse.ArgumentParser): a parser to add global config opts to
+
+    Returns:
+        argparse.ArgumentParser: parser with appended global options
+    """
+    group1 = parser.add_argument_group('run arguments')
+    group1 = add_run_config_args(group1)
+    group2 = parser.add_argument_group('path arguments')
+    group2 = add_file_config_args(group2)
+    group3 = parser.add_argument_group('mysql arguments')
+    group3 = add_mysql_config_args(group3)
+    group4 = parser.add_argument_group('redis arguments')
+    group4 = add_redis_config_args(group4)
     return parser
 
 
