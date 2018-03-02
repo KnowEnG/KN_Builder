@@ -187,7 +187,7 @@ class PfamProt(SrcClass):
         src = 'pf'
 
         ###Map the file name
-        species = (os.path.join('..', '..', 'id_map', 'species', 'species.json'))
+        species = (os.path.join('..', '..', cf.DEFAULT_MAP_PATH, 'species', 'species.json'))
         with open(species) as infile:
             species_map = json.load(infile)
         n2spec = version_dict['alias']

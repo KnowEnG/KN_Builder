@@ -330,7 +330,7 @@ class Kegg(SrcClass):
         alias_map = os.path.join('..', a_map, 'kegg.' + a_map + '.json')
         with open(alias_map) as infile:
             node_map = json.load(infile)
-        species = (os.path.join('..', '..', 'id_map', 'species', 'species.json'))
+        species = (os.path.join('..', '..', cf.DEFAULT_MAP_PATH, 'species', 'species.json'))
         with open(species) as infile:
             species_map = json.load(infile)
 
