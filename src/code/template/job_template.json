@@ -5,7 +5,6 @@
         "type": "DOCKER",
         "image": "TMPIMG",
         "volumes": [TMPVMNTSTR,
-                    TMPCODEPATHSTR,
                     {"containerPath": "/etc/", "hostPath":"/etc/", "mode":"RW"}
                    ]
     },
