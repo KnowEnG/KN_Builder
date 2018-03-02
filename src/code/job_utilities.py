@@ -62,12 +62,14 @@ class Job:
                                "components.json"), 'r') as infile:
             jobsdesc = json.load(infile)
         # prepare volume mount
+        cpstr = '{"containerPath": "TMPCODEPATH", "hostPath":"TMPCODEPATH", "mode":"RW"}'
         vmntstr = '{"containerPath": "TMPWORKDIR", "hostPath":"TMPWORKDIR", "mode":"RW"}'
-        if self.args.working_dir != self.args.storage_dir:
+        if self.args.storage_dir and self.args.working_dir != self.args.storage_dir:
             vmntstr += ', {"containerPath": "TMPSHAREDIR", "hostPath":"TMPSHAREDIR", "mode":"RW"}'
         # replace global dummy values with job specific ones
         self.tmpdict = jobsdesc[jobtype]
         self.tmpdict["TMPVMNTSTR"] = vmntstr
+        self.tmpdict["TMPCODEPATHSTR"] = cpstr
         self.replace_jobtmp(self.tmpdict)
     def replace_jobtmp(self, tmpdict):
         """Replaces temporary strings in self.cjobstr with specific values
@@ -131,7 +133,8 @@ class Job:
         envvars = json.loads(self.tmpdict.get("TMPENV", "[]"))
         envstr = ""
         vmntstr = "-v " + self.args.working_dir + ":" + self.args.working_dir
-        if self.args.working_dir != self.args.storage_dir:
+        vmntstr += " -v " + self.args.code_path + ":" + self.args.code_path
+        if self.args.storage_dir and self.args.working_dir != self.args.storage_dir:
             vmntstr += " -v " + self.args.storage_dir + ":" + self.args.storage_dir
         for env in envvars:
             envstr += ' -e ' + env['variable'] + '=' + env['value']
