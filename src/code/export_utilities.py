@@ -6,8 +6,8 @@ import csv
 import subprocess
 from collections import defaultdict
 import yaml
-import numpy as np
-import scipy.sparse as ss
+#import numpy as np
+#import scipy.sparse as ss
 
 import config_utilities as cf
 import redis_utilities as ru
@@ -44,9 +44,10 @@ def num_connected_components(edges, nodes):
         r, c = edge[:2]
         row.append(rev_nodes[r])
         col.append(rev_nodes[c])
-    mat = ss.coo_matrix((np.ones(len(edges)), (row, col)), shape=(len(nodes), len(nodes)))
-    num, _ = ss.csgraph.connected_components(mat)
-    return num
+    return -1
+#    mat = ss.coo_matrix((np.ones(len(edges)), (row, col)), shape=(len(nodes), len(nodes)))
+#    num, _ = ss.csgraph.connected_components(mat)
+#    return num
 
 def figure_out_class(db, et):
     """Determines the class and bidirectionality of the edge_type.
@@ -166,7 +167,7 @@ def main():
     nodes_fn = '{}.{}.node_map'.format(args.species, args.edge_type)
     meta_fn = '{}.{}.metadata'.format(args.species, args.edge_type)
     bucket_dir = os.path.join(cls, args.species, args.edge_type)
-    sync_dir = os.path.join(args.bucket, bucket_dir)
+    sync_dir = os.path.join(args.working_dir, args.export_path, bucket_dir)
     sync_edges = os.path.join(sync_dir, edges_fn)
     sync_nodes = os.path.join(sync_dir, nodes_fn)
     sync_meta = os.path.join(sync_dir, meta_fn)
