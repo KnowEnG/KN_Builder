@@ -9,23 +9,24 @@ FROM ubuntu:14.04
 MAINTAINER Charles Blatti <blatti@illinois.edu>
 
 RUN apt-get update && apt-get -y install \
+    lxc \
+    liblapack-dev \
+    libblas-dev \
+    gfortran \
     build-essential \
-    pkg-config \
+    python3-pip \
     python3-numpy \
     python3-scipy \
-    git-core \
+    redis-server \
     mysql-client \
     time \
     curl \
     rsync \
     wget
 
-RUN wget https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py
-
 RUN pip3 install https://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.0.4.tar.gz
 RUN pip3 install redis \
     requests \
-    awscli \
     PyYAML
 
 ENV PYTHONUNBUFFERED 1
