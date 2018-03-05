@@ -108,7 +108,8 @@ class Enrichr(SrcClass):
             "WikiPathways_2016": "enrichr_pathway::WikiPath"
         }
         super(Enrichr, self).__init__(name, url_base, aliases, args)
-        self.chunk_size = 500
+        self.chunk_size = 5000
+        
         self.date_modified = 'unknown'
 
         self.source_url = "http://amp.pharm.mssm.edu/Enrichr/"

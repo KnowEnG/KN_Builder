@@ -55,7 +55,7 @@ class Stringdb(SrcClass):
         aliases = dict()
         super(Stringdb, self).__init__(name, url_base, aliases, args)
         self.aliases = self.get_aliases(args)
-        self.chunk_size = 250000
+        self.chunk_size = 750000
 
         self.source_url = "https://string-db.org/"
         self.image = "http://meringlab.org/logos/string.png"

@@ -74,6 +74,7 @@ class Blast(SrcClass):
         aliases = dict()
         super(Blast, self).__init__(name, url_base, aliases, args)
         self.aliases = self.get_aliases(args)
+        self.chunk_size = 400000
         self.sc_max = 100  # may want to load these
         self.sc_min = 2 # may want to load these
 
