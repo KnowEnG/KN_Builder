@@ -50,7 +50,7 @@ class Biogrid(SrcClass):
         aliases = {"PPI": "PPI"}
         super(Biogrid, self).__init__(name, url_base, aliases, args)
         self.access_key = '2fe900033b39209b8f63d531fcb24790'
-        self.chunk_size = 50000
+        self.chunk_size = 100000
         src_data_dir = os.path.join(args.working_dir, args.data_path, cf.DEFAULT_MAP_PATH)
         sp_dir = os.path.join(src_data_dir, 'species', 'species.json')
         sp_dict = json.load(open(sp_dir))
