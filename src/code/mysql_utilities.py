@@ -41,10 +41,10 @@ def deploy_container(args=None):
     if args.storage_dir:
         mysql_dir = os.path.join(args.storage_dir, args.data_path, 'mysql_config')
     # set up config directory
-    os.chmod(os.path.dirname(mysql_dir), 0o777)
     conf_path = os.path.join(mysql_dir, args.mysql_conf)
     if not os.path.exists(conf_path):
         os.makedirs(conf_path)
+    os.chmod(os.path.dirname(mysql_dir), 0o777)
     conf_template = os.path.join(args.code_path, 'mysql', args.mysql_conf)
     shutil.copy(os.path.join(conf_template, 'my.cnf'), os.path.join(conf_path, 'my.cnf'))
     # add port to end of config file
