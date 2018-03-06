@@ -46,6 +46,7 @@ def deploy_container(args=None):
     deploy_dict["id"] = os.path.basename(args.mysql_dir)
     deploy_dict["cpus"] = float(args.mysql_cpu)
     deploy_dict["mem"] = int(args.mysql_mem)
+    deploy_dict["env"]["PORT"] = int(args.mysql_port) 
     if args.mysql_host is not cf.DEFAULT_MYSQL_URL:
         deploy_dict["constraints"] = [["hostname", "CLUSTER", args.mysql_host]]
     else:
