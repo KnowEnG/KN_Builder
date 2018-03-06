@@ -332,11 +332,10 @@ def merge_logs(args):
     """Merge all log files into a single file that contains all the information about the run.
     """
 
+    searchpath = os.path.join(args.working_dir, args.logs_path)
     if args.storage_dir:
-        searchpath = os.path.join(args.storage_dir)
-    else:
-        searchpath = os.path.join(args.working_dir)
-    searchfile = os.path.join(searchpath, '../logs_*/*.log')
+        searchpath = os.path.join(args.storage_dir, args.logs_path)
+    searchfile = os.path.join(searchpath, '*.log')
     outpath = os.path.join(args.working_dir, args.data_path)
     outfile = os.path.join(outpath, 'unique.log.txt')
     with open(outfile, 'w') as out:

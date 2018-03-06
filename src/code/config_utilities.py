@@ -80,9 +80,9 @@ def add_run_config_args(parser):
 
 DEFAULT_WORKING_DIR = os.path.abspath('.')
 DEFAULT_CODE_PATH = '/kn_builder/code/'
-DEFAULT_DATA_PATH = 'data'
-DEFAULT_LOGS_PATH = 'logs'
-DEFAULT_EXPORT_PATH = 'userKN'
+DEFAULT_DATA_PATH = 'kn-rawdata'
+DEFAULT_LOGS_PATH = 'kn-logs'
+DEFAULT_EXPORT_PATH = 'kn-final'
 DEFAULT_SRC_PATH = 'srcClass'
 DEFAULT_MAP_PATH = 'id_map' # not parameter
 
