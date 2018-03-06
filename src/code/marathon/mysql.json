@@ -4,7 +4,6 @@
     "mem": "TMPMYSQLMEM",
     "instances": 1,
     "backoffFactor": 2.0,    
-    "env": {"PORT": "TMPMYSQLPORT"},    
     "constraints": [["hostname", "CLUSTER", "TMPMYSQLHOST"]],
     "container": {
         "type": "DOCKER",

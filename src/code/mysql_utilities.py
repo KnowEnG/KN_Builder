@@ -36,37 +36,39 @@ def deploy_container(args=None):
     """
     if args is None:
         args = cf.config_args()
-    deploy_dir = os.path.join(args.working_dir, args.logs_path, 'marathon_jobs')
-    if not os.path.exists(deploy_dir):
-        os.makedirs(deploy_dir)
-    template_job = os.path.join(args.code_path, 'marathon',
-                                'mysql.json')
+    # put mysql config conf_path on storage directory if exists    
+    mysql_dir = os.path.join(args.working_dir, args.data_path, 'mysql_config')
+    if args.storage_dir:
+        mysql_dir = os.path.join(args.storage_dir, args.data_path, 'mysql_config')
+    # set up config directory
+    os.chmod(os.path.dirname(mysql_dir), 0o777)
+    conf_path = os.path.join(mysql_dir, args.mysql_conf)
+    if not os.path.exists(conf_path):
+        os.makedirs(conf_path)
+    conf_template = os.path.join(args.code_path, 'mysql', args.mysql_conf)
+    shutil.copy(os.path.join(conf_template, 'my.cnf'), os.path.join(conf_path, 'my.cnf'))
+    # add port to end of config file
+    with open(os.path.join(conf_path, 'my.cnf'), "a") as cnffile:
+        cnffile.write("port = " + args.mysql_port)
+    # modify marathon job template
+    template_job = os.path.join(args.code_path, 'marathon', 'mysql.json')
     with open(template_job, 'r') as infile:
         deploy_dict = json.load(infile)
     deploy_dict["id"] = os.path.basename(args.mysql_dir)
     deploy_dict["cpus"] = float(args.mysql_cpu)
     deploy_dict["mem"] = int(args.mysql_mem)
-    deploy_dict["env"]["PORT"] = int(args.mysql_port) 
     if args.mysql_host is not cf.DEFAULT_MYSQL_URL:
         deploy_dict["constraints"] = [["hostname", "CLUSTER", args.mysql_host]]
     else:
         deploy_dict["constraints"] = []
-    conf_template = os.path.join(args.code_path, 'mysql', args.mysql_conf)
-    if args.storage_dir:
-        mysql_dir = os.path.join(args.storage_dir, args.data_path, 'mysql')
-    else:
-        mysql_dir = os.path.join(args.working_dir, args.data_path, 'mysql')
-    conf_path = os.path.join(mysql_dir, args.mysql_conf)
-    if not os.path.exists(conf_path):
-        os.makedirs(conf_path)
-    os.chmod(os.path.dirname(mysql_dir), 0o777)
-    shutil.copy(os.path.join(conf_template, 'my.cnf'), os.path.join(conf_path, 'my.cnf'))
-    with open(os.path.join(conf_path, 'password'), 'w') as f:
-        f.write(args.mysql_pass)
     deploy_dict["container"]["volumes"][0]["hostPath"] = args.mysql_dir
     deploy_dict["container"]["volumes"][1]["hostPath"] = conf_path
     deploy_dict["container"]["docker"]["parameters"][0]["value"] = \
                     "MYSQL_ROOT_PASSWORD=KnowEnG"
+    # write and curl marathon job
+    deploy_dir = os.path.join(args.working_dir, args.logs_path, 'marathon_jobs')
+    if not os.path.exists(deploy_dir):
+        os.makedirs(deploy_dir)
     out_path = os.path.join(deploy_dir, "kn_mysql-" + args.mysql_port +'.json')
     with open(out_path, 'w') as outfile:
         outfile.write(json.dumps(deploy_dict))
