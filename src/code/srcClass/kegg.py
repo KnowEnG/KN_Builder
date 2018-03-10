@@ -187,6 +187,8 @@ class Kegg(SrcClass):
         """
         if 'map' in alias:
             url = self.url_base + 'conv/ncbi-geneid/' + alias[:-4]
+            if alias[:-4] == 'dpx':
+                url = self.url_base + 'conv/ncbi-geneid/' + alias[:-4]
         elif alias == 'pathway':
             url = self.url_base + 'list/pathway'
         else:
@@ -285,6 +287,8 @@ class Kegg(SrcClass):
                     mod_id = src + '_' + orig_id
                     kn_id = orig_name.split(':')[1]
                     kn_name = 'EntrezGene'
+                    if alias[:-4] == 'dpx':
+                        kn_name = 'Uniprot/SPTREMBL'
                     map_dict[mod_id] = kn_id + '::' + kn_name
 
         return map_dict
