@@ -6,6 +6,8 @@ KNP_EXPORT_DIR=$KNP_WORKING_DIR/$KNP_EXPORT_PATH
 mkdir -p $KNP_EXPORT_DIR
 cp $KNP_CODE_DIR/mysql/edge_type.txt $KNP_EXPORT_DIR
 
+echo "-h$KNP_MYSQL_HOST -u$KNP_MYSQL_USER -p$KNP_MYSQL_PASS -P$KNP_MYSQL_PORT"
+
 ## add gene maps
 cp $KNP_WORKING_DIR/$KNP_DATA_PATH/id_map/species/species.txt $KNP_EXPORT_DIR/species.txt
 for TAXON in `cut -f1 $KNP_EXPORT_DIR/species.txt `; do

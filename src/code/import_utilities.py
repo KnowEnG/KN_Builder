@@ -38,7 +38,8 @@ def import_file(file_name, table, ld_cmd='', dup_cmd='', args=None):
     if args is None:
         args = cf.config_args()
     db = mu.get_database('KnowNet', args)
-    print('Inserting data from into ' + table)
+    print('Inserting data from ' + file_name +' into ' + table)
+    print(ld_cmd)    
     db.load_data(file_name, table, ld_cmd)
     db.close()
 
@@ -60,7 +61,8 @@ def import_file_nokeys(file_name, table, ld_cmd='', args=None):
     if args is None:
         args = cf.config_args()
     db = mu.get_database('KnowNet', args)
-    print('Inserting data from into ' + table)
+    print('Inserting nokeys data from ' + file_name +' into ' + table)
+    print(ld_cmd)
     db.disable_keys()
     db.load_data(file_name, table, ld_cmd)
     db.close()

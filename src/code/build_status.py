@@ -53,6 +53,13 @@ def main_parse_args():
             found_wd = True
     if not found_wd:
         config_opts.extend(['-wd', args.working_dir])
+    # remove src_classes from config_opts
+    for opt in ['-srcs', '--src_classes']:
+        if opt in config_opts:
+            idx = config_opts.index(opt)
+            config_opts.pop(idx)
+            # pop next item
+            config_opts.pop(idx)
     args.config_opts = " ".join(config_opts)
     return args
 
