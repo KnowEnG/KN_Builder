@@ -188,11 +188,12 @@ class Kegg(SrcClass):
         if 'map' in alias:
             url = self.url_base + 'conv/ncbi-geneid/' + alias[:-4]
             if alias[:-4] == 'dpx':
-                url = self.url_base + 'conv/ncbi-geneid/' + alias[:-4]
+                url = self.url_base + 'conv/uniprot/' + alias[:-4]
         elif alias == 'pathway':
             url = self.url_base + 'list/pathway'
         else:
             url = self.url_base + 'link/pathway/' + alias
+        print(url)
         return url
 
     def is_map(self, alias):
