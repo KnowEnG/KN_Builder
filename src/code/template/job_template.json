@@ -4,8 +4,7 @@
     "container": {
         "type": "DOCKER",
         "image": "TMPIMG",
-        "volumes": [TMPVMNTSTR,
-                    {"containerPath": "/etc/", "hostPath":"/etc/", "mode":"RW"}
+        "volumes": [TMPVMNTSTR
                    ]
     },
     "cpus": "TMPCPUS",
