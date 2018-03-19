@@ -24,9 +24,6 @@ RUN apt-get update && apt-get -y install \
     rsync \
     wget
 
-RUN sudo update-alternatives --set liblapack.so.3 \
-    /usr/lib/atlas-base/atlas/liblapack.so.3
-
 RUN pip3 install https://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.0.4.tar.gz
 RUN pip3 install redis \
     requests \
