@@ -10,8 +10,8 @@ MAINTAINER Charles Blatti <blatti@illinois.edu>
 
 RUN apt-get update && apt-get -y install \
     lxc \
-    liblapack-dev \
-    libblas-dev \
+    libatlas-dev \
+    libatlas3gf-base \
     gfortran \
     build-essential \
     python3-pip \
@@ -26,6 +26,9 @@ RUN apt-get update && apt-get -y install \
 
 RUN sudo update-alternatives --set liblapack.so.3 \
     /usr/lib/atlas-base/atlas/liblapack.so.3
+RUN sudo update-alternatives --set liblapack.so.3 \
+    /usr/lib/atlas-base/atlas/liblapack.so.3
+
 
 RUN pip3 install https://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.0.4.tar.gz
 RUN pip3 install redis \
