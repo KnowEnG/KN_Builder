@@ -113,7 +113,7 @@ class Blast(SrcClass):
             sp_abbrev = species[0] + species.split(' ')[1][:3]
             splower = species.lower().replace(' ', '_')
             url = self.get_remote_url(splower)
-            req = requests.get(url)
+            req = requests.get(url, stream=True)
             if req.status_code == 200:
                 alias_dict[splower] = taxid
         return alias_dict
