@@ -117,7 +117,12 @@ def wait_for_success(chronos_url, interval=30):
     print('Waiting for jobs...')
     while True:
         time.sleep(interval)
-        job_status = get_status(chronos_url)
+        job_status = None
+        while not job_status:
+            try:
+                job_status = get_status(chronos_url)
+            except ValueError:
+                print("Invalid JSON received, retrying.")
         print_str = time.strftime("%H:%M:%S")
         all_str = " - all: " + ', '.join(sorted(job_status['all']))
         fresh_str = " - fresh: " + ', '.join(sorted(job_status['fresh']))
