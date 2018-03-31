@@ -1,0 +1,20 @@
+9606	Hsap	Homo sapiens	Human	0	Mammals	homo_sapiens
+9598	Ptro	Pan troglodytes	Chimpanzee	1	Mammals	pan_troglodytes
+9913	Btau	Bos taurus	Cow	1	Mammals	bos_taurus
+9615	Cfam	Canis familiaris	Dog	1	Mammals	canis_familiaris
+9544	Mmul	Macaca mulatta	Macaque	1	Mammals	macaca_mulatta
+10090	Mmus	Mus musculus	Mouse	1	Mammals	mus_musculus
+9823	Sscr	Sus scrofa	Pig	1	Mammals	sus_scrofa
+10116	Rnor	Rattus norvegicus	Rat	1	Mammals	rattus_norvegicus
+9031	Ggal	Gallus gallus	Chicken	2	Other Vertebrates	gallus_gallus
+8364	Xtro	Xenopus tropicalis	Clawed frog	2	Other Vertebrates	xenopus_tropicalis
+69293	Gacu	Gasterosteus aculeatus	Stickleback	2	Other Vertebrates	gasterosteus_aculeatus
+59729	Tgut	Taeniopygia guttata	Zebra finch	2	Other Vertebrates	taeniopygia_guttata
+7955	Drer	Danio rerio	Zebrafish	2	Other Vertebrates	danio_rerio
+7227	Dmel	Drosophila melanogaster	Fruitfly	3	Other Non-Vertebrates	drosophila_melanogaster
+7460	Amel	Apis mellifera	Honey bee	3	Other Non-Vertebrates	apis_mellifera
+7159	Aaeg	Aedes aegypti	Mosquito	3	Other Non-Vertebrates	aedes_aegypti
+6239	Cele	Caenorhabditis elegans	Roundworm	3	Other Non-Vertebrates	caenorhabditis_elegans
+3702	Atha	Arabidopsis thaliana	Thale cress	3	Other Non-Vertebrates	arabidopsis_thaliana
+6669	Dpul	Daphnia pulex	Water flea	3	Other Non-Vertebrates	daphnia_pulex
+4932	Scer	Saccharomyces cerevisiae	Yeast	3	Other Non-Vertebrates	saccharomyces_cerevisiae
