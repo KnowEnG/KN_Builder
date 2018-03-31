@@ -187,7 +187,8 @@ class Stringdb(SrcClass):
                       5: 'STRING_coexpression',
                       6: 'STRING_experimental',
                       7: 'STRING_database',
-                      8: 'STRING_textmining'}
+                      8: 'STRING_textmining',
+                      9: 'STRING_integrated'}
 
         with open(raw_line, encoding='utf-8') as infile, \
             open(table_file, 'w') as edges,\
