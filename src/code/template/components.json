@@ -25,7 +25,7 @@
         "TMPCMD": "sh -c '{ cd /TMPCODEPATH/ && python3 export_utilities.py -s TMPTAXON -e TMPETYPE TMPOPTS ; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
     },
     "fetcher": {
-        "TMPMEM": "2500",
+        "TMPMEM": "5000",
         "TMPCPUS": "0.5",
         "TMPPRIOR": "false",
         "TMPCMD": "sh -c '{ cd /TMPWORKDIR/TMPDATAPATH/TMPALIASPATH && ls -l file_metadata.json && python3 /TMPCODEPATH/fetch_utilities.py file_metadata.json TMPOPTS && if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPDATAPATH/TMPALIASPATH/ /TMPSHAREDIR/ && cd TMPDATAPATH/ && find TMPALIASPATH -maxdepth 1 -type f ! -name '*.json' -delete; fi; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"

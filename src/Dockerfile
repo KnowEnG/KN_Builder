@@ -3,7 +3,7 @@
 ############################################################
 
 # Set the base image to ubuntu
-FROM ubuntu:14.04
+FROM ubuntu:16.04
 
 # File Author / Maintainer
 MAINTAINER Charles Blatti <blatti@illinois.edu>

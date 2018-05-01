@@ -83,7 +83,7 @@ class Go(SrcClass):
         sp_dict = json.load(open(sp_dir))
         alias_dict = {"obo_map": "ontology"}
         go_url = self.url_base + 'go_annotation_metadata.all.json'
-        go_resp = urllib.request.urlopen(go_url).readall().decode()
+        go_resp = urllib.request.urlopen(go_url).read().decode()
         go_resources = json.loads(go_resp)
         go_dict = dict()
         for resource in go_resources['resources']:
@@ -151,7 +151,7 @@ class Go(SrcClass):
         if alias == 'obo_map':
             return 'http://purl.obolibrary.org/obo/go.obo'
         go_url = self.url_base + 'go_annotation_metadata.all.json'
-        go_resp = urllib.request.urlopen(go_url).readall().decode()
+        go_resp = urllib.request.urlopen(go_url).read().decode()
         go_resources = json.loads(go_resp)
         for resource in go_resources['resources']:
             if resource['id'] == alias:
