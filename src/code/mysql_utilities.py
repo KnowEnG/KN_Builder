@@ -103,7 +103,7 @@ def combine_tables(alias, args=None):
     combined_table = alias + '_mappings'
     all_table = 'all_mappings'
     steps = ['transcript', 'translation', 'transcript2stable',
-             'translation2stable']
+             'translation2stable', 'synonyms']
     db = MySQL(alias_db, args)
     db.create_table(combined_table, get_insert_cmd('gene'))
     for step in steps:
@@ -383,6 +383,18 @@ def get_insert_cmd(step):
                "ON translation.transcript_id = transcript.transcript_id "
                "INNER JOIN gene "
                "ON transcript.gene_id = gene.gene_id")
+    elif step == 'synonyms':
+        cmd = ("SELECT DISTINCT external_synonym.synonym AS dbprimary_acc, "
+               "external_synonym.synonym AS display_label, "
+               "'ensembl_external_synonym' AS db_name, "
+               "1000 AS priority, "
+               "'ensembl_external_synonym' AS db_display_name, "
+               "gene.stable_id "
+               "FROM external_synonym "
+               "INNER JOIN object_xref "
+               "ON external_synonym.xref_id = object_xref.xref_id "
+               "INNER JOIN gene "
+               "ON object_xref.ensembl_id = gene.gene_id")
     else:
         cmd = ''
     return cmd

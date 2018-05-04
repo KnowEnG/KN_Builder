@@ -29,7 +29,7 @@ import redis_utilities as ru
 import fetch_utilities as fu
 
 TABLE_LIST = ['external_db', 'gene', 'object_xref', 'transcript',
-              'translation', 'xref']
+              'translation', 'xref', 'external_synonym']
 
 def get_SrcClass(args):
     """Returns an object of the source class.
