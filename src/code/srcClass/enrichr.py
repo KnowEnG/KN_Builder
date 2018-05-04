@@ -209,6 +209,8 @@ class Enrichr(SrcClass):
                 chksm = line[0]
                 raw = line[3:]
                 n1_orig_name = raw[0]
+                if not n1_orig_name:
+                    continue
                 n1_kn_name = n1_orig_name
                 if alias != 'PPI_Hub_Proteins':
                     n1_kn_name = cf.pretty_name(node_prefix + '_'+ n1_orig_name)
