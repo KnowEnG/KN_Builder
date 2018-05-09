@@ -36,7 +36,7 @@ def deploy_container(args=None):
     """
     if args is None:
         args = cf.config_args()
-    # put mysql config conf_path on storage directory if exists    
+    # put mysql config conf_path on storage directory if exists
     mysql_dir = os.path.join(args.working_dir, args.data_path, 'mysql_config')
     if args.storage_dir:
         mysql_dir = os.path.join(args.storage_dir, args.data_path, 'mysql_config')
@@ -215,6 +215,7 @@ def query_all_mappings(version_dict, args=None):
     results = db.query_distinct('stable_id, stable_id', table)
     map_dict = dict()
     for (raw, mapped) in results:
+        raw = raw.replace("::","|")
         if str(raw) in lrg_dict:
             mapped = lrg_dict[str(raw)]
         if str(mapped) in lrg_dict:
@@ -225,6 +226,7 @@ def query_all_mappings(version_dict, args=None):
     results.extend(db.query_distinct('dbprimary_acc, db_name, stable_id',
                                      table))
     for (raw, hint, mapped) in results:
+        raw = raw.replace("::","|")
         if str(raw) in lrg_dict:
             mapped = lrg_dict[str(raw)]
         if str(mapped) in lrg_dict:
