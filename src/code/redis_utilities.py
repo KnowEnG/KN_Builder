@@ -292,6 +292,7 @@ def node_desc(rdb, stable_array):
     ret_type = ["None"] * len(stable_array)
     ret_alias = list(stable_array)
     ret_desc = list(stable_array)
+    ret_biotype = list(stable_array)
     st_map_idxs = [idx for idx, st in enumerate(stable_array) if not st.startswith('unmapped')]
     if st_map_idxs:
         vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'type']) for i in st_map_idxs])
@@ -310,7 +311,12 @@ def node_desc(rdb, stable_array):
             if val is None:
                 continue
             ret_desc[i] = val.decode()
-    return stable_array, ret_type, ret_alias, ret_desc
+        vals_array = rdb.mget(['::'.join(['stable', stable_array[i], 'biotype']) for i in st_map_idxs])
+        for i, val in zip(st_map_idxs, vals_array):
+            if val is None:
+                continue
+            ret_biotype[i] = val.decode()
+    return stable_array, ret_type, ret_alias, ret_desc, ret_biotype
 
 
 def main():

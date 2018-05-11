@@ -115,7 +115,7 @@ def get_metadata(db, edges, nodes, lines, sp, et, args):
                    "FROM edge_type WHERE et_name = '{}'".format(et))[0]
 
     num_prop, num_gene, num_none = 0, 0, 0
-    for _, _, typ, _, _ in nodes:
+    for _, _, typ, *_ in nodes:
         if typ == "Property":
             num_prop += 1
         elif typ == "Gene":

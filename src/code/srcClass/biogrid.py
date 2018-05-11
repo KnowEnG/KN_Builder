@@ -45,8 +45,8 @@ class Biogrid(SrcClass):
         This calls the SrcClass constructor (see utilities.SrcClass)
         """
         name = 'biogrid'
-        url_base = ('http://thebiogrid.org/downloads/archives/'
-                    'Latest%20Release/BIOGRID-ALL-LATEST.mitab.zip')
+        url_base = ('https://downloads.thebiogrid.org/Download/BioGRID/'
+                    'Latest-Release/BIOGRID-ALL-LATEST.mitab.zip')
         aliases = {"PPI": "PPI"}
         super(Biogrid, self).__init__(name, url_base, aliases, args)
         self.access_key = '2fe900033b39209b8f63d531fcb24790'
