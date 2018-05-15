@@ -52,6 +52,17 @@ class AppURLopener(urllib.request.FancyURLopener):
 
 opener = AppURLopener()
 
+def openurl(url, filename, openfunc, tries=1, sleeptime=0):
+    for i in range(tries):
+        try:
+            with openfunc(url) as response:
+                with open(filename, 'wb') as outfile:
+                    shutil.copyfileobj(response, outfile)
+            return
+        except OSError:
+            sleep(sleeptime)
+    raise
+
 ARCHIVES = ['.zip', '.tar', '.gz']
 MAX_CHUNKS = 500
 DIR = "."
@@ -80,14 +91,11 @@ def download(version_dict):
     filename = version_dict['local_file_name']
     if "http" in url:
         if 'enrichr' in version_dict['source']:
-            sleep(randint(10, 90))
-        with opener.open(url) as response:
-            with open(filename, 'wb') as outfile:
-                shutil.copyfileobj(response, outfile)
+            openurl(url, filename, opener.open, tries=3, sleeptime=randint(10, 90))
+        else:
+            openurl(url, filename, opener.open)
     else:
-        with urllib.request.urlopen(url) as response:
-            with open(filename, 'wb') as outfile:
-                shutil.copyfileobj(response, outfile)
+        openurl(url, filename, urllib.request.urlopen)
     os.utime(filename, (0, version_dict['remote_date']))
 
     #unzip remote file
