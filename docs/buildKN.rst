@@ -305,7 +305,7 @@ Set up your AWS credentials (modify with your keys)
         echo -e "[default]\naws_access_key_id = ABC\naws_secret_access_key = XYZ" > ~/.aws/credentials
 
 Setup and delete AWS RDS/EC instance
----------------------------------
+------------------------------------
 
 .. code:: bash
 

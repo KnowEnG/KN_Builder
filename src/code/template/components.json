@@ -37,7 +37,7 @@
         "TMPCMD": "sh -c '{ cd /TMPWORKDIR/TMPDATAPATH/TMPALIASPATH && python3 /TMPCODEPATH/table_utilities.py TMPCHUNK file_metadata.json TMPOPTS && if TMPSHAREBOOL ; then cd /TMPWORKDIR && rsync -aR --exclude='*.raw_line.*' TMPDATAPATH/TMPALIASPATH/TMPFILES /TMPSHAREDIR/ && cd TMPDATAPATH/TMPALIASPATH && rm TMPCHUNK ; fi; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
     },
     "mapper": {
-        "TMPMEM": "800",
+        "TMPMEM": "1200",
         "TMPCPUS": "1",
         "TMPPRIOR": "true",
         "TMPCMD": "sh -c '{ python3 /TMPCODEPATH/conv_utilities.py /TMPWORKDIR/TMPDATAPATH/TMPTABLEPATH TMPOPTS && if TMPSHAREBOOL ; then cd /TMPWORKDIR && rsync -aR TMPDATAPATH/TMPFILES /TMPSHAREDIR/ && cd TMPDATAPATH && rm TMPFILES ; fi; } >/TMPWORKDIR/TMPLOGSPATH/TMPJOB.log 2>&1; STAT=$?; if TMPSHAREBOOL ; then cd /TMPWORKDIR/ && rsync -aR TMPLOGSPATH/TMPJOB.log /TMPSHAREDIR/ ; fi && (exit $STAT); '"
