@@ -136,16 +136,13 @@ def wait_for_success(chronos_url, interval=30):
             return True
         elif len(job_status['running']) == 0:
             # no running jobs, but some pending, give one last chance
-            if len(job_status['fresh']) > 0 and last_chance < 2:
+            if last_chance < 10 * 60 / interval:
                 print('No jobs running, but not all finished, checking...')
                 last_chance = last_chance + 1
                 continue
-            if len(job_status['fresh']) > 0 and last_chance > 2:
-                print('Fail: Some jobs are stuck!')
-                return False
-            if len(job_status['failure']) > 0:
-                print('Fail: Some jobs have failed!')
-                return False
+            else:
+                print('Continuing: Some jobs are stuck (possibly because of failures)')
+                return True
         # there are jobs still running
         else:
             last_chance = 0
