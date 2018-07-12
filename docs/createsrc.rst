@@ -4,8 +4,7 @@ Creating a new SrcClass
 Writing the Class
 =================
 
-TODO: which directory?
-The easiest way to create a new SrcClass is by modifying an existing one to suit your needs.  If there is already a source that has the same or similar format as the one you are trying to add, you can start with that.  This will mean that you have a good starting point for the :code:`table()` method, which is the most complex part of each srcClass.
+The easiest way to create a new SrcClass is by modifying an existing one to suit your needs.  If there is already a source that has the same or similar format as the one you are trying to add, you can start with that.  This will mean that you have a good starting point for the :code:`table()` method, which is the most complex part of each srcClass.  SrcClasses can be found in the src/code/srcClass/ directory, and that is also where new ones should go.
 
 The :code:`__init__()` Method
 -----------------------------
