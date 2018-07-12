@@ -19,7 +19,6 @@ To begin, you will need to modify :code:`__init__()` method to initialize the so
         **SrcClass**
 
     .. autoclass:: check_utilities.SrcClass
-
         :noindex:
 
 Other Methods
