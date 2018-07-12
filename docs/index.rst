@@ -13,6 +13,7 @@ Welcome to KnowNet's documentation!
    modules
    formats
    tables
+   createsrc
 
 * :download:`KnowNet MySQL Schema <_static/KnowNet_Schema.pdf>`
 

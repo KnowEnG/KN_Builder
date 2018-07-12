@@ -38,6 +38,8 @@ file_metadata (produced by check_utilities and updated by fetch_utilities)
     'remote_version' (str):     release version of the remote source
     'source' (str):             the source name
 
+.. _rawline-label:
+
 rawline (produced by fetch_utilities)
 -------------------------------------
 ::
@@ -46,6 +48,8 @@ rawline (produced by fetch_utilities)
     'line num' (int):   line number in downloaded file
     'file_id' (str):    processed name of downloaded file
     'line_str' (str):   original line string from downloaded source
+
+.. _table-label:
 
 table (produced by table_utilities)
 -----------------------------------
@@ -66,6 +70,8 @@ table (produced by table_utilities)
     'weight' (float):   score for edge
     'table_hash' (str): md5 checksum of raw edge generated from source line
 
+.. _edge_meta-label:
+
 edge_meta (produced by table_utilities)
 ---------------------------------------
 ::
@@ -73,6 +79,8 @@ edge_meta (produced by table_utilities)
     'line_hash' (str):  md5 checksum of original line string from source
     'info_type' (str):  type of metadate: 'reference', 'experiment', etc
     'info_desc' (str):  description string of metadata
+
+.. _node_meta-label:
 
 node_meta (produced by table_utilities)
 ---------------------------------------

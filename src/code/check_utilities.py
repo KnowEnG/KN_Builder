@@ -52,6 +52,10 @@ class SrcClass(object):
         remote_file (str): The name of the file to extract if the remote source
             is a directory
         version (dict): The release version of each alias in the source.
+        source_url (str): The website for the source.
+        reference (str): The citation for the source.
+        pmid (str): The pubmed ID for the source.
+        license (str): The license for the source.
     """
 
     def __init__(self, src_name, base_url, aliases, args=None):
@@ -86,7 +90,7 @@ class SrcClass(object):
         """Helper function for producing the alias dictionary.
 
         This returns a dictionary where alias names are keys and alias info
-        are the values. This helper function usse the species
+        are the values. This helper function uses the species
         specific information for the build of the Knowledge Network, which is
         produced by ensembl.py during setup utilities and is located at
         cf.DEFAULT_MAP_PATH/species/species.json, in order to fetch all matching
@@ -335,14 +339,16 @@ class SrcClass(object):
         return map_dict
 
     def table(self, raw_line, version_dict):
-        """Uses the provided raw_lines file to produce a 2table_edge file, an
-        edge_meta file, and a node_meta file (only for property nodes).
+        """Uses the provided :ref:`raw_lines file <rawline-label>` to produce
+        :ref:`a table file <table-label>`, :ref:`an edge_meta file
+        <edge_meta-label>`, and :ref:`a node_meta file <node_meta-label>` (only
+        for property nodes).
 
-        This returns nothing but produces the 2table formatted files from the
+        This returns nothing but produces the table formatted files from the
         provided raw_lines file::
 
-            raw_lines table (file, line num, line_chksum, raw_line)
-            2tbl_edge table (line_cksum, n1name, n1hint, n1type, n1spec,
+            raw_lines (file, line num, line_chksum, raw_line)
+            table table (line_cksum, n1name, n1hint, n1type, n1spec,
                             n2name, n2hint, n2type, n2spec, et_hint, score)
             edge_meta (line_cksum, info_type, info_desc)
             node_meta (node_id,
