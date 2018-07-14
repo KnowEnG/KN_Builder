@@ -6,14 +6,26 @@
 Welcome to KnowNet's documentation!
 ===================================
 
+User Documentation
+******************
+
 .. toctree::
    :maxdepth: 2
 
+   readme
+
+
+Developer Documentation
+***********************
+
+.. toctree::
+   :maxdepth: 1
+
+   createsrc
+   formats
    buildKN
    modules
-   formats
    tables
-   createsrc
 
 * :download:`KnowNet MySQL Schema <_static/KnowNet_Schema.pdf>`
 

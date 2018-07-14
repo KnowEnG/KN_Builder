@@ -368,3 +368,59 @@ Create report of results
         git add -f tests/KN03-KClus-build.$KNP_DATA_PATH.pipe
         git commit -m 'adding result report'
         git push
+
+### Troubleshooting
+
+- get mesos tasks
+
+```
+curl -L -X GET 127.0.0.1:5050/tasks
+curl -L -X GET 127.0.0.1:5050/system/stats.json
+curl -L -X GET 127.0.0.1:5050/metrics/snapshot
+curl -L -X GET 127.0.0.1:5050/master/slaves
+```
+
+- get marathon job status
+
+```
+curl -X GET 127.0.0.1:8080/v2/apps/
+```
+
+- get chronos jobs
+
+```
+curl -L -X GET 127.0.0.1:8888/scheduler/jobs
+```
+
+- get chronos job statuses
+
+```
+for i in {1..10}; do
+  echo $i
+  curl -L -s -X GET 127.0.0.1:8888/scheduler/graph/csv | grep node, | \
+    awk -F, '{print $3"\t"$4"\t"$1"\t"$2}' | sort | uniq | grep -v success
+  sleep 30
+done
+```
+
+- remove stopped containers
+
+```
+docker ps -aq --no-trunc | xargs docker rm
+```
+
+- get docker usage stats
+
+```
+eval "docker inspect --format='{{.Name}}' \$(docker ps -aq --no-trunc) | \
+  cut -c 2- | xargs docker stats --no-stream=true"
+```
+
+- Find mesos ids per stage
+
+```
+for i in mysqld redis-server check_utilities fetch_utilities table_utilities conv_utilities import_utilities export_utilities KN_starter next_step; do
+  echo $i
+  docker ps -a --no-trunc | grep $i | rev | cut -d' ' -f 1 | rev | awk -v LABEL="$i" '{print $1"\t"LABEL}'
+done;
+```
