@@ -369,58 +369,59 @@ Create report of results
         git commit -m 'adding result report'
         git push
 
-### Troubleshooting
+Advanced Troubleshooting
+------------------------
 
-- get mesos tasks
+get mesos tasks
 
-```
-curl -L -X GET 127.0.0.1:5050/tasks
-curl -L -X GET 127.0.0.1:5050/system/stats.json
-curl -L -X GET 127.0.0.1:5050/metrics/snapshot
-curl -L -X GET 127.0.0.1:5050/master/slaves
-```
+.. code::
 
-- get marathon job status
+    curl -L -X GET 127.0.0.1:5050/tasks
+    curl -L -X GET 127.0.0.1:5050/system/stats.json
+    curl -L -X GET 127.0.0.1:5050/metrics/snapshot
+    curl -L -X GET 127.0.0.1:5050/master/slaves
 
-```
-curl -X GET 127.0.0.1:8080/v2/apps/
-```
+get marathon job status
 
-- get chronos jobs
+.. code::
 
-```
-curl -L -X GET 127.0.0.1:8888/scheduler/jobs
-```
+    curl -X GET 127.0.0.1:8080/v2/apps/
 
-- get chronos job statuses
+get chronos jobs
 
-```
-for i in {1..10}; do
-  echo $i
-  curl -L -s -X GET 127.0.0.1:8888/scheduler/graph/csv | grep node, | \
-    awk -F, '{print $3"\t"$4"\t"$1"\t"$2}' | sort | uniq | grep -v success
-  sleep 30
-done
-```
+.. code::
 
-- remove stopped containers
+    curl -L -X GET 127.0.0.1:8888/scheduler/jobs
 
-```
-docker ps -aq --no-trunc | xargs docker rm
-```
+get chronos job statuses
 
-- get docker usage stats
+.. code::
 
-```
-eval "docker inspect --format='{{.Name}}' \$(docker ps -aq --no-trunc) | \
-  cut -c 2- | xargs docker stats --no-stream=true"
-```
+    for i in {1..10}; do
+      echo $i
+      curl -L -s -X GET 127.0.0.1:8888/scheduler/graph/csv | grep node, | \
+        awk -F, '{print $3"\t"$4"\t"$1"\t"$2}' | sort | uniq | grep -v success
+      sleep 30
+    done
 
-- Find mesos ids per stage
+remove stopped containers
 
-```
-for i in mysqld redis-server check_utilities fetch_utilities table_utilities conv_utilities import_utilities export_utilities KN_starter next_step; do
-  echo $i
-  docker ps -a --no-trunc | grep $i | rev | cut -d' ' -f 1 | rev | awk -v LABEL="$i" '{print $1"\t"LABEL}'
-done;
-```
+.. code::
+
+    docker ps -aq --no-trunc | xargs docker rm
+
+get docker usage stats
+
+.. code::
+
+    eval "docker inspect --format='{{.Name}}' \$(docker ps -aq --no-trunc) | \
+      cut -c 2- | xargs docker stats --no-stream=true"
+
+Find mesos ids per stage
+
+.. code::
+
+    for i in mysqld redis-server check_utilities fetch_utilities table_utilities conv_utilities import_utilities export_utilities KN_starter next_step; do
+      echo $i
+      docker ps -a --no-trunc | grep $i | rev | cut -d' ' -f 1 | rev | awk -v LABEL="$i" '{print $1"\t"LABEL}'
+    done;

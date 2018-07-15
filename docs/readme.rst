@@ -33,6 +33,16 @@ Overview of Build Pipeline
 
 The make command will produce a large amount of output.  First it will show the status of starting up mesos and chronos, and then starting up the databases.  After it finishes with that, it will start the processing pipeline, and periodically print the status of the pipeline.  It should return when either an error occurs or the pipeline finishes running.
 
+The processing pipeline consists of several stages:
+
+1) SETUP: Imports downloads and imports ensembl, and sets up gene mapping information.
+2) CHECK: Downloads and processes the rest of the sources.  This consists of several substeps.
+    a) fetch: Downloads the source data files.
+    b) table: Takes the source files and reformats it into our table file format.
+    c) map: Maps the idenifiers in the source to our internal identifiers.
+3) IMPORT: Imports all of the files into mysql and redis databases.
+4) EXPORT: Exports the Network into flatfiles and dumps the mysql and redis databases.
+
 Output Files
 ------------
 
