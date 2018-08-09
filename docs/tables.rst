@@ -1,7 +1,9 @@
 .. _tables-ref:
 
-KnowNet MySQL TABLE Formats
-*****************************
+.. highlight:: none
+
+MySQL Table Formats
+*******************
 schema
 ______
 :download:`KnowNet Schema <_static/KnowNet_Schema.pdf>`

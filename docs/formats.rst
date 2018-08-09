@@ -1,28 +1,38 @@
 .. _formats-ref:
 
-KnowNet Pipeline Export Data Formats
-************************************
+.. highlight:: none
+
+Exported Data Formats
+*********************
 
 .. _ex-edge-label:
 
 .edge (produced by export_utilities)
 ------------------------------------
-::
-    'Node1_id' (str):       the internal identifier for the source node of the edge
-    'Node2_id' (str):       the internal identifier for the target node of the edge
+.. code:: 
+
+    'Node1_id' (str):       the internal identifier for the source node 
+                            of the edge
+    'Node2_id' (str):       the internal identifier for the target node of 
+                            the edge
     'Edge_weight' (float):  normalized weight of the edge in the subnetwork
     'Edge_type' (str):      subnetwork edge type for the edge
-    'Source_id' (str):      internal identifier for the public source file the edge was extracted from
-    'Line_num' (int):       original line number of edge information in the public source file
+    'Source_id' (str):      internal identifier for the public source file 
+                            the edge was extracted from
+    'Line_num' (int):       original line number of edge information in the 
+                            public source file
 
 .. _node-map-label:
 
 .node_map (produced by export_utilities)
 ----------------------------------------
-::
-    'Internal_id' (str):        the internal identifier for a node in the subnetwork
-    'Mapped_id' (str):          the mapped internal identifier for a node in the subnetwork
-    'Node_type' (float):        type of node 'Gene' or 'Property'
+.. code:: 
+
+    'Internal_id' (str):        the internal identifier for a node in the 
+                                subnetwork
+    'Mapped_id' (str):          the mapped internal identifier for a node 
+                                in the subnetwork
+    'Node_type' (str):          type of node 'Gene' or 'Property'
     'Node_alias' (str):         common name for network node
     'Node_description' (str):   full name/description for network node
 
@@ -30,28 +40,26 @@ KnowNet Pipeline Export Data Formats
 
 .pnode_map (produced by export_utilities)
 -----------------------------------------
-- This file is produced only for Property type subnetworks and contains information nodes about the
-property nodes of the subnetwork in the same format as .node_map file.
+- This file is produced only for Property type subnetworks and contains information nodes about the property nodes of the subnetwork in the same format as .node_map file.
+
 
 .. _metadata-label:
 
+
 .metadata (produced by export_utilities)
 ----------------------------------------
-- This yaml file contains information about the extracted Knowledge Network subnetwork.  Its keys
-include summarizations about the network size (“data”), its public data source details (“datasets”),
-information about the meaning of its edges (“edge_type”), and some commands and configurations used
-in its construction (“export”).
+- This yaml file contains information about the extracted Knowledge Network subnetwork.  Its keys include summarizations about the network size (“data”), its public data source details (“datasets”), information about the meaning of its edges (“edge_type”), and some commands and configurations used in its construction (“export”).
 
 
 
-KnowNet Pipeline Internal Data Formats
-**************************************
+Internal Data Formats
+*********************
 
 .. _file-metadata-label:
 
 file_metadata (produced by check_utilities and updated by fetch_utilities)
 --------------------------------------------------------------------------
-::
+.. code:: 
 
     'alias' (str):              the alias name
     'alias_info' (str):         a short string with information
@@ -86,7 +94,7 @@ file_metadata (produced by check_utilities and updated by fetch_utilities)
 
 rawline (produced by fetch_utilities)
 -------------------------------------
-::
+.. code:: 
 
     'line_hash' (str):  md5 checksum of line_str field
     'line num' (int):   line number in downloaded file
@@ -97,7 +105,7 @@ rawline (produced by fetch_utilities)
 
 table (produced by table_utilities)
 -----------------------------------
-::
+.. code:: 
 
     'line_hash' (str):  md5 checksum of original line string from source
     'n1name' (str):     node 1 name to map from original source
@@ -118,7 +126,7 @@ table (produced by table_utilities)
 
 edge_meta (produced by table_utilities)
 ---------------------------------------
-::
+.. code:: 
 
     'line_hash' (str):  md5 checksum of original line string from source
     'info_type' (str):  type of metadate: 'reference', 'experiment', etc
@@ -128,23 +136,27 @@ edge_meta (produced by table_utilities)
 
 node_meta (produced by table_utilities)
 ---------------------------------------
-::
+.. code:: 
 
     'node_id' (str):    mapped node identifier
     'info_type' (str):  type of metadata ('alt_alias', 'link', etc)
     'info_desc' (str):  description string of metadata
 
+.. _node-label:
+
 node (produced by table_utilities)
 ----------------------------------
-::
+.. code:: 
 
     'node_id' (str):    node identifier
     'n_alias' (str):    alternate name for node
     'n_type' (str):     type of node ('Gene', 'Property')
 
+.. _edge-label:
+
 edge (produced by conv_utilities)
 ---------------------------------
-::
+.. code:: 
 
     'edge_hash' (str):  md5 checksum of mapped edge
     'n1_id' (str):      node 1 mapped identifier
@@ -152,27 +164,32 @@ edge (produced by conv_utilities)
     'et_name' (str):    name edge type
     'weight' (float):   score for edge type
 
+.. _edge2line-label:
+
 edge2line (produced by conv_utilities)
 --------------------------------------
-::
+.. code:: 
 
     'edge_hash' (str):  md5 checksum of mapped edge
     'line_hash' (str):  md5 checksum of original line string from source
 
+.. _status-label:
 
 status (produced by conv_utilities)
 -----------------------------------
-::
+.. code:: 
 
-    'table_hash' (str):     md5 checksum of raw edge generated from source line
+    'table_hash' (str):     md5 checksum of raw edge generated from source  
+                            line
     'n1_id' (str):          node 1 mapped identifier
     'n2_id' (str):          node 2 mapped identifier
     'et_name' (str):        name edge type
     'weight' (float):       score for edge type
     'edge_hash' (str):      md5 checksum of mapped edge
-    'line_hash' (str):      md5 checksum of original line string from source
-    'status' (str):         "production" if both nodes mapped and "unmapped"
-                            otherwise
+    'line_hash' (str):      md5 checksum of original line string from  
+                            source
+    'status' (str):         "production" if both nodes mapped and 
+                            "unmapped" otherwise
     'status_desc' (str):    description of reason for status label
 
 

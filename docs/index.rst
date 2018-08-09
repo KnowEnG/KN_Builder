@@ -29,10 +29,9 @@ Developer Documentation
    tables
    modules
 
-* :download:`KnowNet MySQL Schema <_static/KnowNet_Schema.pdf>`
 
 Indices and tables
-==================
+******************
 
 * :ref:`genindex`
 * :ref:`modindex`

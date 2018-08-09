@@ -1,6 +1,9 @@
 Advanced Troubleshooting
 ========================
 
+Here are some useful commands if you run into problems are want to understand more 
+about the components of the Knowledge Network build pipeline.
+
 1) List all Mesos tasks
 
 .. code::

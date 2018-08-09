@@ -1,6 +1,10 @@
 Step By Step KN Build
 *********************
 
+This section contains instruction if you wish to run each step of the Knowledge Network
+Build Pipeline separately.  It makes heavy use of the environmental variables specified 
+at the beginning.
+
 Set environment variables
 -------------------------
 
@@ -164,8 +168,8 @@ Run import pipeline (time: 2hr 45min)
             -c $KNP_CHRONOS_URL \
             -sd $KNP_STORAGE_DIR
 
-Run export pipeline (time: )
-----------------------------
+Run export pipeline (time: 45 mins)
+-----------------------------------
 
 .. code:: bash
 

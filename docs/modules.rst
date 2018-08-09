@@ -1,7 +1,7 @@
 .. _modules-ref:
 
-KnowNet Pipeline Modules
-************************
+Pipeline Module Documentation
+*****************************
 
 config_utilities
 ----------------

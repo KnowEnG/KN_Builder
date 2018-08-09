@@ -23,7 +23,7 @@ that describe metadata about the source, making sure to call :code:`__init__()` 
         **SrcClass**
 
     .. autoclass:: check_utilities.SrcClass
-        :noindex:
+       :noindex:
 
 Other Methods
 -------------
@@ -38,7 +38,8 @@ existing ones do not work for your new source.  The most important methods are:
         table
 
     .. automethod:: check_utilities.SrcClass.table
-
+        :noindex:
+        
 .. container:: toggle
 
     .. container:: header
@@ -46,6 +47,7 @@ existing ones do not work for your new source.  The most important methods are:
         get_remote_url
 
     .. automethod:: check_utilities.SrcClass.get_remote_url
+        :noindex:    
 
 .. container:: toggle
 
@@ -54,6 +56,7 @@ existing ones do not work for your new source.  The most important methods are:
         get_source_version
 
     .. automethod:: check_utilities.SrcClass.get_source_version
+        :noindex:
 
 .. container:: toggle
 
@@ -62,6 +65,7 @@ existing ones do not work for your new source.  The most important methods are:
         get_aliases
 
     .. automethod:: check_utilities.SrcClass.get_aliases
+        :noindex:
 
 Most of the time the defaults can be used for the other methods of the SrcClass subclass.
 
