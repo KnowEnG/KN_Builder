@@ -14,6 +14,17 @@ Advanced Parameters
                            [-rh REDIS_HOST] [-rp REDIS_PORT] [-rd REDIS_DIR]
                            [-rm REDIS_MEM] [-rc REDIS_CPU] [-rps REDIS_PASS]
 
+As a developer, you may modified the src/ code (in $CODEDIR) and/or build your 
+own kn_builder Docker image (myimage/kn_builder:latest). To test your your 
+development code, use a command like this:
+
+.. code::
+    
+    python3 $CODEDIR/src/code/build_status.py \
+        -i myimage/kn_builder:latest \
+        -cp $CODEDIR/src/code \
+        -es drosophila_melanogaster \
+        -srcs kegg,,blast \
 
 
 run arguments
