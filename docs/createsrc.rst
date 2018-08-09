@@ -74,7 +74,7 @@ Testing and Running the Class
 
 If you want to run the code using docker (the official method), you can build a local docker image that includes your code:
 
-.. code::
+.. code:: bash
 
         docker build path/to/KN_Builder/src/ -t knoweng/kn_builder:latest
 
@@ -82,7 +82,7 @@ If you do so, remember to remove the image before trying to run the official rel
 
 You can then run the pipeline as normal, making sure to specify your source in the arguments:
 
-.. code::
+.. code:: bash
 
         cd path/to/Knownet_Pipeline_Tools/
         make SOURCES=<source>
