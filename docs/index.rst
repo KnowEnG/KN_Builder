@@ -21,11 +21,13 @@ Developer Documentation
 .. toctree::
    :maxdepth: 1
 
+   parameters
+   buildKN
+   troubleshoot
    createsrc
    formats
-   buildKN
-   modules
    tables
+   modules
 
 * :download:`KnowNet MySQL Schema <_static/KnowNet_Schema.pdf>`
 

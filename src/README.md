@@ -6,13 +6,13 @@ Fetch and parse source files to construct the KnowEnG Knowledge Network
 
 - **Enter the Docker container**
 ```console
-docker run -it -w=`pwd` -v `pwd`:`pwd` cblatti3/kn_builder:latest
+docker run -it -w=`pwd` -v `pwd`:`pwd` knoweng/kn_builder:latest
 ```
 
 
 - **Run command within the Docker container**
 ```console
-python3 /kn_builder/code/job_status.py --species homo_sapiens \
-    --source stringdb reactome enrichr biogrid --build_name hsap-1802
+python3 /kn_builder/code/job_status.py --ens_species homo_sapiens \
+    --src_classes stringdb,,reactome,,enrichr,,biogrid
 ```
 

@@ -1,7 +1,51 @@
 .. _formats-ref:
 
-KnowNet Pipeline Data Formats
-*****************************
+KnowNet Pipeline Export Data Formats
+************************************
+
+.. _ex-edge-label:
+
+.edge (produced by export_utilities)
+------------------------------------
+::
+    'Node1_id' (str):       the internal identifier for the source node of the edge
+    'Node2_id' (str):       the internal identifier for the target node of the edge
+    'Edge_weight' (float):  normalized weight of the edge in the subnetwork
+    'Edge_type' (str):      subnetwork edge type for the edge
+    'Source_id' (str):      internal identifier for the public source file the edge was extracted from
+    'Line_num' (int):       original line number of edge information in the public source file
+
+.. _node-map-label:
+
+.node_map (produced by export_utilities)
+----------------------------------------
+::
+    'Internal_id' (str):        the internal identifier for a node in the subnetwork
+    'Mapped_id' (str):          the mapped internal identifier for a node in the subnetwork
+    'Node_type' (float):        type of node 'Gene' or 'Property'
+    'Node_alias' (str):         common name for network node
+    'Node_description' (str):   full name/description for network node
+
+.. _pnode-map-label:
+
+.pnode_map (produced by export_utilities)
+-----------------------------------------
+- This file is produced only for Property type subnetworks and contains information nodes about the
+property nodes of the subnetwork in the same format as .node_map file.
+
+.. _metadata-label:
+
+.metadata (produced by export_utilities)
+----------------------------------------
+- This yaml file contains information about the extracted Knowledge Network subnetwork.  Its keys
+include summarizations about the network size (“data”), its public data source details (“datasets”),
+information about the meaning of its edges (“edge_type”), and some commands and configurations used
+in its construction (“export”).
+
+
+
+KnowNet Pipeline Internal Data Formats
+**************************************
 
 .. _file-metadata-label:
 
@@ -59,12 +103,12 @@ table (produced by table_utilities)
     'n1name' (str):     node 1 name to map from original source
     'n1hint' (str):     suggestion of node 1 name type to aid mapping
     'n1type' (str):     type of node 1 ('Gene', 'Property')
-    'n1spec' (int):     taxon id of node 1 species, 0 if property, 
+    'n1spec' (int):     taxon id of node 1 species, 0 if property,
                         'unknown' otherwise
     'n2name' (str):     node 2 name to map from original source
     'n2hint' (str):     suggestion of node 2 name type to aid mapping
     'n2type' (str):     type of node 2 ('Gene', 'Property')
-    'n2spec' (int):     taxon id of node 2 species, 0 if property, 
+    'n2spec' (int):     taxon id of node 2 species, 0 if property,
                         'unknown' otherwise
     'et_hint' (str):    name / hint of edge type
     'weight' (float):   score for edge
@@ -102,11 +146,11 @@ edge (produced by conv_utilities)
 ---------------------------------
 ::
 
+    'edge_hash' (str):  md5 checksum of mapped edge
     'n1_id' (str):      node 1 mapped identifier
     'n2_id' (str):      node 2 mapped identifier
     'et_name' (str):    name edge type
     'weight' (float):   score for edge type
-    'edge_hash' (str):  md5 checksum of mapped edge
 
 edge2line (produced by conv_utilities)
 --------------------------------------
@@ -127,6 +171,8 @@ status (produced by conv_utilities)
     'weight' (float):       score for edge type
     'edge_hash' (str):      md5 checksum of mapped edge
     'line_hash' (str):      md5 checksum of original line string from source
-    'status' (str):         "production" if both nodes mapped and "unmapped" 
+    'status' (str):         "production" if both nodes mapped and "unmapped"
                             otherwise
     'status_desc' (str):    description of reason for status label
+
+

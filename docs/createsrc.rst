@@ -4,12 +4,17 @@ Creating a new SrcClass
 Writing the Class
 =================
 
-The easiest way to create a new SrcClass is by modifying an existing one to suit your needs.  If there is already a source that has the same or similar format as the one you are trying to add, you can start with that.  This will mean that you have a good starting point for the :code:`table()` method, which is the most complex part of each srcClass.  SrcClasses can be found in the src/code/srcClass/ directory, and that is also where new ones should go.
+The easiest way to create a new SrcClass is by modifying an existing one to suit your needs.  
+If there is already a source that has the same or similar format as the one you are trying to add, 
+you can start with that.  This will mean that you have a good starting point for 
+the :code:`table()` method, which is the most complex part of each srcClass.  SrcClasses 
+can be found in the src/code/srcClass/ directory, and that is also where new ones should go.
 
 The :code:`__init__()` Method
 -----------------------------
 
-To begin, you will need to modify :code:`__init__()` method to initialize the some attributes that describe metadata about the source, making sure to call :code:`__init__()` of the superclass:
+To begin, you will need to modify the :code:`__init__()` method to initialize some attributes 
+that describe metadata about the source, making sure to call :code:`__init__()` of the superclass:
 
 .. container:: toggle
 
@@ -23,7 +28,8 @@ To begin, you will need to modify :code:`__init__()` method to initialize the so
 Other Methods
 -------------
 
-You will then need to override or modify the other methods of SrcClass if the existing ones do not work for your new source.  The most important methods are:
+You will then need to override or modify the other methods of SrcClass if the 
+existing ones do not work for your new source.  The most important methods are:
 
 .. container:: toggle
 

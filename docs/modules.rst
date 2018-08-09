@@ -39,6 +39,12 @@ import_utilities
 .. automodule:: import_utilities
    :members:
 
+export_utilities
+-------------------
+
+.. automodule:: export_utilities
+   :members:
+
 mysql_utilities
 ---------------
 
@@ -57,17 +63,10 @@ job_utilities
 .. automodule:: job_utilities
    :members:
 
-
 workflow_utilities
 ------------------
 
 .. automodule:: workflow_utilities
-   :members:
-
-export_utilities
--------------------
-
-.. automodule:: export_utilities
    :members:
 
 sanitize_utilities
