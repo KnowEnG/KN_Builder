@@ -8,7 +8,7 @@ The run the Knowledge Network Build Pipeline with the KN_Builder, you must have 
 
 Your system must also meet the following requirements:
     a) Minimum of 4 CPUs, 16GB RAM, 2TB disk
-    b) Must mot have Mesos/Zookeeper/Chronos/Marathon running at default ports
+    b) Must not have Mesos/Zookeeper/Chronos/Marathon or anything running at their default ports (5050/2181/8888/8080)
 
 Quick Start
 ===========
@@ -20,7 +20,7 @@ First, check out the quick run repo:
     git clone https://github.com/KnowEnG/KnowNet_Pipeline_Tools
     cd KnowNet_Pipeline_Tools
 
-.. note:: Depending on your setup, some of the following commands may require root. This is because docker by default does not allow nonroot processes to start jobs.  In addition, the jobs are run as root inside docker, so all the output and intermediate files will be created as root.
+.. note:: Depending on your setup, some of the following commands may require root. This is because docker by default does not allow non-root processes to start jobs.  In addition, the jobs are run as root inside docker, so all the output and intermediate files will be created as root.
 
 Then, running the pipeline is as simple as running :code:`make`:
 
